@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Env / secrets — NEVER commit
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+google-services.json
+GoogleService-Info.plist
+
+# Expo / Metro
+.expo/
+dist/
+web-build/
+.metro-health-check*
+
+# Generated JS bundle + assets (rebuilt by npm run bundle:android)
+android/app/src/main/assets/index.android.bundle
+android/app/src/main/res/drawable-*/node_modules_*
+
+# Android build
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
+
+# iOS build
+ios/Pods/
+ios/build/
+
+# Logs / OS / IDE
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

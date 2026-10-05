@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "types": [
+      "node"
+    ]
+  },
+  "extends": "expo/tsconfig.base",
+  "include": [
+    "src/**/*",
+    "App.tsx",
+    "index.js",
+    "shim.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".expo",
+    "backend",
+    "babel.config.js",
+    "metro.config.js"
+  ]
+}

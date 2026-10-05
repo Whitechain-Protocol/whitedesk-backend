@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhiteDesk Sovereign Master Service & Audit Console (wdrun)</title>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --primary: #2563EB;
+      --primary-hover: #1D4ED8;
+      --primary-light: #EFF6FF;
+      --border: #E2E8F0;
+      --border-dark: #CBD5E1;
+      --success: #10B981;
+      --success-light: #ECFDF5;
+      --warning: #F59E0B;
+      --warning-light: #FEF3C7;
+      --danger: #EF4444;
+      --danger-light: #FEE2E2;
+      --purple: #8B5CF6;
+      --purple-light: #F5F3FF;
+      --radius: 12px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font);
+      line-height: 1.5;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 20px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EFF6FF;
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Stat Cards Row */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Tabs Nav */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: #F1F5F9;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      background: var(--primary-light);
+      border-color: #BFDBFE;
+    }
+
+    .tab-btn.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: #F1F5F9;
+      color: #94A3B8;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p.desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #F1F5F9; border-color: var(--border-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #DC2626; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-warning:hover { background: #D97706; }
+
+    /* Action Bar in Tab 2 */
+    .table-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    /* Accordion Tenant List */
+    .tenant-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tenant-item {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .tenant-item:hover {
+      border-color: #CBD5E1;
+    }
+
+    .tenant-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      background: #FFFFFF;
+      user-select: none;
+    }
+
+    .tenant-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tenant-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-founder { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+    .badge-cosmos-active { background: #ECFDF5; color: #047857; }
+    .badge-cosmos-pending { background: #FEF3C7; color: #B45309; }
+    .badge-admin { background: #EFF6FF; color: #1D4ED8; }
+    .badge-user { background: #F1F5F9; color: #475569; }
+    .badge-pending { background: #FEE2E2; color: #DC2626; font-weight: 700; }
+    .badge-cat { background: #F5F3FF; color: #6D28D9; }
+
+    .chevron-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+      margin-left: 8px;
+    }
+
+    .tenant-item.expanded .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    .tenant-detail-body {
+      display: none;
+      padding: 18px;
+      border-top: 1px solid var(--border);
+      background: #F8FAFC;
+    }
+
+    .tenant-item.expanded .tenant-detail-body {
+      display: block;
+    }
+
+    /* Sub-tabs in detail body */
+    .detail-subtabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+    }
+
+    .subtab-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .subtab-btn:hover { background: #E2E8F0; color: var(--text-main); }
+    .subtab-btn.active { background: #FFFFFF; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+    .subtab-content { display: none; }
+    .subtab-content.active { display: block; }
+
+    /* Tables */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #FFFFFF;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .custom-table th {
+      background: #F8FAFC;
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .custom-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #F1F5F9;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .custom-table tr:last-child td { border-bottom: none; }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+    }
+
+    /* Result Box */
+    .result-box {
+      margin-top: 18px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 16px;
+      display: none;
+    }
+
+    .result-box.visible { display: block; }
+
+    .result-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .key-row {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+    }
+
+    .key-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .key-value-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      word-break: break-all;
+      margin-top: 4px;
+    }
+
+    .copy-btn {
+      background: #F1F5F9;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .copy-btn:hover { background: #E2E8F0; }
+
+    .instruction-callout {
+      background: #FEF3C7;
+      border-left: 4px solid var(--warning);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #92400E;
+      margin-top: 12px;
+    }
+
+    .instruction-callout code {
+      background: rgba(0, 0, 0, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #78350F;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      background: #FFFFFF;
+      color: var(--text-main);
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
+
+    /* QR Code Display Container */
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    #qr-canvas {
+      width: 180px;
+      height: 180px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .header-top { flex-direction: column; }
+    }
+  </style>
+  <!-- Lightweight Offline QR Code Generator Script -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="badge-bar">
+          <span>●</span> inWhite Sovereign Architecture
+        </div>
+        <h1>WhiteDesk Master Service & Audit Console</h1>
+        <p class="subtitle">Multi-Tenant Governance, Zero-Knowledge Roles & Disaster Recovery Engine</p>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-outline btn-sm" onclick="loadAllData()">
+          ⟳ Canlı Senkronize Et
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Stat Summary Row -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div>
+          <div class="stat-val" id="stat-tenants">0</div>
+          <div class="stat-label">Toplam Kiracı</div>
+        </div>
+        <span style="font-size: 22px;">🏢</span>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-val" id="stat-cosmos">0</div>
+          <div class="stat-label">WhiteCosmos *</div>
+        </div>
+        <span style="font-size: 22px;">⭐</span>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-val" id="stat-admins">0</div>
+          <div class="stat-label">Operatör Admin</div>
+        </div>
+        <span style="font-size: 22px;">🛡️</span>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-val" id="stat-users">0</div>
+          <div class="stat-label">Bağlı Personel</div>
+        </div>
+        <span style="font-size: 22px;">👥</span>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-val" id="stat-approvals" style="color: var(--danger);">0</div>
+          <div class="stat-label">Bekleyen Onay</div>
+        </div>
+        <span style="font-size: 22px;">⏳</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button class="tab-btn" id="tab-btn-genesis" onclick="switchTab('genesis')">1. Start Genesis</button>
+    <button class="tab-btn active" id="tab-btn-tenant" onclick="switchTab('tenant')">2. Kiracı Denetim & Servis Masası</button>
+    <button class="tab-btn" id="tab-btn-founder" onclick="switchTab('founder')">3. TheWhite Founder Hash</button>
+    <button class="tab-btn" id="tab-btn-cosmos" onclick="switchTab('cosmos')">4. Global Admin Hash</button>
+    <button class="tab-btn" id="tab-btn-user" onclick="switchTab('user')">5. User Hash & Onboarding</button>
+  </nav>
+
+  <!-- TAB 1: START GENESIS -->
+  <div id="tab-genesis" class="card tab-content" style="display: none;">
+    <h2><span>⚡</span> Step 1: Sovereign Genesis Mührü</h2>
+    <p class="desc">
+      Root lisansör kuruluşu olan <strong>TheWhite Enterprises</strong> firmasını ve sistem genelindeki master veritabanı şemasını mühürler.
+      Klasör yapısı <code>tenants/TheWhite_Enterprises/</code> altına anahtarlar ve felaket kurtarma <code>schema.sql</code> dosyası kaydedilir.
+    </p>
+
+    <div id="genesis-status-banner" style="margin-bottom: 16px; display: none;"></div>
+
+    <button id="btn-start-genesis" class="btn" onclick="handleStartGenesis()">
+      Start Root Genesis Mührü
+    </button>
+
+    <div id="genesis-result" class="result-box">
+      <div class="result-title">✓ Genesis Başarıyla Mühürlendi</div>
+      <div class="key-row">
+        <span class="key-label">TheWhite WhiteID (Kurucu Kimliği)</span>
+        <div class="key-value-box">
+          <span id="gen-whiteid">-</span>
+          <button class="copy-btn" onclick="copyText('gen-whiteid')">Kopyala</button>
+        </div>
+      </div>
+      <div class="key-row">
+        <span class="key-label">Org Public Key (Ed25519)</span>
+        <div class="key-value-box">
+          <span id="gen-orgpub">-</span>
+          <button class="copy-btn" onclick="copyText('gen-orgpub')">Kopyala</button>
+        </div>
+      </div>
+      <div class="key-row">
+        <span class="key-label">Fiziksel Dosyalar</span>
+        <div class="key-value-box">
+          <span id="gen-path">tenants/TheWhite_Enterprises/keys.json & schema.sql</span>
+        </div>
+      </div>
+      <div class="instruction-callout">
+        <strong>Kurucu (TheWhite) Aktivasyon Talimatı:</strong><br>
+        Kurucu admin cihazındaki WhiteDesk bilet mesaj kutusuna şunu yazıp gönderir:<br>
+        <code id="gen-cmd">admin &lt;whiteid&gt;</code><br>
+        Sistem otomatik olarak <strong>TheWhite the Founder (**)</strong> olarak mühürlenir.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: TENANT GOVERNANCE & AUDIT CONSOLE -->
+  <div id="tab-tenant" class="card tab-content">
+    <h2><span>🏢</span> Step 2: Kiracı Denetim & Servis Masası (Tenants)</h2>
+    <p class="desc">
+      Sisteme kayıtlı tüm kiracıları (tenants), Global Admin ve Operatör Admin kadrolarını, bağlı personelleri,
+      kategorileri ve bekleyen yetki onaylarını tek ekrandan canlı denetleyin ve yönetin.
+    </p>
+
+    <!-- Table Action Bar -->
+    <div class="table-action-bar">
+      <div class="search-box">
+        <input type="text" id="tenant-search" placeholder="Kiracı veya Blind ID ara..." oninput="renderTenantsTable()">
+      </div>
+      <button class="btn btn-sm btn-success" onclick="openNewTenantModal()">
+        + Yeni Kiracı Oluştur
+      </button>
+    </div>
+
+    <!-- Accordion Tenants List -->
+    <div id="tenants-accordion-container" class="tenant-list">
+      <div style="text-align: center; color: var(--text-muted); padding: 30px 0;">Kiracılar yükleniyor...</div>
+    </div>
+  </div>
+
+  <!-- TAB 3: CREATE THEWHITE FOUNDER HASH -->
+  <div id="tab-founder" class="card tab-content" style="display: none;">
+    <h2><span>👑</span> Step 3: TheWhite the Founder Hash & Kurucu Denetimi</h2>
+    <p class="desc">
+      Kurucu admin (TheWhite) 12 kelimesini veya cihazını kaybettiğinde kullanılan <strong>tek kullanımlık acil durum kurtarma hash'i</strong> üretir.
+      Bu hash veritabanına saldırı olsa dahi kurucunun kimliğini korur ve <strong>onaysız olarak</strong> anında kurucu yetkisini iade eder.
+    </p>
+
+    <!-- Live Founder Inspection Card -->
+    <div id="founder-inspection-card" style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-weight: 700; font-size: 13px;">Mevcut Kurucu Kayıt Durumu</span>
+        <span id="founder-status-badge" class="badge badge-founder">Kontrol Ediliyor...</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;" id="founder-details-text">
+        Yükleniyor...
+      </div>
+    </div>
+
+    <button class="btn" onclick="handleCreateFounderHash()">
+      Tek Kullanımlık Kurucu Hash Üret
+    </button>
+
+    <div id="founder-hash-result" class="result-box">
+      <div class="result-title">✓ TheWhite Kurucu Kurtarma Hash'i Hazır</div>
+      <div class="key-row">
+        <span class="key-label">Tek Kullanımlık Hash</span>
+        <div class="key-value-box">
+          <span id="f-hash">-</span>
+          <button class="copy-btn" onclick="copyText('f-hash')">Kopyala</button>
+        </div>
+      </div>
+
+      <!-- Founder QR Code Display -->
+      <div class="qr-container">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+          TheWhite Kurucu Kurtarma QR Kodu
+        </span>
+        <canvas id="founder-qr-canvas"></canvas>
+        <span style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          TheWhite bu QR kodu inWhite Destek ekranındaki barkod okuyucuya okutarak tek tıkla kurucu yetkisini geri alır.
+        </span>
+      </div>
+
+      <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="openEmailDispatchModal('founder')">
+          ✉️ E-posta Olarak İlet / Paylaş
+        </button>
+      </div>
+
+      <div class="instruction-callout">
+        <strong>Kayıp Cihaz Kurtarma Talimatı:</strong><br>
+        TheWhite yeni cihazında WhiteDesk bilet mesaj kutusuna şu komutu gönderir:<br>
+        <code id="f-cmd">admin &lt;hash&gt;</code><br>
+        Hash tek seferlik tüketilir ve sistem kurucuyu anında tanıyarak <strong>TheWhite the Founder (**)</strong> modunu aktif eder.
+      </div>
+    </div>
+
+    <!-- Past Founder Hashes History -->
+    <div style="margin-top: 24px;">
+      <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+        Önceki Kurucu Kurtarma Hash Geçmişi
+      </h3>
+      <table class="custom-table" id="founder-hashes-table">
+        <thead>
+          <tr>
+            <th>Hash Kodu</th>
+            <th>Durum</th>
+            <th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody id="founder-hashes-body">
+          <tr><td colspan="3" style="text-align: center;">Yükleniyor...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: CREATE GLOBAL ADMIN HASH -->
+  <div id="tab-cosmos" class="card tab-content" style="display: none;">
+    <h2><span>⭐</span> Step 4: Create Global Admin Hash for a Tenant</h2>
+    <p class="desc">
+      Belirli bir kiracı için <strong>WhiteCosmos (Global Admin *)</strong> adaylığı veya cihaz kaybı sonrası yeniden yetkilendirme hash'i üretir.
+      Bu hash ile talep gönderildiğinde kurucu TheWhite'a onay düşer.
+    </p>
+
+    <div class="form-group">
+      <label>Kiracı Seçin (Tenant)</label>
+      <select id="cosmos-tenant-select" onchange="loadCosmosDetailsForSelectedTenant()">
+        <option value="">Tenantlar yükleniyor...</option>
+      </select>
+    </div>
+
+    <!-- Live Cosmos Inspection Card -->
+    <div id="cosmos-inspection-card" style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-weight: 700; font-size: 13px;">Kiracı WhiteCosmos Durumu</span>
+        <span id="cosmos-status-badge" class="badge">Seçim Bekleniyor</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;" id="cosmos-details-text">
+        Lütfen yukarıdan bir kiracı seçin.
+      </div>
+    </div>
+
+    <button class="btn" onclick="handleCreateCosmosHash()">
+      Global Admin Hash Üret
+    </button>
+
+    <div id="cosmos-hash-result" class="result-box">
+      <div class="result-title">✓ Global Admin Claim Hash'i Hazır</div>
+      <div class="key-row">
+        <span class="key-label">Claim Hash</span>
+        <div class="key-value-box">
+          <span id="c-hash">-</span>
+          <button class="copy-btn" onclick="copyText('c-hash')">Kopyala</button>
+        </div>
+      </div>
+
+      <!-- Cosmos QR Code Display -->
+      <div class="qr-container">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+          WhiteCosmos Global Admin Katılım QR Kodu
+        </span>
+        <canvas id="cosmos-qr-canvas"></canvas>
+        <span style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          Aday admin bu QR kodu okuttuğunda onay talebi kurucu TheWhite'ın ekranına düşer.
+        </span>
+      </div>
+
+      <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="openEmailDispatchModal('global_admin')">
+          ✉️ E-posta Olarak İlet / Paylaş
+        </button>
+      </div>
+
+      <div class="instruction-callout">
+        <strong>Aday Admin Talimatı:</strong><br>
+        Global Admin adayı mesaj kutusuna şunu girer:<br>
+        <code id="c-cmd">admin &lt;hash&gt;</code><br>
+        TheWhite'ın onay ekranına düşer. Onaylandığında kiracının Global Admini (WhiteCosmos *) olur.
+      </div>
+    </div>
+
+    <!-- Past Cosmos Hashes -->
+    <div style="margin-top: 24px;">
+      <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+        Bu Kiracı İçin Üretilmiş Hash Geçmişi
+      </h3>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Hash Kodu</th>
+            <th>Durum</th>
+            <th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody id="cosmos-hashes-body">
+          <tr><td colspan="3" style="text-align: center;">Kiracı seçildiğinde gösterilecek.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 5: CREATE DIVISIONAL USER HASH & ONBOARDING -->
+  <div id="tab-user" class="card tab-content" style="display: none;">
+    <h2><span>👥</span> Step 5: User Hash & Onboarding Engine</h2>
+    <p class="desc">
+      Personellerin şirketin ilgili alt birimine (Org/App) bağlanmasını sağlayan tekil, toplu (ekip) veya süreli katılım hash'leri ve anında mobil QR kodları üretin.
+    </p>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Kiracı (Tenant)</label>
+        <select id="user-tenant-select" onchange="onUserTenantChanged()">
+          <option value="">Tenantlar yükleniyor...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Alt Birim / Şube (Org)</label>
+        <select id="user-org-select">
+          <option value="default">Varsayılan (Merkez)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Uygulama (App)</label>
+        <select id="user-app-select">
+          <option value="inwhite">inWhite</option>
+          <option value="support">Support</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Katılım Türü & Kapasite</label>
+        <select id="user-hash-type" onchange="onHashTypeChanged()">
+          <option value="1">Tek Kullanımlık (1 Personel)</option>
+          <option value="5">Ekip Daveti (5 Kişilik Kapasite)</option>
+          <option value="15">Ekip Daveti (15 Kişilik Kapasite)</option>
+          <option value="50">Departman Daveti (50 Kişilik Kapasite)</option>
+          <option value="custom">Özel Kapasite Belirle...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2" id="custom-capacity-row" style="display: none;">
+      <div class="form-group">
+        <label>Özel Kişi Sayısı</label>
+        <input type="number" id="user-custom-uses" value="10" min="1" max="500">
+      </div>
+      <div class="form-group">
+        <label>Geçerlilik Süresi (Saat)</label>
+        <input type="number" id="user-custom-hours" value="72" min="1" max="720">
+      </div>
+    </div>
+
+    <button class="btn" onclick="handleCreateUserHash()">
+      Divisional User Hash & QR Üret
+    </button>
+
+    <div id="user-hash-result" class="result-box">
+      <div class="result-title">✓ Divisional User Hash ve QR Kod Hazır</div>
+      <div class="key-row">
+        <span class="key-label">User Hash</span>
+        <div class="key-value-box">
+          <span id="u-hash">-</span>
+          <button class="copy-btn" onclick="copyText('u-hash')">Kopyala</button>
+        </div>
+      </div>
+
+      <!-- QR Code Display -->
+      <div class="qr-container">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+          Mobil inWhite Katılım QR Kodu
+        </span>
+        <canvas id="qr-canvas"></canvas>
+        <span style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          Kullanıcı inWhite uygulamasından bu QR kodu okuttuğunda otomatik bağlanır.
+        </span>
+      </div>
+
+      <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="openEmailDispatchModal('user')">
+          ✉️ E-posta Olarak İlet / Paylaş
+        </button>
+      </div>
+
+      <div class="instruction-callout">
+        <strong>Manuel Kullanıcı Bağlantı Talimatı:</strong><br>
+        Kullanıcı WhiteDesk mesaj kutusuna şu komutu gönderir:<br>
+        <code id="u-cmd">user &lt;hash&gt;</code><br>
+        İlgili tenant adminlerine onay düşer. Onaylandığı salise kullanıcı o bölüme dahil olur.
+      </div>
+    </div>
+
+    <!-- Active Bound Users in this Division -->
+    <div style="margin-top: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+          Bu Bölümdeki Aktif Personeller
+        </h3>
+        <button class="btn btn-outline btn-sm" onclick="loadUsersForCurrentDivision()">⟳ Listeyi Yenile</button>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Kullanıcı Blind ID</th>
+            <th>Şube / App</th>
+            <th>Durum</th>
+            <th>Katılım Tarihi</th>
+            <th>Aksiyon</th>
+          </tr>
+        </thead>
+        <tbody id="division-users-body">
+          <tr><td colspan="5" style="text-align: center;">Bölüm seçildiğinde personeller listelenecektir.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: YENİ KİRACI OLUŞTUR -->
+<div class="modal-overlay" id="modal-new-tenant">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🏢 Yeni Kiracı (Tenant) Oluştur</div>
+      <button class="close-btn" onclick="closeNewTenantModal()">&times;</button>
+    </div>
+
+    <div class="form-group">
+      <label>Kiracı Firma Adı (Tenant Name)</label>
+      <input type="text" id="modal-t-name" placeholder="Örn: Atlas Global Inc." value="Atlas Global Inc.">
+    </div>
+
+    <div class="form-group">
+      <label>İlk Uygulama Adı (App ID)</label>
+      <input type="text" id="modal-t-app" placeholder="Örn: Support, inwhite" value="Support">
+    </div>
+
+    <div class="form-group">
+      <label>İlk Alt Birim / Şube (Org Name)</label>
+      <input type="text" id="modal-t-org" placeholder="Örn: Merkez, Genel Müdürlük" value="Merkez">
+    </div>
+
+    <div class="form-group">
+      <label>Kategori Setleri (Virgülle Ayrılmış)</label>
+      <input type="text" id="modal-t-cats" value="Tümü, Genel Destek, Operasyon, Mali İşler & Finans">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+      <button class="btn btn-outline" onclick="closeNewTenantModal()">Vazgeç</button>
+      <button class="btn btn-success" id="btn-modal-create-tenant" onclick="submitNewTenantModal()">
+        Kiracı ve Klasörleri Oluştur
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: YENİ ADMİN EKLE -->
+<div class="modal-overlay" id="modal-new-admin">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🛡️ Yeni Operatör Admin Ekle</div>
+      <button class="close-btn" onclick="closeNewAdminModal()">&times;</button>
+    </div>
+
+    <input type="hidden" id="admin-modal-tenant-id">
+
+    <div class="form-group">
+      <label>Admin WhiteID veya BlindID</label>
+      <input type="text" id="admin-modal-whiteid" placeholder="Örn: bod_xxxxxx veya blind_xxxxxx">
+    </div>
+
+    <div class="form-group">
+      <label>Yönetici Rumuzu (Alias)</label>
+      <input type="text" id="admin-modal-alias" placeholder="Örn: Planet-1, Destek Lead" value="Planet-1">
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Uygulama (App)</label>
+        <select id="admin-modal-app"></select>
+      </div>
+      <div class="form-group">
+        <label>Şube (Org)</label>
+        <select id="admin-modal-org"></select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Yetkili Kategoriler (Virgülle Ayrılmış Kodlar)</label>
+      <input type="text" id="admin-modal-cats" value="all">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+      <button class="btn btn-outline" onclick="closeNewAdminModal()">Vazgeç</button>
+      <button class="btn btn-success" onclick="submitNewAdminModal()">Admini Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: YENİ KATEGORİ EKLE -->
+<div class="modal-overlay" id="modal-new-cat">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🏷️ Uygulamaya Yeni Kategori Ekle</div>
+      <button class="close-btn" onclick="closeNewCatModal()">&times;</button>
+    </div>
+
+    <input type="hidden" id="cat-modal-tenant-id">
+    <input type="hidden" id="cat-modal-app-id">
+
+    <div class="form-group">
+      <label>Kategori Kodu (ID)</label>
+      <input type="text" id="cat-modal-id" placeholder="Örn: billing, kargo">
+    </div>
+
+    <div class="form-group">
+      <label>Türkçe Etiket</label>
+      <input type="text" id="cat-modal-tr" placeholder="Örn: Fatura & Ödemeler">
+    </div>
+
+    <div class="form-group">
+      <label>İngilizce Etiket</label>
+      <input type="text" id="cat-modal-en" placeholder="Örn: Billing & Payments">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+      <button class="btn btn-outline" onclick="closeNewCatModal()">Vazgeç</button>
+      <button class="btn btn-success" onclick="submitNewCatModal()">Kategoriyi Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: E-POSTA İLET / PAYLAŞ -->
+<div class="modal-overlay" id="modal-email-dispatch">
+  <div class="modal-card" style="max-width: 650px;">
+    <div class="modal-header">
+      <div class="modal-title">✉️ WhiteDesk Yetkilendirme & QR E-posta Servisi</div>
+      <button class="close-btn" onclick="closeEmailDispatchModal()">&times;</button>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Alıcı E-posta Adresi (To)</label>
+        <input type="email" id="email-to-input" placeholder="ornek@sirket.com">
+      </div>
+      <div class="form-group">
+        <label>E-posta Konusu (Subject)</label>
+        <input type="text" id="email-subject-input">
+      </div>
+    </div>
+
+    <div style="margin-top: 6px; margin-bottom: 8px;">
+      <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+        Görsel E-posta Önizleme (HTML Preview)
+      </label>
+      <div id="email-preview-content" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: #F8FAFC;">
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-outline btn-sm" onclick="handleCopyEmailHtml()">📋 HTML Kopyala</button>
+        <button class="btn btn-outline btn-sm" onclick="handleOpenMailClient()">📧 Mail İstemcisinde Aç</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-outline" onclick="closeEmailDispatchModal()">Kapat</button>
+        <button class="btn btn-success" onclick="handleSendEmailDispatch()">✉️ E-postayı Gönder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = window.location.origin.includes(':3040') ? '' : 'http://localhost:3040';
+  let cachedAuditData = [];
+  let expandedTenantBlindId = null;
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CORE NAVIGATION & INITIALIZATION
+  // ─────────────────────────────────────────────────────────────────────────────
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+    const btn = document.getElementById('tab-btn-' + tabId);
+    if (btn) btn.classList.add('active');
+
+    const content = document.getElementById('tab-' + tabId);
+    if (content) content.style.display = 'block';
+
+    if (tabId === 'tenant') {
+      loadTenantAuditSummary();
+    } else if (tabId === 'founder') {
+      loadFounderAudit();
+    } else if (tabId === 'cosmos') {
+      loadCosmosTab();
+    } else if (tabId === 'user') {
+      loadUserTab();
+    }
+  }
+
+  function copyText(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.innerText;
+    navigator.clipboard.writeText(text);
+    alert('Panoya kopyalandı: ' + text);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    checkGenesisStatus();
+    loadAllData();
+  });
+
+  async function loadAllData() {
+    await checkGenesisStatus();
+    await loadTenantAuditSummary();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 1. GENESIS STATUS
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function checkGenesisStatus() {
+    try {
+      const res = await fetch(`${API_BASE}/api/status`);
+      const data = await res.json();
+
+      if (data.genesisCompleted) {
+        const btn = document.getElementById('btn-start-genesis');
+        const tabBtn = document.getElementById('tab-btn-genesis');
+        const banner = document.getElementById('genesis-status-banner');
+
+        btn.disabled = true;
+        btn.innerText = 'Genesis Mühürlendi (Aktif)';
+        tabBtn.classList.add('disabled');
+
+        banner.style.display = 'block';
+        banner.className = 'instruction-callout';
+        banner.style.backgroundColor = '#ECFDF5';
+        banner.style.borderLeftColor = '#10B981';
+        banner.style.color = '#065F46';
+        banner.innerHTML = `✓ <strong>Genesis Tamamlanmıştır:</strong> Tepe kuruluş '<strong>${data.founderTenant.name}</strong>' aktif durumdadır.`;
+      }
+    } catch (e) {
+      console.log('Status check failed:', e);
+    }
+  }
+
+  async function handleStartGenesis() {
+    const btn = document.getElementById('btn-start-genesis');
+    btn.disabled = true;
+    btn.innerText = 'İşleniyor...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/genesis`, { method: 'POST' });
+      const data = await res.json();
+      const r = data.result;
+
+      document.getElementById('gen-whiteid').innerText = r.enterprise_white_id;
+      document.getElementById('gen-orgpub').innerText = r.org_pub;
+      document.getElementById('gen-cmd').innerText = `admin ${r.enterprise_white_id}`;
+      document.getElementById('genesis-result').classList.add('visible');
+
+      btn.innerText = 'Genesis Mühürlendi (Aktif)';
+      document.getElementById('tab-btn-genesis').classList.add('disabled');
+      loadAllData();
+    } catch (err) {
+      alert('Genesis işlemi sırasında hata: ' + err.message);
+      btn.disabled = false;
+      btn.innerText = 'Start Root Genesis Mührü';
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 2. TENANT GOVERNANCE & AUDIT ACCORDION TABLE
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function loadTenantAuditSummary() {
+    try {
+      const res = await fetch(`${API_BASE}/api/tenants/audit`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      cachedAuditData = data.audit;
+
+      // Update Header Stats
+      let totalTenants = cachedAuditData.length;
+      let totalCosmos = 0;
+      let totalAdmins = 0;
+      let totalUsers = 0;
+      let totalApprovals = 0;
+
+      cachedAuditData.forEach(t => {
+        if (t.cosmos) totalCosmos++;
+        totalAdmins += t.adminsCount;
+        totalUsers += t.usersCount;
+        totalApprovals += t.pendingApprovalsCount;
+      });
+
+      document.getElementById('stat-tenants').innerText = totalTenants;
+      document.getElementById('stat-cosmos').innerText = totalCosmos;
+      document.getElementById('stat-admins').innerText = totalAdmins;
+      document.getElementById('stat-users').innerText = totalUsers;
+      document.getElementById('stat-approvals').innerText = totalApprovals;
+
+      renderTenantsTable();
+    } catch (e) {
+      console.warn('Failed to load tenant audit summary:', e);
+    }
+  }
+
+  function renderTenantsTable() {
+    const container = document.getElementById('tenants-accordion-container');
+    const query = (document.getElementById('tenant-search').value || '').toLowerCase().trim();
+
+    const filtered = cachedAuditData.filter(t => 
+      t.name.toLowerCase().includes(query) || 
+      t.enterprise_blind_id.toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px 0;">Kayıt bulunamadı.</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(t => {
+      const isExpanded = expandedTenantBlindId === t.enterprise_blind_id;
+      const cosmosBadge = t.cosmos 
+        ? `<span class="badge badge-cosmos-active">👑 ${t.cosmos.alias || 'WhiteCosmos'}</span>`
+        : `<span class="badge badge-cosmos-pending">Cosmos Bekliyor</span>`;
+      const founderBadge = t.is_founder_tenant 
+        ? `<span class="badge badge-founder">Kurucu Tenant</span>` 
+        : '';
+      const approvalsBadge = t.pendingApprovalsCount > 0
+        ? `<span class="badge badge-pending">⚠️ ${t.pendingApprovalsCount} Onay</span>`
+        : '';
+
+      return `
+        <div class="tenant-item ${isExpanded ? 'expanded' : ''}" id="t-item-${t.enterprise_blind_id}">
+          <div class="tenant-header" onclick="toggleTenantItem('${t.enterprise_blind_id}')">
+            <div class="tenant-title-group">
+              <span class="tenant-name">${t.name}</span>
+              ${founderBadge}
+              ${cosmosBadge}
+              <span class="badge badge-admin">${t.adminsCount} Admin</span>
+              <span class="badge badge-user">${t.usersCount} Personel</span>
+              <span class="badge badge-cat">${t.categoriesCount} Kategori</span>
+              ${approvalsBadge}
+            </div>
+            <div>
+              <span class="chevron-icon">▼</span>
+            </div>
+          </div>
+
+          <div class="tenant-detail-body">
+            <!-- Sub-tabs nav -->
+            <div class="detail-subtabs">
+              <button class="subtab-btn active" onclick="switchSubTab('${t.enterprise_blind_id}', 'cosmos', event)">👑 WhiteCosmos</button>
+              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'admins', event)">🛡️ Yöneticiler (${t.adminsCount})</button>
+              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'categories', event)">🏷️ Birim & Kategoriler</button>
+              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'users', event)">👥 Personeller (${t.usersCount})</button>
+              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'approvals', event)">⏳ Onaylar (${t.pendingApprovalsCount})</button>
+              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'dr', event)">💾 Afet Kurtarma</button>
+            </div>
+
+            <!-- 1. WhiteCosmos Sub-Tab -->
+            <div class="subtab-content active" id="subtab-${t.enterprise_blind_id}-cosmos">
+              ${renderCosmosSection(t)}
+            </div>
+
+            <!-- 2. Admins Sub-Tab -->
+            <div class="subtab-content" id="subtab-${t.enterprise_blind_id}-admins">
+              ${renderAdminsSection(t)}
+            </div>
+
+            <!-- 3. Categories Sub-Tab -->
+            <div class="subtab-content" id="subtab-${t.enterprise_blind_id}-categories">
+              ${renderCategoriesSection(t)}
+            </div>
+
+            <!-- 4. Users Sub-Tab -->
+            <div class="subtab-content" id="subtab-${t.enterprise_blind_id}-users">
+              ${renderUsersSection(t)}
+            </div>
+
+            <!-- 5. Approvals Sub-Tab -->
+            <div class="subtab-content" id="subtab-${t.enterprise_blind_id}-approvals">
+              ${renderApprovalsSection(t)}
+            </div>
+
+            <!-- 6. DR Sub-Tab -->
+            <div class="subtab-content" id="subtab-${t.enterprise_blind_id}-dr">
+              ${renderDisasterRecoverySection(t)}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleTenantItem(blindId) {
+    if (expandedTenantBlindId === blindId) {
+      expandedTenantBlindId = null;
+    } else {
+      expandedTenantBlindId = blindId;
+    }
+    renderTenantsTable();
+  }
+
+  function switchSubTab(tenantBlindId, tabName, evt) {
+    evt.stopPropagation();
+    const parent = document.getElementById(`t-item-${tenantBlindId}`);
+    if (!parent) return;
+
+    parent.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    parent.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+
+    evt.currentTarget.classList.add('active');
+    const targetContent = document.getElementById(`subtab-${tenantBlindId}-${tabName}`);
+    if (targetContent) targetContent.classList.add('active');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // SUB-TAB RENDERERS
+  // ─────────────────────────────────────────────────────────────────────────────
+  function renderCosmosSection(t) {
+    if (!t.cosmos) {
+      return `
+        <div style="padding: 12px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; font-size: 13px; color: #92400E; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚠️ Bu kiracıda henüz atanmış bir <strong>WhiteCosmos (Global Admin *)</strong> bulunmuyor.</span>
+          <button class="btn btn-sm" onclick="generateCosmosHashForTenant('${t.enterprise_blind_id}')">+ Cosmos Hash'i Oluştur</button>
+        </div>
+      `;
+    }
+
+    return `
+      <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div>
+            <span style="font-size: 14px; font-weight: 700;">${t.cosmos.alias || 'WhiteCosmos'}</span>
+            <span class="badge badge-cosmos-active" style="margin-left: 6px;">Global Admin *</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-outline btn-sm" onclick="promptUpdateCosmosAlias('${t.enterprise_blind_id}', '${t.cosmos.white_id}', '${t.cosmos.alias}')">Rumuz Değiştir</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCosmos('${t.enterprise_blind_id}', '${t.cosmos.white_id}')">Yetkiyi Sil</button>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
+          <div><strong>Kör Kimlik (Blind ID):</strong> <span class="mono">${t.cosmos.white_id}</span></div>
+          <div><strong>Tescil Tarihi:</strong> ${new Date(Number(t.cosmos.created_at)).toLocaleString('tr-TR')}</div>
+          <div><strong>Durum:</strong> ${t.cosmos.is_active ? '✓ Aktif' : '✗ Pasif'}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdminsSection(t) {
+    return `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 13px; font-weight: 700;">Departman Yöneticileri</span>
+        <button class="btn btn-sm btn-success" onclick="openNewAdminModal('${t.enterprise_blind_id}')">+ Yeni Admin Ekle</button>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Rumuz / Rol</th>
+            <th>Admin Blind ID</th>
+            <th>Atandığı Uygulama & Şube</th>
+            <th>Kategoriler</th>
+            <th>Aksiyon</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${t.admins.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Henüz operatör admin atanmamış.</td></tr>` : ''}
+          ${t.admins.map(adm => {
+            const alloc = adm.allocations && adm.allocations[0];
+            const cats = alloc ? (typeof alloc.categories === 'string' ? JSON.parse(alloc.categories) : alloc.categories) : ['all'];
+            return `
+              <tr>
+                <td><strong>${adm.alias}</strong></td>
+                <td><span class="mono">${adm.white_id.slice(0, 18)}...</span></td>
+                <td>${alloc ? `${alloc.app_id} / ${alloc.org_id}` : 'Genel'}</td>
+                <td>${cats.join(', ')}</td>
+                <td>
+                  <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: #FECACA;" onclick="deleteAdmin('${t.enterprise_blind_id}', '${adm.white_id}')">Sil</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderCategoriesSection(t) {
+    return `
+      <div class="grid-2">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 13px; font-weight: 700;">Alt Birimler / Şubeler (Orgs)</span>
+            <button class="btn btn-outline btn-sm" onclick="promptAddOrg('${t.enterprise_blind_id}')">+ Şube Ekle</button>
+          </div>
+          <table class="custom-table">
+            <thead>
+              <tr><th>Şube Kodu</th><th>Adı</th><th>Aksiyon</th></tr>
+            </thead>
+            <tbody>
+              ${t.orgs.map(o => `
+                <tr>
+                  <td><span class="mono">${o.org_id}</span></td>
+                  <td>${o.name}</td>
+                  <td>
+                    ${o.org_id !== 'default' ? `<button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deleteOrg('${t.enterprise_blind_id}', '${o.org_id}')">Sil</button>` : '<span style="color: var(--text-muted);">Sabit</span>'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 13px; font-weight: 700;">Uygulamalar & Kategoriler</span>
+            <button class="btn btn-outline btn-sm" onclick="openNewCatModal('${t.enterprise_blind_id}', '${t.apps[0] ? t.apps[0].app_id : 'support'}')">+ Kategori Ekle</button>
+          </div>
+          ${t.apps.map(app => `
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+              <div style="font-weight: 700; font-size: 12px; margin-bottom: 6px; color: var(--primary);">
+                Uygulama: ${app.app_id}
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${app.parsed_categories.map(c => {
+                  const catId = typeof c === 'string' ? c : c.id;
+                  const catLabel = typeof c === 'string' ? c : (c.labelTr || c.id);
+                  return `
+                    <span class="badge badge-cat" style="display: inline-flex; align-items: center; gap: 4px;">
+                      ${catLabel}
+                      ${catId !== 'all' ? `<span style="cursor: pointer; font-weight: bold; margin-left: 2px;" onclick="deleteCategory('${t.enterprise_blind_id}', '${app.app_id}', '${catId}')">&times;</span>` : ''}
+                    </span>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderUsersSection(t) {
+    return `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 13px; font-weight: 700;">Bağlı Personeller (${t.users.length})</span>
+        <button class="btn btn-outline btn-sm" onclick="switchTab('user')">+ Yeni Personel Davet Hash'i</button>
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Kullanıcı Blind ID</th>
+            <th>Şube / App</th>
+            <th>Durum</th>
+            <th>Katılım Tarihi</th>
+            <th>Aksiyon</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${t.users.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Bu kiracıya henüz kullanıcı bağlanmamış.</td></tr>` : ''}
+          ${t.users.map(u => `
+            <tr>
+              <td><span class="mono">${u.user_blind_id.slice(0, 22)}...</span></td>
+              <td>${u.app_id || 'inwhite'} / ${u.org_id || 'default'}</td>
+              <td>
+                <span class="badge ${u.status === 'blocked' ? 'badge-pending' : 'badge-cosmos-active'}">
+                  ${u.status === 'blocked' ? 'Engelli' : 'Aktif'}
+                </span>
+              </td>
+              <td>${new Date(Number(u.created_at)).toLocaleDateString('tr-TR')}</td>
+              <td>
+                <div style="display: flex; gap: 4px;">
+                  ${u.status === 'blocked' 
+                    ? `<button class="btn btn-outline btn-sm" onclick="setUserStatus('${u.user_blind_id}', 'approved')">Engeli Kaldır</button>`
+                    : `<button class="btn btn-outline btn-sm" style="color: var(--warning);" onclick="setUserStatus('${u.user_blind_id}', 'blocked')">Engelle</button>`}
+                  <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="setUserStatus('${u.user_blind_id}', 'deleted')">Sil</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderApprovalsSection(t) {
+    return `
+      <div style="margin-bottom: 10px; font-size: 13px; font-weight: 700;">
+        Bekleyen Yetki ve Katılım Onayları (${t.pendingApprovals.length})
+      </div>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Talep Türü</th>
+            <th>Aday ID / Rumuz</th>
+            <th>Kapsam</th>
+            <th>Talep Tarihi</th>
+            <th>Aksiyon</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${t.pendingApprovals.length === 0 ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Bekleyen onay talebi bulunmuyor.</td></tr>` : ''}
+          ${t.pendingApprovals.map(ap => `
+            <tr>
+              <td><span class="badge ${ap.type === 'global_admin' ? 'badge-cosmos-active' : (ap.type === 'admin' ? 'badge-admin' : 'badge-user')}">${ap.type}</span></td>
+              <td>
+                <div><strong>${ap.candidate_alias || '-'}</strong></div>
+                <div class="mono" style="font-size: 10px; color: var(--text-muted);">${(ap.candidate_white_id || ap.candidate_blind_id).slice(0, 18)}...</div>
+              </td>
+              <td>${ap.target_app_id || 'Genel'} / ${ap.target_org_id || 'default'}</td>
+              <td>${new Date(Number(ap.requested_at)).toLocaleTimeString('tr-TR')}</td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-success btn-sm" onclick="reviewApproval(${ap.id}, true)">Onayla</button>
+                  <button class="btn btn-danger btn-sm" onclick="reviewApproval(${ap.id}, false)">Reddet</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderDisasterRecoverySection(t) {
+    const slug = t.name.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+    return `
+      <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+        <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px;">🌪️ Kiracı Felaket Kurtarma Paketi (Disaster Recovery)</div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Sunucu çökmesi veya veritabanı taşınması durumunda bu kiracıyı saniyeler içinde sıfırdan ayağa kaldırmak için fiziksel dosyaları indirin:
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a class="btn btn-outline btn-sm" href="tenants/${slug}/schema.sql" download="${slug}_schema.sql">
+            📥 schema.sql İndir
+          </a>
+          <a class="btn btn-outline btn-sm" href="tenants/${slug}/keys.json" download="${slug}_keys.json">
+            📥 keys.json (Anahtarlar) İndir
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // MUTATION HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function promptUpdateCosmosAlias(tenantBlindId, adminBlindId, currentAlias) {
+    const newAlias = prompt('Yeni WhiteCosmos Rumuzu:', currentAlias || 'WhiteCosmos');
+    if (!newAlias) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/cosmos/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, adminBlindId, alias: newAlias }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Rumuz güncellendi!');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function deleteCosmos(tenantBlindId, adminBlindId) {
+    if (!confirm('WhiteCosmos Global Admin yetkisini silmek istediğinizden emin misiniz?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/cosmos/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, adminBlindId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Global Admin yetkisi silindi.');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function deleteAdmin(tenantBlindId, adminBlindId) {
+    if (!confirm('Yöneticiyi ve tüm yetki atamalarını silmek istediğinizden emin misiniz?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/admin/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, adminBlindId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Yönetici başarıyla silindi.');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function promptAddOrg(tenantBlindId) {
+    const orgName = prompt('Yeni Şube / Birim Adı (Örn: Ege Bölge Müdürlüğü):');
+    if (!orgName) return;
+    const orgId = prompt('Şube Kodu (Örn: ege):', orgName.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    if (!orgId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/org/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, orgId, name: orgName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Şube eklendi!');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function deleteOrg(tenantBlindId, orgId) {
+    if (!confirm(`'${orgId}' şubesini silmek istediğinizden emin misiniz?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/org/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, orgId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Şube silindi.');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function deleteCategory(tenantBlindId, appId, catId) {
+    if (!confirm(`'${catId}' kategorisini bu uygulamadan silmek istediğinizden emin misiniz?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/category/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, appId, catId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Kategori silindi.');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function setUserStatus(userBlindId, status) {
+    const actionLabel = status === 'deleted' ? 'silmek' : (status === 'blocked' ? 'engellemek' : 'engelini kaldırmak');
+    if (!confirm(`Kullanıcıyı ${actionLabel} istediğinizden emin misiniz?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/user/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userBlindId, status }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Kullanıcı durumu güncellendi.');
+        loadTenantAuditSummary();
+        loadUsersForCurrentDivision();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  async function reviewApproval(approvalId, approve) {
+    try {
+      const res = await fetch(`${API_BASE}/api/approval/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approvalId, approve }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(approve ? 'Onaylandı!' : 'Reddedildi.');
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // MODALS
+  // ─────────────────────────────────────────────────────────────────────────────
+  function openNewTenantModal() {
+    document.getElementById('modal-new-tenant').classList.add('active');
+  }
+  function closeNewTenantModal() {
+    document.getElementById('modal-new-tenant').classList.remove('active');
+  }
+  async function submitNewTenantModal() {
+    const btn = document.getElementById('btn-modal-create-tenant');
+    btn.disabled = true;
+    btn.innerText = 'Oluşturuluyor...';
+
+    const tenantName = document.getElementById('modal-t-name').value;
+    const appName = document.getElementById('modal-t-app').value;
+    const orgName = document.getElementById('modal-t-org').value;
+    const catsStr = document.getElementById('modal-t-cats').value;
+    const categories = catsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantName, appName, orgName, categories }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Yeni Kiracı Başarıyla Oluşturuldu!');
+        closeNewTenantModal();
+        loadTenantAuditSummary();
+      }
+    } catch (err) {
+      alert('Hata: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'Kiracı ve Klasörleri Oluştur';
+    }
+  }
+
+  function openNewAdminModal(tenantBlindId) {
+    document.getElementById('admin-modal-tenant-id').value = tenantBlindId;
+    const t = cachedAuditData.find(x => x.enterprise_blind_id === tenantBlindId);
+
+    const appSelect = document.getElementById('admin-modal-app');
+    const orgSelect = document.getElementById('admin-modal-org');
+    appSelect.innerHTML = (t ? t.apps : []).map(a => `<option value="${a.app_id}">${a.app_id}</option>`).join('') || '<option value="*">*</option>';
+    orgSelect.innerHTML = (t ? t.orgs : []).map(o => `<option value="${o.org_id}">${o.name} (${o.org_id})</option>`).join('') || '<option value="default">default</option>';
+
+    document.getElementById('modal-new-admin').classList.add('active');
+  }
+  function closeNewAdminModal() {
+    document.getElementById('modal-new-admin').classList.remove('active');
+  }
+  async function submitNewAdminModal() {
+    const tenantBlindId = document.getElementById('admin-modal-tenant-id').value;
+    const adminWhiteId = document.getElementById('admin-modal-whiteid').value.trim();
+    const alias = document.getElementById('admin-modal-alias').value.trim();
+    const appId = document.getElementById('admin-modal-app').value;
+    const orgId = document.getElementById('admin-modal-org').value;
+    const cats = document.getElementById('admin-modal-cats').value.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (!adminWhiteId) {
+      alert('Admin WhiteID gereklidir.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/admin/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, adminWhiteId, alias, appId, orgId, categories: cats }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Admin başarıyla eklendi!');
+        closeNewAdminModal();
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  function openNewCatModal(tenantBlindId, appId) {
+    document.getElementById('cat-modal-tenant-id').value = tenantBlindId;
+    document.getElementById('cat-modal-app-id').value = appId;
+    document.getElementById('modal-new-cat').classList.add('active');
+  }
+  function closeNewCatModal() {
+    document.getElementById('modal-new-cat').classList.remove('active');
+  }
+  async function submitNewCatModal() {
+    const tenantBlindId = document.getElementById('cat-modal-tenant-id').value;
+    const appId = document.getElementById('cat-modal-app-id').value;
+    const catId = document.getElementById('cat-modal-id').value.trim();
+    const labelTr = document.getElementById('cat-modal-tr').value.trim();
+    const labelEn = document.getElementById('cat-modal-en').value.trim();
+
+    if (!catId) {
+      alert('Kategori Kodu zorunludur.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/tenant/category/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, appId, catId, labelTr, labelEn }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Kategori başarıyla eklendi!');
+        closeNewCatModal();
+        loadTenantAuditSummary();
+      }
+    } catch (e) {
+      alert('Hata: ' + e.message);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 3. TWHITE FOUNDER AUDIT & HASH
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function loadFounderAudit() {
+    try {
+      const res = await fetch(`${API_BASE}/api/founder/audit`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const f = data.details.founder;
+      const t = data.details.founderTenant;
+      const history = data.details.hashHistory || [];
+
+      const badge = document.getElementById('founder-status-badge');
+      const text = document.getElementById('founder-details-text');
+
+      if (f) {
+        badge.className = 'badge badge-cosmos-active';
+        badge.innerText = '✓ Kurucu Aktif & Mühürlü';
+        text.innerHTML = `
+          <div><strong>Kurucu Blind ID:</strong> <span class="mono">${f.white_id}</span></div>
+          <div><strong>Unvan / Rumuz:</strong> ${f.alias || 'TheWhite'} (Founder **)</div>
+          <div><strong>Kurucu Kiracı:</strong> ${t ? t.name : 'TheWhite Enterprises'}</div>
+          <div><strong>Tescil Tarihi:</strong> ${new Date(Number(f.created_at)).toLocaleString('tr-TR')}</div>
+        `;
+      } else {
+        badge.className = 'badge badge-pending';
+        badge.innerText = '⚠️ Kurucu Kaydı Bulunamadı';
+        text.innerHTML = `
+          <div style="color: var(--danger);">Veritabanında aktif TheWhite kurucu kaydı bulunamadı (Cold-start veya hasarlı durum). Aşağıdaki butonla sıfırdan kurucu kurtarma hash'i oluşturabilirsiniz.</div>
+        `;
+      }
+
+      // History Table
+      const tbody = document.getElementById('founder-hashes-body');
+      tbody.innerHTML = history.length === 0 
+        ? `<tr><td colspan="3" style="text-align: center;">Henüz üretilmiş kurtarma hash'i yok.</td></tr>`
+        : history.map(h => `
+          <tr>
+            <td><span class="mono">${h.hash}</span></td>
+            <td><span class="badge ${h.used ? 'badge-user' : 'badge-cosmos-active'}">${h.used ? 'Tüketildi' : 'Kullanılabilir'}</span></td>
+            <td>${new Date(Number(h.created_at)).toLocaleString('tr-TR')}</td>
+          </tr>
+        `).join('');
+    } catch (e) {
+      console.warn('Founder audit load error:', e);
+    }
+  }
+
+  async function handleCreateFounderHash() {
+    try {
+      const res = await fetch(`${API_BASE}/api/hash/founder`, { method: 'POST' });
+      const data = await res.json();
+      const r = data.result;
+
+      document.getElementById('f-hash').innerText = r.hash;
+      document.getElementById('f-cmd').innerText = `admin ${r.hash}`;
+      document.getElementById('founder-hash-result').classList.add('visible');
+
+      // Generate inWhite Founder QR Code
+      const fCanvas = document.getElementById('founder-qr-canvas');
+      const fPayload = `inwhite://whitedesk/founder?hash=${r.hash}`;
+      if (window.QRCode && QRCode.toCanvas && fCanvas) {
+        QRCode.toCanvas(fCanvas, fPayload, { width: 180, margin: 2, color: { dark: '#0F172A', light: '#FFFFFF' } });
+      }
+
+      loadFounderAudit();
+    } catch (err) {
+      alert('Hata: ' + err.message);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 4. GLOBAL ADMIN HASH AUDIT
+  // ─────────────────────────────────────────────────────────────────────────────
+  async function loadCosmosTab() {
+    const select = document.getElementById('cosmos-tenant-select');
+    select.innerHTML = cachedAuditData.map(t => `<option value="${t.enterprise_blind_id}">${t.name} (${t.enterprise_blind_id.slice(0, 16)}...)</option>`).join('');
+    loadCosmosDetailsForSelectedTenant();
+  }
+
+  async function loadCosmosDetailsForSelectedTenant() {
+    const tenantBlindId = document.getElementById('cosmos-tenant-select').value;
+    if (!tenantBlindId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/cosmos/audit?tenantBlindId=${tenantBlindId}`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const cosmos = data.details.cosmos;
+      const history = data.details.hashHistory || [];
+
+      const badge = document.getElementById('cosmos-status-badge');
+      const text = document.getElementById('cosmos-details-text');
+
+      if (cosmos) {
+        badge.className = 'badge badge-cosmos-active';
+        badge.innerText = '✓ WhiteCosmos Aktif';
+        text.innerHTML = `
+          <div><strong>Global Admin:</strong> ${cosmos.alias || 'WhiteCosmos'}</div>
+          <div><strong>Blind ID:</strong> <span class="mono">${cosmos.white_id}</span></div>
+          <div><strong>Tescil Tarihi:</strong> ${new Date(Number(cosmos.created_at)).toLocaleString('tr-TR')}</div>
+        `;
+      } else {
+        badge.className = 'badge badge-cosmos-pending';
+        badge.innerText = '⚠️ Cosmos Atanmamış';
+        text.innerHTML = `<div>Bu kiracı için henüz atanmış bir WhiteCosmos bulunmuyor. Yeni bir hash üreterek atayabilirsiniz.</div>`;
+      }
+
+      const tbody = document.getElementById('cosmos-hashes-body');
+      tbody.innerHTML = history.length === 0 
+        ? `<tr><td colspan="3" style="text-align: center;">Henüz üretilmiş hash yok.</td></tr>`
+        : history.map(h => `
+          <tr>
+            <td><span class="mono">${h.hash}</span></td>
+            <td><span class="badge ${h.used ? 'badge-user' : 'badge-cosmos-active'}">${h.used ? 'Tüketildi' : 'Beklemede'}</span></td>
+            <td>${new Date(Number(h.created_at)).toLocaleString('tr-TR')}</td>
+          </tr>
+        `).join('');
+    } catch (e) {
+      console.warn('Failed to load cosmos details:', e);
+    }
+  }
+
+  async function handleCreateCosmosHash() {
+    const tenantBlindId = document.getElementById('cosmos-tenant-select').value;
+    if (!tenantBlindId) return alert('Lütfen kiracı seçin.');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/hash/cosmos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId }),
+      });
+      const data = await res.json();
+      const r = data.result;
+
+      document.getElementById('c-hash').innerText = r.hash;
+      document.getElementById('c-cmd').innerText = `admin ${r.hash}`;
+      document.getElementById('cosmos-hash-result').classList.add('visible');
+
+      // Generate inWhite Global Admin QR Code
+      const cCanvas = document.getElementById('cosmos-qr-canvas');
+      const cPayload = `inwhite://whitedesk/admin?hash=${r.hash}&tenant=${tenantBlindId}`;
+      if (window.QRCode && QRCode.toCanvas && cCanvas) {
+        QRCode.toCanvas(cCanvas, cPayload, { width: 180, margin: 2, color: { dark: '#0F172A', light: '#FFFFFF' } });
+      }
+
+      loadCosmosDetailsForSelectedTenant();
+    } catch (err) {
+      alert('Hata: ' + err.message);
+    }
+  }
+
+  function generateCosmosHashForTenant(tenantBlindId) {
+    switchTab('cosmos');
+    setTimeout(() => {
+      document.getElementById('cosmos-tenant-select').value = tenantBlindId;
+      loadCosmosDetailsForSelectedTenant();
+    }, 100);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 5. USER HASH & ONBOARDING ENGINE
+  // ─────────────────────────────────────────────────────────────────────────────
+  function loadUserTab() {
+    const select = document.getElementById('user-tenant-select');
+    select.innerHTML = cachedAuditData.map(t => `<option value="${t.enterprise_blind_id}">${t.name}</option>`).join('');
+    onUserTenantChanged();
+  }
+
+  function onUserTenantChanged() {
+    const tenantBlindId = document.getElementById('user-tenant-select').value;
+    const t = cachedAuditData.find(x => x.enterprise_blind_id === tenantBlindId);
+
+    const orgSelect = document.getElementById('user-org-select');
+    const appSelect = document.getElementById('user-app-select');
+
+    orgSelect.innerHTML = (t && t.orgs.length > 0)
+      ? t.orgs.map(o => `<option value="${o.org_id}">${o.name} (${o.org_id})</option>`).join('')
+      : '<option value="default">Varsayılan (Merkez)</option>';
+
+    appSelect.innerHTML = (t && t.apps.length > 0)
+      ? t.apps.map(a => `<option value="${a.app_id}">${a.app_id}</option>`).join('')
+      : '<option value="inwhite">inWhite</option>';
+
+    loadUsersForCurrentDivision();
+  }
+
+  function onHashTypeChanged() {
+    const type = document.getElementById('user-hash-type').value;
+    const customRow = document.getElementById('custom-capacity-row');
+    customRow.style.display = type === 'custom' ? 'grid' : 'none';
+  }
+
+  async function handleCreateUserHash() {
+    const tenantBlindId = document.getElementById('user-tenant-select').value;
+    const orgId = document.getElementById('user-org-select').value;
+    const appId = document.getElementById('user-app-select').value;
+    const type = document.getElementById('user-hash-type').value;
+
+    let maxUses = 1;
+    let expiresInHours = 72;
+
+    if (type === 'custom') {
+      maxUses = Number(document.getElementById('user-custom-uses').value) || 10;
+      expiresInHours = Number(document.getElementById('user-custom-hours').value) || 72;
+    } else {
+      maxUses = Number(type) || 1;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/hash/user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantBlindId, orgId, appId, maxUses, expiresInHours }),
+      });
+      const data = await res.json();
+      const r = data.result;
+
+      document.getElementById('u-hash').innerText = r.hash;
+      document.getElementById('u-cmd').innerText = `user ${r.hash}`;
+      document.getElementById('user-hash-result').classList.add('visible');
+
+      // Generate inWhite User QR Code
+      const qrCanvas = document.getElementById('qr-canvas');
+      const qrPayload = `inwhite://whitedesk/user?hash=${r.hash}&tenant=${tenantBlindId}&org=${orgId}&app=${appId}`;
+      if (window.QRCode && QRCode.toCanvas && qrCanvas) {
+        QRCode.toCanvas(qrCanvas, qrPayload, { width: 180, margin: 2, color: { dark: '#0F172A', light: '#FFFFFF' } });
+      }
+
+      loadUsersForCurrentDivision();
+    } catch (err) {
+      alert('Hata: ' + err.message);
+    }
+  }
+
+  async function loadUsersForCurrentDivision() {
+    const tenantBlindId = document.getElementById('user-tenant-select').value;
+    const orgId = document.getElementById('user-org-select').value;
+    const appId = document.getElementById('user-app-select').value;
+
+    if (!tenantBlindId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/users/audit?tenantBlindId=${tenantBlindId}&orgId=${orgId}&appId=${appId}`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const users = data.details.users || [];
+      const tbody = document.getElementById('division-users-body');
+
+      tbody.innerHTML = users.length === 0
+        ? `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Bu bölümde henüz personel kaydı yok.</td></tr>`
+        : users.map(u => `
+          <tr>
+            <td><span class="mono">${u.user_blind_id}</span></td>
+            <td>${u.app_id || 'inwhite'} / ${u.org_id || 'default'}</td>
+            <td>
+              <span class="badge ${u.status === 'blocked' ? 'badge-pending' : 'badge-cosmos-active'}">
+                ${u.status === 'blocked' ? 'Engelli' : 'Aktif'}
+              </span>
+            </td>
+            <td>${new Date(Number(u.created_at)).toLocaleDateString('tr-TR')}</td>
+            <td>
+              <div style="display: flex; gap: 4px;">
+                ${u.status === 'blocked' 
+                  ? `<button class="btn btn-outline btn-sm" onclick="setUserStatus('${u.user_blind_id}', 'approved')">Aç</button>`
+                  : `<button class="btn btn-outline btn-sm" style="color: var(--warning);" onclick="setUserStatus('${u.user_blind_id}', 'blocked')">Engelle</button>`}
+                <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="setUserStatus('${u.user_blind_id}', 'deleted')">Sil</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+    } catch (e) {
+      console.warn('Failed to load division users:', e);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 6. EMAIL DISPATCH & SHARE SERVICE
+  // ─────────────────────────────────────────────────────────────────────────────
+  let activeEmailPayload = null;
+
+  function openEmailDispatchModal(type) {
+    let hash = '';
+    let roleTitle = '';
+    let roleBadge = '';
+    let tenantName = '';
+    let targetCanvasId = '';
+
+    if (type === 'founder') {
+      hash = document.getElementById('f-hash').innerText;
+      roleTitle = 'TheWhite Kurucu (Founder) Kurtarma Anahtarı';
+      roleBadge = '👑 Kurucu Kurtarma';
+      tenantName = 'TheWhite Enterprises';
+      targetCanvasId = 'founder-qr-canvas';
+    } else if (type === 'global_admin') {
+      hash = document.getElementById('c-hash').innerText;
+      roleTitle = 'WhiteCosmos Global Admin Daveti';
+      roleBadge = '⭐ Global Admin Daveti';
+      const select = document.getElementById('cosmos-tenant-select');
+      tenantName = (select && select.selectedIndex >= 0) ? select.options[select.selectedIndex]?.text.split('(')[0].trim() : 'Kiracı Organizasyonu';
+      targetCanvasId = 'cosmos-qr-canvas';
+    } else {
+      hash = document.getElementById('u-hash').innerText;
+      roleTitle = 'Kurumsal WhiteDesk Destek Masası Katılım Daveti';
+      roleBadge = '👥 Personel Katılımı';
+      const select = document.getElementById('user-tenant-select');
+      tenantName = (select && select.selectedIndex >= 0) ? select.options[select.selectedIndex]?.text.split('(')[0].trim() : 'Kiracı Organizasyonu';
+      targetCanvasId = 'qr-canvas';
+    }
+
+    if (!hash || hash === '-') {
+      return alert('Lütfen önce bir hash kodu üretin.');
+    }
+
+    const canvas = document.getElementById(targetCanvasId);
+    const qrDataUrl = canvas ? canvas.toDataURL('image/png') : '';
+
+    const subject = `[inWhite / WhiteDesk] ${roleTitle} - ${tenantName}`;
+    document.getElementById('email-subject-input').value = subject;
+    document.getElementById('email-to-input').value = '';
+
+    // Generate Visual HTML Email Preview
+    const emailHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; color: #0F172A;">
+        <div style="background: #0F172A; padding: 22px; text-align: center; color: #FFFFFF;">
+          <div style="font-size: 20px; font-weight: 800; letter-spacing: 1px;">inWhite · WhiteDesk</div>
+          <div style="font-size: 11px; opacity: 0.8; margin-top: 4px; letter-spacing: 0.5px;">Sovereign Zero-Knowledge Communication Protocol</div>
+        </div>
+        <div style="padding: 24px;">
+          <div style="display: inline-block; background: #EFF6FF; color: #2563EB; font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-bottom: 12px;">
+            ${roleBadge}
+          </div>
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #0F172A;">${roleTitle}</h2>
+          <p style="font-size: 13px; color: #64748B; line-height: 1.6; margin-bottom: 20px;">
+            <strong>${tenantName}</strong> bünyesindeki WhiteDesk güvenli iletişim ağına katılmanız veya yetkinizi aktarmanız için tek kullanımlık güvenli anahtarınız ve mobil katılım QR kodunuz aşağıda yer almaktadır:
+          </p>
+
+          <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 6px;">Yetkilendirme / Kurtarma Kodu</div>
+            <div style="font-family: monospace; font-size: 15px; font-weight: 700; color: #2563EB; word-break: break-all;">${hash}</div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Mobil QR Kod ile Anında Katılım</div>
+            ${qrDataUrl ? `<img src="${qrDataUrl}" alt="WhiteDesk QR" style="width: 170px; height: 170px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px; background: #FFFFFF; display: inline-block;" />` : ''}
+          </div>
+
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+            <strong style="color: #166534; font-size: 13px; display: block; margin-bottom: 6px;">📱 Mobil Uygulama Kurulum Adımları:</strong>
+            <ol style="margin-left: 20px; font-size: 12px; color: #166534; line-height: 1.6;">
+              <li>inWhite uygulamasını test cihazınızda açın.</li>
+              <li>Alt menüden <strong>Destek (WhiteDesk)</strong> ekranına geçin.</li>
+              <li>Sağ üstteki <strong>Yenile</strong> butonunun sağındaki <strong>Barkod Okuyucu (📷)</strong> butonuna dokunun.</li>
+              <li>Bu ekrandaki QR kodu okuttuğunuz anda yetkilendirme otomatik olarak devreye girer.</li>
+              <li><em>(Alternatif: Bilet mesaj kutusuna "admin ${hash}" veya "user ${hash}" yazıp gönderebilirsiniz.)</em></li>
+            </ol>
+          </div>
+
+          <div style="border-top: 1px solid #E2E8F0; padding-top: 16px; font-size: 11px; color: #94A3B8; text-align: center;">
+            inWhite Protocol · Zero-Metadata End-to-End Encrypted Telecom & Service Architecture
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('email-preview-content').innerHTML = emailHtml;
+    activeEmailPayload = {
+      type,
+      code: hash,
+      subject,
+      tenantName,
+      html: emailHtml,
+      text: `${roleTitle}\nKurum: ${tenantName}\nHash: ${hash}\n\ninWhite uygulamasında Destek ekranından QR okutunuz.`,
+    };
+
+    document.getElementById('modal-email-dispatch').classList.add('visible');
+  }
+
+  function closeEmailDispatchModal() {
+    document.getElementById('modal-email-dispatch').classList.remove('visible');
+  }
+
+  async function handleSendEmailDispatch() {
+    const to = document.getElementById('email-to-input').value.trim();
+    if (!to || !to.includes('@')) {
+      return alert('Lütfen geçerli bir alıcı e-posta adresi girin.');
+    }
+    const subject = document.getElementById('email-subject-input').value.trim() || activeEmailPayload.subject;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/email/dispatch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to,
+          subject,
+          html: activeEmailPayload.html,
+          text: activeEmailPayload.text,
+          type: activeEmailPayload.type,
+          code: activeEmailPayload.code,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || 'E-posta başarıyla iletildi.');
+        closeEmailDispatchModal();
+      } else {
+        alert('Hata: ' + (data.error || 'E-posta gönderilemedi.'));
+      }
+    } catch (e) {
+      alert('İletim hatası: ' + e.message);
+    }
+  }
+
+  function handleCopyEmailHtml() {
+    if (!activeEmailPayload) return;
+    navigator.clipboard.writeText(activeEmailPayload.html).then(() => {
+      alert('Zengin HTML e-posta şablonu panoya kopyalandı! Outlook veya web mail istemcinize yapıştırabilirsiniz.');
+    });
+  }
+
+  function handleOpenMailClient() {
+    if (!activeEmailPayload) return;
+    const to = document.getElementById('email-to-input').value.trim();
+    const subject = encodeURIComponent(document.getElementById('email-subject-input').value.trim() || activeEmailPayload.subject);
+    const body = encodeURIComponent(activeEmailPayload.text);
+    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_blank');
+  }
+</script>
+
+</body>
+</html>
