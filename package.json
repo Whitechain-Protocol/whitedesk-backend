@@ -11,8 +11,8 @@
     "@neondatabase/serverless": "^0.10.4"
   },
   "devDependencies": {
-    "@types/node": "^20.17.24",
-    "@vercel/node": "^3.2.35",
-    "typescript": "^5.7.3"
+    "@types/node": "^20.17.0",
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.0.0"
   }
 }
