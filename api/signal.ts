@@ -1,31 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-/**
- * Ephemeral In-Memory Signal Store for Low-Latency (<20ms) WebRTC Signaling
- */
-interface SignalRecord {
-  roomName: string;
-  offerSdp?: string;
-  answerSdp?: string;
-  signalType?: string;
-  targetMode?: string;
-  callerCandidates: string[];
-  calleeCandidates: string[];
-  updatedAt: number;
-}
-
-// In-memory store persistent across warm lambda invocations
-const signalRooms = new Map<string, SignalRecord>();
-
-// Periodic garbage collection for signals older than 2 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [room, record] of signalRooms.entries()) {
-    if (now - record.updatedAt > 120_000) {
-      signalRooms.delete(room);
-    }
-  }
-}, 30_000);
+import { getDb } from './_lib/db.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -42,88 +16,138 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const normalizedRoom = roomName.toLowerCase().trim();
+  const sql = getDb();
+  const now = Date.now();
 
-  // 1. DELETE: Room cleanup when call finishes
-  if (req.method === 'DELETE') {
-    signalRooms.delete(normalizedRoom);
-    return res.status(200).json({ success: true, message: 'Room cleared' });
-  }
+  try {
+    // Zero-retention: 2 dakikadan eski bayat sinyal kayıtlarını temizle
+    void sql`DELETE FROM whitedesk_ephemeral_signals WHERE updated_at < ${now - 120_000}`.catch(() => {});
 
-  // 2. GET: Fast poll of WebRTC signal (Offer, Answer, Candidates)
-  if (req.method === 'GET') {
-    const role = (req.query.role as string) || 'callee';
-    const record = signalRooms.get(normalizedRoom);
-
-    if (!record) {
-      return res.status(200).json({ found: false });
+    // 1. DELETE: Görüşme bittiğinde odayı anında temizle
+    if (req.method === 'DELETE') {
+      await sql`DELETE FROM whitedesk_ephemeral_signals WHERE room_name = ${normalizedRoom}`;
+      return res.status(200).json({ success: true, message: 'Room cleared' });
     }
 
-    // Role perspective:
-    // If 'caller' is polling: Caller wants to see Callee's candidates
-    // If 'callee' is polling: Callee wants to see Caller's candidates
-    const candidates = role === 'caller' ? record.calleeCandidates : record.callerCandidates;
+    // 2. GET: WebRTC sinyal durumunu (Offer, Answer, Candidates) çek
+    if (req.method === 'GET') {
+      const role = (req.query.role as string) || 'callee';
+      const rows = await sql`
+        SELECT * FROM whitedesk_ephemeral_signals 
+        WHERE room_name = ${normalizedRoom}
+        LIMIT 1
+      `;
 
-    return res.status(200).json({
-      found: true,
-      offerSdp: record.offerSdp,
-      answerSdp: record.answerSdp,
-      signalType: record.signalType,
-      targetMode: record.targetMode,
-      candidates: candidates || [],
-      updatedAt: record.updatedAt,
-    });
-  }
-
-  // 3. POST: Publish fast WebRTC signal
-  if (req.method === 'POST') {
-    const { role, signalType, sdp, targetMode, candidate } = req.body || {};
-    const now = Date.now();
-
-    let record = signalRooms.get(normalizedRoom);
-    if (!record) {
-      record = {
-        roomName: normalizedRoom,
-        callerCandidates: [],
-        calleeCandidates: [],
-        updatedAt: now,
-      };
-      signalRooms.set(normalizedRoom, record);
-    }
-
-    record.updatedAt = now;
-
-    if (candidate) {
-      if (role === 'caller') {
-        record.callerCandidates.push(candidate);
-      } else {
-        record.calleeCandidates.push(candidate);
+      if (!rows || rows.length === 0) {
+        return res.status(200).json({ found: false });
       }
-      return res.status(200).json({ success: true, candidateAdded: true });
+
+      const record = rows[0];
+      const candidates = role === 'caller' 
+        ? (record.callee_candidates || []) 
+        : (record.caller_candidates || []);
+
+      return res.status(200).json({
+        found: true,
+        offerSdp: record.offer_sdp || undefined,
+        answerSdp: record.answer_sdp || undefined,
+        signalType: record.signal_type || undefined,
+        targetMode: record.target_mode || undefined,
+        candidates: Array.isArray(candidates) ? candidates : [],
+        updatedAt: Number(record.updated_at),
+      });
     }
 
-    if (signalType === 'offer') {
-      record.offerSdp = sdp;
-      record.signalType = 'offer';
-      record.targetMode = targetMode || record.targetMode;
-      record.callerCandidates = [];
-      record.calleeCandidates = [];
-      record.answerSdp = undefined;
-    } else if (signalType === 'answer' || signalType === 'answered') {
-      record.answerSdp = sdp;
-      record.signalType = 'answer';
-      record.targetMode = targetMode || record.targetMode;
-    } else if (signalType === 'hangup' || signalType === 'reject') {
-      record.signalType = signalType;
-      record.targetMode = targetMode || record.targetMode;
-      record.answerSdp = undefined;
-    } else if (signalType === 'mode-switch') {
-      record.offerSdp = sdp;
-      record.targetMode = targetMode;
-      record.signalType = 'mode-switch';
+    // 3. POST: WebRTC sinyali yayınla
+    if (req.method === 'POST') {
+      const { role, signalType, sdp, targetMode, candidate } = req.body || {};
+
+      // 3.1 ICE Candidate ekleme (Trickle ICE)
+      if (candidate) {
+        const candidateStr = typeof candidate === 'string' ? candidate : JSON.stringify(candidate);
+        if (role === 'caller') {
+          await sql`
+            INSERT INTO whitedesk_ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
+            VALUES (${normalizedRoom}, jsonb_build_array(${candidateStr}), '[]'::jsonb, ${now})
+            ON CONFLICT (room_name) DO UPDATE SET
+              caller_candidates = COALESCE(whitedesk_ephemeral_signals.caller_candidates, '[]'::jsonb) || jsonb_build_array(${candidateStr}),
+              updated_at = EXCLUDED.updated_at
+          `;
+        } else {
+          await sql`
+            INSERT INTO whitedesk_ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
+            VALUES (${normalizedRoom}, '[]'::jsonb, jsonb_build_array(${candidateStr}), ${now})
+            ON CONFLICT (room_name) DO UPDATE SET
+              callee_candidates = COALESCE(whitedesk_ephemeral_signals.callee_candidates, '[]'::jsonb) || jsonb_build_array(${candidateStr}),
+              updated_at = EXCLUDED.updated_at
+          `;
+        }
+        return res.status(200).json({ success: true, candidateAdded: true });
+      }
+
+      // 3.2 Offer yayınlama
+      if (signalType === 'offer') {
+        await sql`
+          INSERT INTO whitedesk_ephemeral_signals (room_name, offer_sdp, signal_type, target_mode, caller_candidates, callee_candidates, answer_sdp, updated_at)
+          VALUES (${normalizedRoom}, ${sdp || null}, 'offer', ${targetMode || null}, '[]'::jsonb, '[]'::jsonb, NULL, ${now})
+          ON CONFLICT (room_name) DO UPDATE SET
+            offer_sdp = EXCLUDED.offer_sdp,
+            signal_type = 'offer',
+            target_mode = COALESCE(EXCLUDED.target_mode, whitedesk_ephemeral_signals.target_mode),
+            caller_candidates = '[]'::jsonb,
+            callee_candidates = '[]'::jsonb,
+            answer_sdp = NULL,
+            updated_at = EXCLUDED.updated_at
+        `;
+        return res.status(200).json({ success: true, signalType: 'offer' });
+      }
+
+      // 3.3 Answer yanıtı
+      if (signalType === 'answer' || signalType === 'answered') {
+        await sql`
+          UPDATE whitedesk_ephemeral_signals
+          SET answer_sdp = ${sdp || null},
+              signal_type = 'answer',
+              target_mode = COALESCE(${targetMode || null}, target_mode),
+              updated_at = ${now}
+          WHERE room_name = ${normalizedRoom}
+        `;
+        return res.status(200).json({ success: true, signalType: 'answer' });
+      }
+
+      // 3.4 Hangup / Reject
+      if (signalType === 'hangup' || signalType === 'reject') {
+        await sql`
+          UPDATE whitedesk_ephemeral_signals
+          SET signal_type = ${signalType},
+              target_mode = COALESCE(${targetMode || null}, target_mode),
+              answer_sdp = NULL,
+              updated_at = ${now}
+          WHERE room_name = ${normalizedRoom}
+        `;
+        return res.status(200).json({ success: true, signalType });
+      }
+
+      // 3.5 Telsiz mod değişimi (speaker_start, speaker_stop, peer_join, peer_leave)
+      if (signalType === 'mode-switch') {
+        await sql`
+          INSERT INTO whitedesk_ephemeral_signals (room_name, offer_sdp, signal_type, target_mode, caller_candidates, callee_candidates, answer_sdp, updated_at)
+          VALUES (${normalizedRoom}, ${sdp || null}, 'mode-switch', ${targetMode || null}, '[]'::jsonb, '[]'::jsonb, NULL, ${now})
+          ON CONFLICT (room_name) DO UPDATE SET
+            offer_sdp = EXCLUDED.offer_sdp,
+            signal_type = 'mode-switch',
+            target_mode = EXCLUDED.target_mode,
+            updated_at = EXCLUDED.updated_at
+        `;
+        return res.status(200).json({ success: true, signalType: 'mode-switch' });
+      }
+
+      return res.status(200).json({ success: true });
     }
 
-    return res.status(200).json({ success: true, signalType: record.signalType });
+    return res.status(405).json({ error: 'Method not allowed' });
+  } catch (error: any) {
+    console.error('[SIGNAL ERROR]:', error);
+    return res.status(500).json({ error: error.message || 'Signal processing error' });
   }
-
-  return res.status(405).json({ error: 'Method not allowed' });
 }
