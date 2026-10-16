@@ -42,12 +42,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         orgId
       } = req.body || {};
 
-      // 1. Cihaz FCM Token Kaydı (Hem ham White ID hem de türetilen Blind ID kaydedilir)
+      // 1. Cihaz FCM Token Kaydı
       if (action === 'register') {
         if (!whiteId || !pushToken) {
           return res.status(400).json({ error: 'whiteId and pushToken required' });
         }
         const cleanWhiteId = whiteId.toLowerCase().trim();
+
+        // Eğer ID zaten blind_ ise ana tabloya ayrı bir satır olarak basma (White ID'ye ait satırın blind_id kolonunda tutulur)
+        if (cleanWhiteId.startsWith('blind_')) {
+          await sql`
+            UPDATE whitedesk_user_devices 
+            SET push_token = ${pushToken}, updated_at = ${now}
+            WHERE blind_id = ${cleanWhiteId}
+          `;
+          return res.status(200).json({ success: true, message: 'Blind device token updated' });
+        }
+
         const blindId = computeBlindId(cleanWhiteId);
 
         await sql`
@@ -70,9 +81,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         const cleanTargetId = (targetWhiteId || '').toLowerCase().trim();
+        const cleanCaller = (callerWhiteId || '').toLowerCase().trim();
+        const callerBlind = computeBlindId(cleanCaller);
+
+        // Arayanın kendi cihaz tokenlarını tespit et (kendi kendine bildirim atılmasını engelle)
+        let callerTokens: Set<string> = new Set();
+        if (cleanCaller) {
+          const cRows = await sql`
+            SELECT push_token FROM whitedesk_user_devices
+            WHERE white_id = ${cleanCaller} OR blind_id = ${cleanCaller}
+               OR white_id = ${callerBlind} OR blind_id = ${callerBlind}
+          `;
+          cRows.forEach((r: any) => callerTokens.add(r.push_token));
+        }
+
         let targetTokens: string[] = [];
 
-        if (cleanTargetId) {
+        if (cleanTargetId && cleanTargetId !== cleanCaller && cleanTargetId !== callerBlind) {
           const directMatch = await sql`
             SELECT push_token FROM whitedesk_user_devices
             WHERE white_id = ${cleanTargetId} OR blind_id = ${cleanTargetId}
@@ -83,7 +108,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         }
 
-        // Bilet bazlı fallback: Eğer doğrudan eşleşme bulunamadıysa biletin taraflarından cihaz token'ını çöz
+        // Bilet bazlı fallback: Eğer doğrudan eşleşme bulunamadıysa biletin taraflarından karşı tarafı çöz
         if (targetTokens.length === 0 && ticketId) {
           const tkt = await sql`
             SELECT user_white_id, user_blind_id, assigned_admin_blind_id
@@ -101,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ]
               .filter(Boolean)
               .map((s: any) => String(s).toLowerCase().trim())
-              .filter((s: string) => s !== (callerWhiteId || '').toLowerCase().trim());
+              .filter((s: string) => s !== cleanCaller && s !== callerBlind);
 
             for (const cId of candidateIds) {
               const matched = await sql`
@@ -117,8 +142,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         }
 
+        // Kendi kendine bildirim göndermeyi KESİN OLARAK filtrele
+        targetTokens = targetTokens.filter(tok => !callerTokens.has(tok));
+
         if (targetTokens.length === 0) {
-          return res.status(200).json({ success: false, reason: 'No registered device found for target' });
+          return res.status(200).json({ success: false, reason: 'No remote recipient device found' });
         }
 
         const token = targetTokens[0];
@@ -151,22 +179,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // 3. Saha Grubu Telsiz Yayını (Kurumsal Broadcast PTT)
       if (action === 'broadcast_org') {
         const cleanCaller = (callerWhiteId || '').toLowerCase().trim();
+        const callerBlind = computeBlindId(cleanCaller);
+
+        // Arayanın token'larını al ve kesinlikle hariç tut
+        const callerRows = await sql`
+          SELECT push_token FROM whitedesk_user_devices
+          WHERE white_id = ${cleanCaller} OR blind_id = ${cleanCaller}
+             OR white_id = ${callerBlind} OR blind_id = ${callerBlind}
+        `;
+        const callerTokens = new Set(callerRows.map((r: any) => r.push_token));
+
         const devices = await sql`
-          SELECT push_token, white_id FROM whitedesk_user_devices
-          WHERE white_id != ${cleanCaller}
+          SELECT DISTINCT push_token, white_id, blind_id FROM whitedesk_user_devices
+          WHERE white_id != ${cleanCaller} AND blind_id != ${cleanCaller}
+            AND white_id != ${callerBlind} AND blind_id != ${callerBlind}
         `;
 
         if (!devices || devices.length === 0) {
-          return res.status(200).json({ success: true, sentCount: 0, reason: 'No other devices registered' });
+          return res.status(200).json({ success: true, sentCount: 0, reason: 'No remote devices registered' });
         }
 
         const alias = callerAlias || 'Saha Görevlisi';
         const groupName = orgName || 'Kurumsal Saha Telsizi';
 
         let sentCount = 0;
+        const sentTokens = new Set<string>();
+
         for (const dev of devices) {
-          if (!dev.push_token) continue;
-          const sent = await sendFcmPush(dev.push_token, {
+          const token = dev.push_token;
+          if (!token || callerTokens.has(token) || sentTokens.has(token)) {
+            continue;
+          }
+          sentTokens.add(token);
+
+          const sent = await sendFcmPush(token, {
             title: `Telsiz Anonsu: ${groupName}`,
             body: `${alias} canlı telsiz yayını başlattı. Dinlemek için dokunun.`,
             data: {
