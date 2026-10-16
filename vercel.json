@@ -1,4 +1,5 @@
 {
+  "name": "whitedesk-backend",
   "version": 2,
   "outputDirectory": "public",
   "headers": [
