@@ -9,11 +9,8 @@ interface SignalRecord {
   answerSdp?: string;
   signalType?: string;
   targetMode?: string;
-  candidates: string[];
-  callerCandidate?: string;
-  calleeCandidate?: string;
-  callerActive?: boolean;
-  calleeActive?: boolean;
+  callerCandidates: string[];
+  calleeCandidates: string[];
   updatedAt: number;
 }
 
@@ -62,15 +59,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Role perspective:
-    // If 'caller' is polling: Caller wants to see Callee's Answer SDP, candidates or reject/hangup
-    // If 'callee' is polling: Callee wants to see Caller's Offer SDP, candidates or hangup
+    // If 'caller' is polling: Caller wants to see Callee's candidates
+    // If 'callee' is polling: Callee wants to see Caller's candidates
+    const candidates = role === 'caller' ? record.calleeCandidates : record.callerCandidates;
+
     return res.status(200).json({
       found: true,
       offerSdp: record.offerSdp,
       answerSdp: record.answerSdp,
       signalType: record.signalType,
       targetMode: record.targetMode,
-      candidates: record.candidates,
+      candidates: candidates || [],
       updatedAt: record.updatedAt,
     });
   }
@@ -84,7 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!record) {
       record = {
         roomName: normalizedRoom,
-        candidates: [],
+        callerCandidates: [],
+        calleeCandidates: [],
         updatedAt: now,
       };
       signalRooms.set(normalizedRoom, record);
@@ -93,7 +93,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     record.updatedAt = now;
 
     if (candidate) {
-      record.candidates.push(candidate);
+      if (role === 'caller') {
+        record.callerCandidates.push(candidate);
+      } else {
+        record.calleeCandidates.push(candidate);
+      }
       return res.status(200).json({ success: true, candidateAdded: true });
     }
 
@@ -101,7 +105,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       record.offerSdp = sdp;
       record.signalType = 'offer';
       record.targetMode = targetMode || record.targetMode;
-      record.candidates = []; // reset candidates for new offer
+      record.callerCandidates = [];
+      record.calleeCandidates = [];
+      record.answerSdp = undefined;
     } else if (signalType === 'answer' || signalType === 'answered') {
       record.answerSdp = sdp;
       record.signalType = 'answer';
@@ -109,8 +115,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else if (signalType === 'hangup' || signalType === 'reject') {
       record.signalType = signalType;
       record.targetMode = targetMode || record.targetMode;
+      record.answerSdp = undefined;
     } else if (signalType === 'mode-switch') {
-      // Used for speaker_start, speaker_stop, peer_join, peer_leave
       record.offerSdp = sdp;
       record.targetMode = targetMode;
       record.signalType = 'mode-switch';

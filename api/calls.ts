@@ -41,13 +41,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'sessionDescription (Offer SDP) is required for new-session' });
       }
 
+      const bodyPayload: any = { sessionDescription };
+      if (tracks) bodyPayload.tracks = tracks;
+
       const cfRes = await fetch(`${CLOUDFLARE_CALLS_API_BASE}/apps/${APP_ID}/sessions/new`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${APP_SECRET}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sessionDescription }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await cfRes.json();
