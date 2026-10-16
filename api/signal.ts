@@ -65,20 +65,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // 3.1 ICE Candidate ekleme (Trickle ICE)
       if (candidate) {
         const candidateStr = typeof candidate === 'string' ? candidate : JSON.stringify(candidate);
+        const candJsonArray = JSON.stringify([candidateStr]);
         if (role === 'caller') {
           await sql`
             INSERT INTO whitedesk_ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
-            VALUES (${normalizedRoom}, jsonb_build_array(${candidateStr}), '[]'::jsonb, ${now})
+            VALUES (${normalizedRoom}, ${candJsonArray}::jsonb, '[]'::jsonb, ${now})
             ON CONFLICT (room_name) DO UPDATE SET
-              caller_candidates = COALESCE(whitedesk_ephemeral_signals.caller_candidates, '[]'::jsonb) || jsonb_build_array(${candidateStr}),
+              caller_candidates = COALESCE(whitedesk_ephemeral_signals.caller_candidates, '[]'::jsonb) || ${candJsonArray}::jsonb,
               updated_at = EXCLUDED.updated_at
           `;
         } else {
           await sql`
             INSERT INTO whitedesk_ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
-            VALUES (${normalizedRoom}, '[]'::jsonb, jsonb_build_array(${candidateStr}), ${now})
+            VALUES (${normalizedRoom}, '[]'::jsonb, ${candJsonArray}::jsonb, ${now})
             ON CONFLICT (room_name) DO UPDATE SET
-              callee_candidates = COALESCE(whitedesk_ephemeral_signals.callee_candidates, '[]'::jsonb) || jsonb_build_array(${candidateStr}),
+              callee_candidates = COALESCE(whitedesk_ephemeral_signals.callee_candidates, '[]'::jsonb) || ${candJsonArray}::jsonb,
               updated_at = EXCLUDED.updated_at
           `;
         }

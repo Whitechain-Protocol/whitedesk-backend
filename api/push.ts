@@ -176,6 +176,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json({ success: sent });
       }
 
+      // 2.1 Çağrı İptal Bildirimi (Arayan vazgeçtiğinde veya kırmızı butona bastığında arananın zili ve bildirimini derhal susturur)
+      if (action === 'cancel_call' || action === 'cancel_call_push') {
+        const cleanTargetId = (targetWhiteId || '').toLowerCase().trim();
+        const targetBlind = computeBlindId(cleanTargetId);
+
+        const rows = await sql`
+          SELECT push_token FROM whitedesk_user_devices
+          WHERE white_id = ${cleanTargetId} OR blind_id = ${cleanTargetId}
+             OR white_id = ${targetBlind} OR blind_id = ${targetBlind}
+        `;
+
+        for (const r of rows) {
+          if (r.push_token) {
+            await sendFcmPush(r.push_token, {
+              title: '',
+              body: '',
+              data: {
+                type: 'cancel_call',
+                ticketId: ticketId || '',
+                callerWhiteId: callerWhiteId || '',
+              },
+            });
+          }
+        }
+        return res.status(200).json({ success: true, cancelled: true });
+      }
+
       // 3. Saha Grubu Telsiz Yayını (Kurumsal Broadcast PTT)
       if (action === 'broadcast_org') {
         const cleanCaller = (callerWhiteId || '').toLowerCase().trim();
