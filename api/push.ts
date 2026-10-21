@@ -150,22 +150,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         const token = targetTokens[0];
-        const pushCallType = callType || (type === 'direct_ptt' ? 'ptt' : 'call');
+        const pushCallType = callType || (type === 'direct_ptt' ? 'ptt' : type === 'remote_desktop_offer' ? 'remote_desktop' : 'call');
         const alias = callerAlias || 'Operatör';
 
-        const title = pushCallType === 'ptt'
-          ? 'Gelen Bas-Konuş Çağrısı'
-          : 'Gelen Sesli Görüşme';
+        const title = pushCallType === 'remote_desktop'
+          ? 'Uzak Masaüstü İsteği'
+          : pushCallType === 'ptt'
+            ? 'Gelen Bas-Konuş Çağrısı'
+            : 'Gelen Sesli Görüşme';
 
-        const body = pushCallType === 'ptt'
-          ? `${alias} bas-konuş telsiz bağlantısı kurmak istiyor.`
-          : `${alias} sizi arıyor...`;
+        const body = pushCallType === 'remote_desktop'
+          ? `${alias} cihaz ekranınıza bağlanmak için onayınızı bekliyor.`
+          : pushCallType === 'ptt'
+            ? `${alias} bas-konuş telsiz bağlantısı kurmak istiyor.`
+            : `${alias} sizi arıyor...`;
 
         const sent = await sendFcmPush(token, {
           title,
           body,
           data: {
-            type: pushCallType === 'ptt' ? 'direct_ptt' : 'incoming_call',
+            type: pushCallType === 'remote_desktop' ? 'remote_desktop_offer' : pushCallType === 'ptt' ? 'direct_ptt' : 'incoming_call',
             ticketId: ticketId || '',
             callerAlias: alias,
             callerWhiteId: callerWhiteId || '',
