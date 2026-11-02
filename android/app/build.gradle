@@ -85,13 +85,13 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdk 35
 
     namespace 'com.mceryilmaz.whitedesk'
     defaultConfig {
         applicationId 'com.mceryilmaz.whitedesk'
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 24
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0.0"
 
@@ -179,4 +179,10 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Firebase Cloud Messaging (FCM)
+    implementation platform('com.google.firebase:firebase-bom:33.4.0')
+    implementation 'com.google.firebase:firebase-messaging'
 }
+
+apply plugin: 'com.google.gms.google-services'

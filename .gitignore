@@ -12,6 +12,8 @@ node_modules/
 *.key
 google-services.json
 GoogleService-Info.plist
+whitedesk-*.json
+*firebase*.json
 
 # Expo / Metro
 .expo/
@@ -44,3 +46,17 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# UI Dumps & Test Scratch (Never commit to repo)
+*.xml
+!android/**/*.xml
+*.png
+!assets/**/*.png
+!android/**/*.png
+*.docx
+scratch/
+screenshots/
+admin_qr/
+corrections_mnedia/
+uygulama_planlari/
+

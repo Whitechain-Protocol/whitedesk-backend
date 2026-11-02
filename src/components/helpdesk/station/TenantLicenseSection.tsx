@@ -69,8 +69,8 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
             </View>
           </View>
 
-          {/* HIZLI İLAVE HASH ÜRETİMİ (ADD-ON) */}
-          <Text style={styles.subSectionHeader}>Hızlı İlave Hash Üret (Store Add-on)</Text>
+          {/* EK LİSANSLAR */}
+          <Text style={styles.subSectionHeader}>Ek Lisanslar</Text>
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
             <TouchableOpacity
               style={styles.addonActionBtn}
@@ -95,32 +95,32 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
             <View style={styles.copiedBanner}>
               <Check size={14} color="#16A34A" style={{ marginRight: 6 }} />
               <Text style={styles.copiedBannerText} numberOfLines={1}>
-                Yeni Hash Kopyalandı: {copiedConsoleHash}
+                Yeni Hash: {copiedConsoleHash}
               </Text>
             </View>
           )}
 
-          {/* ABONELİK PLANLARI BİLGİ KARTLARI */}
-          <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>Abonelik Paketleri</Text>
+          {/* LİSANS PAKETLERİ */}
+          <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>Lisans Paketleri</Text>
           <View style={styles.tierPlanBox}>
-            <Text style={styles.tierPlanName}>🥉 Starter</Text>
-            <Text style={styles.tierPlanPrice}>$19/ay · $190/yıl</Text>
-            <Text style={styles.tierPlanDesc}>1 Admin + 1 Operatör + 25 Müşteri</Text>
+            <Text style={styles.tierPlanName}>Starter Plan</Text>
+            <Text style={styles.tierPlanPrice}>$19 / ay</Text>
+            <Text style={styles.tierPlanDesc}>3 Operatör • 50 Müşteri</Text>
           </View>
 
           <View style={[styles.tierPlanBox, styles.tierPlanBoxPro]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.tierPlanName}>🥈 Pro ⭐</Text>
+              <Text style={styles.tierPlanName}>Pro Plan ⭐</Text>
               <Text style={styles.popularBadge}>Önerilen</Text>
             </View>
-            <Text style={styles.tierPlanPrice}>$49/ay · $490/yıl</Text>
-            <Text style={styles.tierPlanDesc}>1 Admin + 3 Operatör + 100 Müşteri</Text>
+            <Text style={styles.tierPlanPrice}>$49 / ay</Text>
+            <Text style={styles.tierPlanDesc}>10 Operatör • 250 Müşteri</Text>
           </View>
 
           <View style={styles.tierPlanBox}>
-            <Text style={styles.tierPlanName}>🥇 Enterprise</Text>
-            <Text style={styles.tierPlanPrice}>$149/ay · $1.490/yıl</Text>
-            <Text style={styles.tierPlanDesc}>1 Admin + 10 Operatör + 500 Müşteri</Text>
+            <Text style={styles.tierPlanName}>Enterprise Plan</Text>
+            <Text style={styles.tierPlanPrice}>$149 / ay</Text>
+            <Text style={styles.tierPlanDesc}>Sınırsız Operatör • Sınırsız Müşteri</Text>
           </View>
         </View>
       )}

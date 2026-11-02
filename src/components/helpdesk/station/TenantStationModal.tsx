@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 import { ShieldCheck, X } from 'lucide-react-native';
 import { GeminiSectionKey } from '../types';
@@ -63,6 +64,9 @@ export const TenantStationModal: React.FC<TenantStationModalProps> = ({
   onSaveAllocation,
   tAllLabel,
 }) => {
+  const { height: windowHeight } = useWindowDimensions();
+  const modalContainerHeight = Math.round(windowHeight * 0.86);
+
   return (
     <Modal
       visible={visible}
@@ -72,7 +76,7 @@ export const TenantStationModal: React.FC<TenantStationModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.consoleModalOverlay}>
-        <View style={styles.consoleModalContainer}>
+        <View style={[styles.consoleModalContainer, { height: modalContainerHeight }]}>
           {/* Header */}
           <View style={styles.consoleHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     maxWidth: 540,
-    maxHeight: '90%',
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,

@@ -83,11 +83,28 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
             () => navigation.goBack()
           );
         } else if (res.type === 'global_admin') {
+          const isActive = (res.message || '').includes('aktif') || (res.message || '').includes('hazır') || (res.message || '').includes('yüklendi');
           showAlert(
-            '⭐ Global Admin Talebi Alındı',
+            isActive ? '⭐ Global Admin Yetkisi Aktif' : '⭐ Global Admin Talebi Alındı',
             res.message || 'Global Admin adaylığınız kurucu TheWhite onayına iletildi. Onaylandıktan sonra WhiteCosmos yetkiniz aktifleşecektir.',
-            'Anladım',
-            '#D97706',
+            isActive ? 'Destek Masasına Geç' : 'Anladım',
+            isActive ? '#2563EB' : '#D97706',
+            () => navigation.goBack()
+          );
+        } else if (res.type === 'admin') {
+          showAlert(
+            '🛡️ Yönetici Yetkisi Aktif',
+            res.message || 'Yönetici yetkiniz başarıyla etkinleştirildi.',
+            'Destek Masasına Geç',
+            '#2563EB',
+            () => navigation.goBack()
+          );
+        } else if (res.type === 'desktop_pair') {
+          showAlert(
+            '🖥️ Masaüstü Yetkilendirildi',
+            res.message || 'Yıllık lisansınız doğrulandı. WhiteDesk Masaüstü uygulaması aktif hale getirildi.',
+            'Masaüstüne Geç',
+            '#16A34A',
             () => navigation.goBack()
           );
         } else if (res.type === 'user') {
@@ -108,13 +125,23 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
           );
         }
       } else {
-        showAlert(
-          'Geçersiz WhiteDesk Kodu',
-          res.message || 'Taratılan QR kod geçerli bir WhiteDesk yetkilendirme veya katılım anahtarı içermiyor.',
-          'Tekrar Dene',
-          '#EF4444',
-          () => setIsScanning(true)
-        );
+        if (res.type === 'desktop_pair') {
+          showAlert(
+            'Masaüstü Eşleştirme Hatası',
+            res.message || 'Masaüstü uygulaması eşleştirilemedi.',
+            'Tekrar Dene',
+            '#EF4444',
+            () => setIsScanning(true)
+          );
+        } else {
+          showAlert(
+            'Geçersiz WhiteDesk Kodu',
+            res.message || 'Taratılan QR kod geçerli bir WhiteDesk yetkilendirme veya katılım anahtarı içermiyor.',
+            'Tekrar Dene',
+            '#EF4444',
+            () => setIsScanning(true)
+          );
+        }
       }
     } catch (err: any) {
       showAlert(

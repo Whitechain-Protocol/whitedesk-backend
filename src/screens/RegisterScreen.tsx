@@ -133,7 +133,7 @@ export default function RegisterScreen({ navigation, route }: any) {
     }
   };
 
-  /** Hash code entry: claim hash then go to HelpDesk */
+  /** Hash code entry: claim hash via live backend then go to HelpDesk */
   const handleHashEntry = async () => {
     const hash = hashInput.trim();
     if (!hash) {
@@ -143,10 +143,18 @@ export default function RegisterScreen({ navigation, route }: any) {
     if (!identity) return;
     setIsWorking(true);
     try {
-      await helpDeskService.handleAdminClaimCommand(identity.whiteId, hash);
-      navigation.replace('HelpDesk');
-    } catch (e) {
-      showAlert('Geçersiz Kod', 'Bu kod tanınanamadı. Yöneticinizden yeni bir kod talep edin.');
+      const res = await helpDeskService.claimUnifiedHash(identity.whiteId, hash);
+      if (res.success) {
+        navigation.replace('HelpDesk', {
+          role: res.role,
+          enterpriseName: res.enterpriseName,
+          enterpriseBlindId: res.enterpriseBlindId,
+        });
+      } else {
+        showAlert('Geçersiz Kod', res.message || 'Bu kod tanınamadı. Yöneticinizden geçerli bir kod talep edin.');
+      }
+    } catch (e: any) {
+      showAlert('Geçersiz Kod', e?.message || 'Bu kod tanınamadı. Yöneticinizden yeni bir kod talep edin.');
     } finally {
       setIsWorking(false);
     }

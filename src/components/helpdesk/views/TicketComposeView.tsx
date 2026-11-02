@@ -11,9 +11,12 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Image,
+  Modal,
 } from 'react-native';
 import {
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   Camera,
   Paperclip,
   FileText,
@@ -23,8 +26,16 @@ import {
   Tag,
   Package,
   HelpCircle,
+    ShieldCheck,
+  Activity,
+  MoreVertical,
+  Cpu,
+  Image as ImageIcon,
+  Check,
 } from 'lucide-react-native';
-import { HelpDeskCategory, INWHITE_CATEGORIES } from '../../../services/helpDeskService';
+import { piiSanitizer } from '../../../services/piiSanitizer';
+import { HeadphoneChatIcon } from '../icons/HeadphoneChatIcon';
+import { HelpDeskCategory } from '../../../services/helpDeskService';
 import { AttachedFile, CustomFieldDef, CatalogItem } from '../types';
 
 interface TicketComposeViewProps {
@@ -40,6 +51,8 @@ interface TicketComposeViewProps {
   availableCategories: HelpDeskCategory[];
   attachedFile: AttachedFile | null;
   setAttachedFile: (f: AttachedFile | null) => void;
+  attachedFiles?: AttachedFile[];
+  onRemoveAttachedFile?: (index: number) => void;
   isSendActive: boolean;
   isHelpCommand?: boolean;
   sending: boolean;
@@ -55,6 +68,12 @@ interface TicketComposeViewProps {
   setCustomFieldValues?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   catalog?: CatalogItem[];
   supportTicketTarget?: 'none' | 'thewhite' | 'global_admin';
+  isAdmin?: boolean;
+  isFounder?: boolean;
+  enterpriseName?: string | null;
+  isCreatingDiscussion?: boolean;
+  attachDiagnostics?: boolean;
+  setAttachDiagnostics?: (v: boolean) => void;
 }
 
 export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
@@ -70,6 +89,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
   availableCategories,
   attachedFile,
   setAttachedFile,
+  attachedFiles = [],
+  onRemoveAttachedFile,
   isSendActive,
   isHelpCommand = false,
   sending,
@@ -85,8 +106,20 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
   setCustomFieldValues,
   catalog = [],
   supportTicketTarget = 'none',
+  isAdmin = false,
+  isFounder = false,
+  enterpriseName = null,
+  isCreatingDiscussion = false,
+  attachDiagnostics = false,
+  setAttachDiagnostics,
 }) => {
   const [activeFieldKey, setActiveFieldKey] = React.useState<string | null>(null);
+  const [isCustomFieldsExpanded, setIsCustomFieldsExpanded] = React.useState<boolean>(false);
+  const [isMenuModalVisible, setIsMenuModalVisible] = React.useState<boolean>(false);
+  const [isDiagConsentModalVisible, setIsDiagConsentModalVisible] = React.useState<boolean>(false);
+  const hasPiiDetected = React.useMemo(() => {
+    return piiSanitizer.hasPii(composeSubject) || piiSanitizer.hasPii(composeMessage);
+  }, [composeSubject, composeMessage]);
 
   // Normalizes keys to match catalog keys case-insensitively
   const getCatalogValue = (item: CatalogItem, field: CustomFieldDef): string | undefined => {
@@ -174,17 +207,12 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
           contentContainerStyle={[
             styles.fluidScrollContent,
             {
-              paddingTop: safeTop + 10,
+              paddingTop: safeTop + 6,
               paddingBottom: keyboardHeight > 0 ? keyboardHeight : 20,
             }
           ]}
         >
-          {/* WHITEDESK LOGO */}
-          <View style={styles.scrollLogoRow}>
-            <Text style={styles.logoText} numberOfLines={1} adjustsFontSizeToFit>WhiteDesk</Text>
-          </View>
-
-          {/* SAMSUNG ONE UI DIRECT ON CANVAS BACK BUTTON */}
+          {/* TOP HEADER ROW */}
           <TouchableOpacity
             style={styles.samsungBackRow}
             onPress={onBack}
@@ -192,15 +220,41 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
           >
             <ChevronLeft size={22} color="#1E293B" strokeWidth={2.4} style={{ marginRight: 4 }} />
             <Text style={styles.samsungBackText}>
-              {supportTicketTarget === 'thewhite'
-                ? getLabel('helpdesk.theWhiteSupportTicket', 'TheWhite Uygulama Destek Bileti', 'TheWhite App Support Ticket')
-                : supportTicketTarget === 'global_admin'
-                ? getLabel('helpdesk.globalAdminSupportTicket', 'Kurum Yöneticisi Destek Bileti', 'Global Admin Support Ticket')
-                : getLabel('helpdesk.newTicket', 'Yeni Destek Bileti', 'New Support Ticket')}
+              {isCreatingDiscussion
+                ? (language === 'en' ? 'Start a new discussion' : 'Yeni bir tartışma başlat')
+                : (language === 'en' ? 'Create a new ticket' : 'Yeni bir bilet oluştur')}
             </Text>
           </TouchableOpacity>
 
           <View style={styles.composeCardFluid}>
+            {/* PANEL HEADER ROW WITH HEADPHONES ICON (SAME AS ENTRANCE SCREEN) */}
+            <View style={styles.panelHeaderRow}>
+              <View style={styles.sectionTitleContainer}>
+                <View style={styles.titleIconBox}>
+                  <HeadphoneChatIcon size={28} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={styles.sectionTitleText} numberOfLines={1}>
+                    {isAdmin ? 'WhiteDesk Admin' : 'WhiteDesk'}
+                  </Text>
+                  <Text style={styles.sectionSubtitleText} numberOfLines={1}>
+                    {isAdmin 
+                      ? (isFounder ? 'TheWhite Root Licensing & Multi-Tenant' : (enterpriseName || 'Kurumsal Destek Masası'))
+                      : (enterpriseName || 'Destek ve Operasyon Merkezi')}
+                  </Text>
+                </View>
+              </View>
+
+              {/* BİLET KARTININ SAĞ ÜST KÖŞESİ: 3 NOKTA MENÜSÜ */}
+              <TouchableOpacity
+                style={styles.composeMoreBtn}
+                onPress={() => setIsMenuModalVisible(true)}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MoreVertical size={18} color="#64748B" strokeWidth={2.2} />
+              </TouchableOpacity>
+            </View>
             {/* Category Selector (Horizontal Scroll) */}
             <View style={styles.composeFieldGroup}>
               <Text style={styles.composeFieldLabel}>
@@ -224,7 +278,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.categoryScrollContainer}
                 >
-                  {(availableCategories.length > 0 ? availableCategories : INWHITE_CATEGORIES).map((cat) => {
+                  {availableCategories.map((cat) => {
                     const isSelected = composeCategory === cat.id;
                     const catLabel = language === 'tr' ? cat.labelTr : cat.labelEn;
                     return (
@@ -282,14 +336,30 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Custom Enterprise Fields Section (if configured by tenant) */}
             {customFields && customFields.length > 0 && (
               <View style={styles.customFieldsSection}>
-                <View style={styles.customFieldsHeaderRow}>
-                  <Tag size={13} color="#2563EB" style={{ marginRight: 6 }} />
-                  <Text style={styles.customFieldsSectionTitle}>
-                    {getLabel('helpdesk.customFieldsTitle', 'KAYIT / CİHAZ BİLGİLERİ', 'RECORD / DEVICE DETAILS')}
-                  </Text>
-                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.customFieldsHeaderRow,
+                    { justifyContent: 'space-between', marginBottom: isCustomFieldsExpanded ? 10 : 0 }
+                  ]}
+                  onPress={() => setIsCustomFieldsExpanded(prev => !prev)}
+                  activeOpacity={0.7}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <Tag size={13} color="#2563EB" style={{ marginRight: 6 }} />
+                    <Text style={styles.customFieldsSectionTitle}>
+                      {getLabel('helpdesk.customFieldsTitle', 'Ek Bilgi', 'Additional Info')}
+                    </Text>
+                  </View>
+                  {isCustomFieldsExpanded ? (
+                    <ChevronUp size={16} color="#64748B" strokeWidth={2.4} />
+                  ) : (
+                    <ChevronDown size={16} color="#64748B" strokeWidth={2.4} />
+                  )}
+                </TouchableOpacity>
 
-                {customFields.map((field) => {
+                {isCustomFieldsExpanded && (
+                  <View style={{ marginTop: 4 }}>
+                    {customFields.map((field) => {
                   const currentValue = customFieldValues?.[field.key] || '';
                   const suggestions = activeFieldKey === field.key ? getCatalogSuggestions(field, currentValue) : [];
                   const hasSuggestions = suggestions.length > 0;
@@ -383,6 +453,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                     </View>
                   );
                 })}
+                  </View>
+                )}
               </View>
             )}
 
@@ -452,31 +524,49 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               )}
             </View>
 
-            {/* Attachment Preview if selected */}
-            {attachedFile && (
-              <View style={styles.attachPreviewBarFluid}>
-                {attachedFile.type === 'image' ? (
-                  <Image
-                    source={{ uri: `data:image/jpeg;base64,${attachedFile.data}` }}
-                    style={styles.attachThumb}
-                  />
-                ) : (
-                  <View style={styles.attachDocIconBox}>
-                    <FileText size={18} color="#3B82F6" />
-                  </View>
-                )}
-                <Text style={styles.attachFileName} numberOfLines={1}>
-                  {attachedFile.name}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setAttachedFile(null)}
-                  style={styles.attachRemoveBtn}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            {/* Attachment Preview if selected (Multiple Support) */}
+            {(() => {
+              const effectiveAttachedFiles = attachedFiles.length > 0 ? attachedFiles : (attachedFile ? [attachedFile] : []);
+              if (effectiveAttachedFiles.length === 0) return null;
+              return (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingBottom: 6 }}
                 >
-                  <X size={16} color="#94a3b8" />
-                </TouchableOpacity>
-              </View>
-            )}
+                  {effectiveAttachedFiles.map((file, fIdx) => (
+                    <View key={`compose_att_${fIdx}`} style={styles.attachPreviewBarFluid}>
+                      {file.type === 'image' && file.data ? (
+                        <Image
+                          source={{ uri: file.data.startsWith('data:') ? file.data : `data:image/jpeg;base64,${file.data}` }}
+                          style={styles.attachThumb}
+                        />
+                      ) : (
+                        <View style={styles.attachDocIconBox}>
+                          <FileText size={18} color="#3B82F6" />
+                        </View>
+                      )}
+                      <Text style={styles.attachFileName} numberOfLines={1}>
+                        {file.name}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (onRemoveAttachedFile) {
+                            onRemoveAttachedFile(fIdx);
+                          } else {
+                            setAttachedFile(null);
+                          }
+                        }}
+                        style={styles.attachRemoveBtn}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <X size={16} color="#94a3b8" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              );
+            })()}
 
             {/* Attachment Selection Row */}
             <View style={styles.composeAttachRowFluid}>
@@ -505,8 +595,45 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                 >
                   <FileText size={16} color="#64748B" />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.attachMiniBtn,
+                    attachDiagnostics && styles.attachMiniBtnActiveDiag,
+                  ]}
+                  onPress={() => setIsDiagConsentModalVisible(true)}
+                  activeOpacity={0.7}
+                >
+                  <Cpu
+                    size={16}
+                    color={attachDiagnostics ? '#15803D' : '#64748B'}
+                  />
+                  {attachDiagnostics && <View style={styles.attachActiveDot} />}
+                </TouchableOpacity>
               </View>
             </View>
+
+            {attachDiagnostics && (
+              <View style={styles.diagNoticeBox}>
+                <Activity size={13} color="#15803D" style={{ marginRight: 6 }} />
+                <Text style={styles.diagNoticeText}>
+                  {language === 'tr'
+                    ? '⚡ Sistem tanısı şifreli olarak bu bilete eklenecek.'
+                    : '⚡ System diagnostic will be encrypted into this ticket.'}
+                </Text>
+              </View>
+            )}
+
+            {/* PII Redaction Live Protection Badge */}
+            {hasPiiDetected && (
+              <View style={styles.piiShieldBadge}>
+                <ShieldCheck size={14} color="#059669" strokeWidth={2.5} style={{ marginRight: 6 }} />
+                <Text style={styles.piiShieldText}>
+                  {language === 'tr'
+                    ? '🛡️ Hassas bilgileriniz (kart/kimlik/IBAN) cihazınızda otomatik olarak koruma altına alındı.'
+                    : '🛡️ Sensitive data (cards/IDs/IBANs) protected on-device.'}
+                </Text>
+              </View>
+            )}
 
             {/* Submit Button */}
             <TouchableOpacity
@@ -532,6 +659,174 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {/* 3 NOKTA MENÜSÜ DROPDOWN MODALI */}
+      <Modal
+        visible={isMenuModalVisible}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setIsMenuModalVisible(false)}
+      >
+        <View style={styles.dropdownOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFillObject}
+            activeOpacity={1}
+            onPress={() => setIsMenuModalVisible(false)}
+          />
+          <View style={[styles.dropdownPopupContainer, { top: safeTop + 54 }]}>
+            {/* 1. Sistem Tanısı Ekle / Kaldır */}
+            <TouchableOpacity
+              style={styles.dropdownMenuItem}
+              onPress={() => {
+                setIsMenuModalVisible(false);
+                if (setAttachDiagnostics) {
+                  setAttachDiagnostics(!attachDiagnostics);
+                }
+              }}
+              activeOpacity={0.65}
+            >
+              <Cpu size={16} color={attachDiagnostics ? '#15803D' : '#4A5568'} strokeWidth={2} style={styles.dropdownMenuIcon} />
+              <Text style={[styles.dropdownMenuText, attachDiagnostics && { color: '#15803D', fontWeight: '600' }]}>
+                {attachDiagnostics
+                  ? (language === 'tr' ? 'Sistem Tanısını Kaldır' : 'Remove System Diag')
+                  : (language === 'tr' ? 'Sistem Tanısı Ekle' : 'Add System Diag')}
+              </Text>
+              {attachDiagnostics && <Check size={15} color="#15803D" strokeWidth={2.5} style={{ marginLeft: 'auto' }} />}
+            </TouchableOpacity>
+
+            <View style={styles.dropdownDivider} />
+
+            {/* 2. Resim Ekle */}
+            <TouchableOpacity
+              style={styles.dropdownMenuItem}
+              onPress={() => {
+                setIsMenuModalVisible(false);
+                onPickGallery();
+              }}
+              activeOpacity={0.65}
+            >
+              <ImageIcon size={16} color="#4A5568" strokeWidth={2} style={styles.dropdownMenuIcon} />
+              <Text style={styles.dropdownMenuText}>
+                {language === 'tr' ? 'Resim Ekle' : 'Add Image'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* 3. Belge Ekle */}
+            <TouchableOpacity
+              style={styles.dropdownMenuItem}
+              onPress={() => {
+                setIsMenuModalVisible(false);
+                onPickDocument();
+              }}
+              activeOpacity={0.65}
+            >
+              <FileText size={16} color="#4A5568" strokeWidth={2} style={styles.dropdownMenuIcon} />
+              <Text style={styles.dropdownMenuText}>
+                {language === 'tr' ? 'Belge Ekle' : 'Add Document'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ÇARK İKONUNA BASILINCA AÇILAN SİSTEM TANISI BİLGİLENDİRME VE ONAY MODALI */}
+      <Modal
+        visible={isDiagConsentModalVisible}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={() => setIsDiagConsentModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setIsDiagConsentModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.modalOptionIconBox, { backgroundColor: 'rgba(37, 99, 235, 0.1)', marginRight: 10 }]}>
+                  <Cpu size={20} color="#2563EB" />
+                </View>
+                <View>
+                  <Text style={styles.modalTitle}>
+                    {language === 'tr' ? 'Sistem Tanısı' : 'System Diagnostics'}
+                  </Text>
+                  <Text style={styles.modalSubtitle}>
+                    {language === 'tr' ? 'Tanı Verisi ve Güvenlik Bilgilendirmesi' : 'Diagnostic Data & Privacy Notice'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsDiagConsentModalVisible(false)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <X size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Bilgilendirme Kutusu */}
+            <View style={styles.diagConsentInfoBox}>
+              <Text style={styles.diagConsentText}>
+                {language === 'tr'
+                  ? 'Sistem tanısı; uygulamanın son ekran geçişlerini, ağ istek durumlarını ve cihaz model parametrelerini biletinize şifreli olarak ekler.'
+                  : 'System diagnostics attaches encrypted screen transitions, network status, and device model telemetry to your ticket.'}
+              </Text>
+              <View style={{ marginTop: 8, gap: 4 }}>
+                <Text style={styles.diagConsentBullet}>
+                  {language === 'tr'
+                    ? '🛡️ Sıfır Kişisel Veri: Şifreler, kimlik numaraları ve kart bilgileri cihazınızda otomatik olarak maskelenir.'
+                    : '🛡️ Zero Personal Data: Passwords, ID numbers, and card numbers are masked on-device.'}
+                </Text>
+                <Text style={styles.diagConsentBullet}>
+                  {language === 'tr'
+                    ? '🔒 Uçtan Uca Şifreli: Yalnızca yetkili destek yöneticisi tarafından incelenebilir.'
+                    : '🔒 End-to-End Encrypted: Inspectable only by authorized support.'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Durum Göstergesi */}
+            <View style={[styles.diagStatusBanner, attachDiagnostics ? styles.diagStatusBannerActive : styles.diagStatusBannerInactive]}>
+              <Text style={[styles.diagStatusBannerText, attachDiagnostics ? styles.diagStatusBannerTextActive : styles.diagStatusBannerTextInactive]}>
+                {attachDiagnostics
+                  ? (language === 'tr' ? '✓ Sistem tanısı şu anda biletinize iliştirilmiş durumda.' : '✓ System diagnostics is currently attached to ticket.')
+                  : (language === 'tr' ? '○ Sistem tanısı henüz iliştirilmedi.' : '○ System diagnostics is not attached.')}
+              </Text>
+            </View>
+
+            {/* Onay Butonları */}
+            <TouchableOpacity
+              style={[styles.modalPrimaryBtn, attachDiagnostics && { backgroundColor: '#DC2626' }]}
+              onPress={() => {
+                if (setAttachDiagnostics) {
+                  setAttachDiagnostics(!attachDiagnostics);
+                }
+                setIsDiagConsentModalVisible(false);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalPrimaryBtnText}>
+                {attachDiagnostics
+                  ? (language === 'tr' ? 'Sistem Tanısını Kaldır' : 'Remove Diagnostics')
+                  : (language === 'tr' ? 'Onayla ve Ekle' : 'Confirm & Add')}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalCancelBtn}
+              onPress={() => setIsDiagConsentModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.modalCancelBtnText}>
+                {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 };
@@ -591,6 +886,45 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 20,
     elevation: 3,
+  },
+  panelHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  sectionTitleContainer: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  panelHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  titleIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  sectionTitleText: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  sectionSubtitleText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#94A3B8',
   },
   composeFieldGroup: {
     marginBottom: 16,
@@ -706,6 +1040,74 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  composeDiagBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  composeMoreBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  composeDiagBtnActive: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  composeDiagBtnText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  composeDiagBtnTextActive: {
+    color: '#15803D',
+    fontWeight: '700',
+  },
+  diagNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
+  },
+  diagNoticeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#15803D',
+    flex: 1,
+  },
+  piiShieldBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginBottom: 12,
+  },
+  piiShieldText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#065F46',
+    flex: 1,
+    lineHeight: 16,
   },
   fluidSubmitBtn: {
     backgroundColor: '#94A3B8',
@@ -883,5 +1285,179 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     lineHeight: 17,
     paddingTop: 2,
+  },
+  composeTopHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+    marginBottom: 8,
+  },
+  attachMiniBtnActiveDiag: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  attachActiveDot: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#15803D',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 22,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  dropdownOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  dropdownPopupContainer: {
+    position: 'absolute',
+    right: 16,
+    width: 240,
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  dropdownMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10.5,
+    paddingHorizontal: 14,
+    marginHorizontal: 4,
+    marginVertical: 1.5,
+    borderRadius: 14,
+  },
+  dropdownMenuIcon: {
+    marginRight: 14,
+  },
+  dropdownMenuText: {
+    fontSize: 14.5,
+    color: '#1E293B',
+    fontWeight: '400',
+    letterSpacing: -0.1,
+  },
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginHorizontal: 12,
+    marginVertical: 4,
+  },
+  modalOptionIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  diagConsentInfoBox: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+  },
+  diagConsentText: {
+    fontSize: 13,
+    color: '#334155',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  diagConsentBullet: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 17,
+  },
+  diagStatusBanner: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginBottom: 14,
+    alignItems: 'center',
+  },
+  diagStatusBannerActive: {
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  diagStatusBannerInactive: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  diagStatusBannerText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  diagStatusBannerTextActive: {
+    color: '#15803D',
+  },
+  diagStatusBannerTextInactive: {
+    color: '#64748B',
+  },
+  modalPrimaryBtn: {
+    backgroundColor: '#2563EB',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalPrimaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  modalCancelBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalCancelBtnText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -1,0 +1,77 @@
+{
+  "settings": {
+    "advanced_features": {
+      "menu_title": "Gelişmiş Özellikler",
+      "page_description": "Kuruluşunuz için gelişmiş güvenlik, iletişim ve yaşam döngüsü kurallarını yapılandırın.",
+      "section_communication": "İletişim Kanalları",
+      "voice_call": {
+        "title": "Uçtan Uca Şifreli Sesli Arama",
+        "description": "Talepler içinde yöneticiler ve kullanıcılar arasında doğrudan WebRTC tabanlı şifreli sesli görüşmeye izin ver.",
+        "rule_label": "Erişim Kuralı",
+        "opt_mutual": "Yalnızca Karşılıklı Onayla",
+        "opt_always": "Her Zaman İzin Ver (VIP)",
+        "opt_disabled": "Devre Dışı"
+      },
+      "ptt": {
+        "title": "Canlı Telsiz (Bas-Konuş)",
+        "description": "Operasyonel birimlerde bilet içi anlık şifreli ses patlamaları ile hızlı telsiz iletişimini etkinleştir.",
+        "allowed_orgs_label": "Yetkili Birimler / Departmanlar"
+      },
+      "radio": {
+        "title": "Kurumsal Telsiz Yayını & Saha Frekansları",
+        "description": "Departmanlar ve operasyonel saha grupları arasında genel telsiz yayını ve ortak kanal dinlemeyi yönetin.",
+        "allowed_channels_label": "Telsiz Yayını Açık Olan Birimler / Kanallar",
+        "user_permission_title": "Kullanıcı & Saha Personeli Telsiz Yayını",
+        "user_permission_desc": "Yetkili personelin bağlı olduğu kanal frekansında genel anons ve telsiz yayını yapmasına izin ver."
+      },
+      "section_lifecycle": "Talep Güvenliği ve Yaşam Döngüsü",
+      "closure": {
+        "title": "Bilet Kapama & Çözüm Teyit Politikası",
+        "description": "Bilet kapatılmadan önce kullanıcıdan çözüm onayı istenmesini ve otomatik kapanma sürelerini denetler.",
+        "require_user_title": "Kullanıcı Çözüm Onayı Zorunlu",
+        "require_user_desc": "Operatör çözüldü dese bile kullanıcı 'Evet, çözüldü' diyene kadar bilet açık kalır.",
+        "auto_close_title": "Kullanıcı Yanıt Vermezse Otomatik Kapat",
+        "auto_close_desc": "Çözüm bildirimi sonrası kullanıcı onay veya itiraz vermezse bilet bu sürede kapanır."
+      },
+      "self_destruct": {
+        "title": "Kendini İmha Eden Talepler",
+        "description": "Çözülen taleplerin şifreleme anahtarlarını cihazlardan otomatik temizle.",
+        "timer_label": "İmha Zamanlayıcısı",
+        "opt_24h": "Çözümden 24 Saat Sonra",
+        "opt_72h": "Çözümden 72 Saat Sonra (Önerilen)",
+        "opt_7d": "Çözümden 7 Gün Sonra",
+        "opt_never": "Yalnızca Elle Temizle"
+      },
+      "rating": {
+        "title": "Operatör Değerlendirme & Yıldız Puanlama",
+        "description": "Bilet kapandıktan sonra kullanıcının operatör hizmetini 1-5 yıldız ve geri bildirimle değerlendirmesini yönetin.",
+        "instant_title": "Beklemeden Anında Değerlendirme İzni",
+        "instant_desc": "Kullanıcının soğuma süresi beklemeden hemen yıldız ve yorum vermesini sağlar."
+      },
+      "escalation": {
+        "title": "Tırmanan Talepler",
+        "description": "Belirlenen sürede yanıtlanmayan kriz taleplerini otomatik olarak üst makama tırmandır.",
+        "sla_label": "Cevapsız kalma durumunda tırmanma süresi (Saat)"
+      },
+      "proof_of_integrity": {
+        "title": "Değişmezlik İspatı (Kriptografik Makbuz)",
+        "description": "Kapanan her talep için iki tarafın cihazında karşılıklı doğrulanabilir matematiksel kapanış özeti üret.",
+        "auto_download_label": "Talep kapandığında Değişmezlik Makbuzunu otomatik indir (.json)"
+      },
+      "user_preferences": {
+        "title": "Gelişmiş Tercihler",
+        "subtitle": "Sesli arama, telsiz ve makbuz indirme tercihleri",
+        "voice_label": "Sesli Aramaları Etkinleştir",
+        "voice_desc": "Gelen sesli görüşme el sıkışma bildirimlerini kabul et",
+        "ptt_label": "Canlı Telsiz (Bas-Konuş) Etkin",
+        "ptt_desc": "Bilet içi hızlı sesli telsiz özelliğini kullan",
+        "receipt_label": "Makbuzu Otomatik İndir",
+        "receipt_desc": "Kapanan talepler için değişmezlik makbuzunu cihaza kaydet"
+      },
+      "actions": {
+        "save": "Ayarları Kaydet",
+        "saved_success": "Gelişmiş özellikler başarıyla güncellendi."
+      }
+    }
+  }
+}

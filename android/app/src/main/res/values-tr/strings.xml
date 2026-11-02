@@ -1,0 +1,6 @@
+<resources>
+  <string name="app_name">WhiteDesk</string>
+  <string name="call_notification_answer_action">Katıl</string>
+  <string name="call_notification_decline_action">Kapat</string>
+  <string name="call_notification_hang_up_action">Kapat</string>
+</resources>

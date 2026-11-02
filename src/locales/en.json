@@ -862,5 +862,87 @@
     "feat2": "Sovereign WhiteMail & Encrypted Attachments",
     "feat3": "Multi-Tier Anti-Censorship Tunnels (TLS / HTTP3)",
     "feat4": "Hardware Secure Vault Storage & Zero Telemetry"
+  },
+  "auth": {
+    "hub": {
+      "title": "WhiteDesk",
+      "subtitle": "Serverless, locally end-to-end encrypted corporate helpdesk with zero personal data collection.",
+      "enter_workspace": "Sign In with 12-Word Recovery Phrase",
+      "create_tenant": "Create New Organization",
+      "access_key_login": "Sign In with Access Key",
+      "lost_passphrase": "Forgot your recovery phrase? Sign in with access key"
+    },
+    "login": {
+      "title": "Sign In with 12-Word Recovery Phrase",
+      "subtitle": "Enter your 12-word recovery passphrase to access your account.",
+      "input_placeholder": "Enter your 12-word recovery passphrase...",
+      "action_btn": "Verify & Enter Session",
+      "back_btn": "Go Back",
+      "error_word_count": "Please enter exactly 12 words.",
+      "error_invalid": "The words entered do not form a valid recovery phrase."
+    },
+    "genesis": {
+      "step1_title": "Create New Organization",
+      "step1_subtitle": "Define initial information for your organization and workspace.",
+      "tenant_name_label": "Organization / Company Name",
+      "tenant_name_placeholder": "e.g., ACME Corp.",
+      "workspace_name_label": "Workspace Name",
+      "workspace_name_placeholder": "e.g., Support & Operations Center",
+      "next_btn": "Next",
+      "back_btn": "Cancel",
+      "error_required": "Please fill in all required fields."
+    },
+    "customization": {
+      "title": "Organization Logo & Custom Fields",
+      "subtitle": "You can add logo and custom ticket fields now or skip. You can change these anytime in Settings.",
+      "skip_header_link": "Do It Later ➔",
+      "skip_button": "Skip This Step (Configure Later in Settings)",
+      "save_button": "Save & Continue",
+      "defer_notice": "Notice: You can add or update your logo and custom fields anytime in the Settings section.",
+      "logo_section": {
+        "title": "Organization Logo (Optional)",
+        "dropzone": "Drag logo here or select file",
+        "format_hint": "SVG, PNG or WEBP (Max 2MB)",
+        "logo_selected": "Logo selected"
+      },
+      "fields_section": {
+        "title": "Ticket Custom Fields (Optional)",
+        "description": "Additional information you want customers to provide when creating tickets.",
+        "placeholder_example": "e.g., Device Model, Serial Number",
+        "add_button": "Add New Field",
+        "empty_state": "No custom fields added yet. You may skip this step."
+      }
+    },
+    "ceremony": {
+      "title": "Security Key Setup",
+      "subtitle": "Your data is only encrypted on this device. The 12-word recovery phrase below is your organization's sole key. It is never stored on servers.",
+      "warning": "These 12 words are never stored on servers. If lost, they cannot be recovered. Please store them securely.",
+      "copy": "Copy to Clipboard",
+      "copied": "Copied",
+      "verify_title": "12-Word Verification",
+      "verify_subtitle": "To confirm you have backed up your recovery phrase, please enter the requested words below:",
+      "verify_prompt": ". enter word:",
+      "verify_action": "Verify & Launch Organization",
+      "challenge_error": "Entered words do not match. Please verify."
+    },
+    "genesis_success": {
+      "title": "Organization Created Successfully",
+      "subtitle": "Your end-to-end encrypted, serverless, secure helpdesk is ready for use.",
+      "trial_badge": "14-Day Free Trial",
+      "trial_body": "1 Administrator Access Key and 10 User Access Keys have been generated locally on your device for the trial.",
+      "download_btn": "Download / Share Access Keys",
+      "copy_btn": "Copy All Access Keys",
+      "notice": "Important: These access keys are generated solely on this device and are never stored in plaintext on servers.",
+      "go_dashboard": "Enter Admin Desk"
+    },
+    "recovery": {
+      "title": "Sign In with Access Key",
+      "description": "Enter the access key provided by your administrator or organization. Your role and workspace will be detected automatically.",
+      "input_placeholder": "Paste your access key...",
+      "verify_btn": "Enter Session",
+      "back_btn": "Back to Login",
+      "error_length": "Invalid access key length.",
+      "error_invalid": "Access key could not be verified. Please check and try again."
+    }
   }
 }

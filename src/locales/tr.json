@@ -862,5 +862,275 @@
     "feat2": "Sovereign WhiteMail ve Güvenli Dosya İletimi",
     "feat3": "Çok Katmanlı Sansür Direnci (TLS / HTTP3)",
     "feat4": "Donanım Kasa Güvenliği ve Sıfır Metaveri"
+  },
+  "auth": {
+    "hub": {
+      "title": "WhiteDesk",
+      "subtitle": "Sunucusuz, uçtan uca lokalde şifrelenen ve hiçbir kişisel veri barındırmayan kurumsal destek masası.",
+      "enter_workspace": "12 Kelimelik Kurtarma İfadesi ile Giriş",
+      "create_tenant": "Yeni Kuruluş Oluştur",
+      "access_key_login": "Erişim Anahtarı ile Giriş",
+      "lost_passphrase": "Kurtarma ifadenizi mi unuttunuz? Erişim anahtarı ile giriş yapın"
+    },
+    "login": {
+      "title": "12 Kelimelik Kurtarma İfadesi ile Giriş",
+      "subtitle": "Hesabınıza erişmek için 12 kelimelik kurtarma ifadenizi (passphrase) giriniz.",
+      "input_placeholder": "12 kelimelik kurtarma ifadenizi giriniz...",
+      "action_btn": "Doğrula ve Oturuma Gir",
+      "back_btn": "Geri Dön",
+      "error_word_count": "Lütfen tam olarak 12 kelime giriniz.",
+      "error_invalid": "Girdiğiniz kelimeler geçerli bir kurtarma ifadesi oluşturmuyor."
+    },
+    "genesis": {
+      "step1_title": "Yeni Kuruluş Oluştur",
+      "step1_subtitle": "Kuruluşunuz ve çalışma alanınız için temel tanımlamaları yapınız.",
+      "tenant_name_label": "Kuruluş / Şirket Adı",
+      "tenant_name_placeholder": "Örn: ACME Bilişim A.Ş.",
+      "workspace_name_label": "Çalışma Alanı Adı",
+      "workspace_name_placeholder": "Örn: Destek ve Operasyon Merkezi",
+      "next_btn": "İleri",
+      "back_btn": "Vazgeç",
+      "error_required": "Lütfen tüm zorunlu alanları doldurunuz."
+    },
+    "customization": {
+      "title": "Kuruluş Logosu ve Özel Alanlar",
+      "subtitle": "Destek biletlerinizde yer alacak alanları ve logonuzu şimdi ekleyebilir veya doğrudan geçebilirsiniz. Bu tercihleri daha sonra 'Ayarlar' bölümünden dilediğiniz an değiştirebilirsiniz.",
+      "skip_header_link": "Daha Sonra Yap ➔",
+      "skip_button": "Bu Adımı Atla (Daha Sonra Ayarlardan Yap)",
+      "save_button": "Kaydet ve Devam Et",
+      "defer_notice": "Bilgi: Logo ve özel alan tanımlarını dilediğiniz zaman Ayarlar bölümünden ekleyebilir veya güncelleyebilirsiniz.",
+      "logo_section": {
+        "title": "Kuruluş Logosu (İsteğe Bağlı)",
+        "dropzone": "Logoyu buraya sürükleyin veya dosya seçin",
+        "format_hint": "SVG, PNG veya WEBP (En fazla 2MB)",
+        "logo_selected": "Logo seçildi"
+      },
+      "fields_section": {
+        "title": "Bilet Takip Alanları (İsteğe Bağlı)",
+        "description": "Müşterilerinizin destek talebi açarken doldurmasını istediğiniz ek bilgiler.",
+        "placeholder_example": "Örn: Cihaz Modeli, Seri Numarası",
+        "add_button": "Yeni Özel Alan Ekle",
+        "empty_state": "Henüz özel alan eklenmedi. Bu adımı atlayabilirsiniz."
+      }
+    },
+    "ceremony": {
+      "title": "Güvenlik Anahtarı Kurulumu",
+      "subtitle": "Verileriniz yalnızca bu cihazda şifrelenir. Aşağıdaki 12 kelimelik kurtarma ifadesi kuruluşunuzun tek anahtarıdır. Bu anahtar sunucularda saklanmaz.",
+      "warning": "Bu 12 kelime sunucularda saklanmaz. Kaybedilirse geri getirilemez. Lütfen güvenli bir yere not ediniz.",
+      "copy": "Panoya Kopyala",
+      "copied": "Kopyalandı",
+      "verify_title": "12 Kelime Doğrulama",
+      "verify_subtitle": "Güvenlik kelimelerinizi doğru not ettiğinizi onaylamak için lütfen aşağıdaki kelimeleri giriniz:",
+      "verify_prompt": ". kelimeyi giriniz:",
+      "verify_action": "Doğrula ve Kuruluşu Başlat",
+      "challenge_error": "Girdiğiniz kelimeler eşleşmiyor. Lütfen kontrol ediniz."
+    },
+    "genesis_success": {
+      "title": "Kuruluş Başarıyla Oluşturuldu",
+      "subtitle": "Uçtan uca şifreli, sunucusuz ve güvenli kurumsal destek masanız kullanıma hazır.",
+      "trial_badge": "14 Günlük Ücretsiz Deneme Sürümü",
+      "trial_body": "Deneme süresi boyunca kullanabileceğiniz 1 Yönetici Erişim Anahtarı ve 10 Kullanıcı Erişim Anahtarı cihazınızda yerel olarak üretilmiştir.",
+      "download_btn": "Erişim Anahtarlarını İndir / Paylaş",
+      "copy_btn": "Tüm Erişim Anahtarlarını Kopyala",
+      "notice": "Önemli: Bu erişim anahtarları yalnızca bu cihazda üretilmiştir ve sunucuda açık halde saklanmaz.",
+      "go_dashboard": "Yönetici Masasına Giriş Yap"
+    },
+    "recovery": {
+      "title": "Erişim Anahtarı ile Giriş",
+      "description": "Yöneticiniz veya kuruluşunuz tarafından sağlanan erişim anahtarınızı (yönetici veya kullanıcı anahtarı) giriniz. Rolünüz ve kuruluşunuz otomatik olarak tanınacaktır.",
+      "input_placeholder": "Erişim anahtarınızı yapıştırın...",
+      "verify_btn": "Oturuma Gir",
+      "back_btn": "Giriş Ekranına Dön",
+      "error_length": "Erişim anahtarı geçersiz uzunlukta.",
+      "error_invalid": "Erişim anahtarı doğrulanamadı. Lütfen kontrol ediniz."
+    }
+  },
+  "integration": {
+    "title": "SDK Entegrasyonları",
+    "company_label": "Firma",
+    "org_label": "Organizasyon",
+    "org_all": "Tüm Organizasyonlar",
+    "app_name_label": "Uygulama Adı",
+    "app_name_placeholder": "Uygulama adını giriniz...",
+    "generate_key_btn": "SDK Köprü Anahtarı Oluştur",
+    "key_label": "SDK Köprü Anahtarı",
+    "copy_btn": "Kopyala",
+    "copied_toast": "SDK köprü anahtarı panoya kopyalandı",
+    "code_label": "Başlatma Kodu",
+    "code_copied_toast": "Başlatma kodu kopyalandı",
+    "revoke_title": "Entegrasyonu Kaldır",
+    "revoke_btn": "Entegrasyonu Kaldır",
+    "revoke_confirm_title": "Entegrasyon İptali Onayı",
+    "revoke_confirm_desc": "Bu uygulamanın SDK köprü anahtarı ve WhiteDesk bağlantısı kalıcı olarak iptal edilecektir. Onaylıyor musunuz?",
+    "revoke_confirm_action": "Entegrasyonu Kalıcı Olarak Kaldır",
+    "revoke_success_toast": "Uygulama entegrasyonu başarıyla kaldırıldı"
+  },
+  "provisioning": {
+    "title": "Provizyon Konsolu",
+    "company_row": "Firma",
+    "admins_row": "Yönetici",
+    "admin_self": "Siz",
+    "orgs_row": "Organizasyon",
+    "apps_row": "Uygulama",
+    "cats_row": "Kategori",
+    "save_btn": "Kaydet",
+    "saved_toast": "Değişiklikler kaydedildi",
+    "action_delete": "Sil",
+    "action_assign": "Ata",
+    "action_move": "Taşı",
+    "action_revoke_integration": "Entegrasyonu Kaldır",
+    "move_to_org": "Organizasyona Taşı",
+    "move_to_app": "Uygulamaya Taşı",
+    "move_to_company": "Firmaya Taşı",
+    "confirm_delete_title": "Silme Onayı",
+    "confirm_delete_msg": "Bu öğeyi silmek istediğinize emin misiniz?",
+    "add_org_title": "Yeni Organizasyon",
+    "add_app_title": "Yeni Uygulama",
+    "add_cat_title": "Yeni Kategori",
+    "add_admin_title": "Yeni Yönetici",
+    "input_name_placeholder": "Ad giriniz...",
+    "cancel_btn": "Vazgeç",
+    "add_btn": "Ekle"
+  },
+  "settings": {
+    "advanced_features": {
+      "menu_title": "Gelişmiş Özellikler",
+      "page_description": "Kuruluşunuz için gelişmiş güvenlik, iletişim ve yaşam döngüsü kurallarını yapılandırın.",
+      "section_communication": "İletişim Kanalları",
+      "voice_call": {
+        "title": "Uçtan Uca Şifreli Sesli Arama",
+        "description": "Talepler içinde yöneticiler ve kullanıcılar arasında doğrudan WebRTC tabanlı şifreli sesli görüşmeye izin ver.",
+        "rule_label": "Erişim Kuralı",
+        "opt_mutual": "Yalnızca Karşılıklı Onayla",
+        "opt_always": "Her Zaman İzin Ver (VIP)",
+        "opt_disabled": "Devre Dışı"
+      },
+      "ptt": {
+        "title": "Canlı Telsiz (Bas-Konuş)",
+        "description": "Operasyonel birimlerde bilet içi anlık şifreli ses patlamaları ile hızlı telsiz iletişimini etkinleştir.",
+        "allowed_orgs_label": "Yetkili Birimler / Departmanlar"
+      },
+      "radio": {
+        "title": "Kurumsal Telsiz Yayını & Saha Frekansları",
+        "description": "Departmanlar ve operasyonel saha grupları arasında genel telsiz yayını ve ortak kanal dinlemeyi yönetin.",
+        "allowed_channels_label": "Telsiz Yayını Açık Olan Birimler / Kanallar",
+        "user_permission_title": "Kullanıcı & Saha Personeli Telsiz Yayını",
+        "user_permission_desc": "Yetkili personelin bağlı olduğu kanal frekansında genel anons ve telsiz yayını yapmasına izin ver."
+      },
+      "section_lifecycle": "Talep Güvenliği ve Yaşam Döngüsü",
+      "closure": {
+        "title": "Bilet Kapama & Çözüm Teyit Politikası",
+        "description": "Bilet kapatılmadan önce kullanıcıdan çözüm onayı istenmesini ve otomatik kapanma sürelerini denetler.",
+        "require_user_title": "Kullanıcı Çözüm Onayı Zorunlu",
+        "require_user_desc": "Operatör çözüldü dese bile kullanıcı 'Evet, çözüldü' diyene kadar bilet açık kalır.",
+        "auto_close_title": "Kullanıcı Yanıt Vermezse Otomatik Kapat",
+        "auto_close_desc": "Çözüm bildirimi sonrası kullanıcı onay veya itiraz vermezse bilet bu sürede kapanır."
+      },
+      "self_destruct": {
+        "title": "Kendini İmha Eden Talepler",
+        "description": "Çözülen taleplerin şifreleme anahtarlarını cihazlardan otomatik temizle.",
+        "timer_label": "İmha Zamanlayıcısı",
+        "opt_24h": "Çözümden 24 Saat Sonra",
+        "opt_72h": "Çözümden 72 Saat Sonra (Önerilen)",
+        "opt_7d": "Çözümden 7 Gün Sonra",
+        "opt_never": "Yalnızca Elle Temizle"
+      },
+      "rating": {
+        "title": "Operatör Değerlendirme & Yıldız Puanlama",
+        "description": "Bilet kapandıktan sonra kullanıcının operatör hizmetini 1-5 yıldız ve geri bildirimle değerlendirmesini yönetin.",
+        "instant_title": "Beklemeden Anında Değerlendirme İzni",
+        "instant_desc": "Kullanıcının soğuma süresi beklemeden hemen yıldız ve yorum vermesini sağlar."
+      },
+      "escalation": {
+        "title": "Tırmanan Talepler",
+        "description": "Belirlenen sürede yanıtlanmayan kriz taleplerini otomatik olarak üst makama tırmandır.",
+        "sla_label": "Cevapsız kalma durumunda tırmanma süresi (Saat)"
+      },
+      "proof_of_integrity": {
+        "title": "Değişmezlik İspatı (Kriptografik Makbuz)",
+        "description": "Kapanan her talep için iki tarafın cihazında karşılıklı doğrulanabilir matematiksel kapanış özeti üret.",
+        "auto_download_label": "Talep kapandığında Değişmezlik Makbuzunu otomatik indir (.json)"
+      },
+      "user_preferences": {
+        "title": "Gelişmiş Tercihler",
+        "subtitle": "Sesli arama, telsiz ve makbuz indirme tercihleri",
+        "voice_label": "Sesli Aramaları Etkinleştir",
+        "voice_desc": "Gelen sesli görüşme el sıkışma bildirimlerini kabul et",
+        "ptt_label": "Canlı Telsiz (Bas-Konuş) Etkin",
+        "ptt_desc": "Bilet içi hızlı sesli telsiz özelliğini kullan",
+        "receipt_label": "Makbuzu Otomatik İndir",
+        "receipt_desc": "Kapanan talepler için değişmezlik makbuzunu cihaza kaydet"
+      },
+      "actions": {
+        "save": "Ayarları Kaydet",
+        "saved_success": "Gelişmiş özellikler başarıyla güncellendi."
+      }
+    }
+  },
+  "ticket": {
+    "resolution_check": {
+      "notice": "Talebinizle ilgili gerekli çözüm sağlandı mı? Sürecinize uygun seçeneği belirleyerek devam edebilirsiniz.",
+      "reminder_notice": "Talebinizle ilgili çözüm sağlanabildi mi? Süreci tamamlamak veya devam etmek için bir seçenek belirleyiniz.",
+      "auto_closed_notice": "Talebiniz belirlenen süre boyunca işlem yapılmadığı için otomatik olarak kapatılmıştır.",
+      "action_close": "Talebi Kapat",
+      "action_ask": "Soru Sor"
+    },
+    "feedback": {
+      "title": "Destek Deneyiminizi Değerlendirin",
+      "subtitle": "Görüştüğünüz yöneticinin sunduğu desteği değerlendiriniz.",
+      "scale_min": "Yetersiz",
+      "scale_max": "Mükemmel",
+      "comment_placeholder": "Kısa bir not iletebilirsiniz (isteğe bağlı)...",
+      "submit_btn": "Değerlendirmeyi Gönder ve Kapat"
+    },
+    "admin_ratings": {
+      "menu_title": "Yönetici Değerlendirmeleri",
+      "console_title": "Yönetici Değerlendirmeleri",
+      "kpi_average": "Genel Memnuniyet Ortalaması",
+      "kpi_total": "Toplam Değerlendirme",
+      "kpi_active": "Aktif Yönetici",
+      "kpi_total_tickets": "Toplam Talep",
+      "gauge_title": "Memnuniyet Endeksi",
+      "gauge_status_excellent": "Mükemmel",
+      "gauge_status_good": "Yüksek",
+      "gauge_status_average": "Dengeli",
+      "gauge_status_low": "Geliştirilmeli",
+      "ticket_ratio_title": "Talep Durumu Dağılımı",
+      "open_tickets": "Açık",
+      "closed_tickets": "Kapatılan",
+      "score_distribution_title": "İşlem Başarı Oranları",
+      "score_high": "Başarılı (4-5)",
+      "score_neutral": "Nötr (3)",
+      "score_low": "Düşük (1-2)",
+      "col_admin": "Yönetici",
+      "col_org": "Organizasyon",
+      "col_resolved": "Çözülen",
+      "col_score": "Ortalama Puan",
+      "col_success_rate": "Başarı Oranı",
+      "col_latest_notes": "Son Notlar",
+      "col_status": "Durum",
+      "status_active": "Aktif",
+      "no_notes": "Henüz yazılı not iletilmedi",
+      "close": "Kapat"
+    },
+    "call_handshake": {
+      "title": "Uçtan Uca Şifreli Sesli Arama",
+      "offer_message": "Yönetici sizinle uçtan uca şifreli doğrudan sesli görüşme başlatmak istiyor.",
+      "accept": "Kabul Et",
+      "reject": "Reddet",
+      "calling": "Aranıyor...",
+      "connecting": "Bağlanıyor..."
+    },
+    "ptt": {
+      "recording": "Telsiz Yayını Kaydediliyor...",
+      "max_burst": "En fazla 15 saniye",
+      "sending": "Şifreleniyor ve İletiliyor..."
+    },
+    "integrity_receipt": {
+      "badge": "Değişmezlik Makbuzu",
+      "verified": "Kriptografik Olarak Doğrulandı",
+      "download": "Makbuzu İndir (.json)",
+      "saved": "Değişmezlik makbuzu cihazınıza indirildi."
+    }
   }
 }

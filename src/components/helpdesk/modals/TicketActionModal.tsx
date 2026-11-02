@@ -5,27 +5,38 @@ import {
   Text,
   TouchableOpacity,
   Modal,
+  Dimensions,
 } from 'react-native';
 import {
   Trash2,
+  Activity,
   LogOut,
   UserPlus,
   Sparkles,
   ShieldCheck,
+  Leaf,
+  RotateCcw,
+  Star,
+  Layers,
+  Cpu,
+  ArrowRight,
   X,
+  Database,
 } from 'lucide-react-native';
-import { HelpDeskTicket } from '../../../services/helpDeskService';
+import { HelpDeskTicket, helpDeskService } from '../../../services/helpDeskService';
+import { checkTicketHasDiagnostics } from '../utils/helpdeskFormatters';
 
-interface TicketActionModalProps {
+export interface TicketActionModalProps {
   visible: boolean;
   onClose: () => void;
   ticket: HelpDeskTicket | null;
   ownWhiteId: string;
   adminRole: 'founder' | 'global_admin' | 'admin' | 'none';
+  isAdmin?: boolean;
   isMasterAdmin: boolean;
   isFounder: boolean;
   targetActionRole: 'founder' | 'global_admin' | 'admin' | 'none';
-  getRank: (role: string) => number;
+  getRank: (role: any) => number;
   language: string;
   getLabel: (key: string, tr: string, en: string) => string;
   formatWhiteId: (id: string) => string;
@@ -35,6 +46,19 @@ interface TicketActionModalProps {
   onPromoteTicketUserToCosmos: () => void;
   onBlockTicketUser: () => void;
   onDeleteTicketAndUser: () => void;
+  onStartSelfDestruct?: (ticket?: any) => void;
+  onCancelSelfDestruct?: (ticket?: any) => void;
+  onOpenRating?: () => void;
+  onOpenOrgAssign?: () => void;
+  onInspectDiagnostics?: (ticket?: any) => void;
+  onAttachDiagnostics?: (ticket?: any) => void;
+  onDeleteDiagnostics?: (ticket?: any) => void;
+  onStartTransfer?: (ticket?: any) => void;
+  onCancelTransfer?: (ticket?: any) => void;
+  onTakeOverTicket?: (ticket: HelpDeskTicket) => void;
+  messages?: any[] | null;
+  safeTop?: number;
+  anchorY?: number | null;
 }
 
 export const TicketActionModal: React.FC<TicketActionModalProps> = ({
@@ -43,6 +67,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
   ticket,
   ownWhiteId,
   adminRole,
+  isAdmin = false,
   isMasterAdmin,
   isFounder,
   targetActionRole,
@@ -56,11 +81,37 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
   onPromoteTicketUserToCosmos,
   onBlockTicketUser,
   onDeleteTicketAndUser,
+  onStartSelfDestruct,
+  onCancelSelfDestruct,
+  onOpenRating,
+  onOpenOrgAssign,
+  onInspectDiagnostics,
+  onAttachDiagnostics,
+  onDeleteDiagnostics,
+  onStartTransfer,
+  onCancelTransfer,
+  onTakeOverTicket,
+  messages = null,
+  safeTop = 44,
+  anchorY = null,
 }) => {
   if (!ticket) return null;
 
   const targetId = ticket.user_white_id || ticket.user_blind_id || '';
   const isNotMe = targetId !== ownWhiteId;
+  const selfDestructInfo = helpDeskService.getTicketSelfDestructInfo(ticket);
+  const lifecycle = helpDeskService.getTicketLifecycleStatus(ticket);
+  const hasDiag = checkTicketHasDiagnostics(ticket, messages);
+
+  const { height: screenHeight } = Dimensions.get('window');
+  const shouldOpenUpwards = anchorY !== null && anchorY !== undefined && anchorY > screenHeight * 0.58;
+
+  const dynamicPopupStyle = (anchorY !== null && anchorY !== undefined)
+    ? (shouldOpenUpwards
+        ? { bottom: Math.max(20, screenHeight - anchorY + 4), right: 16 }
+        : { top: Math.max(safeTop + 8, anchorY + 4), right: 16 }
+      )
+    : { top: safeTop + 54, right: 16 };
 
   return (
     <Modal
@@ -70,148 +121,289 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
       statusBarTranslucent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.attachModalOverlay}>
+      <View style={styles.overlay}>
         <TouchableOpacity
-          style={StyleSheet.absoluteFill}
+          style={StyleSheet.absoluteFillObject}
           activeOpacity={1}
           onPress={onClose}
         />
-        <View style={[styles.attachModalContainer, { maxWidth: 440 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <View>
-              <Text style={styles.attachModalTitle}>
-                {language === 'tr' ? 'Kullanıcı & Bilet Yönetimi' : 'User & Ticket Governance'}
+        <View style={[styles.popupContainer, dynamicPopupStyle]}>
+          {/* 1. Sistem Tanısı Aksiyonları */}
+          {hasDiag ? (
+            <>
+              {onInspectDiagnostics && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    onClose();
+                    onInspectDiagnostics(ticket);
+                  }}
+                  activeOpacity={0.65}
+                >
+                  <Activity size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+                  <Text style={styles.menuText}>
+                    {language === 'tr' ? 'Sistem Tanısını İncele' : 'Inspect Diagnostic'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {onDeleteDiagnostics && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    onClose();
+                    onDeleteDiagnostics(ticket);
+                  }}
+                  activeOpacity={0.65}
+                >
+                  <Trash2 size={16} color="#DC2626" strokeWidth={2} style={styles.menuIcon} />
+                  <Text style={[styles.menuText, { color: '#DC2626' }]}>
+                    {language === 'tr' ? 'Sistem Tanısını Sil' : 'Delete Diagnostic'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            onAttachDiagnostics && (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  onClose();
+                  onAttachDiagnostics(ticket);
+                }}
+                activeOpacity={0.65}
+              >
+                <Cpu size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+                <Text style={styles.menuText}>
+                  {language === 'tr' ? 'Sistem Tanısı Ekle' : 'Add Diagnostic'}
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+
+          {/* 2. Hizmet Kalitesini Değerlendir */}
+          {!isAdmin && onOpenRating && (lifecycle.stage === 'closed_cooling' || lifecycle.stage === 'rating_pending') && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onOpenRating();
+              }}
+              activeOpacity={0.65}
+            >
+              <Star size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Hizmeti Değerlendir' : 'Rate Support'}
               </Text>
-              <Text style={styles.attachModalSubtitle}>
-                #{ticket.id} · {formatWhiteId(targetId)}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <X size={18} color="#94A3B8" />
             </TouchableOpacity>
-          </View>
+          )}
 
-          {/* Option 1: Delete Ticket */}
-          <TouchableOpacity
-            style={styles.ticketActionOptionBtn}
-            onPress={onDeleteSingleTicket}
-            activeOpacity={0.7}
-          >
-            <Trash2 size={20} color="#DC2626" style={styles.ticketActionOptionIcon} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.ticketActionOptionTitle, { color: '#DC2626' }]}>
-                {language === 'tr' ? 'Bileti Sil' : 'Delete Ticket'}
+          {/* 3. Birim / Uygulama Düzenle */}
+          {(isAdmin || getRank(adminRole) >= 1) && onOpenOrgAssign && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onOpenOrgAssign();
+              }}
+              activeOpacity={0.65}
+            >
+              <Layers size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Birim Düzenle' : 'Assign Unit'}
               </Text>
-              <Text style={styles.ticketActionOptionDesc}>
-                {language === 'tr' ? 'Bu destek biletini ve tüm mesajlarını kalıcı olarak siler.' : 'Permanently remove this support ticket and all messages.'}
-              </Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
 
-          {/* Option 2: Revoke Admin Privileges */}
+          {/* 3.0 Bileti Devral (Take Over) - Yalnızca Kurucu ve Global Admin için sunucuda henüz buharlaşmamış biletlerde */}
+          {(isFounder || isMasterAdmin || adminRole === 'founder' || adminRole === 'global_admin') && ticket.is_relay_pending && onTakeOverTicket && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onTakeOverTicket(ticket);
+              }}
+              activeOpacity={0.65}
+            >
+              <Database size={16} color="#DC2626" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={[styles.menuText, { color: '#DC2626', fontWeight: '700' }]}>
+                {language === 'tr' ? 'Bileti Devral' : 'Take Over'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 3.1 Bileti Devret */}
+          {(isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status !== 'pending' && onStartTransfer && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onStartTransfer(ticket);
+              }}
+              activeOpacity={0.65}
+            >
+              <ArrowRight size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Bileti Devret' : 'Hand Over'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 3.2 Devri İptal Et */}
+          {(isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status === 'pending' && onCancelTransfer && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onCancelTransfer(ticket);
+              }}
+              activeOpacity={0.65}
+            >
+              <X size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Devri İptal Et' : 'Cancel Hand Over'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 4. Dijital Temizlik (Self-Destruct) */}
+          {Boolean(selfDestructInfo.inDestruction || (ticket.auto_delete_at && Number(ticket.auto_delete_at) > 0)) ? (
+            onCancelSelfDestruct && (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  onClose();
+                  onCancelSelfDestruct(ticket);
+                }}
+                activeOpacity={0.65}
+              >
+                <RotateCcw size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+                <Text style={styles.menuText}>
+                  {language === 'tr' ? 'Silme Sürecini Durdur' : 'Stop Deletion Process'}
+                </Text>
+              </TouchableOpacity>
+            )
+          ) : (
+            onStartSelfDestruct && (
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  onClose();
+                  onStartSelfDestruct(ticket);
+                }}
+                activeOpacity={0.65}
+              >
+                <Leaf size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+                <Text style={styles.menuText}>
+                  {language === 'tr' ? 'Silme Sürecini Başlat' : 'Start Deletion Process'}
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+
+          {/* 5. Yönetici Yetkisi Ver */}
+          {getRank(adminRole) >= 1 && targetActionRole === 'none' && isNotMe && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onPromoteTicketUserToAdmin();
+              }}
+              activeOpacity={0.65}
+            >
+              <UserPlus size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Yönetici Yetkisi Ver' : 'Grant Admin Privileges'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 6. Kiracı Global Yöneticisi Ata */}
+          {(isFounder || (adminRole === 'global_admin' && targetActionRole === 'admin')) && targetActionRole !== 'founder' && targetActionRole !== 'global_admin' && isNotMe && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onPromoteTicketUserToCosmos();
+              }}
+              activeOpacity={0.65}
+            >
+              <Sparkles size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Kiracı Global Yöneticisi Ata' : 'Assign Global Admin'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Divider Before Danger Actions */}
+          <View style={styles.divider} />
+
+          {/* 7. Yöneticilik Yetkisini İptal Et */}
           {isNotMe && targetActionRole !== 'none' && getRank(adminRole) > getRank(targetActionRole) && (
             <TouchableOpacity
-              style={styles.ticketActionOptionBtn}
-              onPress={onRevokeUserAdmin}
-              activeOpacity={0.7}
+              style={[styles.menuItem, styles.menuItemWipe]}
+              onPress={() => {
+                onClose();
+                onRevokeUserAdmin();
+              }}
+              activeOpacity={0.65}
             >
-              <LogOut size={20} color="#EF4444" style={styles.ticketActionOptionIcon} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.ticketActionOptionTitle, { color: '#EF4444' }]}>
-                  {language === 'tr' ? 'Yöneticilik Yetkisini İptal Et' : 'Revoke Admin Authority'}
-                </Text>
-                <Text style={styles.ticketActionOptionDesc}>
-                  {language === 'tr' ? 'Kullanıcının yöneticilik yetkisini ve tüm yetkilendirmelerini iptal eder.' : 'Revoke admin privileges and all allocations.'}
-                </Text>
-              </View>
+              <LogOut size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={[styles.menuText, styles.menuTextWipe]}>
+                {language === 'tr' ? 'Yöneticilik Yetkisini İptal Et' : 'Revoke Admin Authority'}
+              </Text>
             </TouchableOpacity>
           )}
 
-          {/* Option 3: Promote to Admin */}
-          {isMasterAdmin && targetActionRole === 'none' && isNotMe && (
-            <TouchableOpacity
-              style={styles.ticketActionOptionBtn}
-              onPress={onPromoteTicketUserToAdmin}
-              activeOpacity={0.7}
-            >
-              <UserPlus size={20} color="#3B82F6" style={styles.ticketActionOptionIcon} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.ticketActionOptionTitle}>
-                  {language === 'tr' ? 'Yönetici Yetkisi Ver (Admin Yap)' : 'Grant Admin Privileges'}
-                </Text>
-                <Text style={styles.ticketActionOptionDesc}>
-                  {language === 'tr' ? 'Kullanıcıyı kategori ve uygulama destek yöneticisi yapar.' : 'Assign user to manage app/category support tickets.'}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-
-          {/* Option 4: Promote to Global Admin (Founder Only) */}
-          {isFounder && targetActionRole !== 'founder' && targetActionRole !== 'global_admin' && isNotMe && (
-            <TouchableOpacity
-              style={styles.ticketActionOptionBtn}
-              onPress={onPromoteTicketUserToCosmos}
-              activeOpacity={0.7}
-            >
-              <Sparkles size={20} color="#7C3AED" style={styles.ticketActionOptionIcon} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.ticketActionOptionTitle, { color: '#7C3AED' }]}>
-                  {language === 'tr' ? 'Kiracı Global Admini (WhiteCosmos *) Ata' : 'Assign WhiteCosmos (Global Admin *)'}
-                </Text>
-                <Text style={styles.ticketActionOptionDesc}>
-                  {language === 'tr' ? 'Bu kiracının tek ve yetkili WhiteCosmos Global Yöneticisi yapar.' : 'Promote this user to the sole WhiteCosmos Global Admin.'}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-
-          {/* Option 5: Block User */}
+          {/* 8. Kullanıcıyı Engelle */}
           {isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
             <TouchableOpacity
-              style={styles.ticketActionOptionBtn}
-              onPress={onBlockTicketUser}
-              activeOpacity={0.7}
+              style={[styles.menuItem, styles.menuItemWipe]}
+              onPress={() => {
+                onClose();
+                onBlockTicketUser();
+              }}
+              activeOpacity={0.65}
             >
-              <ShieldCheck size={20} color="#D97706" style={styles.ticketActionOptionIcon} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.ticketActionOptionTitle, { color: '#D97706' }]}>
-                  {language === 'tr' ? 'Kullanıcıyı Engelle' : 'Block User'}
-                </Text>
-                <Text style={styles.ticketActionOptionDesc}>
-                  {language === 'tr' ? 'Kullanıcının sisteme bilet açmasını engeller.' : 'Prevent user from opening further support tickets.'}
-                </Text>
-              </View>
+              <ShieldCheck size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={[styles.menuText, styles.menuTextWipe]}>
+                {language === 'tr' ? 'Kullanıcıyı Engelle' : 'Block User'}
+              </Text>
             </TouchableOpacity>
           )}
 
-          {/* Option 6: Delete User & Ticket */}
+          {/* 9. Bileti Sil */}
+          {(isAdmin || !isNotMe) && (
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemWipe]}
+              onPress={() => {
+                onClose();
+                onDeleteSingleTicket();
+              }}
+              activeOpacity={0.65}
+            >
+              <Trash2 size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={[styles.menuText, styles.menuTextWipe]}>
+                {language === 'tr' ? 'Bileti Sil' : 'Delete Ticket'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 10. Bileti ve Kullanıcıyı Sil (Master Admin) */}
           {isMasterAdmin && isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
             <TouchableOpacity
-              style={styles.ticketActionOptionBtn}
-              onPress={onDeleteTicketAndUser}
-              activeOpacity={0.7}
+              style={[styles.menuItem, styles.menuItemWipe]}
+              onPress={() => {
+                onClose();
+                onDeleteTicketAndUser();
+              }}
+              activeOpacity={0.65}
             >
-              <Trash2 size={20} color="#DC2626" style={styles.ticketActionOptionIcon} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.ticketActionOptionTitle, { color: '#DC2626' }]}>
-                  {language === 'tr' ? 'Bileti ve Kullanıcıyı Sil' : 'Delete User & Ticket'}
-                </Text>
-                <Text style={styles.ticketActionOptionDesc}>
-                  {language === 'tr' ? 'Kullanıcı bağlamasını ve destek biletini kalıcı olarak siler.' : 'Permanently remove user binding and support ticket.'}
-                </Text>
-              </View>
+              <Trash2 size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={[styles.menuText, styles.menuTextWipe]}>
+                {language === 'tr' ? 'Bileti ve Kullanıcıyı Sil' : 'Delete User & Ticket'}
+              </Text>
             </TouchableOpacity>
           )}
-
-          <TouchableOpacity
-            style={[styles.attachCancelBtn, { marginTop: 8 }]}
-            onPress={onClose}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.attachCancelText}>
-              {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -219,64 +411,55 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  attachModalOverlay: {
+  overlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
-  attachModalContainer: {
-    backgroundColor: '#FFFFFF',
+  popupContainer: {
+    position: 'absolute',
+    right: 16,
+    width: 252,
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
     borderRadius: 24,
-    padding: 20,
-    width: '100%',
-    shadowColor: '#000000',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 30,
-    elevation: 20,
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 10,
   },
-  attachModalTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  attachModalSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  ticketActionOptionBtn: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  ticketActionOptionIcon: {
-    marginRight: 12,
-  },
-  ticketActionOptionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 2,
-  },
-  ticketActionOptionDesc: {
-    fontSize: 11,
-    color: '#64748B',
-    lineHeight: 16,
-  },
-  attachCancelBtn: {
-    backgroundColor: '#F1F5F9',
+    paddingVertical: 10.5,
+    paddingHorizontal: 14,
+    marginHorizontal: 4,
+    marginVertical: 1.5,
     borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
   },
-  attachCancelText: {
-    fontSize: 13,
+  menuIcon: {
+    marginRight: 15,
+  },
+  menuText: {
+    fontSize: 14.5,
+    color: '#1E293B',
+    fontWeight: '400',
+    letterSpacing: -0.1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginHorizontal: 12,
+    marginVertical: 5,
+  },
+  menuItemWipe: {
+    backgroundColor: '#FEF2F2',
+  },
+  menuTextWipe: {
+    color: '#EF4444',
     fontWeight: '600',
-    color: '#64748B',
   },
 });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { StatusBar } from 'react-native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nProvider } from './src/services/i18nService';
@@ -11,53 +11,68 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import UserGuideScreen from './src/screens/UserGuideScreen';
 import TenantSetupScreen from './src/screens/TenantSetupScreen';
+import UnifiedAuthScreen from './src/screens/auth/UnifiedAuthScreen';
+import { NotificationService } from './src/services/notificationService';
+import { voiceCallService } from './src/services/voiceCallService';
 
 const Stack = createStackNavigator();
+export const navigationRef = createNavigationContainerRef<any>();
 
 function AppContent() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [initialRoute, setInitialRoute] = useState<'HelpDesk' | 'Welcome' | 'Register'>('HelpDesk');
-
   useEffect(() => {
     async function checkAuth() {
       try {
-        const [isRegistered, storedId] = await Promise.all([
-          CryptoService.checkRegistrationStatus(),
-          CryptoService.getWhiteId(),
+        const [initialCall, isRegistered, storedId] = await Promise.all([
+          NotificationService.getInitialCallIntent().catch(() => null),
+          CryptoService.checkRegistrationStatus().catch(() => false),
+          CryptoService.getWhiteId().catch(() => null),
         ]);
+
+        if (initialCall?.ticketId || initialCall?.callerWhiteId) {
+          console.warn('[APP] Instant cold start incoming call detected:', initialCall);
+          const autoAnswer = initialCall?.callAction === 'answer';
+          if (initialCall?.callAction === 'reject') {
+            void voiceCallService.rejectCallRequest();
+          } else {
+            voiceCallService.presentIncomingCallFromPush(initialCall, storedId || '', autoAnswer);
+          }
+          if (storedId) void NotificationService.init(storedId);
+          return;
+        }
+
         if (isRegistered && storedId) {
-          setInitialRoute('HelpDesk');
+          void NotificationService.init(storedId);
         } else {
-          setInitialRoute('Register');
+          // Kayıtlı değilse sessizce Register ekranına yönlendir
+          if (navigationRef.isReady()) {
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: 'Register' }],
+            });
+          }
         }
       } catch (err) {
         console.error('[WhiteDesk Auth Check]', err);
-        setInitialRoute('Register');
-      } finally {
-        setIsLoading(false);
+        if (navigationRef.isReady()) {
+          navigationRef.reset({
+            index: 0,
+            routes: [{ name: 'Register' }],
+          });
+        }
       }
     }
     checkAuth();
   }, []);
 
-  if (isLoading) {
-    return (
-      <View style={styles.splashContainer}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F4F7FA" translucent />
-        <Text style={styles.splashLogo}>WhiteDesk</Text>
-        <ActivityIndicator size="small" color="#3B82F6" style={{ marginTop: 16 }} />
-      </View>
-    );
-  }
-
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator initialRouteName="HelpDesk" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="HelpDesk" component={HelpDeskScreen} />
+        <Stack.Screen name="Auth" component={UnifiedAuthScreen} />
+        <Stack.Screen name="Register" component={UnifiedAuthScreen} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="UserGuide" component={UserGuideScreen} />
         <Stack.Screen name="TenantSetup" component={TenantSetupScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="HelpDesk" component={HelpDeskScreen} />
         <Stack.Screen 
           name="WhiteDeskScanner" 
           component={WhiteDeskScannerScreen} 
@@ -79,18 +94,3 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  splashContainer: {
-    flex: 1,
-    backgroundColor: '#F4F7FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  splashLogo: {
-    fontSize: 56,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -1.5,
-    fontFamily: 'Arial Black',
-  },
-});

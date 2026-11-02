@@ -11,7 +11,7 @@ import {
   hexToBytes,
   concatBytes,
 } from '@noble/ciphers/utils.js';
-import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
+import { generateMnemonic, entropyToMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 
 const SECURE_STORE_KEYS = {
@@ -85,10 +85,16 @@ export const CryptoService = {
 
   /**
    * Cryptographically secure 12-word BIP39 mnemonic.
-   * 128-bit entropy + 4-bit checksum from the full 2048-word English list.
+   * 128-bit entropy (16 bytes) + 4-bit checksum from the full 2048-word English list.
    */
   generateMnemonic(): string {
-    return generateMnemonic(wordlist, 128);
+    try {
+      const entropy = new Uint8Array(16);
+      Crypto.getRandomValues(entropy);
+      return entropyToMnemonic(entropy, wordlist);
+    } catch {
+      return generateMnemonic(wordlist, 128);
+    }
   },
 
   /**
@@ -215,8 +221,8 @@ export const CryptoService = {
   },
 
   /**
-   * Short, deterministic Agora channel name derived from both identities.
-   * Agora channel names must stay well under 64 bytes, so we hash the sorted
+   * Short, deterministic WebRTC room name derived from both identities.
+   * Room names must stay well under 64 bytes, so we hash the sorted
    * public keys rather than concatenating the 66-char keys directly.
    */
   async deriveRoomName(peerWhiteId: string): Promise<string> {
@@ -246,7 +252,7 @@ export const CryptoService = {
   },
 
   /**
-   * 32-byte KDF salt derived deterministically from call secret for Agora C++ hardware encryption:
+   * 32-byte KDF salt derived deterministically from call secret for native C++ WebRTC hardware encryption:
    *   sha256( callSecretBytes || "kdf_salt" )
    */
   deriveKdfSalt(callSecretHex: string): number[] {
@@ -321,5 +327,109 @@ export const CryptoService = {
     const aadBytes = aad ? utf8ToBytes(aad) : undefined;
     const cipher = managedNonce(gcm)(key, aadBytes);
     return cipher.decrypt(data);
+  },
+
+  /* ------------------------------------------------------------------ */
+  /* Merkle Root & Digital Signatures (Proof of Integrity)              */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * Calculates the 256-bit Merkle Root Hash from an array of message hashes.
+   */
+  calculateMerkleRoot(hashes: string[]): string {
+    if (!hashes || hashes.length === 0) {
+      return toHex(sha256(utf8ToBytes('empty_ticket')));
+    }
+    let currentLevel = hashes.map(h => fromHex(h.replace(/^0x/i, '')));
+
+    while (currentLevel.length > 1) {
+      const nextLevel: Uint8Array[] = [];
+      for (let i = 0; i < currentLevel.length; i += 2) {
+        if (i + 1 < currentLevel.length) {
+          nextLevel.push(sha256(concatBytes(currentLevel[i], currentLevel[i + 1])));
+        } else {
+          // Odd number of leaves: duplicate the last hash
+          nextLevel.push(sha256(concatBytes(currentLevel[i], currentLevel[i])));
+        }
+      }
+      currentLevel = nextLevel;
+    }
+    return toHex(currentLevel[0]);
+  },
+
+  /**
+   * Signs a string or hex digest with the device's P-256 private key.
+   */
+  async signData(data: string): Promise<string> {
+    let privHex = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PRIVATE_KEY);
+    if (!privHex) {
+      await this.ensureKeyPair();
+      privHex = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PRIVATE_KEY);
+    }
+    const priv = fromHex(privHex!);
+    const msgBytes = utf8ToBytes(data);
+    const msgHash = sha256(msgBytes);
+    const sig = p256.sign(msgHash, priv);
+    return toHex(sig);
+  },
+
+  /**
+   * Verifies a P-256 signature against data and public key.
+   */
+  verifySignature(data: string, sigHex: string, publicKeyHex: string): boolean {
+    try {
+      const msgHash = sha256(utf8ToBytes(data));
+      const sigBytes = fromHex(sigHex);
+      const pubBytes = fromHex(publicKeyHex);
+      return p256.verify(sigBytes, msgHash, pubBytes);
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * Generates a cryptographic Proof of Integrity receipt for a resolved ticket.
+   */
+  async generateProofOfIntegrityReceipt(params: {
+    ticketId: string;
+    tenantBlindId: string;
+    clientBlindId: string;
+    messageHashes: string[];
+    adminSig?: string;
+  }): Promise<{ receiptJson: string; receiptObject: any }> {
+    const merkleRoot = this.calculateMerkleRoot(params.messageHashes);
+    const resolvedAt = new Date().toISOString();
+    const clientSig = await this.signData(merkleRoot);
+    const receiptId = `rec_${params.ticketId.substring(0, 8)}_${Date.now().toString(36)}`;
+
+    const receiptObject = {
+      receiptId,
+      ticketId: params.ticketId,
+      tenantBlindId: params.tenantBlindId,
+      clientBlindId: params.clientBlindId,
+      resolvedAt,
+      merkleRoot,
+      signatures: {
+        adminSig: params.adminSig || clientSig,
+        clientSig,
+      },
+    };
+
+    return {
+      receiptJson: JSON.stringify(receiptObject, null, 2),
+      receiptObject,
+    };
+  },
+
+  /**
+   * Permanently destroys the ticket's session key in local secure storage.
+   */
+  async destroyTicketSessionKey(ticketId: string): Promise<void> {
+    try {
+      await SafeSecureStore.deleteItemAsync(`ticket_session_key_${ticketId}`);
+      await SafeSecureStore.deleteItemAsync(`ticket_chat_key_${ticketId}`);
+    } catch (e) {
+      console.warn('[CryptoService] destroyTicketSessionKey error:', e);
+    }
   },
 };

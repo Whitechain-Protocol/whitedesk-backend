@@ -1,0 +1,29 @@
+{
+  "provisioning": {
+    "title": "Provizyon Konsolu",
+    "company_row": "Firma",
+    "admins_row": "Yönetici",
+    "admin_self": "Siz",
+    "orgs_row": "Organizasyon",
+    "apps_row": "Uygulama",
+    "cats_row": "Kategori",
+    "save_btn": "Kaydet",
+    "saved_toast": "Değişiklikler kaydedildi",
+    "action_delete": "Sil",
+    "action_assign": "Ata",
+    "action_move": "Taşı",
+    "action_revoke_integration": "Entegrasyonu Kaldır",
+    "move_to_org": "Organizasyona Taşı",
+    "move_to_app": "Uygulamaya Taşı",
+    "move_to_company": "Firmaya Taşı",
+    "confirm_delete_title": "Silme Onayı",
+    "confirm_delete_msg": "Bu öğeyi silmek istediğinize emin misiniz?",
+    "add_org_title": "Yeni Organizasyon",
+    "add_app_title": "Yeni Uygulama",
+    "add_cat_title": "Yeni Kategori",
+    "add_admin_title": "Yeni Yönetici",
+    "input_name_placeholder": "Ad giriniz...",
+    "cancel_btn": "Vazgeç",
+    "add_btn": "Ekle"
+  }
+}

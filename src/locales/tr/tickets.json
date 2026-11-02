@@ -1,0 +1,68 @@
+{
+  "ticket": {
+    "resolution_check": {
+      "notice": "Talebinizle ilgili gerekli çözüm sağlandı mı? Sürecinize uygun seçeneği belirleyerek devam edebilirsiniz.",
+      "reminder_notice": "Talebinizle ilgili çözüm sağlanabildi mi? Süreci tamamlamak veya devam etmek için bir seçenek belirleyiniz.",
+      "auto_closed_notice": "Talebiniz belirlenen süre boyunca işlem yapılmadığı için otomatik olarak kapatılmıştır.",
+      "action_close": "Talebi Kapat",
+      "action_ask": "Soru Sor"
+    },
+    "feedback": {
+      "title": "Destek Deneyiminizi Değerlendirin",
+      "subtitle": "Görüştüğünüz yöneticinin sunduğu desteği değerlendiriniz.",
+      "scale_min": "Yetersiz",
+      "scale_max": "Mükemmel",
+      "comment_placeholder": "Kısa bir not iletebilirsiniz (isteğe bağlı)...",
+      "submit_btn": "Değerlendirmeyi Gönder ve Kapat"
+    },
+    "admin_ratings": {
+      "menu_title": "Yönetici Değerlendirmeleri",
+      "console_title": "Yönetici Değerlendirmeleri",
+      "kpi_average": "Genel Memnuniyet Ortalaması",
+      "kpi_total": "Toplam Değerlendirme",
+      "kpi_active": "Aktif Yönetici",
+      "kpi_total_tickets": "Toplam Talep",
+      "gauge_title": "Memnuniyet Endeksi",
+      "gauge_status_excellent": "Mükemmel",
+      "gauge_status_good": "Yüksek",
+      "gauge_status_average": "Dengeli",
+      "gauge_status_low": "Geliştirilmeli",
+      "ticket_ratio_title": "Talep Durumu Dağılımı",
+      "open_tickets": "Açık",
+      "closed_tickets": "Kapatılan",
+      "score_distribution_title": "İşlem Başarı Oranları",
+      "score_high": "Başarılı (4-5)",
+      "score_neutral": "Nötr (3)",
+      "score_low": "Düşük (1-2)",
+      "col_admin": "Yönetici",
+      "col_org": "Organizasyon",
+      "col_resolved": "Çözülen",
+      "col_score": "Ortalama Puan",
+      "col_success_rate": "Başarı Oranı",
+      "col_latest_notes": "Son Notlar",
+      "col_status": "Durum",
+      "status_active": "Aktif",
+      "no_notes": "Henüz yazılı not iletilmedi",
+      "close": "Kapat"
+    },
+    "call_handshake": {
+      "title": "Uçtan Uca Şifreli Sesli Arama",
+      "offer_message": "Yönetici sizinle uçtan uca şifreli doğrudan sesli görüşme başlatmak istiyor.",
+      "accept": "Kabul Et",
+      "reject": "Reddet",
+      "calling": "Aranıyor...",
+      "connecting": "Bağlanıyor..."
+    },
+    "ptt": {
+      "recording": "Telsiz Yayını Kaydediliyor...",
+      "max_burst": "En fazla 15 saniye",
+      "sending": "Şifreleniyor ve İletiliyor..."
+    },
+    "integrity_receipt": {
+      "badge": "Değişmezlik Makbuzu",
+      "verified": "Kriptografik Olarak Doğrulandı",
+      "download": "Makbuzu İndir (.json)",
+      "saved": "Değişmezlik makbuzu cihazınıza indirildi."
+    }
+  }
+}

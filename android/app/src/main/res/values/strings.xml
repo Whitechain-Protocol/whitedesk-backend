@@ -2,4 +2,7 @@
   <string name="app_name">WhiteDesk</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="call_notification_answer_action">Katıl</string>
+  <string name="call_notification_decline_action">Kapat</string>
+  <string name="call_notification_hang_up_action">Kapat</string>
 </resources>

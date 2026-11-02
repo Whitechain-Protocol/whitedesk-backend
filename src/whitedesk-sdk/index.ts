@@ -10,4 +10,5 @@ export * from './core/crypto';
 export * from './core/database';
 export * from './core/authority';
 export * from './core/client';
+export { diagnosticRecorder } from '../services/diagnosticRecorder';
 export { default as helpdeskLang } from './locales/helpdeskLang.json';
