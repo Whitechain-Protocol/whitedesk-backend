@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 385 385" width="385" height="385" fill="none" stroke="#000000" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- kulaklık bandı -->
+  <path d="M34 151 A159 159 0 0 1 346 151"/>
+  <!-- kulaklıklar -->
+  <rect x="17" y="152" width="28" height="58" rx="13"/>
+  <rect x="332" y="152" width="28" height="58" rx="13"/>
+  <!-- mikrofon kolu ve mikrofon -->
+  <path d="M33.5 210 A159 159 0 0 0 172 340"/>
+  <rect x="172" y="327" width="33" height="22" rx="9"/>
+  <!-- konuşma balonu -->
+  <path d="M282.4 267 L302.9 326.9 L236.8 298.4 A125.5 125.5 0 1 1 282.4 267 Z"/>
+  <!-- üç nokta -->
+  <circle cx="129" cy="182" r="16"/>
+  <circle cx="190" cy="182" r="16"/>
+  <circle cx="251" cy="182" r="16"/>
+</svg>

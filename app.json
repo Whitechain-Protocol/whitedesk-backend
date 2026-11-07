@@ -19,7 +19,7 @@
       "package": "com.mceryilmaz.whitedesk",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F4F7FA"
+        "backgroundColor": "#001A3F"
       }
     },
     "web": {

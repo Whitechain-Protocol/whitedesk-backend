@@ -2,17 +2,16 @@ import { SafeSecureStore } from './storageService';
 import * as Crypto from 'expo-crypto';
 import { p256 } from '@noble/curves/nist.js';
 import { sha256 } from '@noble/hashes/sha2.js';
-import { gcm } from '@noble/ciphers/aes.js';
 import {
-  managedNonce,
   utf8ToBytes,
-  bytesToUtf8,
   bytesToHex,
   hexToBytes,
   concatBytes,
 } from '@noble/ciphers/utils.js';
 import { generateMnemonic, entropyToMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
+import { WhiteDeskCrypto } from '../whitedesk-sdk';
+export { WhiteDeskCrypto };
 
 const SECURE_STORE_KEYS = {
   MNEMONIC: 'inwhite_mnemonic',
@@ -25,12 +24,6 @@ const SECURE_STORE_KEYS = {
 export interface CryptoIdentity {
   mnemonic: string;
   whiteId: string;
-}
-
-export interface EncryptedPayload {
-  v: 2;
-  enc: 'aes-256-gcm';
-  ct: string; // managedNonce(gcm) output: nonce (12) || ciphertext || tag (16)
 }
 
 function toHex(bytes: Uint8Array): string {
@@ -66,7 +59,8 @@ function deriveKeyPairFromMnemonic(mnemonic: string): {
 }
 
 function whiteIdFromPublicKey(publicKey: Uint8Array): string {
-  return toHex(publicKey);
+  const cleanId = toHex(publicKey).trim().toLowerCase();
+  return WhiteDeskCrypto.generateBlindId(cleanId);
 }
 
 /**
@@ -135,7 +129,17 @@ export const CryptoService = {
   },
 
   async getWhiteId(): Promise<string | null> {
-    return await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.WHITE_ID);
+    const pub = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PUBLIC_KEY);
+    if (pub && pub.trim().length > 10) {
+      const blindId = WhiteDeskCrypto.generateBlindId(pub.trim());
+      await SafeSecureStore.setItemAsync(SECURE_STORE_KEYS.WHITE_ID, blindId);
+      return blindId;
+    }
+    const raw = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.WHITE_ID);
+    if (!raw) return null;
+    const blindId = WhiteDeskCrypto.generateBlindId(raw);
+    await SafeSecureStore.setItemAsync(SECURE_STORE_KEYS.WHITE_ID, blindId);
+    return blindId;
   },
 
   async clearAllData(): Promise<void> {
@@ -182,151 +186,6 @@ export const CryptoService = {
     if (pub) return pub;
     const generated = await this.ensureKeyPair();
     return generated.publicKeyHex;
-  },
-
-  /* ------------------------------------------------------------------ */
-  /* Shared secret + key derivation                                      */
-  /* ------------------------------------------------------------------ */
-
-  /**
-   * ECDH shared secret between our private key and the peer's public key.
-   * Since identity == public key, `peerWhiteId` is passed directly.
-   */
-  async deriveBaseKey(peerPublicKeyHex: string): Promise<Uint8Array> {
-    let privHex = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PRIVATE_KEY);
-    if (!privHex) {
-      await this.ensureKeyPair();
-      privHex = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PRIVATE_KEY);
-    }
-
-    const priv = fromHex(privHex!);
-    const peerPub = fromHex(peerPublicKeyHex);
-    const shared = p256.getSharedSecret(priv, peerPub);
-    return sha256(shared);
-  },
-
-  /**
-   * AES-256-GCM chat key for a peer:
-   *   sha256( baseKey || "chat" || conversationId )
-   * where conversationId = sorted(myPublicKey, peerPublicKey) so both sides match.
-   */
-  async deriveChatKeyHex(peerWhiteId: string): Promise<string> {
-    const myWhiteId = (await this.getWhiteId()) || '';
-    const baseKey = await this.deriveBaseKey(peerWhiteId);
-    const conversationId = [myWhiteId, peerWhiteId].sort().join('|');
-    const digest = sha256(
-      concatBytes(baseKey, utf8ToBytes('chat'), utf8ToBytes(conversationId))
-    );
-    return toHex(digest);
-  },
-
-  /**
-   * Short, deterministic WebRTC room name derived from both identities.
-   * Room names must stay well under 64 bytes, so we hash the sorted
-   * public keys rather than concatenating the 66-char keys directly.
-   */
-  async deriveRoomName(peerWhiteId: string): Promise<string> {
-    const myWhiteId = (await this.getWhiteId()) || '';
-    const conversationId = [myWhiteId, peerWhiteId].sort().join('|');
-    const digest = sha256(utf8ToBytes(conversationId));
-    return 'room_' + toHex(digest).substring(0, 20);
-  },
-
-  /**
-   * AES-256-XTS call secret for a peer + room:
-   *   sha256( baseKey || "call" || conversationId || roomName )
-   */
-  async deriveCallSecretHex(peerWhiteId: string, roomName: string): Promise<string> {
-    const myWhiteId = (await this.getWhiteId()) || '';
-    const baseKey = await this.deriveBaseKey(peerWhiteId);
-    const conversationId = [myWhiteId, peerWhiteId].sort().join('|');
-    const digest = sha256(
-      concatBytes(
-        baseKey,
-        utf8ToBytes('call'),
-        utf8ToBytes(conversationId),
-        utf8ToBytes(roomName || '')
-      )
-    );
-    return toHex(digest);
-  },
-
-  /**
-   * 32-byte KDF salt derived deterministically from call secret for native C++ WebRTC hardware encryption:
-   *   sha256( callSecretBytes || "kdf_salt" )
-   */
-  deriveKdfSalt(callSecretHex: string): number[] {
-    const secretBytes = fromHex(callSecretHex);
-    const digest = sha256(concatBytes(secretBytes, utf8ToBytes('kdf_salt')));
-    return Array.from(digest);
-  },
-
-  /**
-   * 4-byte dynamic call-stream magic header (H1..H4) for media packet header scrambling:
-   *   sha256( callSecretBytes || "magic_header" )[0..4]
-   */
-  deriveMagicHeaderHex(callSecretHex: string): string {
-    const secretBytes = fromHex(callSecretHex);
-    const digest = sha256(concatBytes(secretBytes, utf8ToBytes('magic_header')));
-    return toHex(digest.subarray(0, 4));
-  },
-
-  /* ------------------------------------------------------------------ */
-  /* AES-256-GCM                                                         */
-  /* ------------------------------------------------------------------ */
-
-  /**
-   * Encrypts UTF-8 plaintext with AES-256-GCM.
-   * `ct` contains managedNonce(gcm)'s output: nonce (12) || ciphertext || tag (16).
-   */
-  async encryptText(plaintext: string, keyHex: string, aad?: string): Promise<EncryptedPayload> {
-    const key = fromHex(keyHex);
-    const aadBytes = aad ? utf8ToBytes(aad) : undefined;
-    const cipher = managedNonce(gcm)(key, aadBytes);
-    const ct = cipher.encrypt(utf8ToBytes(plaintext));
-
-    return {
-      v: 2,
-      enc: 'aes-256-gcm',
-      ct: toHex(ct),
-    };
-  },
-
-  /**
-   * Decrypts an AES-256-GCM ciphertext produced by encryptText.
-   */
-  async decryptText(payload: EncryptedPayload, keyHex: string, aad?: string): Promise<string> {
-    if (!payload || payload.v !== 2 || payload.enc !== 'aes-256-gcm') {
-      throw new Error('Unsupported encrypted payload version');
-    }
-
-    const key = fromHex(keyHex);
-    const aadBytes = aad ? utf8ToBytes(aad) : undefined;
-    const cipher = managedNonce(gcm)(key, aadBytes);
-    const plaintext = cipher.decrypt(fromHex(payload.ct));
-    return bytesToUtf8(plaintext);
-  },
-
-  /**
-   * Encrypts raw bytes (file/media content) with AES-256-GCM.
-   * Returns nonce (12) || ciphertext || tag (16) as raw bytes — no hex/base64
-   * overhead, so media blobs stay as compact as the original file.
-   */
-  async encryptBytes(data: Uint8Array, keyHex: string, aad?: string): Promise<Uint8Array> {
-    const key = fromHex(keyHex);
-    const aadBytes = aad ? utf8ToBytes(aad) : undefined;
-    const cipher = managedNonce(gcm)(key, aadBytes);
-    return cipher.encrypt(data);
-  },
-
-  /**
-   * Decrypts raw bytes produced by encryptBytes.
-   */
-  async decryptBytes(data: Uint8Array, keyHex: string, aad?: string): Promise<Uint8Array> {
-    const key = fromHex(keyHex);
-    const aadBytes = aad ? utf8ToBytes(aad) : undefined;
-    const cipher = managedNonce(gcm)(key, aadBytes);
-    return cipher.decrypt(data);
   },
 
   /* ------------------------------------------------------------------ */

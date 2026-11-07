@@ -13,6 +13,7 @@ import {
 import { helpDeskAuthService } from './helpDeskAuthService';
 import { helpDeskRelayService } from './helpDeskRelayService';
 import { helpDeskStationService } from './helpDeskStationService';
+import { helpDeskLicenseService } from './helpDeskLicenseService';
 
 /**
  * WhiteDesk Ticket & Messaging Service:
@@ -60,8 +61,8 @@ export const helpDeskTicketService = {
         // Alt Adminler: Yalnızca kendi biletleri veya kurum biletleri (root_support ASLA görünmez!)
         filtered = allTickets.filter(t => {
           const tenantMatch = !effectiveTenant || t.enterprise_blind_id === effectiveTenant;
-          const ownTicket = (t.user_white_id && t.user_white_id.toLowerCase() === ownWhiteId.toLowerCase()) ||
-                            (t.user_blind_id && t.user_blind_id.toLowerCase() === blindId.toLowerCase());
+          const tOwnerBlind = WhiteDeskCrypto.generateBlindId(t.user_blind_id || t.user_white_id || '');
+          const ownTicket = tOwnerBlind.toLowerCase() === blindId.toLowerCase();
           const isRootSupport = t.category === 'root_support';
           return (tenantMatch || ownTicket) && !isRootSupport;
         });
@@ -69,8 +70,8 @@ export const helpDeskTicketService = {
     } else {
       // Normal Kullanıcı: SADECE kendi biletlerini görür! Tartışmaları ve root_support biletlerini ASLA göremez!
       filtered = allTickets.filter(t => {
-        const isOwn = (t.user_white_id && t.user_white_id.toLowerCase() === ownWhiteId.toLowerCase()) ||
-                      (t.user_blind_id && t.user_blind_id.toLowerCase() === blindId.toLowerCase());
+        const tOwnerBlind = WhiteDeskCrypto.generateBlindId(t.user_blind_id || t.user_white_id || '');
+        const isOwn = tOwnerBlind.toLowerCase() === blindId.toLowerCase();
         const isRootSupport = t.category === 'root_support';
         return isOwn && !t.is_discussion && !isRootSupport;
       });
@@ -121,6 +122,28 @@ export const helpDeskTicketService = {
               payloadData = JSON.parse(item.encrypted_payload);
             } catch {
               payloadData = { message: item.encrypted_payload };
+            }
+
+            // UZAK MASAÜSTÜ KONTROL PAKETLERİ: Sohbet mesajı olarak kaydedilip buharlaştırılmasın,
+            // doğrudan remoteDesktopService'e iletilsin (aksi halde onay modalı hiç açılmıyordu).
+            if (payloadData?.type === 'rd_invite_signal' || payloadData?.type === 'rd_cancel_signal') {
+              const rdTicketId = payloadData.ticket_id || item.ticket_id || cleanTicketId;
+              try {
+                const { remoteDesktopService } = require('../remoteDesktopService');
+                if (payloadData.type === 'rd_invite_signal') {
+                  void remoteDesktopService.receiveIncomingInvite(
+                    rdTicketId,
+                    payloadData.admin_alias || 'Destek Uzmanı',
+                    true
+                  );
+                } else {
+                  remoteDesktopService.dismissIncomingOffer(rdTicketId);
+                }
+              } catch (rdErr) {
+                console.warn('[HelpDeskTicketService] Remote desktop signal dispatch error:', rdErr);
+              }
+              await apiClient.confirmRelayAck(item.id, item.attachment_r2_key);
+              continue;
             }
 
             const rawMsg = payloadData.message || payloadData.initial_message || payloadData;
@@ -232,38 +255,26 @@ export const helpDeskTicketService = {
     orgId?: string
   ): Promise<string | null> {
     const ownWhiteId = await helpDeskAuthService.getOwnWhiteId();
-    const ticketId = generateTicketId();
+    const ticketId = generateTicketId(isDiscussion);
     const messageId = 'msg_' + Math.random().toString(36).substring(2, 10);
     const now = Date.now();
 
     const blindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
-    let finalEnterpriseBlindId = enterpriseBlindId;
-    if (!finalEnterpriseBlindId) {
-      const userEnt = await helpDeskAuthService.getUserEnterprise();
-      const adminEnt = await helpDeskAuthService.getAdminEnterprise();
-      finalEnterpriseBlindId = userEnt.enterpriseBlindId || adminEnt.enterpriseBlindId || undefined;
-    }
+    const [userEnt, adminEnt, localRole, customAlias] = await Promise.all([
+      helpDeskAuthService.getUserEnterprise(blindId, true),
+      helpDeskAuthService.getAdminEnterprise(blindId, true),
+      SafeSecureStore.getItemAsync('inwhite_helpdesk_admin_role'),
+      helpDeskAuthService.getCustomAlias(),
+    ]);
 
-    let userPubKey = '';
-    try {
-      const mnemonic = (await SafeSecureStore.getItemAsync('wb_secure_mnemonic')) || (await SafeSecureStore.getItemAsync('sec_mnemonic'));
-      if (mnemonic) {
-        userPubKey = WhiteDeskCrypto.deriveEd25519FromMnemonic(mnemonic).publicKeyHex;
-      }
-    } catch {}
-    if (!userPubKey) {
-      userPubKey = WhiteDeskCrypto.generateBlindId(blindId + '_pub').replace('blind_', '');
-    }
+    const finalEnterpriseBlindId = enterpriseBlindId || userEnt.enterpriseBlindId || adminEnt.enterpriseBlindId || undefined;
+    const isUserAdmin = Boolean(localRole && localRole !== 'none');
+    const senderAlias = customAlias || (isUserAdmin ? await helpDeskAuthService.getAdminAlias(blindId) : null);
+    const entName = userEnt.enterpriseName || adminEnt.enterpriseName || 'TheWhite Enterprises';
+
+    const userPubKey = WhiteDeskCrypto.generateBlindId(blindId + '_pub').replace('blind_', '');
     const ephemeral = WhiteDeskCrypto.generateEphemeralKeyPair();
     const ticketPubKey = ephemeral.publicKeyHex;
-
-    const isUserAdmin = await helpDeskAuthService.checkIfAdmin(ownWhiteId);
-    const customAlias = await helpDeskAuthService.getCustomAlias();
-    const senderAlias = customAlias || (isUserAdmin ? await helpDeskAuthService.getAdminAlias(ownWhiteId) : null);
-
-    const userEnt = await helpDeskAuthService.getUserEnterprise();
-    const adminEnt = await helpDeskAuthService.getAdminEnterprise();
-    const entName = userEnt.enterpriseName || adminEnt.enterpriseName || 'TheWhite Enterprises';
 
     const attachmentsList = attachment
       ? (attachment.type === 'multi'
@@ -275,10 +286,11 @@ export const helpDeskTicketService = {
       id: ticketId,
       enterprise_blind_id: finalEnterpriseBlindId,
       enterprise_name: entName,
-      org_id: orgId || 'default',
+      org_id: orgId || userEnt.orgId || adminEnt.orgId || 'default',
       app_id: appId,
-      user_white_id: ownWhiteId,
+      user_white_id: blindId,
       user_blind_id: blindId,
+      user_alias: senderAlias || undefined,
       user_pubkey: userPubKey,
       ticket_pubkey: ticketPubKey,
       subject,
@@ -289,6 +301,7 @@ export const helpDeskTicketService = {
       attachment_name: attachment?.name || null,
       attachment_type: attachment?.type || null,
       attachments: attachmentsList,
+      assigned_at: now,
       created_at: now,
       updated_at: now,
     };
@@ -297,7 +310,7 @@ export const helpDeskTicketService = {
       id: messageId,
       ticket_id: ticketId,
       app_id: appId,
-      sender_white_id: ownWhiteId,
+      sender_white_id: blindId,
       sender_alias: senderAlias,
       sender_blind_id: blindId,
       is_admin: isUserAdmin,
@@ -334,6 +347,18 @@ export const helpDeskTicketService = {
 
         let targetRecipientBlindId = finalEnterpriseBlindId || 'blind_thewhite_root';
         if (!isDiscussion && category !== 'root_support') {
+          // Fetch enterprise SLA from Neon Postgres (whitedesk_enterprises)
+          let tenantSlaMins = 30;
+          try {
+            const advCfg = await helpDeskLicenseService.getAdvancedFeaturesConfig(finalEnterpriseBlindId);
+            if (advCfg?.escalation?.slaMinutes && advCfg.escalation.slaMinutes > 0) {
+              tenantSlaMins = advCfg.escalation.slaMinutes;
+            } else if (advCfg?.escalation?.slaHours && advCfg.escalation.slaHours > 0) {
+              tenantSlaMins = advCfg.escalation.slaHours * 60;
+            }
+          } catch {}
+          newTicket.sla_limit_minutes = tenantSlaMins;
+
           try {
             const alloc = await apiClient.allocateTicketAdmin({
               enterprise_blind_id: finalEnterpriseBlindId || 'default',
@@ -343,17 +368,17 @@ export const helpDeskTicketService = {
             if (alloc && alloc.success && alloc.assigned_admin_blind_id && alloc.assigned_admin_blind_id !== 'unassigned') {
               targetRecipientBlindId = alloc.assigned_admin_blind_id;
               newTicket.assigned_admin_blind_id = alloc.assigned_admin_blind_id;
-              await keystoreTicketVault.upsertTicket(newTicket);
             } else {
-              const assignedAdmin = await helpDeskStationService.findBestAdminForTicket(finalEnterpriseBlindId, category);
-              if (assignedAdmin && assignedAdmin.blindId) {
-                targetRecipientBlindId = assignedAdmin.blindId;
-                newTicket.assigned_admin_blind_id = assignedAdmin.blindId;
-                await keystoreTicketVault.upsertTicket(newTicket);
-              }
+              // Online admin bulunamadı -> Bilet havuzda (Atama Bekliyor)
+              targetRecipientBlindId = finalEnterpriseBlindId || 'blind_thewhite_root';
+              newTicket.assigned_admin_blind_id = 'unassigned';
             }
+            await keystoreTicketVault.upsertTicket(newTicket);
           } catch (assignErr) {
             console.warn('[HelpDeskTicketService] load-balance assignment fallback:', assignErr);
+            targetRecipientBlindId = finalEnterpriseBlindId || 'blind_thewhite_root';
+            newTicket.assigned_admin_blind_id = 'unassigned';
+            await keystoreTicketVault.upsertTicket(newTicket);
           }
         } else if (category === 'root_support') {
           // Strictly Confidential to TheWhite Root!
@@ -412,6 +437,26 @@ export const helpDeskTicketService = {
             attachment_r2_key: attachmentR2Key,
           });
           console.log(`[HelpDeskTicketService] Ticket relay response:`, relayRes);
+
+          try {
+            let pushTargetBlindId = targetRecipientBlindId;
+            if (!pushTargetBlindId || !pushTargetBlindId.startsWith('blind_') || pushTargetBlindId === 'blind_thewhite_root') {
+              pushTargetBlindId = await helpDeskAuthService.getAdminWhiteId();
+            }
+            if (pushTargetBlindId && pushTargetBlindId.toLowerCase() !== blindId.toLowerCase()) {
+              await apiClient.sendHelpDeskPushNotification(
+                pushTargetBlindId,
+                blindId,
+                {
+                  titleTr: 'Yeni Destek Bileti',
+                  titleEn: 'New Support Ticket',
+                  bodyTr: `${senderAlias || 'Kullanıcı'}: ${subject}`,
+                  bodyEn: `${senderAlias || 'User'}: ${subject}`,
+                  ticketId,
+                }
+              );
+            }
+          } catch {}
         }
       } catch (e) {
         console.warn('[HelpDeskTicketService] createTicket relay warning:', e);
@@ -568,17 +613,17 @@ export const helpDeskTicketService = {
       id: messageId,
       ticket_id: ticketId,
       app_id: appId,
-      sender_white_id: ownWhiteId,
+      sender_white_id: blindId,
       sender_alias: senderAlias,
       sender_blind_id: blindId,
       is_admin: isAdmin,
-      sender_role: isAdmin ? ((role => (role === 'none' ? null : role))(await helpDeskAuthService.getAdminRole(ownWhiteId))) : null,
+      sender_role: isAdmin ? ((role => (role === 'none' ? null : role))(await helpDeskAuthService.getAdminRole(blindId))) : null,
       message: effectiveMessage,
       visibility_level: isWhisper ? 'whisper' : (isInternal ? 'internal' : 'customer'),
       is_whisper: isWhisper,
       whisper_target_alias: whisperTargetAlias,
       whisper_target_blind_id: whisperTargetBlindId,
-      whisper_target_white_id: whisperTargetWhiteId,
+      whisper_target_white_id: whisperTargetBlindId,
       is_internal: isInternal,
       attachment_data: attachment?.data || null,
       attachment_name: attachment?.name || null,
@@ -631,8 +676,10 @@ export const helpDeskTicketService = {
           targetBlindId = target?.enterprise_blind_id || 'blind_thewhite_root'; // Masa havuzuna gider, müşteriye asla gitmez
         } else {
           targetBlindId = isAdmin
-            ? (target?.user_blind_id || 'blind_unknown')
-            : (target?.enterprise_blind_id || 'blind_thewhite_root');
+            ? WhiteDeskCrypto.generateBlindId(target?.user_blind_id || target?.user_white_id || 'blind_unknown')
+            : (target?.assigned_admin_blind_id && target.assigned_admin_blind_id !== 'unassigned'
+                ? WhiteDeskCrypto.generateBlindId(target.assigned_admin_blind_id)
+                : (target?.enterprise_blind_id || 'blind_thewhite_root'));
         }
 
         const sanitizedAttachments = attachmentsList ? attachmentsList.map((a: any) => ({ name: a.name, type: a.type, data: '' })) : undefined;
@@ -686,8 +733,8 @@ export const helpDeskTicketService = {
           let bodyTr = "inWhite Destek'ten mesajınız var";
           let bodyEn = 'You have a message from inWhite Support';
 
-          if (isWhisper && whisperTargetWhiteId) {
-            targetWhiteId = whisperTargetWhiteId;
+          if (isWhisper && whisperTargetBlindId) {
+            targetWhiteId = WhiteDeskCrypto.generateBlindId(whisperTargetBlindId);
             titleTr = '🔒 Özel Fısıltı';
             titleEn = '🔒 Confidential Whisper';
             bodyTr = `${senderAlias || 'Bir yönetici'} size özel fısıltı gönderdi (#${ticketId})`;
@@ -695,19 +742,23 @@ export const helpDeskTicketService = {
           } else if (isInternal) {
             targetWhiteId = null; // Dahili not müşteriye push bildirimi olarak ASLA gitmez
           } else if (isAdmin) {
-            if (target && target.user_white_id) {
-              targetWhiteId = target.user_white_id.trim();
+            const rawUserTarget = target?.user_blind_id || target?.user_white_id;
+            if (rawUserTarget) {
+              targetWhiteId = WhiteDeskCrypto.generateBlindId(rawUserTarget.trim());
             }
           } else {
-            targetWhiteId = await helpDeskAuthService.getAdminWhiteId();
+            const assignedAdmin = target?.assigned_admin_blind_id;
+            targetWhiteId = (assignedAdmin && assignedAdmin !== 'unassigned')
+              ? WhiteDeskCrypto.generateBlindId(assignedAdmin)
+              : await helpDeskAuthService.getAdminWhiteId();
             bodyTr = 'inWhite Kullanıcı Mesajı';
             bodyEn = 'inWhite User Message';
           }
 
-          if (targetWhiteId && targetWhiteId.toLowerCase() !== ownWhiteId.toLowerCase()) {
+          if (targetWhiteId && targetWhiteId.toLowerCase() !== blindId.toLowerCase()) {
             await apiClient.sendHelpDeskPushNotification(
               targetWhiteId,
-              ownWhiteId,
+              blindId,
               {
                 titleTr,
                 titleEn,
@@ -763,6 +814,34 @@ export const helpDeskTicketService = {
                 resolution_note: resolutionNote,
               }),
             });
+
+            // Completion Hook: Admin bilet kapattığında havuzda bekleyen sıradaki bilet varsa otomatik olarak bu admine atanır
+            if (isAdmin && status === 'closed') {
+              try {
+                const claimRes = await apiClient.claimNextPoolTicket({
+                  enterprise_blind_id: target.enterprise_blind_id || 'default',
+                  admin_blind_id: blindId,
+                  admin_name: ownWhiteId,
+                });
+                if (claimRes && claimRes.claimed && claimRes.item) {
+                  console.log(`[HelpDeskTicketService] Auto-claimed next pool ticket upon completion: ${claimRes.ticket_id}`);
+                  try {
+                    const payload = JSON.parse(claimRes.item.encrypted_payload);
+                    if (payload.ticket) {
+                      payload.ticket.is_relay_pending = false;
+                      await keystoreTicketVault.upsertTicket(payload.ticket);
+                      if (payload.initial_message) {
+                        await keystoreTicketVault.appendMessage(payload.ticket.id, payload.initial_message);
+                      }
+                    }
+                  } catch (parseErr) {
+                    console.warn('[HelpDeskTicketService] Ingest claimed pool ticket error:', parseErr);
+                  }
+                }
+              } catch (claimErr) {
+                console.warn('[HelpDeskTicketService] Auto-claim pool error:', claimErr);
+              }
+            }
           } catch {}
         })();
       }
@@ -1563,11 +1642,11 @@ export const helpDeskTicketService = {
         id: messageId,
         ticket_id: cleanId,
         app_id: target.app_id || CURRENT_APP_ID,
-        sender_white_id: ownWhiteId,
+        sender_white_id: blindId,
         sender_alias: senderAlias,
         sender_blind_id: blindId,
         is_admin: isAdmin,
-        sender_role: isAdmin ? ((role => (role === 'none' ? null : role))(await helpDeskAuthService.getAdminRole(ownWhiteId))) : null,
+        sender_role: isAdmin ? ((role => (role === 'none' ? null : role))(await helpDeskAuthService.getAdminRole(blindId))) : null,
         message: '🛠️ Sistem tanısı eklendi (diagnostics.whitedesk)',
         attachment_data: diagFile.data,
         attachment_name: diagFile.name,
@@ -1761,7 +1840,7 @@ export const helpDeskTicketService = {
         id: 'msg_' + Math.random().toString(36).substring(2, 10),
         ticket_id: cleanId,
         app_id: target.app_id || CURRENT_APP_ID,
-        sender_white_id: ownWhiteId,
+        sender_white_id: ownBlindId,
         sender_alias: ownAlias,
         sender_blind_id: ownBlindId,
         is_admin: true,
@@ -1796,7 +1875,7 @@ export const helpDeskTicketService = {
             transfer_note: transferNote || null,
             sender_alias: ownAlias,
             sender_blind_id: ownBlindId,
-            sender_white_id: ownWhiteId,
+            sender_white_id: ownBlindId,
             target_alias: targetAdminAlias,
             target_blind_id: targetAdminBlindId,
             created_at: now,
@@ -1850,7 +1929,7 @@ export const helpDeskTicketService = {
         id: 'msg_' + Math.random().toString(36).substring(2, 10),
         ticket_id: cleanId,
         app_id: target.app_id || CURRENT_APP_ID,
-        sender_white_id: ownWhiteId,
+        sender_white_id: ownBlindId,
         sender_alias: ownAlias,
         sender_blind_id: ownBlindId,
         is_admin: true,
@@ -1915,6 +1994,7 @@ export const helpDeskTicketService = {
       target.transfer_sender_alias = null;
       target.transfer_note = null;
       target.transfer_requested_at = null;
+      target.assigned_at = now;
       target.updated_at = now;
       await keystoreTicketVault.upsertTicket(target);
 
@@ -1922,7 +2002,7 @@ export const helpDeskTicketService = {
         id: 'msg_' + Math.random().toString(36).substring(2, 10),
         ticket_id: cleanId,
         app_id: target.app_id || CURRENT_APP_ID,
-        sender_white_id: ownWhiteId,
+        sender_white_id: ownBlindId,
         sender_alias: ownAlias,
         sender_blind_id: ownBlindId,
         is_admin: true,
@@ -2035,6 +2115,11 @@ export const helpDeskTicketService = {
 
       const claimingBlindId = WhiteDeskCrypto.generateBlindId(claimingWhiteId);
       target.assigned_admin_blind_id = claimingBlindId;
+      if (claimingAlias) {
+        target.assigned_admin_name = claimingAlias;
+        target.assigned_admin_alias = claimingAlias;
+      }
+      target.assigned_at = now;
       target.updated_at = now;
       await keystoreTicketVault.upsertTicket(target);
 
@@ -2043,7 +2128,7 @@ export const helpDeskTicketService = {
         id: 'msg_claim_' + Math.random().toString(36).substring(2, 10),
         ticket_id: cleanId,
         app_id: target.app_id || 'whitedesk',
-        sender_white_id: claimingWhiteId,
+        sender_white_id: claimingBlindId,
         sender_alias: claimingAlias || 'Admin',
         sender_blind_id: claimingBlindId,
         is_admin: true,

@@ -37,10 +37,14 @@ export const WhiteDeskCrypto = {
    */
   generateBlindId(whiteId: string, salt: string = DEFAULT_SYSTEM_SALT): string {
     if (!whiteId) return '';
+    const clean = whiteId.trim().toLowerCase();
+    if (clean.startsWith('ent_')) return clean;
+    if (clean.startsWith('blind_')) return clean.replace(/^blind_/, '');
+    if (/^[0-9a-f]{60}$/.test(clean)) return clean;
     const key = utf8ToBytes(salt);
-    const data = utf8ToBytes(whiteId.trim().toLowerCase());
+    const data = utf8ToBytes(clean);
     const hash = hmac(sha256, key, data);
-    return 'blind_' + bytesToHex(hash).slice(0, 32);
+    return bytesToHex(hash).slice(0, 60);
   },
 
   /**
@@ -152,6 +156,6 @@ export const WhiteDeskCrypto = {
     if (!blindId) return '';
     const clean = blindId.replace(/^blind_/, '');
     if (clean.length <= 12) return blindId;
-    return `blind_${clean.slice(0, 6)}...${clean.slice(-4)}`;
+    return `${clean.slice(0, 6)}...${clean.slice(-4)}`;
   }
 };

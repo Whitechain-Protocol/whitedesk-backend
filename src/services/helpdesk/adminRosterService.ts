@@ -42,27 +42,25 @@ class AdminRosterService {
   }
 
   /**
-   * Initializes and starts 60-second background heartbeat loop for an admin.
-   * Also listens to app foreground events (AppState active) to evaluate break return on entry.
+   * Initializes admin roster status on entry and listens to app foreground events
+   * (AppState active) to evaluate break return on entry (0-Polling: no idle interval).
    */
   startHeartbeat(params: {
     whiteId: string;
     enterpriseBlindId: string;
     alias?: string;
   }): void {
-    this.currentWhiteId = params.whiteId;
+    this.currentWhiteId = WhiteDeskCrypto.generateBlindId(params.whiteId);
     this.currentEnterpriseBlindId = params.enterpriseBlindId;
     this.currentAlias = params.alias || '';
 
-    if (this.timer) clearInterval(this.timer);
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
 
-    // Initial heartbeat
+    // Initial heartbeat on entry
     void this.sendHeartbeat();
-
-    // 60-second periodic heartbeat
-    this.timer = setInterval(() => {
-      void this.sendHeartbeat();
-    }, 60000);
 
     // AppState listener: Admin uygulamaya giriş yaptıkça / ön plana aldıkça mola dönüşü tetiklenir!
     if (!this.appStateSubscription) {
@@ -209,10 +207,11 @@ class AdminRosterService {
         t => t.assigned_admin_blind_id === blindId && t.status === 'open'
       ).length;
 
+      const cleanName = (this.currentAlias && !this.currentAlias.startsWith('blind_')) ? this.currentAlias : '';
       const res = await apiClient.sendRosterHeartbeat({
         blind_id: blindId,
         enterprise_blind_id: this.currentEnterpriseBlindId,
-        name: this.currentAlias || this.currentWhiteId,
+        name: cleanName || undefined,
         is_active: effectiveIsActive,
         snooze_until: effectiveSnoozeUntil,
         open_tickets: openCount,

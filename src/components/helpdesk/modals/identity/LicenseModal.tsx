@@ -38,10 +38,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [selectedCycle, setSelectedCycle] = useState<'monthly' | 'annual'>('annual');
-  const [expandedPlanIds, setExpandedPlanIds] = useState<Record<string, boolean>>({
-    core: true,
-    live: true,
-  });
+  const [expandedPlanIds, setExpandedPlanIds] = useState<Record<string, boolean>>({});
 
   const togglePlanDetails = (planId: string) => {
     setExpandedPlanIds((prev) => ({
@@ -73,6 +70,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   useEffect(() => {
     if (visible) {
       setViewMode('current');
+      setExpandedPlanIds({});
       loadLicenseData();
     }
   }, [visible, loadLicenseData]);
@@ -119,29 +117,60 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
     ? 'LIVE Paketi'
     : isCore
     ? 'CORE Paketi'
-    : (language === 'tr' ? '14 Günlük Deneme Sürümü' : '14-Day Trial');
+    : (language === 'tr' ? 'Ücretsiz Deneme' : 'Free Trial');
 
   const activePlanId: 'core' | 'live' = isLive ? 'live' : 'core';
 
-  // Bütün lisanslarda birebir aynı formatta listelenen net özellik maddeleri
+  // Bütün lisanslarda birebir aynı formatta listelenen net ve mükerrersiz özellik maddeleri
   const getPlanFeatureList = (planId: 'core' | 'live') => {
     if (planId === 'live') {
-      return [
-        'Tüm CORE özellikleri dahil',
-        'WhiteDesk Masaüstü (Windows / macOS) istemcisi',
-        'Uzak masaüstü canlı ekran ve müdahale',
-        'Canlı sesli görüşme ve telsiz (PTT)',
-        'Sınırsız operatör ve istemci cihaz',
-        'Gelişmiş denetim kayıtları ve raporlar',
-      ];
+      return language === 'tr'
+        ? [
+            'Bütün temel özellikler',
+            'Uzak masaüstü',
+            'Bilet içerisinden sesli görüşme',
+            'Bilet içerisinden bas-konuş',
+            'Telsiz yayını',
+          ]
+        : [
+            'All basic features',
+            'Remote desktop',
+            'In-ticket voice calling',
+            'In-ticket push-to-talk',
+            'Radio broadcast',
+          ];
     }
-    return [
-      'Sınırsız operatör ve istemci cihaz',
-      'WhiteDesk Masaüstü (Windows / macOS) istemcisi',
-      'Uçtan uca şifreli (E2EE) biletleme akışı',
-      'Kategori ve organizasyon yönetimi',
-      'Dosya ve ekran görüntüsü ekleri',
-    ];
+    return language === 'tr'
+      ? [
+          'Cihazda yerel AES-256 şifreleme',
+          'Uçtan uca şifreleme',
+          'Sunucuda sıfır veri\nVeriler yerel cihazlarda tutulur',
+          'Federal veri hasadı\nTek tuşla verileri merkezde toplama',
+          'Cihazda otomatik veri maskeleme',
+          'Kör kimlik koruması',
+          'Sistem ve hata tanısı ekleme',
+          'Çift onaylı yetki kuyruğu',
+          'Mobil ve masaüstü istemcileri',
+          'Sınırsız operatör ve kullanıcı',
+          'Kategori ve organizasyon yönetimi',
+          'Dosya ve ekran görüntüsü ekleri',
+          'Gelişmiş denetim ve raporlama özellikleri',
+        ]
+      : [
+          'On-device AES-256 encryption',
+          'End-to-end encryption',
+          'Zero data on server\nData kept on local devices',
+          'Federal data harvesting\nOne-touch centralized data collection',
+          'Automatic on-device data masking',
+          'Blind identifier shield',
+          'System and error diagnostics attachment',
+          'Dual-approval authorization queue',
+          'Mobile and desktop clients',
+          'Unlimited operators and users',
+          'Category and organization management',
+          'File and screenshot attachments',
+          'Advanced audit and reporting features',
+        ];
   };
 
   // 2. Ekranda sadece seçilebilir olan alternatif planlar gösterilir (mevcut plan gizlenir)
@@ -242,12 +271,20 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 </Text>
 
                 <View style={styles.featureList}>
-                  {getPlanFeatureList(activePlanId).map((feat, idx) => (
-                    <View key={`current_feat_${idx}`} style={styles.featureRow}>
-                      <Check size={14} color="#1A73E8" strokeWidth={2.4} style={styles.checkIcon} />
-                      <Text style={styles.featureText}>{feat}</Text>
-                    </View>
-                  ))}
+                  {getPlanFeatureList(activePlanId).map((feat, idx) => {
+                    const [mainTitle, subTitle] = feat.split('\n');
+                    return (
+                      <View key={`current_feat_${idx}`} style={styles.featureRow}>
+                        <Check size={14} color="#1A73E8" strokeWidth={2.4} style={styles.checkIcon} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.featureTitleText}>{mainTitle}</Text>
+                          {!!subTitle && (
+                            <Text style={styles.featureSubtitleText}>{subTitle}</Text>
+                          )}
+                        </View>
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
 
@@ -309,11 +346,11 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                           <Text style={styles.planOneLiner}>
                             {isPlanLive
                               ? (language === 'tr'
-                                  ? 'Masaüstü istemcisi, uzaktan canlı müdahale ve telsiz (PTT)'
-                                  : 'Desktop client, remote intervention and PTT')
+                                  ? 'Bütün temel özellikler, uzak masaüstü, sesli görüşme ve telsiz yayını'
+                                  : 'All basic features, remote desktop, voice calling and radio broadcast')
                               : (language === 'tr'
-                                  ? 'Masaüstü istemcisi, sınırsız operatör ve biletleme'
-                                  : 'Desktop client, unlimited operators and ticketing')}
+                                  ? 'Uçtan uca şifreleme, sınırsız operatör, mobil ve masaüstü istemcileri'
+                                  : 'End-to-end encryption, unlimited operators, mobile and desktop clients')}
                           </Text>
                         </View>
 
@@ -349,12 +386,20 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                       {/* Özellik Listesi */}
                       {isExpanded && (
                         <View style={styles.featureList}>
-                          {features.map((feat, idx) => (
-                            <View key={`feat_${plan.id}_${idx}`} style={styles.featureRow}>
-                              <Check size={14} color="#1A73E8" strokeWidth={2.4} style={styles.checkIcon} />
-                              <Text style={styles.featureText}>{feat}</Text>
-                            </View>
-                          ))}
+                          {features.map((feat, idx) => {
+                            const [mainTitle, subTitle] = feat.split('\n');
+                            return (
+                              <View key={`feat_${plan.id}_${idx}`} style={styles.featureRow}>
+                                <Check size={14} color="#1A73E8" strokeWidth={2.4} style={styles.checkIcon} />
+                                <View style={{ flex: 1 }}>
+                                  <Text style={styles.featureTitleText}>{mainTitle}</Text>
+                                  {!!subTitle && (
+                                    <Text style={styles.featureSubtitleText}>{subTitle}</Text>
+                                  )}
+                                </View>
+                              </View>
+                            );
+                          })}
                         </View>
                       )}
 
@@ -647,6 +692,19 @@ const styles = StyleSheet.create({
     color: '#3C4043',
     flex: 1,
     lineHeight: 16,
+  },
+  featureTitleText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#3C4043',
+    lineHeight: 16.5,
+  },
+  featureSubtitleText: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: '#70757A',
+    lineHeight: 15,
+    marginTop: 1,
   },
   /* Aksiyon Butonu */
   actionBtn: {

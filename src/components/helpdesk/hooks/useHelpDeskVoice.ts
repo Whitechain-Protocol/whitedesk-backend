@@ -4,6 +4,7 @@ import { voiceCallService, VoiceCallSession } from '../../../services/voiceCallS
 import { remoteDesktopService } from '../../../services/remoteDesktopService';
 import { helpDeskService, HelpDeskTicket, HelpDeskMessage, OrgEntry, AdminEntry, TenantEntry } from '../../../services/helpDeskService';
 import { NotificationService } from '../../../services/notificationService';
+import { WhiteDeskCrypto } from '../../../services/cryptoService';
 
 export interface UseHelpDeskVoiceProps {
   ownWhiteId: string;
@@ -73,6 +74,11 @@ export function useHelpDeskVoice({
       NotificationService.setOwnTenantId(activeEnterpriseBlindId);
     }
   }, [activeEnterpriseBlindId]);
+
+  // Kendi kimlik ve isim bilgisini (isim girilmemişse Blind ID maskesi için) ses servisine senkronize et
+  useEffect(() => {
+    voiceCallService.setOwnIdentity(ownWhiteId, customAlias);
+  }, [ownWhiteId, customAlias]);
 
   // Push bildirimi tıklandığında veya kilit ekranında tam ekran arama intent'i geldiğinde doğrudan cevaplama modalını aç
   useEffect(() => {
@@ -144,32 +150,36 @@ export function useHelpDeskVoice({
   const handleCallPress = useCallback(async () => {
     if (!selectedTicket) return;
 
-    const callerWhiteId = ownWhiteId;
+    const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
     const callerAlias = customAlias || (isAdmin ? 'WhiteDesk Admin' : 'Kullanıcı');
 
     let calleeWhiteId = isAdmin
-      ? (selectedTicket.user_white_id || selectedTicket.user_blind_id || '')
-      : (selectedTicket.assigned_admin_blind_id || '');
+      ? (selectedTicket.user_blind_id || selectedTicket.user_white_id || '')
+      : (selectedTicket.assigned_admin_blind_id && selectedTicket.assigned_admin_blind_id !== 'unassigned'
+          ? selectedTicket.assigned_admin_blind_id
+          : '');
 
-    if (!isAdmin && !calleeWhiteId) {
-      const lastAdminMsg = [...ticketMessages].reverse().find(m => m.is_admin && m.sender_white_id);
-      if (lastAdminMsg?.sender_white_id) {
-        calleeWhiteId = lastAdminMsg.sender_white_id;
-      } else {
-        try {
-          const ticketTenant = selectedTicket.enterprise_blind_id || activeEnterpriseBlindId || 'default';
-          const adminList = await helpDeskService.getAdminsList(ticketTenant);
-          const activeAdm = adminList.find(a => a.is_active && a.white_id);
-          if (activeAdm?.white_id) {
-            calleeWhiteId = activeAdm.white_id;
-          }
-        } catch {}
+    if (!calleeWhiteId) {
+      const targetMsg = [...ticketMessages].reverse().find(m =>
+        (isAdmin ? !m.is_admin : m.is_admin) && ((m as any).sender_blind_id || m.sender_white_id)
+      );
+      if (targetMsg) {
+        calleeWhiteId = (targetMsg as any).sender_blind_id || targetMsg.sender_white_id || '';
       }
     }
 
+    if (!isAdmin && !calleeWhiteId) {
+      const fallbackAdmin = await helpDeskService.getAdminWhiteId();
+      if (fallbackAdmin) calleeWhiteId = fallbackAdmin;
+    }
+
+    if (calleeWhiteId) {
+      calleeWhiteId = WhiteDeskCrypto.generateBlindId(calleeWhiteId);
+    }
+
     const calleeAlias = isAdmin
-      ? (selectedTicket.user_white_id ? selectedTicket.user_white_id.slice(0, 10) : 'Kullanıcı')
-      : 'Destek Operatörü';
+      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : 'Kullanıcı'))
+      : ((selectedTicket as any).assigned_admin_name || 'Destek Operatörü');
 
     const elig = await voiceCallService.checkCallEligibility(
       callerWhiteId,
@@ -230,32 +240,36 @@ export function useHelpDeskVoice({
   const handlePttPress = useCallback(async () => {
     if (!selectedTicket) return;
 
-    const callerWhiteId = ownWhiteId;
+    const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
     const callerAlias = customAlias || (isAdmin ? 'WhiteDesk Admin' : 'Kullanıcı');
 
     let calleeWhiteId = isAdmin
-      ? (selectedTicket.user_white_id || selectedTicket.user_blind_id || '')
-      : (selectedTicket.assigned_admin_blind_id || '');
+      ? (selectedTicket.user_blind_id || selectedTicket.user_white_id || '')
+      : (selectedTicket.assigned_admin_blind_id && selectedTicket.assigned_admin_blind_id !== 'unassigned'
+          ? selectedTicket.assigned_admin_blind_id
+          : '');
 
-    if (!isAdmin && !calleeWhiteId) {
-      const lastAdminMsg = [...ticketMessages].reverse().find(m => m.is_admin && m.sender_white_id);
-      if (lastAdminMsg?.sender_white_id) {
-        calleeWhiteId = lastAdminMsg.sender_white_id;
-      } else {
-        try {
-          const ticketTenant = selectedTicket.enterprise_blind_id || activeEnterpriseBlindId || 'default';
-          const adminList = await helpDeskService.getAdminsList(ticketTenant);
-          const activeAdm = adminList.find(a => a.is_active && a.white_id);
-          if (activeAdm?.white_id) {
-            calleeWhiteId = activeAdm.white_id;
-          }
-        } catch {}
+    if (!calleeWhiteId) {
+      const targetMsg = [...ticketMessages].reverse().find(m =>
+        (isAdmin ? !m.is_admin : m.is_admin) && ((m as any).sender_blind_id || m.sender_white_id)
+      );
+      if (targetMsg) {
+        calleeWhiteId = (targetMsg as any).sender_blind_id || targetMsg.sender_white_id || '';
       }
     }
 
+    if (!isAdmin && !calleeWhiteId) {
+      const fallbackAdmin = await helpDeskService.getAdminWhiteId();
+      if (fallbackAdmin) calleeWhiteId = fallbackAdmin;
+    }
+
+    if (calleeWhiteId) {
+      calleeWhiteId = WhiteDeskCrypto.generateBlindId(calleeWhiteId);
+    }
+
     const calleeAlias = isAdmin
-      ? (selectedTicket.user_white_id ? selectedTicket.user_white_id.slice(0, 10) : 'Kullanıcı')
-      : 'Destek Operatörü';
+      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : 'Kullanıcı'))
+      : ((selectedTicket as any).assigned_admin_name || 'Destek Operatörü');
 
     const elig = await voiceCallService.checkPttEligibility(
       callerWhiteId,
@@ -315,7 +329,10 @@ export function useHelpDeskVoice({
   // Admin Org ID derivation
   const myAdminOrgId = useMemo(() => {
     if (!isAdmin) return undefined;
-    const currentAdminEntry = adminsList.find(a => (a.white_id || '').toLowerCase() === (ownWhiteId || '').toLowerCase());
+    const ownBlind = WhiteDeskCrypto.generateBlindId(ownWhiteId || '').toLowerCase();
+    const currentAdminEntry = adminsList.find(a =>
+      WhiteDeskCrypto.generateBlindId(a.white_id || '').toLowerCase() === ownBlind
+    );
     return currentAdminEntry?.org_id || undefined;
   }, [isAdmin, adminsList, ownWhiteId]);
 
@@ -383,36 +400,60 @@ export function useHelpDeskVoice({
     return availableOrgChannels.length > 1;
   }, [isAdmin, isFounder, adminRole, isSingleOrgAdmin, availableOrgChannels.length]);
 
-  // Channel member count
-  const currentChannelMemberCount = useMemo(() => {
-    if (activeOrgChannelId === 'admins_only') {
-      const adminSet = new Set<string>();
+  // Bilet kartlarındaki blind_id'ler ve aktif yöneticilerden kanal hedeflerini çıkarır (KURAL 7: whitedesk_user_bindings şartı yoktur)
+  const collectChannelTargetBlindIds = useCallback((tenantId: string, cleanOrgId: string): string[] => {
+    const ownBlind = WhiteDeskCrypto.generateBlindId(ownWhiteId || '').toLowerCase();
+    const memberSet = new Set<string>();
+
+    const addBlind = (raw?: string | null) => {
+      if (!raw || raw === 'unassigned' || raw === 'default' || raw === 'all') return;
+      const b = WhiteDeskCrypto.generateBlindId(raw.trim());
+      if (b && b.toLowerCase() !== ownBlind) {
+        memberSet.add(b);
+      }
+    };
+
+    if (cleanOrgId === 'admins_only') {
       adminsList.forEach(a => {
-        if (a.white_id && a.white_id.toLowerCase() !== (ownWhiteId || '').toLowerCase()) {
-          adminSet.add(a.white_id);
+        if (!tenantId || !a.enterprise_blind_id || a.enterprise_blind_id === tenantId) {
+          addBlind(a.white_id);
         }
       });
-      return adminSet.size;
+      return Array.from(memberSet);
     }
-    const cleanOrgId = activeOrgChannelId && activeOrgChannelId !== 'all' ? activeOrgChannelId : 'global';
-    const targetUserSet = new Set<string>();
+
+    const isGlobalOrg = !cleanOrgId || cleanOrgId === 'global' || cleanOrgId === 'all' || cleanOrgId === '*';
+
+    // 1. Bilet kartlarındaki user_blind_id ve assigned_admin_blind_id
     tickets.forEach(t => {
+      if (tenantId && t.enterprise_blind_id && t.enterprise_blind_id !== 'default' && t.enterprise_blind_id !== tenantId) {
+        return;
+      }
       const tOrg = t.org_id || 'global';
-      if (cleanOrgId === 'global' || tOrg === cleanOrgId) {
-        if (t.user_white_id && t.user_white_id.toLowerCase() !== (ownWhiteId || '').toLowerCase()) {
-          targetUserSet.add(t.user_white_id);
-        }
+      if (isGlobalOrg || tOrg === cleanOrgId) {
+        addBlind(t.user_blind_id || t.user_white_id);
+        addBlind(t.assigned_admin_blind_id);
       }
     });
+
+    // 2. Kurumsal temsilciler (whitedesk_admins)
     adminsList.forEach(a => {
-      if (a.white_id && a.white_id.toLowerCase() !== (ownWhiteId || '').toLowerCase()) {
-        if (cleanOrgId === 'global' || !a.org_id || a.org_id === 'all' || a.org_id === cleanOrgId) {
-          targetUserSet.add(a.white_id);
+      if (!tenantId || !a.enterprise_blind_id || a.enterprise_blind_id === tenantId) {
+        if (isGlobalOrg || !a.org_id || a.org_id === 'all' || a.org_id === 'default' || a.org_id === cleanOrgId) {
+          addBlind(a.white_id);
         }
       }
     });
-    return targetUserSet.size;
-  }, [activeOrgChannelId, tickets, adminsList, ownWhiteId]);
+
+    return Array.from(memberSet);
+  }, [tickets, adminsList, ownWhiteId]);
+
+  // Channel member count
+  const currentChannelMemberCount = useMemo(() => {
+    const tenantId = pttTenantId || activeEnterpriseBlindId || '';
+    const cleanOrgId = activeOrgChannelId && activeOrgChannelId !== 'all' ? activeOrgChannelId : 'global';
+    return collectChannelTargetBlindIds(tenantId, cleanOrgId).length;
+  }, [activeOrgChannelId, pttTenantId, activeEnterpriseBlindId, collectChannelTargetBlindIds]);
 
   // Org Group PTT broadcast button
   const handleOrgGroupPttPress = useCallback(async () => {
@@ -429,9 +470,6 @@ export function useHelpDeskVoice({
         return;
       }
 
-      // 1. Hedef birim / grup izolasyonu:
-      // Eğer anonsu başlatan admin belirli bir birime bağlıysa (isSingleOrgAdmin) zorunlu olarak kendi birimine kilitlenir.
-      // Eğer Global Admin veya yetkili admin bir grup seçtiyse (filterOrgId), kesinlikle o birim hedeflenir.
       let targetOrgCandidate = filterOrgId;
       if (isSingleOrgAdmin && myAdminOrgId && myAdminOrgId !== 'all' && myAdminOrgId !== '*') {
         targetOrgCandidate = myAdminOrgId;
@@ -441,6 +479,7 @@ export function useHelpDeskVoice({
       const cleanOrgId = validOrgItem ? validOrgItem.id : (rawOrgId !== 'global' ? rawOrgId : 'global');
       const orgName = validOrgItem?.name || (rawOrgId !== 'global' ? rawOrgId : (language === 'tr' ? 'Genel' : 'General'));
       const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : 'Yönetici') : 'Kullanıcı');
+      const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       if (!pttTenantId || pttTenantId !== tenantId) {
         setPttTenantId(tenantId);
@@ -449,29 +488,16 @@ export function useHelpDeskVoice({
 
       setActiveOrgChannelId(cleanOrgId === 'global' ? 'all' : cleanOrgId);
 
-      if (!canSwitchHierarchy) {
-        const targetMembers = cleanOrgId === 'admins_only'
-          ? adminsList
-              .filter(a => a.enterprise_blind_id === tenantId && a.white_id && a.white_id.toLowerCase() !== (ownWhiteId || '').toLowerCase())
-              .map(a => a.white_id)
-          : await helpDeskService.getTenantMembers(tenantId, cleanOrgId);
-        await voiceCallService.startOrgGroupPttCall(
-          tenantId,
-          cleanOrgId,
-          orgName,
-          ownWhiteId || 'default',
-          callerAlias,
-          targetMembers
-        );
-        return;
-      }
+      // Bilet kartlarındaki blind_id'ler ve kurumsal temsilcilerden oluşan hedef kitle
+      const targetMembers = collectChannelTargetBlindIds(tenantId, cleanOrgId);
 
-      voiceCallService.openOrgPttConsole(
+      await voiceCallService.startOrgGroupPttCall(
         tenantId,
         cleanOrgId,
         orgName,
-        ownWhiteId || 'default',
-        callerAlias
+        callerBlindId,
+        callerAlias,
+        targetMembers
       );
     } catch (e) {
       console.warn('[useHelpDeskVoice] handleOrgGroupPttPress error:', e);
@@ -490,11 +516,10 @@ export function useHelpDeskVoice({
     customAlias,
     isAdmin,
     isFounder,
-    canSwitchHierarchy,
     isSingleOrgAdmin,
     myAdminOrgId,
     language,
-    adminsList,
+    collectChannelTargetBlindIds,
   ]);
 
   const handleChangeOrgChannel = useCallback((newOrgId: string) => {
@@ -517,18 +542,15 @@ export function useHelpDeskVoice({
       const cleanOrgId = validOrgItem ? validOrgItem.id : (targetOrgId && targetOrgId !== 'all' && targetOrgId !== '*' && targetOrgId !== 'global' ? targetOrgId : 'global');
       const orgName = validOrgItem?.name || (cleanOrgId !== 'global' ? cleanOrgId : (language === 'tr' ? 'Genel' : 'General'));
 
-      const targetMembers = cleanOrgId === 'admins_only'
-        ? adminsList
-            .filter(a => a.enterprise_blind_id === tenantId && a.white_id && a.white_id.toLowerCase() !== (ownWhiteId || '').toLowerCase())
-            .map(a => a.white_id)
-        : await helpDeskService.getTenantMembers(tenantId, cleanOrgId);
+      const targetMembers = collectChannelTargetBlindIds(tenantId, cleanOrgId);
       const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : 'Yönetici') : 'Kullanıcı');
+      const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       await voiceCallService.startOrgGroupPttCall(
         tenantId,
         cleanOrgId,
         orgName,
-        ownWhiteId || 'default',
+        callerBlindId,
         callerAlias,
         targetMembers
       );
@@ -544,7 +566,7 @@ export function useHelpDeskVoice({
     isAdmin,
     isFounder,
     language,
-    adminsList,
+    collectChannelTargetBlindIds,
   ]);
 
   // Reactive handling of Call Handshake rejection alert

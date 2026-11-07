@@ -29,6 +29,7 @@ class CallActionReceiver : BroadcastReceiver() {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(WhiteDeskMessagingService.CALL_NOTIFICATION_ID)
                 notificationManager.cancel(WhiteDeskMessagingService.PTT_NOTIFICATION_ID)
+                notificationManager.cancel(WhiteDeskMessagingService.RD_NOTIFICATION_ID)
             } catch (e: Exception) {
                 Log.w(TAG, "Notification cancel failed: ${e.message}")
             }

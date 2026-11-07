@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import { Keyboard, Alert, BackHandler, AppState } from 'react-native';
+import { Keyboard, Alert, BackHandler, AppState, DeviceEventEmitter } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import * as Sharing from 'expo-sharing';
 import {
@@ -363,12 +363,11 @@ export function useHelpDeskTicketState({
               const updated = await helpDeskService.getTickets(myId, admin, CURRENT_APP_ID, tenantFilter, effectiveRole);
               setTickets(updated);
             }
-            if (!admin) {
-              const slaRes = await helpDeskService.checkAndEscalateTickets({ ownWhiteId: myId });
-              if (slaRes && slaRes.escalatedCount > 0) {
-                const updated = await helpDeskService.getTickets(myId, admin, CURRENT_APP_ID, tenantFilter, effectiveRole);
-                setTickets(updated);
-              }
+            // SLA Engine Check (Hem kullanıcı hem admin için)
+            const slaRes = await helpDeskService.checkAndEscalateTickets({ ownWhiteId: myId });
+            if (slaRes && slaRes.escalatedCount > 0) {
+              const updated = await helpDeskService.getTickets(myId, admin, CURRENT_APP_ID, tenantFilter, effectiveRole);
+              setTickets(updated);
             }
             if (admin) {
               const [freshRole, approvals] = await Promise.all([
@@ -428,6 +427,68 @@ export function useHelpDeskTicketState({
     setAppsList,
     setPendingApprovals,
     setTenantsList,
+  ]);
+
+  // 0-Polling FCM Push & AppState Foreground Wakeup Listener:
+  // Yeni destek bileti veya mesajı bildirimi (FCM Push) geldiğinde ya da uygulama ön plana alındığında D1 havuzunu anında senkronize eder
+  useEffect(() => {
+    const syncNow = async (incomingTicketId?: string) => {
+      try {
+        const myId = ownWhiteId || (await helpDeskService.getOwnWhiteId());
+        if (!myId || myId === 'anonymous') return;
+        const tenantFilter = isFounder
+          ? (selectedTenantBlindId !== 'all' ? selectedTenantBlindId : null)
+          : (activeEnterpriseBlindId || undefined);
+        const hasChanges = await helpDeskService.syncRelayInbox(myId, tenantFilter, adminRole);
+        const updatedTickets = await helpDeskService.getTickets(myId, isAdmin, CURRENT_APP_ID, tenantFilter, adminRole);
+        setTickets(updatedTickets);
+
+        const activeTicketId = selectedTicket?.id || incomingTicketId;
+        if (currentView === 'detail' && selectedTicket && (!incomingTicketId || incomingTicketId === selectedTicket.id || hasChanges)) {
+          const msgs = await helpDeskService.getTicketMessages(selectedTicket.id);
+          setTicketMessages(msgs);
+          const refreshedTicket = updatedTickets.find(t => t.id === selectedTicket.id);
+          if (refreshedTicket) {
+            setSelectedTicket(refreshedTicket);
+          }
+          setTimeout(() => {
+            messagesScrollRef.current?.scrollToEnd({ animated: true });
+          }, 150);
+        } else if (activeTicketId && hasChanges) {
+          const refreshedTicket = updatedTickets.find(t => t.id === activeTicketId);
+          if (refreshedTicket && selectedTicket?.id === activeTicketId) {
+            setSelectedTicket(refreshedTicket);
+          }
+        }
+      } catch (err) {
+        console.warn('[useHelpDeskTicketState] FCM push / foreground sync warning:', err);
+      }
+    };
+
+    const pushSub = DeviceEventEmitter.addListener('onHelpDeskPushReceived', (event: any) => {
+      void syncNow(event?.ticketId);
+    });
+
+    const appStateSub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void syncNow();
+      }
+    });
+
+    return () => {
+      pushSub.remove();
+      appStateSub.remove();
+    };
+  }, [
+    ownWhiteId,
+    isAdmin,
+    isFounder,
+    adminRole,
+    selectedTenantBlindId,
+    activeEnterpriseBlindId,
+    currentView,
+    selectedTicket,
+    messagesScrollRef,
   ]);
 
   // Open ticket detail and fetch messages
@@ -493,7 +554,9 @@ export function useHelpDeskTicketState({
     if (ticket.status === 'closed') return;
     if (dismissedResolutionChecks.current.has(ticket.id)) return;
 
-    const isOwner = Boolean(ownWhiteId) && Boolean(ticket.user_white_id) && ticket.user_white_id.toLowerCase() === ownWhiteId.toLowerCase();
+    const ownBlind = ownWhiteId ? WhiteDeskCrypto.generateBlindId(ownWhiteId).toLowerCase() : '';
+    const ticketOwnerBlind = WhiteDeskCrypto.generateBlindId(ticket.user_blind_id || ticket.user_white_id || '').toLowerCase();
+    const isOwner = Boolean(ownBlind) && Boolean(ticketOwnerBlind) && ticketOwnerBlind === ownBlind;
     if (!isOwner) return;
     if (!msgs || msgs.length === 0) return;
 
@@ -1059,15 +1122,14 @@ export function useHelpDeskTicketState({
             setTicketMessages(freshMsgs);
           }
         }
-        if (!isAdmin) {
-          const slaRes = await helpDeskService.checkAndEscalateTickets({ ownWhiteId });
-          if (slaRes && slaRes.escalatedCount > 0) {
-            const updated = await helpDeskService.getTickets(ownWhiteId, isAdmin, CURRENT_APP_ID, tenantFilter, adminRole);
-            setTickets(updated);
-            if (currentView === 'detail' && selectedTicket) {
-              const freshMsgs = await helpDeskService.getLocalTicketMessages(selectedTicket.id);
-              setTicketMessages(freshMsgs);
-            }
+        // SLA Engine Check (Periyodik döngüde hem kullanıcı hem admin için)
+        const slaRes = await helpDeskService.checkAndEscalateTickets({ ownWhiteId });
+        if (slaRes && slaRes.escalatedCount > 0) {
+          const updated = await helpDeskService.getTickets(ownWhiteId, isAdmin, CURRENT_APP_ID, tenantFilter, adminRole);
+          setTickets(updated);
+          if (currentView === 'detail' && selectedTicket) {
+            const freshMsgs = await helpDeskService.getLocalTicketMessages(selectedTicket.id);
+            setTicketMessages(freshMsgs);
           }
         }
       } catch {}

@@ -292,10 +292,14 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
     }
 
     if (otherId) {
-      if (otherId.length > 12) {
-        return `${otherId.slice(0, 5)}...${otherId.slice(-5)}`;
+      const cleanBlind = otherId.startsWith('blind_') ? otherId.substring(6) : otherId;
+      if (cleanBlind.length >= 14) {
+        return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9, 14)}`;
       }
-      return otherId;
+      if (cleanBlind.length >= 10) {
+        return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9)}`;
+      }
+      return cleanBlind;
     }
 
     return 'Kullanıcı';
@@ -311,8 +315,9 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
       }
       const speakerAlias = session.activeSpeakerAlias;
       const speakerId = session.activeSpeakerWhiteId;
+      const myId = session.role === 'caller' ? session.callerWhiteId : session.calleeWhiteId;
       // Yalnızca karşı tarafta birisi mikrofonu açmışsa ve konuşuyorsa göster
-      if (speakerAlias && speakerId && speakerId.toLowerCase() !== (session.callerWhiteId || '').toLowerCase()) {
+      if (speakerAlias && speakerId && speakerId.toLowerCase() !== (myId || '').toLowerCase()) {
         return `${speakerAlias} ${language === 'tr' ? 'konuşuyor...' : 'is speaking...'}`;
       }
       // Grupta kimse yoksa "Kimse Yok" yaz
@@ -326,6 +331,10 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
 
   const handleTogglePttButton = () => {
     if (!isConnected) return;
+    if (session.scope === 'org_group' && (session as any).isStandby && onBroadcastChannelInvite) {
+      onBroadcastChannelInvite(currentOrgChannelId || session.targetOrgId || 'all');
+      return;
+    }
     // Bas-konuş mantığı: Tek basışta konuş moduna geçer, tekrar basınca dinle moduna geçer
     onToggleTalking(!isTalking);
   };
@@ -578,10 +587,11 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                     ) : (() => {
                       const speakerAlias = session.activeSpeakerAlias;
                       const speakerId = session.activeSpeakerWhiteId;
+                      const myId = session.role === 'caller' ? session.callerWhiteId : session.calleeWhiteId;
                       const isOtherTalking =
                         speakerAlias &&
                         speakerId &&
-                        speakerId.toLowerCase() !== (session.callerWhiteId || '').toLowerCase();
+                        speakerId.toLowerCase() !== (myId || '').toLowerCase();
 
                       if (isOtherTalking) {
                         return (

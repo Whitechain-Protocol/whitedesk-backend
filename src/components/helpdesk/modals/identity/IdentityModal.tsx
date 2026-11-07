@@ -93,6 +93,15 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
 
   const effectiveAllowNameEntry = allowNameEntryProp !== undefined ? allowNameEntryProp : localAllowNameEntry;
 
+  const isValidTwoWordName = (name: string): boolean => {
+    if (!name) return false;
+    const cleaned = name.trim().replace(/[.,/#!$%^&*;:{}=\-_`~()0-9]/g, '');
+    const words = cleaned.split(/\s+/).filter(w => w.length >= 2);
+    return words.length >= 2;
+  };
+
+  const isSaveEnabled = effectiveAllowNameEntry ? isValidTwoWordName(identityInput) : true;
+
   useEffect(() => {
     if (visible && isAdmin) {
       const updateStatus = (status: { isActive: boolean; subStatus?: AdminSubStatus; customReason?: string; snoozeUntil: number | null }) => {
@@ -209,17 +218,24 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
             {effectiveAllowNameEntry && (
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>
-                  {language === 'tr' ? 'Kimlik bilgisi' : 'Identity Information'}
+                  {language === 'tr' ? 'Ad ve Soyad (Zorunlu)' : 'Full Name (Required)'}
                 </Text>
                 <TextInput
-                  style={[styles.input, { marginBottom: 16 }]}
-                  placeholder={language === 'tr' ? 'Örn: Mustafa ERYILMAZ, Tech Lead vb.' : 'e.g. John Doe, Tech Lead etc.'}
+                  style={[styles.input, { marginBottom: 4 }]}
+                  placeholder={language === 'tr' ? 'Örn: Mustafa ERYILMAZ' : 'e.g. John Doe'}
                   placeholderTextColor="#94a3b8"
                   value={identityInput}
                   onChangeText={onChangeIdentityInput}
                   autoFocus={false}
                   autoCapitalize="words"
                 />
+                {!isValidTwoWordName(identityInput) && identityInput.trim().length > 0 ? (
+                  <Text style={{ fontSize: 11, color: '#DC2626', marginBottom: 12, fontWeight: '500' }}>
+                    {language === 'tr' ? 'En az iki kelime ad ve soyad giriniz (nokta vb. kabul edilmez).' : 'Please enter at least two words (dots not allowed).'}
+                  </Text>
+                ) : (
+                  <View style={{ marginBottom: 12 }} />
+                )}
               </View>
             )}
 
@@ -429,10 +445,10 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
               <TouchableOpacity
                 style={[
                   styles.submitBtn,
-                  (identityInput.trim().length > 0 || !effectiveAllowNameEntry) && styles.submitBtnActive,
+                  isSaveEnabled && styles.submitBtnActive,
                 ]}
                 onPress={handleSavePress}
-                disabled={effectiveAllowNameEntry ? !identityInput.trim() : false}
+                disabled={!isSaveEnabled}
                 activeOpacity={0.7}
               >
                 <Text style={styles.submitBtnText}>

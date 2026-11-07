@@ -21,11 +21,11 @@ import {
   UserPreferencesModal,
   TicketOrgAssignModal,
   AttachMenuModal,
+  ApprovalsModal,
+  ImagePreviewModal,
 } from './';
 
-import { ApprovalsModal } from './ApprovalsModal';
 import { TicketActionModal } from './TicketActionModal';
-import { ImagePreviewModal } from './ImagePreviewModal';
 import { DiagnosticViewerModal } from './DiagnosticViewerModal';
 import { RemoteDesktopModal } from './RemoteDesktopModal';
 import { remoteDesktopService, RemoteDesktopSession } from '../../../services/remoteDesktopService';
@@ -97,6 +97,7 @@ export interface HelpDeskModalsContainerProps {
   // Profile Modal
   profileModalVisible: boolean;
   setProfileModalVisible: (val: boolean) => void;
+  onSaveCustomAlias?: (alias: string) => void | Promise<void>;
 
   // Work Status Modal
   workStatusModalVisible?: boolean;
@@ -392,6 +393,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
 
     profileModalVisible,
     setProfileModalVisible,
+    onSaveCustomAlias,
 
     workStatusModalVisible = false,
     setWorkStatusModalVisible = () => {},
@@ -695,7 +697,11 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
           language={language}
           onOpenProfile={() => setProfileModalVisible(true)}
           onOpenWorkStatus={() => setWorkStatusModalVisible(true)}
-          onOpenLicense={() => setLicenseModalVisible(true)}
+          onOpenLicense={
+            (isMasterAdmin || isFounder || adminRole === 'global_admin' || adminRole === 'founder')
+              ? () => setLicenseModalVisible(true)
+              : undefined
+          }
           onOpenProvisioning={() => setAdminScreenType('provisioning')}
           onOpenSettings={() => setAdminScreenType('settings')}
           onOpenAdvancedFeatures={() => setAdminScreenType('advanced')}
@@ -754,6 +760,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
           tenantStats={tenantStats}
           currentEnterpriseName={currentEnterpriseName}
           language={language as any}
+          onSaveCustomAlias={onSaveCustomAlias}
         />
       )}
 
@@ -1296,7 +1303,13 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
         callSession.scope === 'org_group' &&
         callSession.state === 'incoming_ringing' && (
           <View style={bannerStyles.orgPttTopBanner}>
-            <View style={bannerStyles.orgPttTopBannerLeft}>
+            <TouchableOpacity
+              style={bannerStyles.orgPttTopBannerLeft}
+              onPress={() => {
+                void voiceCallService.answerCall();
+              }}
+              activeOpacity={0.85}
+            >
               <View style={bannerStyles.orgPttIconCircle}>
                 <Radio size={16} color="#0F766E" strokeWidth={2.4} />
               </View>
@@ -1308,7 +1321,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
                   {callSession.callerAlias || 'Admin'} canlı anons yapıyor...
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
 
             <View style={bannerStyles.orgPttTopBannerActions}>
               <TouchableOpacity

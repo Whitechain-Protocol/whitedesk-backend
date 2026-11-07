@@ -3,9 +3,9 @@
  * Zero Personal Data: All messages transient in D1/R2 until Keystore ACK vaporization.
  */
 
-const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://whitedesk-backend.vercel.app';
+const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one';
 const RELAY_BASE_URL =
-  process.env.EXPO_PUBLIC_DO_RELAY_URL || 'https://whitedesk-auth-relay.cemalettin-eryilmaz.workers.dev';
+  process.env.EXPO_PUBLIC_DO_RELAY_URL || 'https://api.whitedesk.one';
 
 export interface MailboxMessageItem {
   id: string;
@@ -293,7 +293,7 @@ export const relayClient = {
     org_id?: string;
     app_id?: string;
     category?: string;
-  }): Promise<{ success: boolean; assigned_admin_blind_id: string; name?: string | null; counter?: number; open_tickets?: number; error?: string }> {
+  }): Promise<{ success: boolean; assigned_admin_blind_id: string; name?: string | null; counter?: number; open_tickets?: number; sla_minutes?: number; error?: string }> {
     try {
       const res = await fetch(`${RELAY_BASE_URL.replace(/\/$/, '')}/api/tickets/allocate`, {
         method: 'POST',
@@ -304,6 +304,28 @@ export const relayClient = {
       return { success: false, assigned_admin_blind_id: 'unassigned', error: await res.text() };
     } catch (e: any) {
       return { success: false, assigned_admin_blind_id: 'unassigned', error: e.message };
+    }
+  },
+
+  /**
+   * Claims next waiting ticket from enterprise pool (Fair Queue / Round-Robin)
+   */
+  async claimNextPoolTicket(params: {
+    enterprise_blind_id: string;
+    admin_blind_id: string;
+    admin_name?: string;
+  }): Promise<{ success: boolean; claimed: boolean; ticket_id?: string; item?: any }> {
+    try {
+      const res = await fetch(`${RELAY_BASE_URL.replace(/\/$/, '')}/api/tickets/claim-next-pool`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      if (res.ok) return await res.json();
+      return { success: false, claimed: false };
+    } catch (e) {
+      console.warn('[relayClient] claimNextPoolTicket error:', e);
+      return { success: false, claimed: false };
     }
   },
 

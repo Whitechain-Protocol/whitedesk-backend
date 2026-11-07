@@ -1,6 +1,8 @@
 import { NativeModules, PermissionsAndroid, Platform, DeviceEventEmitter } from 'react-native';
 import { apiClient } from './apiClient';
 import { WhiteDeskCrypto } from '../whitedesk-sdk';
+import { SafeSecureStore } from './storageService';
+import { STORAGE_KEYS } from './helpdesk/types';
 
 const { WhiteDeskNotificationModule } = NativeModules;
 
@@ -11,6 +13,7 @@ export class NotificationService {
 
   static async init(whiteId: string): Promise<void> {
     if (Platform.OS !== 'android' || !whiteId) return;
+    const blindId = WhiteDeskCrypto.generateBlindId(whiteId);
 
     try {
       // 1. Android 13+ (API 33+) için bildirim iznini iste
@@ -21,39 +24,43 @@ export class NotificationService {
       }
 
       if (WhiteDeskNotificationModule?.setOwnWhiteId) {
-        WhiteDeskNotificationModule.setOwnWhiteId(whiteId);
+        WhiteDeskNotificationModule.setOwnWhiteId(blindId);
       }
 
-      // 2. Native FCM Token'ı al ve backend'e kaydet (Yalnızca değiştiğinde)
+      // Native katmana tenant ve org ID'lerini aktararak ZERO-TRUST filtrelerinin doğru çalışmasını sağla
+      try {
+        const [adminEnt, userEnt, userOrg] = await Promise.all([
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_BLIND_ID).catch(() => null),
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.USER_ORG_BLIND_ID).catch(() => null),
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.USER_ORG_ID).catch(() => null),
+        ]);
+        const tenant = adminEnt || userEnt || 'ent_1fc4c76b722c';
+        if (tenant) {
+          this.setOwnTenantId(tenant);
+        }
+        if (userOrg) {
+          this.setOwnOrgId(userOrg);
+        }
+      } catch (err) {
+        console.warn('[PUSH] Error setting initial tenant/org in native:', err);
+      }
+
+      // 2. Native FCM Token'ı al ve backend'e YALNIZCA blind_id ile kaydet
       if (WhiteDeskNotificationModule?.getPushToken) {
         const token = await WhiteDeskNotificationModule.getPushToken();
-        if (token && (this.registeredWhiteId !== whiteId || this.registeredToken !== token)) {
-          this.registeredWhiteId = whiteId;
+        if (token && (this.registeredWhiteId !== blindId || this.registeredToken !== token)) {
+          this.registeredWhiteId = blindId;
           this.registeredToken = token;
-          console.warn('[PUSH] FCM Token acquired, registering with backend:', token);
-          await apiClient.registerFcmToken(whiteId, token);
-          try {
-            const blind = WhiteDeskCrypto.generateBlindId(whiteId);
-            if (blind && blind.toLowerCase() !== whiteId.toLowerCase()) {
-              await apiClient.registerFcmToken(blind, token);
-            }
-          } catch (e) {
-            console.warn('[PUSH] Error generating/registering blind token:', e);
-          }
+          console.warn('[PUSH] FCM Token acquired, registering blind_id with backend:', blindId);
+          await apiClient.registerFcmToken(blindId, token);
         }
 
         // 3. Token yenilendiğinde otomatik güncelle
         if (!this.isInitialized) {
           DeviceEventEmitter.addListener('onPushTokenRefresh', async (event: any) => {
             if (event?.token) {
-              console.warn('[PUSH] Token refreshed, updating backend:', event.token);
-              await apiClient.registerFcmToken(whiteId, event.token);
-              try {
-                const blind = WhiteDeskCrypto.generateBlindId(whiteId);
-                if (blind && blind.toLowerCase() !== whiteId.toLowerCase()) {
-                  await apiClient.registerFcmToken(blind, event.token);
-                }
-              } catch {}
+              console.warn('[PUSH] Token refreshed, updating backend with blind_id:', blindId);
+              await apiClient.registerFcmToken(blindId, event.token);
             }
           });
           this.isInitialized = true;

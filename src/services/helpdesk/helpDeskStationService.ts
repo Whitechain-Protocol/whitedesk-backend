@@ -43,6 +43,17 @@ export const helpDeskStationService = {
             advanced_features_config JSONB DEFAULT '{"voiceCall":{"enabled":true,"policy":"mutual_consent"},"escalation":{"enabled":true,"slaHours":4},"pushToTalk":{"enabled":true,"allowedOrgs":[],"maxBurstSeconds":15},"selfDestruct":{"enabled":true,"retentionAfterResolvedHours":72,"escalationSlaHours":4},"proofOfIntegrity":{"enabled":true,"autoDownloadReceipt":true}}'::jsonb,
             custom_fields JSONB DEFAULT '[]'::jsonb,
             catalog JSONB DEFAULT '[]'::jsonb,
+            plan_id VARCHAR(32) DEFAULT 'trial',
+            billing_cycle VARCHAR(16) DEFAULT 'monthly',
+            license_status VARCHAR(32) DEFAULT 'trial_active',
+            trial_start_at TEXT,
+            trial_end_at TEXT,
+            subscription_start_at TEXT,
+            subscription_end_at TEXT,
+            grace_period_days INTEGER DEFAULT 3,
+            warning_intervals INTEGER DEFAULT 12,
+            grace_ends_at TEXT,
+            license_hash TEXT,
             created_at BIGINT NOT NULL
         );`,
         `CREATE TABLE IF NOT EXISTS whitedesk_apps (
@@ -243,8 +254,7 @@ export const helpDeskStationService = {
     const now = Date.now();
     const cleanTarget = targetId.trim().toLowerCase();
     const entBlind = tenantBlindId && tenantBlindId !== 'all' ? escapeSqlString(tenantBlindId) : 'NULL';
-    const cleanCandidate = candidateWhiteId.trim();
-    const candidateBlind = WhiteDeskCrypto.generateBlindId(cleanCandidate);
+    const candidateBlind = WhiteDeskCrypto.generateBlindId(candidateWhiteId.trim());
     const aliasVal = candidateAlias ? escapeSqlString(candidateAlias) : 'NULL';
     
     let targetApp = 'NULL';
@@ -261,7 +271,7 @@ export const helpDeskStationService = {
           type, tenant_blind_id, candidate_white_id, candidate_blind_id, candidate_alias, 
           target_app_id, target_org_id, status, requested_at
         ) VALUES (
-          '${type}', ${entBlind}, ${escapeSqlString(cleanCandidate)}, ${escapeSqlString(candidateBlind)}, 
+          '${type}', ${entBlind}, ${escapeSqlString(candidateBlind)}, ${escapeSqlString(candidateBlind)}, 
           ${aliasVal}, ${targetApp}, ${targetOrg}, 'pending', ${now}
         );
       `);
@@ -284,22 +294,24 @@ export const helpDeskStationService = {
       const app = rows[0];
       const newStatus = approve ? 'approved' : 'rejected';
 
+      const reviewerBlind = WhiteDeskCrypto.generateBlindId(reviewerWhiteId.trim());
       await executeSql(`
         UPDATE whitedesk_approvals 
-        SET status = '${newStatus}', reviewed_at = ${now}, reviewed_by = ${escapeSqlString(reviewerWhiteId)}
+        SET status = '${newStatus}', reviewed_at = ${now}, reviewed_by = ${escapeSqlString(reviewerBlind)}
         WHERE id = ${approvalId};
       `);
 
       if (approve) {
-        const candidateBlind = String(app.candidate_blind_id);
+        const candidateBlind = WhiteDeskCrypto.generateBlindId(String(app.candidate_blind_id || app.candidate_white_id || ''));
         const tenantBlind = String(app.tenant_blind_id);
 
         if (app.type === 'global_admin') {
           const defaultOrgId = 'merkez_' + tenantBlind.slice(-6);
           await executeSql(`
-            INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, alias, role, org_id, app_id, is_active, created_at)
-            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, 'WhiteCosmos', 'global_admin', ${escapeSqlString(defaultOrgId)}, 'all', TRUE, ${now})
+            INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, org_id, app_id, is_active, created_at)
+            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, 'WhiteCosmos', 'global_admin', ${escapeSqlString(defaultOrgId)}, 'all', TRUE, ${now})
             ON CONFLICT (white_id) DO UPDATE SET 
+              blind_id = EXCLUDED.blind_id,
               enterprise_blind_id = EXCLUDED.enterprise_blind_id,
               role = 'global_admin',
               alias = 'WhiteCosmos',
@@ -312,9 +324,10 @@ export const helpDeskStationService = {
           const targetOrg = app.target_org_id || 'default';
           const targetApp = app.target_app_id || 'inwhite';
           await executeSql(`
-            INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, alias, role, org_id, app_id, is_active, created_at)
-            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, ${escapeSqlString(alias)}, 'admin', ${escapeSqlString(targetOrg)}, ${escapeSqlString(targetApp)}, TRUE, ${now})
+            INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, org_id, app_id, is_active, created_at)
+            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, ${escapeSqlString(alias)}, 'admin', ${escapeSqlString(targetOrg)}, ${escapeSqlString(targetApp)}, TRUE, ${now})
             ON CONFLICT (white_id) DO UPDATE SET 
+              blind_id = EXCLUDED.blind_id,
               enterprise_blind_id = EXCLUDED.enterprise_blind_id,
               role = 'admin',
               alias = EXCLUDED.alias,
@@ -842,7 +855,7 @@ export const helpDeskStationService = {
   async getAdminsList(tenantBlindId?: string): Promise<AdminEntry[]> {
     try {
       let query = `
-        SELECT a.white_id, a.enterprise_blind_id, a.org_id, a.app_id, a.alias, a.role, a.pub_key, a.is_active, a.granted_by, a.created_at, e.name as enterprise_name
+        SELECT COALESCE(a.blind_id, a.white_id) AS white_id, a.enterprise_blind_id, a.org_id, a.app_id, a.alias, a.role, a.pub_key, a.is_active, a.granted_by, a.created_at, e.name as enterprise_name
         FROM whitedesk_admins a
         LEFT JOIN whitedesk_enterprises e ON a.enterprise_blind_id = e.enterprise_blind_id
       `;
@@ -857,7 +870,7 @@ export const helpDeskStationService = {
         END, a.created_at ASC;`;
       const rows = await executeSql(query);
       return rows.map(r => ({
-        white_id: String(r.white_id),
+        white_id: WhiteDeskCrypto.generateBlindId(String(r.white_id || '')),
         enterprise_blind_id: r.enterprise_blind_id ? String(r.enterprise_blind_id) : undefined,
         org_id: r.org_id ? String(r.org_id) : 'all',
         app_id: r.app_id ? String(r.app_id) : 'all',
@@ -887,7 +900,7 @@ export const helpDeskStationService = {
     appId: string = 'all',
     grantedBy?: string
   ): Promise<boolean> {
-    const cleanId = whiteId.trim();
+    const cleanId = WhiteDeskCrypto.generateBlindId(whiteId.trim());
     if (!cleanId) return false;
 
     const genericAliases = ['', 'admin', 'Admin', 'master admin', 'Master Admin', 'bu cihaz (master)', 'this device (master)'];
@@ -899,12 +912,13 @@ export const helpDeskStationService = {
     const entVal = enterpriseBlindId ? escapeSqlString(enterpriseBlindId) : 'NULL';
     const cleanOrg = orgId ? escapeSqlString(orgId.trim()) : "'all'";
     const cleanApp = appId ? escapeSqlString(appId.trim().toLowerCase()) : "'all'";
-    const cleanGrant = grantedBy ? escapeSqlString(grantedBy.trim()) : 'NULL';
+    const cleanGrant = grantedBy ? escapeSqlString(WhiteDeskCrypto.generateBlindId(grantedBy.trim())) : 'NULL';
 
     await executeSql(`
-      INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, org_id, app_id, alias, role, is_active, granted_by, created_at)
-      VALUES (${escapeSqlString(cleanId)}, ${entVal}, ${cleanOrg}, ${cleanApp}, ${escapeSqlString(resolvedAlias)}, ${escapeSqlString(role)}, true, ${cleanGrant}, NOW())
+      INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, org_id, app_id, alias, role, is_active, granted_by, created_at)
+      VALUES (${escapeSqlString(cleanId)}, ${escapeSqlString(cleanId)}, ${entVal}, ${cleanOrg}, ${cleanApp}, ${escapeSqlString(resolvedAlias)}, ${escapeSqlString(role)}, true, ${cleanGrant}, NOW())
       ON CONFLICT (white_id) DO UPDATE SET 
+        blind_id = EXCLUDED.blind_id,
         enterprise_blind_id = COALESCE(EXCLUDED.enterprise_blind_id, whitedesk_admins.enterprise_blind_id),
         alias = EXCLUDED.alias, 
         org_id = EXCLUDED.org_id,
@@ -918,11 +932,11 @@ export const helpDeskStationService = {
    * Toggles an admin's is_active status
    */
   async toggleAdminActiveStatus(whiteId: string): Promise<boolean> {
-    const cleanId = whiteId.trim();
+    const cleanId = WhiteDeskCrypto.generateBlindId(whiteId.trim());
     await executeSql(`
       UPDATE whitedesk_admins
       SET is_active = NOT COALESCE(is_active, true)
-      WHERE white_id = ${escapeSqlString(cleanId)};
+      WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(whiteId.trim())};
     `);
     return true;
   },
@@ -931,9 +945,10 @@ export const helpDeskStationService = {
    * Removes an admin from whitedesk_admins and demotes them to a normal user
    */
   async removeAdmin(whiteId: string): Promise<boolean> {
-    const cleanId = whiteId.trim();
+    const cleanId = WhiteDeskCrypto.generateBlindId(whiteId.trim());
+    const rawId = whiteId.trim();
     try {
-      const rows = await executeSql(`SELECT * FROM whitedesk_admins WHERE white_id = ${escapeSqlString(cleanId)} LIMIT 1;`);
+      const rows = await executeSql(`SELECT * FROM whitedesk_admins WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(rawId)} LIMIT 1;`);
       if (rows && rows.length > 0) {
         const adm = rows[0];
         const tenantBlind = adm.enterprise_blind_id || 'default';
@@ -957,7 +972,7 @@ export const helpDeskStationService = {
     } catch (e) {
       console.warn('[HelpDeskStationService] removeAdmin demote user warning:', e);
     }
-    await executeSql(`DELETE FROM whitedesk_admins WHERE white_id = ${escapeSqlString(cleanId)};`);
+    await executeSql(`DELETE FROM whitedesk_admins WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(rawId)};`);
     return true;
   },
 
@@ -1067,12 +1082,12 @@ export const helpDeskStationService = {
       }
       const aRows = await executeSql(aQuery);
       for (const r of aRows) {
-        if (r.candidate_white_id) memberSet.add(String(r.candidate_white_id).toLowerCase());
-        if (r.candidate_blind_id) memberSet.add(String(r.candidate_blind_id).toLowerCase());
+        if (r.candidate_blind_id) memberSet.add(WhiteDeskCrypto.generateBlindId(String(r.candidate_blind_id)).toLowerCase());
+        else if (r.candidate_white_id) memberSet.add(WhiteDeskCrypto.generateBlindId(String(r.candidate_white_id)).toLowerCase());
       }
 
       // 3. Check whitedesk_admins (Strict company & group isolation)
-      let admQuery = `SELECT white_id, org_id, role FROM whitedesk_admins WHERE is_active = true`;
+      let admQuery = `SELECT COALESCE(blind_id, white_id) AS white_id, org_id, role FROM whitedesk_admins WHERE is_active = true`;
       if (isDefaultTenant) {
         admQuery += ` AND enterprise_blind_id = 'default'`;
       } else {
@@ -1084,7 +1099,7 @@ export const helpDeskStationService = {
       const admRows = await executeSql(admQuery);
       for (const r of admRows) {
         if (r.white_id) {
-          memberSet.add(String(r.white_id).toLowerCase());
+          memberSet.add(WhiteDeskCrypto.generateBlindId(String(r.white_id)).toLowerCase());
         }
       }
 
@@ -1211,14 +1226,14 @@ export const helpDeskStationService = {
     enterpriseBlindId?: string,
     categoryId: string = 'all'
   ): Promise<boolean> {
-    const cleanId = adminWhiteId.trim();
+    const cleanId = WhiteDeskCrypto.generateBlindId(adminWhiteId.trim());
     const cleanOrg = orgId.trim().toLowerCase() || 'all';
     const cleanApp = appId.trim().toLowerCase() || 'all';
     let sql = `UPDATE whitedesk_admins SET org_id = ${escapeSqlString(cleanOrg)}, app_id = ${escapeSqlString(cleanApp)}`;
     if (enterpriseBlindId) {
       sql += `, enterprise_blind_id = ${escapeSqlString(enterpriseBlindId)}`;
     }
-    sql += ` WHERE white_id = ${escapeSqlString(cleanId)};`;
+    sql += ` WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(adminWhiteId.trim())};`;
     await executeSql(sql);
     return true;
   },
@@ -1227,8 +1242,8 @@ export const helpDeskStationService = {
    * Deletes / Resets an allocation for an admin
    */
   async deleteAdminAlloc(adminWhiteId: string, appId: string = 'all', orgId: string = 'all'): Promise<boolean> {
-    const cleanId = adminWhiteId.trim();
-    await executeSql(`UPDATE whitedesk_admins SET org_id = 'all', app_id = 'all' WHERE white_id = ${escapeSqlString(cleanId)};`);
+    const cleanId = WhiteDeskCrypto.generateBlindId(adminWhiteId.trim());
+    await executeSql(`UPDATE whitedesk_admins SET org_id = 'all', app_id = 'all' WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(adminWhiteId.trim())};`);
     return true;
   },
 
@@ -1237,15 +1252,16 @@ export const helpDeskStationService = {
    */
   async getAdminAllocations(adminWhiteId?: string): Promise<AdminAllocEntry[]> {
     try {
-      let sql = `SELECT white_id as admin_white_id, enterprise_blind_id, org_id, app_id, EXTRACT(EPOCH FROM created_at)*1000 as updated_at FROM whitedesk_admins`;
+      let sql = `SELECT COALESCE(blind_id, white_id) as admin_white_id, enterprise_blind_id, org_id, app_id, EXTRACT(EPOCH FROM created_at)*1000 as updated_at FROM whitedesk_admins`;
       if (adminWhiteId) {
-        sql += ` WHERE white_id = ${escapeSqlString(adminWhiteId.trim())}`;
+        const cleanId = WhiteDeskCrypto.generateBlindId(adminWhiteId.trim());
+        sql += ` WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(adminWhiteId.trim())}`;
       }
       sql += ` ORDER BY created_at DESC;`;
       const rows = await executeSql(sql);
       return rows.map((r, idx) => ({
         id: idx + 1,
-        admin_white_id: String(r.admin_white_id),
+        admin_white_id: WhiteDeskCrypto.generateBlindId(String(r.admin_white_id || '')),
         enterprise_blind_id: r.enterprise_blind_id ? String(r.enterprise_blind_id) : undefined,
         org_id: String(r.org_id || 'all'),
         app_id: String(r.app_id || 'all'),
@@ -1352,13 +1368,14 @@ export const helpDeskStationService = {
    */
   async moveAdminToTarget(adminWhiteId: string, targetOrgId?: string, targetAppId?: string): Promise<boolean> {
     try {
+      const cleanId = WhiteDeskCrypto.generateBlindId(adminWhiteId.trim());
       const cleanOrg = (!targetOrgId || targetOrgId === 'all' || targetOrgId === 'default') ? 'default' : targetOrgId.trim();
       const cleanApp = (!targetAppId || targetAppId === 'all' || targetAppId === 'default') ? 'all' : targetAppId.trim();
       const q = `
         UPDATE whitedesk_admins
         SET org_id = ${escapeSqlString(cleanOrg)},
             app_id = ${escapeSqlString(cleanApp)}
-        WHERE white_id = ${escapeSqlString(adminWhiteId)};
+        WHERE white_id = ${escapeSqlString(cleanId)} OR blind_id = ${escapeSqlString(cleanId)} OR white_id = ${escapeSqlString(adminWhiteId.trim())};
       `;
       await executeSql(q);
       return true;

@@ -6,22 +6,25 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import { HelpDeskTicket, TicketStatus, helpDeskService } from '../../../services/helpDeskService';
+import { HelpDeskTicket, TicketStatus, OrgEntry, helpDeskService } from '../../../services/helpDeskService';
 import { piiSanitizer } from '../../../services/piiSanitizer';
 import { AdminBadge, tierFromCategory } from '../AdminBadge';
-import { MoreVertical, Leaf, Clock, Star, Paperclip, ImageIcon, FileText, ArrowRight, Database, Lock } from 'lucide-react-native';
+import { MoreVertical, Leaf, Clock, Star, Paperclip, ImageIcon, FileText, ArrowRight, Cloud, Lock, User } from 'lucide-react-native';
 import { isImageFile } from '../utils/fileMimeUtils';
+import { formatDisplayBlindId } from '../utils/helpdeskFormatters';
 
 interface TicketCardProps {
   ticket: HelpDeskTicket;
-  onPress: () => void;
+  onPress?: () => void;
   onLongPress?: () => void;
   onMenuPress?: (ticket: HelpDeskTicket, pageY?: number) => void;
   getLabel: (key: string, tr: string, en: string) => string;
-  formatWhiteId: (id: string) => string;
-  formatAppId: (id?: string) => string;
+  formatWhiteId?: (id: string) => string;
+  formatAppId?: (id?: string) => string;
   formatTicketDate: (ts: number, showTime?: boolean) => string;
   getCategoryLabel: (cat?: string) => string;
+  orgsList?: OrgEntry[];
+  containerStyle?: any;
 }
 
 export const TicketCard: React.FC<TicketCardProps> = ({
@@ -33,6 +36,8 @@ export const TicketCard: React.FC<TicketCardProps> = ({
   formatAppId,
   formatTicketDate,
   getCategoryLabel,
+  orgsList,
+  containerStyle,
 }) => {
   const renderStatusPill = (status: TicketStatus) => {
     if (status === 'answered') {
@@ -49,15 +54,6 @@ export const TicketCard: React.FC<TicketCardProps> = ({
         <View style={styles.pillClosed}>
           <Text style={styles.pillClosedText}>
             {getLabel('helpdesk.filterClosed', 'Kapalı', 'Closed')}
-          </Text>
-        </View>
-      );
-    }
-    if (status === 'revoked') {
-      return (
-        <View style={styles.pillRevoked}>
-          <Text style={styles.pillRevokedText}>
-            {getLabel('helpdesk.filterRevoked', 'Eskale Edildi', 'Escalated')}
           </Text>
         </View>
       );
@@ -79,28 +75,37 @@ export const TicketCard: React.FC<TicketCardProps> = ({
 
   return (
     <TouchableOpacity
-      style={styles.fluidTicketCard}
+      style={[styles.fluidTicketCard, containerStyle]}
       onPress={onPress}
+      disabled={!onPress}
       delayPressIn={200}
-      activeOpacity={0.75}
+      activeOpacity={onPress ? 0.75 : 1}
     >
-      {/* Row 1: ID · App tag · Badge/Category · Status */}
+      {/* Row 1: ID · ORG (Birim / Departman) · Status */}
       <View style={styles.cardHeaderTopRow}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.ticketIdMonoText}>{ticket.id}</Text>
-          {/* Tenant Adı: Sabit 'inwhite' yerine gerçek kayıtlı Tenant Adı */}
-          {ticket.enterprise_name ? (
-            <View style={styles.appTagBadge}>
-              <Text style={styles.appTagBadgeText}>{ticket.enterprise_name}</Text>
-            </View>
-          ) : (ticket.app_id && ticket.app_id.toLowerCase() !== 'inwhite' && ticket.app_id.toLowerCase() !== 'whitedesk') ? (
-            <View style={styles.appTagBadge}>
-              <Text style={styles.appTagBadgeText}>{ticket.app_id}</Text>
-            </View>
-          ) : null}
-          {badgeTier !== null ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8, flexWrap: 'nowrap' }}>
+          {/* Bilet Numarası Başta */}
+          <Text style={styles.ticketIdText}>{ticket.id}</Text>
+
+          {/* ORG (Birim / Departman: Saha, Muhasebe vb. - Kategori Değil!) */}
+          {(() => {
+            const rawOrg = (ticket.org_id || '').trim();
+            if (!rawOrg || rawOrg.toLowerCase() === 'default' || rawOrg === 'all') {
+              return null;
+            }
+            const matchedOrg = orgsList?.find(o => o.org_id.toLowerCase() === rawOrg.toLowerCase());
+            const orgDisplay = matchedOrg?.name || rawOrg;
+            return (
+              <Text style={styles.metaSubUnitText} numberOfLines={1}>
+                <Text style={styles.metaDotSeparator}> · </Text>
+                {orgDisplay}
+              </Text>
+            );
+          })()}
+
+          {badgeTier !== null && (
             /* Unified AdminBadge — same visual grammar as message bubbles */
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 4 }}>
               <AdminBadge tier={badgeTier} size={13} />
               {ticket.category === 'root_support' && (
                 <View style={styles.confidentialPill}>
@@ -109,13 +114,6 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                 </View>
               )}
             </View>
-          ) : (
-            /* Regular ticket: show category pill if not 'general' and not 'voice' */
-            ticket.category && ticket.category !== 'general' && ticket.category.toLowerCase() !== 'voice' && (
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryBadgeText}>{getCategoryLabel(ticket.category)}</Text>
-              </View>
-            )
           )}
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -142,133 +140,105 @@ export const TicketCard: React.FC<TicketCardProps> = ({
         {piiSanitizer.sanitize(ticket.subject).sanitizedText}
       </Text>
 
-      {/* Row 3: Date & Leaf Countdown & Transfer indicator */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.ticketDateMutedText}>
-            {getLabel('helpdesk.lastAction', 'Son işlem:', 'Updated:')} {formatTicketDate(ticket.updated_at || ticket.created_at, true)}
-          </Text>
-          {selfDestructInfo.inDestruction ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-              <Leaf size={12} color="#10B981" strokeWidth={2.4} />
-              <Text style={{ fontSize: 10, fontWeight: '800', color: '#10B981', marginLeft: 3 }}>
-                {selfDestructInfo.remainingText || `${selfDestructInfo.remainingDays} g`}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          {ticket.is_relay_pending && (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Database size={13} color="#EF4444" strokeWidth={2.2} />
-            </View>
-          )}
-          {ticket.transfer_status === 'pending' && (
-            <ArrowRight size={13} color="#10B981" strokeWidth={2.5} />
-          )}
-          {ticket.transfer_status === 'accepted' && (ticket.transferred_from_alias || ticket.transfer_sender_alias) && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-              <Text style={{ fontSize: 10, fontWeight: '600', color: '#64748B' }}>
-                @{ticket.transferred_from_alias || ticket.transfer_sender_alias}
-              </Text>
-              <ArrowRight size={12} color="#64748B" strokeWidth={2} />
-            </View>
-          )}
-        </View>
-      </View>
-
-      {/* Row 3.5: Allocation, Pool & SLA Status */}
+      {/* Row 3: Google M3 Alt Barı (Temsilci Mikro-Çipi + Tarih · Sağ Ray: Bulut + Sayaç) */}
       {(() => {
+        const rawName = (ticket.assigned_admin_name || ticket.assigned_admin_alias || '').trim();
+        const cleanName = rawName.startsWith('@') ? rawName.substring(1) : rawName;
+        const assignedBlind = (ticket.assigned_admin_blind_id || '').trim();
+        const newBlind = ((ticket as any).reassigned_to || ticket.transfer_target_blind_id || '').trim();
         const isRevoked = ticket.status === 'revoked';
-        const hasReassigned = !!ticket.reassigned_from;
-        const assignedName = ticket.assigned_admin_name || ticket.assigned_admin_alias;
-        const assignedBlind = ticket.assigned_admin_blind_id;
-        const isPool = !assignedBlind || assignedBlind === 'unassigned';
-        const isOpen = ticket.status === 'open';
+        const hasChanged = isRevoked || Boolean((ticket as any).reassigned_to) || Boolean((ticket as any).reassigned_from) || Boolean(ticket.transfer_target_blind_id) || ((ticket as any).escalation_stage && (ticket as any).escalation_stage > 0);
 
-        // Calculate live SLA countdown if open
-        let slaRemainingMins: number | null = null;
-        if (isOpen && ticket.created_at) {
-          const elapsed = Date.now() - Number(ticket.created_at);
-          const slaLimitMs = 120 * 60 * 1000; // 2 saat varsayılan SLA
-          slaRemainingMins = Math.round((slaLimitMs - elapsed) / 60000);
+        let representativeText = 'Havuzda';
+        if (hasChanged) {
+          const targetBlind = (newBlind && newBlind !== 'unassigned')
+            ? newBlind
+            : (assignedBlind && assignedBlind !== 'unassigned')
+              ? assignedBlind
+              : '';
+          if (targetBlind) {
+            representativeText = formatDisplayBlindId(targetBlind);
+          }
+        } else {
+          const isPool = !assignedBlind || assignedBlind === 'unassigned';
+          if (!isPool) {
+            if (cleanName) {
+              representativeText = cleanName;
+            } else if (assignedBlind && assignedBlind !== 'unassigned') {
+              representativeText = formatDisplayBlindId(assignedBlind);
+            }
+          }
         }
 
-        const showRow = isRevoked || hasReassigned || assignedName || (assignedBlind && assignedBlind !== 'unassigned') || (isOpen && isPool) || slaRemainingMins !== null;
-        if (!showRow) return null;
+        // Oluşturan Bilgisi (İsim varsa isim, yoksa blind id formatı: 124495...77343)
+        const rawCreatorName = (ticket.user_alias || (ticket as any).user_name || '').trim();
+        const rawCreatorBlind = (ticket.user_blind_id || ticket.user_white_id || '').trim();
+        let creatorText = 'Anonim';
+        if (rawCreatorName) {
+          creatorText = rawCreatorName;
+        } else if (rawCreatorBlind) {
+          creatorText = formatDisplayBlindId(rawCreatorBlind);
+        }
 
         return (
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: 4 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              {isRevoked ? (
-                <View style={styles.inlineEscalatedPill}>
-                  <Text style={styles.inlineEscalatedPillText}>
-                    ⚠️ Eskale Edildi (SLA Aşımı)
-                  </Text>
-                </View>
-              ) : hasReassigned ? (
-                <Text style={styles.allocationMutedText}>
-                  🔄 Yeniden Atandı: {assignedName ? `@${assignedName}` : (assignedBlind ? assignedBlind.substring(0, 10) + '...' : 'Havuz')}
-                </Text>
-              ) : assignedName ? (
-                <Text style={styles.allocationMutedText}>
-                  👤 Atandı: @{assignedName}
-                </Text>
-              ) : assignedBlind && assignedBlind !== 'unassigned' ? (
-                <Text style={styles.allocationMutedText}>
-                  👤 Atandı: {assignedBlind.substring(0, 10)}...
-                </Text>
-              ) : isOpen && isPool ? (
-                <View style={styles.poolBadge}>
-                  <Clock size={10} color="#3B82F6" style={{ marginRight: 3 }} />
-                  <Text style={styles.poolBadgeText}>Havuzda (Atama Bekliyor)</Text>
-                </View>
-              ) : null}
+          <>
+            {/* Oluşturan Satırı: Pill olmadan yalın, en başta içi boş yıldız ikonlu + Oluşturma Tarihi */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+              <Star size={11} color="#64748B" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
+              <Text style={[styles.ticketDateMutedText, { fontWeight: '600', color: '#475569' }]} numberOfLines={1}>
+                {creatorText}
+              </Text>
+              <Text style={styles.metaDotSeparator}> · </Text>
+              <Text style={styles.ticketDateMutedText} numberOfLines={1}>
+                {formatTicketDate(ticket.created_at, true)}
+              </Text>
             </View>
 
-            {/* SLA Geri Sayım Rozeti (Yalnızca açık biletlerde) */}
-            {slaRemainingMins !== null && (
-              <View
-                style={[
-                  styles.slaBadge,
-                  slaRemainingMins <= 0
-                    ? styles.slaBadgeRed
-                    : slaRemainingMins <= 15
-                    ? styles.slaBadgeAmber
-                    : styles.slaBadgeBlue,
-                ]}
-              >
-                <Clock
-                  size={9.5}
-                  color={
-                    slaRemainingMins <= 0
-                      ? '#DC2626'
-                      : slaRemainingMins <= 15
-                      ? '#D97706'
-                      : '#2563EB'
-                  }
-                  style={{ marginRight: 3 }}
-                />
-                <Text
-                  style={[
-                    styles.slaBadgeText,
-                    slaRemainingMins <= 0
-                      ? styles.slaBadgeTextRed
-                      : slaRemainingMins <= 15
-                      ? styles.slaBadgeTextAmber
-                      : styles.slaBadgeTextBlue,
-                  ]}
-                >
-                  {slaRemainingMins <= 0
-                    ? 'SLA Aşımı'
-                    : slaRemainingMins <= 15
-                    ? `${slaRemainingMins} dk (Kritik SLA)`
-                    : `${slaRemainingMins} dk SLA`}
+            {/* Son Satır: Temsilci (Pill Yok, Mavi) + Atama/Havuz/Devir Tarihi · Sağ Ray: Bulut + Sayaç */}
+            <View style={styles.cardMetaRow}>
+              {/* Sol: Temsilci + Atama Tarihi */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0, marginRight: 8, overflow: 'hidden' }}>
+                <User size={11} color="#2563EB" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
+                <Text style={[styles.ticketDateMutedText, { fontWeight: '600', color: '#2563EB' }]} numberOfLines={1}>
+                  {representativeText}
+                </Text>
+
+                <Text style={styles.metaDotSeparator}> · </Text>
+
+                <Text style={styles.ticketDateMutedText} numberOfLines={1}>
+                  {formatTicketDate(ticket.assigned_at || ticket.updated_at || ticket.created_at, true)}
                 </Text>
               </View>
-            )}
-          </View>
+
+              {/* Sağ: Tonal Shade Bulut + Tonal Shade Yaprak/Sayaç Rayı */}
+              <View style={styles.rightIconRail}>
+                <View style={styles.cloudChip}>
+                  <Cloud size={11} color="#2563EB" strokeWidth={2.2} />
+                </View>
+
+                {selfDestructInfo.inDestruction ? (
+                  <View style={styles.leafChip}>
+                    <Leaf size={10} color="#059669" strokeWidth={2.4} />
+                    <Text style={styles.leafChipText}>
+                      {selfDestructInfo.remainingText || `${selfDestructInfo.remainingDays} g`}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {ticket.transfer_status === 'pending' && (
+                  <ArrowRight size={13} color="#10B981" strokeWidth={2.5} />
+                )}
+                {ticket.transfer_status === 'accepted' && (ticket.transferred_from_alias || ticket.transfer_sender_alias) && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                    <Text style={{ fontSize: 10, fontWeight: '600', color: '#64748B' }}>
+                      @{ticket.transferred_from_alias || ticket.transfer_sender_alias}
+                    </Text>
+                    <ArrowRight size={12} color="#64748B" strokeWidth={2} />
+                  </View>
+                )}
+              </View>
+            </View>
+          </>
         );
       })()}
 
@@ -335,10 +305,10 @@ export const TicketCard: React.FC<TicketCardProps> = ({
   );
 };
 
-// 🔒 KİLİTLİ TASARIM: Ana ekran bilet kartı (#F8FAFC, kenarlıksız, kontürsüz, gölgesiz) ve iç öğeleri kilitlenmiştir. Asla değiştirilmemelidir.
+// 🔒 KİLİTLİ TASARIM: Ana ekran bilet kartı (#F4F7FA, kenarlıksız, kontürsüz, gölgesiz) ve iç öğeleri kilitlenmiştir. Asla değiştirilmemelidir.
 const styles = Object.freeze(StyleSheet.create({
   fluidTicketCard: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FA',
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 12,
@@ -355,14 +325,92 @@ const styles = Object.freeze(StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
+  },
+  metaTenantText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  metaDotSeparator: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#94A3B8',
+  },
+  metaCategoryText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  metaSubUnitText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  ticketIdText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1E293B',
   },
   ticketIdMonoText: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    marginRight: 6,
+    color: '#1E293B',
+  },
+  cardMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  rightIconRail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  representativeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    maxWidth: 155,
+    flexShrink: 1,
+  },
+  representativeChipText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#1D4ED8',
+  },
+  cloudChip: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  leafChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  leafChipText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#059669',
+    marginLeft: 3,
   },
   appTagBadge: {
     paddingHorizontal: 6,
@@ -392,15 +440,16 @@ const styles = Object.freeze(StyleSheet.create({
     color: '#64748B',
   },
   fluidTicketSubject: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12.5,
+    fontWeight: '500',
     color: '#0F172A',
-    marginBottom: 8,
-    lineHeight: 20,
+    marginBottom: 6,
+    lineHeight: 18,
+    letterSpacing: -0.2,
   },
   ticketDateMutedText: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#64748B',
   },
   cardBottomRow: {
     flexDirection: 'row',

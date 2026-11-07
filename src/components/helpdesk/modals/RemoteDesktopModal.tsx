@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -9,8 +9,17 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  StatusBar,
 } from 'react-native';
-import { X } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  X,
+  ArrowLeft,
+  Home,
+  LayoutGrid,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react-native';
 import {
   RemoteDesktopSession,
   remoteDesktopService,
@@ -31,11 +40,42 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
   onRejectOffer,
   onEndSession,
 }) => {
+  const insets = useSafeAreaInsets();
   const isEn = language === 'en';
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({
     width: 320,
-    height: 540,
+    height: 480,
   });
+
+  // Çift Katmanlı Akıcı Ekran Mimarisi (Titreme ve Donmayı Önler)
+  const [currentFrame, setCurrentFrame] = useState<string | null>(session?.liveFrameUri || null);
+  const [prevFrame, setPrevFrame] = useState<string | null>(null);
+
+  // Ölçekleme Durumu: 'fit' (orijinal oran / contain) veya 'cover' (ekranı doldur / cover)
+  const [scaleMode, setScaleMode] = useState<'fit' | 'cover'>('fit');
+
+  const toggleScaleMode = () => {
+    setScaleMode((prev) => (prev === 'fit' ? 'cover' : 'fit'));
+  };
+
+  // Çıkış Tehir Modalı
+  const [confirmExitVisible, setConfirmExitVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (session?.liveFrameUri) {
+      setCurrentFrame(session.liveFrameUri);
+    }
+    const unsub = remoteDesktopService.onFrame((frameUri) => {
+      if (!frameUri) return;
+      setCurrentFrame((prev) => {
+        if (prev && prev !== frameUri) {
+          setPrevFrame(prev);
+        }
+        return frameUri;
+      });
+    });
+    return () => unsub();
+  }, [session?.ticketId]);
 
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
@@ -121,34 +161,77 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 3. YÖNETİCİ (ADMIN) TARAFI: SAMSUNG ONE UI UZAK MASAÜSTÜ PENCERESİ
+  // 3. YÖNETİCİ (ADMIN) TARAFI: MİNİMALİST, GLASSMORPHISM RUSTED GLASS UZAK MASAÜSTÜ
   // ─────────────────────────────────────────────────────────────────────────────
+  const handleClosePress = () => {
+    if (session.status === 'active') {
+      setConfirmExitVisible(true);
+    } else {
+      onEndSession();
+    }
+  };
+
+  const handleCanvasTap = (normX: number, normY: number) => {
+    void remoteDesktopService.sendRemoteTap(normX, normY);
+  };
+
   return (
     <Modal
       visible={true}
-      transparent={true}
+      transparent={false}
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onEndSession}
+      onRequestClose={handleClosePress}
     >
-      <View style={styles.bottomSheetOverlay}>
-        <View style={styles.adminSheetContainer}>
-          {/* Üst Başlık */}
-          <View style={styles.adminHeaderRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.adminHeaderTitle}>
-                {isEn ? 'Remote Desktop' : 'Uzak Masaüstü'}
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <View
+        style={[
+          styles.adminFullScreenRoot,
+          {
+            paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 8 : 14),
+            paddingBottom: Math.max(insets.bottom, 8),
+          },
+        ]}
+      >
+        {/* ── ÜST BAŞLIK: LOGO, ALTINDA BİLET NO, SAĞDA 2 AYRI SIĞDIR BUTONU VE ÇARPI ── */}
+        <View style={styles.adminHeaderRow}>
+            <View style={styles.adminHeaderLeft}>
+              <Text style={styles.headerLogoWhite}>
+                White<Text style={styles.headerLogoDesk}>Desk</Text>
               </Text>
-              <Text style={styles.adminHeaderSub} numberOfLines={1}>
-                {`#${session.ticketId}`}
+              <Text style={styles.headerTicketSub}>
+                #{String(session.ticketId || '').replace(/^#/, '')}
               </Text>
             </View>
-            <TouchableOpacity onPress={onEndSession} style={{ padding: 6 }} activeOpacity={0.7}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
+
+            <View style={styles.adminHeaderRight}>
+              {/* Tek Sığdır Butonu (X İkonu Renginde, Borderless, 1. Basışta Sığdır, 2. Basışta Eski Haline Getir) */}
+              <TouchableOpacity
+                style={styles.headerActionBtn}
+                onPress={toggleScaleMode}
+                activeOpacity={0.7}
+                accessibilityLabel="Sığdır / Tam Ekran"
+              >
+                {scaleMode === 'fit' ? (
+                  <Maximize2 size={18} color="#64748B" strokeWidth={2.2} />
+                ) : (
+                  <Minimize2 size={18} color="#64748B" strokeWidth={2.2} />
+                )}
+              </TouchableOpacity>
+
+              {/* Kapatma Butonu (X) - Görüntü ekranının sağ kenarı ile bloklu */}
+              <TouchableOpacity
+                onPress={handleClosePress}
+                style={styles.headerCloseBtn}
+                activeOpacity={0.7}
+                accessibilityLabel="Kapat"
+              >
+                <X size={18} color="#64748B" strokeWidth={2.2} />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Durum 1: Onay Bekleniyor */}
+          {/* ── DURUM 1: ONAY BEKLENİYOR ── */}
           {(session.status === 'offering' || session.status === 'connecting') && (
             <View style={styles.centerStatusBox}>
               <ActivityIndicator size="large" color="#2563EB" />
@@ -163,7 +246,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             </View>
           )}
 
-          {/* Durum 2: Reddedildi veya Kapalı */}
+          {/* ── DURUM 2: REDDEDİLDİ VEYA KAPALI ── */}
           {(session.status === 'disabled_by_user' || session.status === 'rejected') && (
             <View style={styles.centerStatusBox}>
               <Text style={styles.centerStatusTitle}>
@@ -187,7 +270,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             </View>
           )}
 
-          {/* Durum 3: Aktif Uzak Masaüstü — Ölçeklenmiş Canlı Ekran */}
+          {/* ── DURUM 3: CANLI UZAK TUVAL (ÇİFT KATMANLI, DONMASIZ VE SİYAH KENARLIKSIZ) ── */}
           {session.status === 'active' && (
             <View
               style={styles.remoteCanvas}
@@ -216,31 +299,42 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 const dx = locationX - start.x;
                 const dy = locationY - start.y;
                 const dist = Math.hypot(dx, dy);
-                const elapsed = Math.max(80, Math.min(900, Date.now() - start.time));
 
                 const normStartX = start.x / Math.max(1, canvasSize.width);
                 const normStartY = start.y / Math.max(1, canvasSize.height);
                 const normEndX = locationX / Math.max(1, canvasSize.width);
                 const normEndY = locationY / Math.max(1, canvasSize.height);
 
-                if (dist > 18) {
+                if (dist > 16) {
+                  // Hızlı, anlık tepki veren kaydırma (140ms fling)
                   void remoteDesktopService.sendRemoteSwipe(
                     normStartX,
                     normStartY,
                     normEndX,
                     normEndY,
-                    elapsed
+                    140
                   );
                 } else {
-                  void remoteDesktopService.sendRemoteTap(normEndX, normEndY);
+                  handleCanvasTap(normEndX, normEndY);
                 }
               }}
             >
-              {session.liveFrameUri ? (
+              {/* Alt katman (önceki kare) - yeni kare çözülürken ekranı dolu tutar, siyahlık vermez */}
+              {prevFrame ? (
                 <Image
-                  source={{ uri: session.liveFrameUri }}
+                  source={{ uri: prevFrame }}
                   style={StyleSheet.absoluteFill}
-                  resizeMode="stretch"
+                  resizeMode={scaleMode === 'fit' ? 'contain' : 'cover'}
+                  fadeDuration={0}
+                />
+              ) : null}
+
+              {/* Üst katman (canlı kare) - doğrudan akıcı çizilir */}
+              {currentFrame ? (
+                <Image
+                  source={{ uri: currentFrame }}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode={scaleMode === 'fit' ? 'contain' : 'cover'}
                   fadeDuration={0}
                 />
               ) : (
@@ -251,34 +345,85 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             </View>
           )}
 
-          {/* Alt Samsung One UI Kapat / Sonlandır Satırı */}
-          <View style={styles.bottomSheetBtnRow}>
-            <TouchableOpacity
-              style={styles.textBtn}
-              onPress={onEndSession}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.cancelText,
-                  session.status === 'active' && { color: '#EF4444', fontWeight: '700' },
-                ]}
+          {/* ── ALT GEZİNME: X İLE AYNI BOYUTTA, PASTEL MAVİ, BORDERLESS 3 BUTON ── */}
+          {session.status === 'active' && (
+            <View style={styles.bottomNavRow}>
+              {/* 1. Geri Ok */}
+              <TouchableOpacity
+                style={styles.pastelNavBtn}
+                onPress={() => void remoteDesktopService.sendRemoteSystemKey('BACK')}
+                activeOpacity={0.7}
+                accessibilityLabel="Geri"
               >
-                {session.status === 'active'
-                  ? isEn
-                    ? 'End Session'
-                    : 'Oturumu Sonlandır'
-                  : isEn
-                    ? 'Close'
-                    : 'Kapat'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <ArrowLeft size={18} color="#2563EB" strokeWidth={2.2} />
+              </TouchableOpacity>
+
+              {/* 2. Masaüstü */}
+              <TouchableOpacity
+                style={styles.pastelNavBtn}
+                onPress={() => void remoteDesktopService.sendRemoteSystemKey('HOME')}
+                activeOpacity={0.7}
+                accessibilityLabel="Masaüstü"
+              >
+                <Home size={18} color="#2563EB" strokeWidth={2.2} />
+              </TouchableOpacity>
+
+              {/* 3. Arka Plan Uygulamalar */}
+              <TouchableOpacity
+                style={styles.pastelNavBtn}
+                onPress={() => void remoteDesktopService.sendRemoteSystemKey('RECENTS')}
+                activeOpacity={0.7}
+                accessibilityLabel="Arka Plan"
+              >
+                <LayoutGrid size={18} color="#2563EB" strokeWidth={2.2} />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* ── ONAY MODALI: ÇARPIYA BASINCA ALTTAN AÇILIR ── */}
+          {confirmExitVisible && (
+            <View style={styles.confirmOverlay}>
+              <View style={styles.confirmBox}>
+                <Text style={styles.confirmTitle}>
+                  {isEn ? 'End Connection' : 'Bağlantıyı Kes'}
+                </Text>
+                <Text style={styles.confirmDesc}>
+                  {isEn
+                    ? 'Are you sure you want to end the remote session?'
+                    : 'Uzak masaüstü bağlantısını kesmek istediğinize emin misiniz?'}
+                </Text>
+
+                <View style={styles.confirmBtnRow}>
+                  <TouchableOpacity
+                    style={[styles.confirmBtn, styles.confirmBtnCancel]}
+                    onPress={() => setConfirmExitVisible(false)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.confirmBtnCancelText}>
+                      {isEn ? 'Cancel' : 'Vazgeç'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.confirmBtn, styles.confirmBtnDanger]}
+                    onPress={() => {
+                      setConfirmExitVisible(false);
+                      onEndSession();
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.confirmBtnDangerText}>
+                      {isEn ? 'Disconnect' : 'Bağlantıyı Kes'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
-      </View>
-    </Modal>
-  );
-};
+      </Modal>
+    );
+  };
 
 const styles = StyleSheet.create({
   bottomSheetOverlay: {
@@ -287,11 +432,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.18)',
+    backgroundColor: 'rgba(15, 23, 42, 0.40)',
     justifyContent: 'flex-end',
     alignItems: 'center',
     zIndex: 99999,
-    padding: 16,
+    padding: 12,
   },
   bottomSheetContainer: {
     backgroundColor: '#ffffff',
@@ -310,13 +455,13 @@ const styles = StyleSheet.create({
   bottomSheetTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000000',
+    color: '#0F172A',
     marginBottom: 10,
     textAlign: 'left',
   },
   bottomSheetDesc: {
     fontSize: 14,
-    color: '#4B5563',
+    color: '#475569',
     lineHeight: 20,
     marginBottom: 24,
     textAlign: 'left',
@@ -331,7 +476,7 @@ const styles = StyleSheet.create({
   textBtn: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   approveText: {
     fontSize: 15,
@@ -341,47 +486,71 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6B7280',
+    color: '#64748B',
   },
   separator: {
     width: 1,
     height: 20,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E2E8F0',
   },
-  adminSheetContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+  adminFullScreenRoot: {
+    flex: 1,
     width: '100%',
-    maxWidth: 420,
-    height: Dimensions.get('window').height * 0.84,
-    marginBottom: Platform.OS === 'ios' ? 20 : 12,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 25,
+    height: '100%',
+    backgroundColor: '#ffffff',
   },
   adminHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 12,
-    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F1F5F9',
+    backgroundColor: '#ffffff',
   },
-  adminHeaderTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#000000',
+  adminHeaderLeft: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    flex: 1,
   },
-  adminHeaderSub: {
-    fontSize: 12,
-    color: '#6B7280',
+  headerLogoWhite: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  headerLogoDesk: {
+    color: '#2563EB',
+    fontWeight: '800',
+  },
+  headerTicketSub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#64748B',
     marginTop: 2,
+  },
+  adminHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  headerActionBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F1F5F9',
+  },
+  headerCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F1F5F9',
   },
   centerStatusBox: {
     flex: 1,
@@ -392,24 +561,114 @@ const styles = StyleSheet.create({
   centerStatusTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000000',
+    color: '#0F172A',
     marginTop: 14,
     textAlign: 'center',
   },
   centerStatusSub: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#64748B',
     marginTop: 6,
     textAlign: 'center',
     lineHeight: 19,
   },
   remoteCanvas: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    width: '100%',
+    backgroundColor: '#F8FAFC',
     overflow: 'hidden',
+    position: 'relative',
+  },
+  bottomNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    gap: 16,
+  },
+  pastelNavBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    zIndex: 99999,
+  },
+  confirmBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  confirmTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 6,
+  },
+  confirmDesc: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  confirmBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  confirmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  confirmBtnCancel: {
+    backgroundColor: '#F1F5F9',
+  },
+  confirmBtnCancelText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  confirmBtnDanger: {
+    backgroundColor: '#EF4444',
+  },
+  confirmBtnDangerText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  confirmBtnPrimary: {
+    backgroundColor: '#2563EB',
+  },
+  confirmBtnPrimaryText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   userActiveBannerWrap: {
     position: 'absolute',

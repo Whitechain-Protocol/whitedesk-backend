@@ -25,6 +25,7 @@ import {
 } from 'lucide-react-native';
 import { HelpDeskTicket, helpDeskService } from '../../../services/helpDeskService';
 import { checkTicketHasDiagnostics } from '../utils/helpdeskFormatters';
+import { WhiteDeskCrypto } from '../../../whitedesk-sdk';
 
 export interface TicketActionModalProps {
   visible: boolean;
@@ -103,6 +104,21 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
   const lifecycle = helpDeskService.getTicketLifecycleStatus(ticket);
   const hasDiag = checkTicketHasDiagnostics(ticket, messages);
 
+  // Kırılmaz Sahiplik & Devralma Kontrolü (Zero-Trust Ticket Ownership)
+  const assignedBlind = (ticket.assigned_admin_blind_id || '').trim().toLowerCase();
+  const isPool = !assignedBlind || assignedBlind === 'unassigned';
+  const myCleanWhiteId = (ownWhiteId || '').trim().toLowerCase();
+  const myHashedBlindId = (myCleanWhiteId && typeof WhiteDeskCrypto?.generateBlindId === 'function')
+    ? (myCleanWhiteId.startsWith('blind_') ? myCleanWhiteId : WhiteDeskCrypto.generateBlindId(myCleanWhiteId)).trim().toLowerCase()
+    : myCleanWhiteId;
+  const isMyTicket = Boolean(
+    !isPool && (
+      (myHashedBlindId && assignedBlind && myHashedBlindId === assignedBlind) ||
+      (myCleanWhiteId && assignedBlind && myCleanWhiteId === assignedBlind)
+    )
+  );
+  const canClaim = (isAdmin || isMasterAdmin || isFounder || adminRole === 'founder' || adminRole === 'global_admin') && !isMyTicket;
+
   const { height: screenHeight } = Dimensions.get('window');
   const shouldOpenUpwards = anchorY !== null && anchorY !== undefined && anchorY > screenHeight * 0.58;
 
@@ -128,8 +144,8 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           onPress={onClose}
         />
         <View style={[styles.popupContainer, dynamicPopupStyle]}>
-          {/* 1. Sistem Tanısı Aksiyonları */}
-          {hasDiag ? (
+          {/* 1. Sistem Tanısı Aksiyonları - Yalnızca bilet sahibi admine ait biletlerde */}
+          {isMyTicket && (hasDiag ? (
             <>
               {onInspectDiagnostics && (
                 <TouchableOpacity
@@ -178,7 +194,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
                 </Text>
               </TouchableOpacity>
             )
-          )}
+          ))}
 
           {/* 2. Hizmet Kalitesini Değerlendir */}
           {!isAdmin && onOpenRating && (lifecycle.stage === 'closed_cooling' || lifecycle.stage === 'rating_pending') && (
@@ -197,7 +213,24 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* 3. Birim / Uygulama Düzenle */}
+          {/* 3.0 Bileti Devral (Take Over / Claim) - Kendisine ait olmayan biletlerde görünür (Normal menü renginde) */}
+          {!isMyTicket && canClaim && onTakeOverTicket && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onClose();
+                onTakeOverTicket(ticket);
+              }}
+              activeOpacity={0.65}
+            >
+              <Database size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
+              <Text style={styles.menuText}>
+                {language === 'tr' ? 'Bileti Devral' : 'Take Over'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* 3.1 Birim / Uygulama Düzenle */}
           {(isAdmin || getRank(adminRole) >= 1) && onOpenOrgAssign && (
             <TouchableOpacity
               style={styles.menuItem}
@@ -209,30 +242,13 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Layers size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Birim Düzenle' : 'Assign Unit'}
+                {language === 'tr' ? 'Birim Değiştir' : 'Change Unit'}
               </Text>
             </TouchableOpacity>
           )}
 
-          {/* 3.0 Bileti Devral (Take Over) - Yalnızca Kurucu ve Global Admin için sunucuda henüz buharlaşmamış biletlerde */}
-          {(isFounder || isMasterAdmin || adminRole === 'founder' || adminRole === 'global_admin') && ticket.is_relay_pending && onTakeOverTicket && (
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                onClose();
-                onTakeOverTicket(ticket);
-              }}
-              activeOpacity={0.65}
-            >
-              <Database size={16} color="#DC2626" strokeWidth={2} style={styles.menuIcon} />
-              <Text style={[styles.menuText, { color: '#DC2626', fontWeight: '700' }]}>
-                {language === 'tr' ? 'Bileti Devral' : 'Take Over'}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {/* 3.1 Bileti Devret */}
-          {(isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status !== 'pending' && onStartTransfer && (
+          {/* 3.2 Bileti Devret - KESİNLİKLE YALNIZCA BİLETİN GERÇEK SAHİBİ DEVREDEBİLİR */}
+          {isMyTicket && (isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status !== 'pending' && onStartTransfer && (
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -248,8 +264,8 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* 3.2 Devri İptal Et */}
-          {(isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status === 'pending' && onCancelTransfer && (
+          {/* 3.3 Devri İptal Et */}
+          {isMyTicket && (isAdmin || getRank(adminRole) >= 1) && ticket.transfer_status === 'pending' && onCancelTransfer && (
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -265,8 +281,8 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* 4. Dijital Temizlik (Self-Destruct) */}
-          {Boolean(selfDestructInfo.inDestruction || (ticket.auto_delete_at && Number(ticket.auto_delete_at) > 0)) ? (
+          {/* 4. Dijital Temizlik (Self-Destruct) - KESİNLİKLE YALNIZCA BİLET SAHİBİ BAŞLATABİLİR */}
+          {isMyTicket && (Boolean(selfDestructInfo.inDestruction || (ticket.auto_delete_at && Number(ticket.auto_delete_at) > 0)) ? (
             onCancelSelfDestruct && (
               <TouchableOpacity
                 style={styles.menuItem}
@@ -298,10 +314,10 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
                 </Text>
               </TouchableOpacity>
             )
-          )}
+          ))}
 
-          {/* 5. Yönetici Yetkisi Ver */}
-          {getRank(adminRole) >= 1 && targetActionRole === 'none' && isNotMe && (
+          {/* 5. Yönetici Yetkisi Ver - Yalnızca bilet sahibi admine ait biletlerde */}
+          {isMyTicket && getRank(adminRole) >= 1 && targetActionRole === 'none' && isNotMe && (
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -318,7 +334,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           )}
 
           {/* 6. Kiracı Global Yöneticisi Ata */}
-          {(isFounder || (adminRole === 'global_admin' && targetActionRole === 'admin')) && targetActionRole !== 'founder' && targetActionRole !== 'global_admin' && isNotMe && (
+          {isMyTicket && (isFounder || (adminRole === 'global_admin' && targetActionRole === 'admin')) && targetActionRole !== 'founder' && targetActionRole !== 'global_admin' && isNotMe && (
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -335,10 +351,10 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           )}
 
           {/* Divider Before Danger Actions */}
-          <View style={styles.divider} />
+          {isMyTicket && <View style={styles.divider} />}
 
           {/* 7. Yöneticilik Yetkisini İptal Et */}
-          {isNotMe && targetActionRole !== 'none' && getRank(adminRole) > getRank(targetActionRole) && (
+          {isMyTicket && isNotMe && targetActionRole !== 'none' && getRank(adminRole) > getRank(targetActionRole) && (
             <TouchableOpacity
               style={[styles.menuItem, styles.menuItemWipe]}
               onPress={() => {
@@ -355,7 +371,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           )}
 
           {/* 8. Kullanıcıyı Engelle */}
-          {isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
+          {isMyTicket && isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
             <TouchableOpacity
               style={[styles.menuItem, styles.menuItemWipe]}
               onPress={() => {
@@ -372,7 +388,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           )}
 
           {/* 9. Bileti Sil */}
-          {(isAdmin || !isNotMe) && (
+          {isMyTicket && (isAdmin || !isNotMe) && (
             <TouchableOpacity
               style={[styles.menuItem, styles.menuItemWipe]}
               onPress={() => {
@@ -389,7 +405,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
           )}
 
           {/* 10. Bileti ve Kullanıcıyı Sil (Master Admin) */}
-          {isMasterAdmin && isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
+          {isMyTicket && isMasterAdmin && isNotMe && (targetActionRole === 'none' || getRank(adminRole) > getRank(targetActionRole)) && (
             <TouchableOpacity
               style={[styles.menuItem, styles.menuItemWipe]}
               onPress={() => {

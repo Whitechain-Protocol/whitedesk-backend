@@ -16,11 +16,34 @@ export const STORAGE_KEYS = {
   ADMIN_ORG_ID: 'inwhite_helpdesk_admin_org_id',
   CUSTOM_ALIAS: 'inwhite_helpdesk_custom_alias',
   ACTIVE_TENANT_BLIND_ID: 'inwhite_helpdesk_active_tenant_blind_id',
+  LAST_GRACE_WARN_TS: 'inwhite_license_last_grace_warn_ts',
 };
 
-export const PLANET_NAMES = [
-  'Planet', 'Orbit', 'Cluster',
-];
+export interface TenantLicenseData {
+  enterpriseBlindId: string;
+  planId: 'trial' | 'core' | 'live';
+  planName: string;
+  tierLevel: number;
+  status: 'trialing' | 'active' | 'grace_period' | 'expired';
+  monthlyPrice: number;
+  annualMonthlyPrice: number;
+  billingCycle: 'monthly' | 'annual';
+  features: string[];
+  trialDaysRemaining?: number;
+  trialStartAt?: number;
+  trialEndAt?: number;
+  subscriptionStartAt?: number;
+  subscriptionEndAt?: number;
+  gracePeriodDays: number;
+  warningIntervals: number;
+  graceEndsAt?: number;
+  graceDaysRemaining?: number;
+  isInGracePeriod?: boolean;
+  isGraceExpired?: boolean;
+  hasRemoteDesktop: boolean;
+  hasAuditLogs: boolean;
+  updatedAt?: number;
+}
 
 export const COSMIC_PREFIXES = [
   'Planet', 'WhiteCosmos', 'Orbit', 'Nebula', 'Pulsar', 'Nova', 'Comet', 'Titan',
@@ -39,8 +62,6 @@ export interface HelpDeskCategory {
   labelTr: string;
   labelEn: string;
 }
-
-export const INWHITE_CATEGORIES: HelpDeskCategory[] = [];
 
 export interface AppEntry {
   app_id: string;
@@ -139,6 +160,8 @@ export interface HelpDeskTicket {
   app_id: string;
   user_white_id: string;
   user_blind_id?: string;
+  user_alias?: string | null;
+  user_name?: string | null;
   user_pubkey?: string;
   ticket_pubkey?: string;
   subject: string;
@@ -168,11 +191,13 @@ export interface HelpDeskTicket {
   is_relay_pending?: boolean;
   relay_item_id?: string;
   relay_attachment_r2_key?: string | null;
+  sla_limit_minutes?: number;
   escalation_stage?: number;
   reassigned_from?: string | null;
   reassigned_to?: string | null;
   revocation_reason?: string | null;
   audit_trail?: string | null;
+  assigned_at?: number;
   created_at: number;
   updated_at: number;
 }

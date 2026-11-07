@@ -1,10 +1,10 @@
 import { HelpDeskCategory } from './types';
 
-// SECURITY: Credentials are loaded from process.env at bundle time.
-export const WHITEDESK_NEON_ENDPOINT = process.env.EXPO_PUBLIC_NEON_ENDPOINT || '';
-export const WHITEDESK_CONNECTION_STRING = process.env.EXPO_PUBLIC_NEON_CONNECTION_STRING || '';
+// Sovereign Unified Cloudflare D1 SQL Gateway (Neon completely decommissioned)
+const DEFAULT_BACKEND_URL = (process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one').replace(/\/$/, '');
+export const WHITEDESK_D1_SQL_ENDPOINT = `${DEFAULT_BACKEND_URL}/api/d1/query`;
 
-// In-memory structural performance caches (eliminates redundant Neon pooler HTTP overhead)
+// In-memory structural performance caches
 export let _roleCache: { [whiteId: string]: { role: 'founder' | 'global_admin' | 'admin' | 'none'; ts: number } } = {};
 export let _categoryCache: { [appId: string]: HelpDeskCategory[] } = {};
 
@@ -17,13 +17,13 @@ export function clearCategoryCache() {
   _categoryCache = {};
 }
 
-export function generateTicketId(): string {
+export function generateTicketId(isDiscussion: boolean = false): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let rand = '';
   for (let i = 0; i < 6; i++) {
     rand += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return `TKT-${rand}`;
+  return isDiscussion ? `DSC-${rand}` : `TKT-${rand}`;
 }
 
 export function escapeSqlString(val: string | null | undefined, nullable: boolean = false): string {
@@ -33,25 +33,24 @@ export function escapeSqlString(val: string | null | undefined, nullable: boolea
 
 export async function executeSql(query: string): Promise<any[]> {
   try {
-    const res = await fetch(WHITEDESK_NEON_ENDPOINT, {
+    const res = await fetch(WHITEDESK_D1_SQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Neon-Connection-String': WHITEDESK_CONNECTION_STRING,
       },
       body: JSON.stringify({ query }),
     });
 
     if (!res.ok) {
       const errText = await res.text();
-      console.warn('[HelpDeskService] SQL error:', res.status, errText);
+      console.warn('[HelpDeskService] D1 SQL error:', res.status, errText);
       return [];
     }
 
     const data = await res.json();
     return Array.isArray(data.rows) ? data.rows : [];
   } catch (err) {
-    console.warn('[HelpDeskService] executeSql network error:', err);
+    console.warn('[HelpDeskService] executeSql D1 network error:', err);
     return [];
   }
 }

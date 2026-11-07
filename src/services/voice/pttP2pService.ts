@@ -144,15 +144,15 @@ export class PttP2pService {
         payload,
         'direct_ptt'
       );
-
-      void apiClient.sendCallPushNotification(
-        session.calleeWhiteId,
-        session.callerAlias,
-        session.callerWhiteId,
-        session.ticketId,
-        'ptt'
-      );
     }
+
+    void apiClient.sendCallPushNotification(
+      session.calleeWhiteId || '',
+      session.callerAlias,
+      session.callerWhiteId,
+      session.ticketId,
+      'ptt'
+    );
   }
 }
 

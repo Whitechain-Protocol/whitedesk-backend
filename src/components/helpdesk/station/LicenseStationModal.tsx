@@ -236,7 +236,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                       styles.statusBadgeText,
                       { color: isTrial ? '#B45309' : isLive ? '#6D28D9' : '#1D4ED8' }
                     ]}>
-                      {isTrial ? 'Deneme Sürümü' : isLive ? 'Zirve Paket' : 'Aktif Plan'}
+                      {isTrial ? 'Ücretsiz Deneme' : isLive ? 'Zirve Paket' : 'Aktif Plan'}
                     </Text>
                   </View>
                 </View>
@@ -326,7 +326,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   </TouchableOpacity>
                   <Text style={styles.upgradeHintText}>
                     {isTrial
-                      ? '14 günlük deneme sürümünden CORE veya LIVE paketine anında geçiş yapın.'
+                      ? 'Ücretsiz denemeden CORE veya LIVE paketine anında geçiş yapın.'
                       : 'Canlı müdahale ve uzak masaüstü desteği için LIVE pakete geçin.'}
                   </Text>
                 </View>

@@ -1,5 +1,6 @@
 import { apiClient } from '../apiClient';
 import { helpDeskService } from '../helpDeskService';
+import { remoteDesktopService } from '../remoteDesktopService';
 import { InWhiteRingtone } from '../../../modules/inwhite-ringtone';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { NotificationService } from '../notificationService';
@@ -19,7 +20,14 @@ import { signalingService, SignalingService, optimizeOpusSdp } from './signaling
 import { callService, CallService } from './callService';
 import { pttService, PttService } from './pttService';
 import { pttP2pService, PttP2pService } from './pttP2pService';
-import { pttBroadcastService, PttBroadcastService, normalizeOrgPttTenant, buildPttRoomName } from './pttBroadcastService';
+import {
+  pttBroadcastService,
+  PttBroadcastService,
+  normalizeOrgPttTenant,
+  buildPttRoomName,
+  formatPttBlindId,
+  resolvePttPeerDisplayName,
+} from './pttBroadcastService';
 
 export * from './types';
 export * from './signalingService';
@@ -31,6 +39,40 @@ export * from './pttBroadcastService';
 export class VoiceCallService {
   public activeEnterpriseBlindId: string = '';
   public activeOrgId: string = '';
+  public ownWhiteId: string = '';
+  public ownCustomAlias: string = '';
+
+  setOwnIdentity(whiteId?: string | null, customAlias?: string | null): void {
+    if (whiteId && whiteId.trim()) {
+      this.ownWhiteId = WhiteDeskCrypto.generateBlindId(whiteId.trim());
+    }
+    if (customAlias !== undefined) {
+      this.ownCustomAlias = (customAlias || '').trim();
+    }
+  }
+
+  private getOwnSessionWhiteId(): string {
+    if (this.ownWhiteId) {
+      return WhiteDeskCrypto.generateBlindId(this.ownWhiteId);
+    }
+    if (!this.currentSession) return '';
+    const raw =
+      this.currentSession.role === 'callee'
+        ? (this.currentSession.calleeWhiteId || this.currentSession.callerWhiteId)
+        : (this.currentSession.callerWhiteId || this.currentSession.calleeWhiteId);
+    return raw ? WhiteDeskCrypto.generateBlindId(raw) : '';
+  }
+
+  private getOwnSessionDisplayName(): string {
+    const myId = this.getOwnSessionWhiteId();
+    if (this.ownCustomAlias && this.ownCustomAlias.trim()) {
+      return resolvePttPeerDisplayName(this.ownCustomAlias, myId);
+    }
+    if (this.currentSession?.role === 'caller' && this.currentSession.callerAlias) {
+      return resolvePttPeerDisplayName(this.currentSession.callerAlias, myId);
+    }
+    return resolvePttPeerDisplayName('', myId);
+  }
 
   setActiveEnterpriseBlindId(id: string): void {
     this.activeEnterpriseBlindId = (id || '').trim();
@@ -185,15 +227,17 @@ export class VoiceCallService {
    */
   async startDirectCall(
     ticketId: string,
-    callerWhiteId: string,
+    rawCallerWhiteId: string,
     callerAlias: string,
-    calleeWhiteId: string,
+    rawCalleeWhiteId: string,
     calleeAlias: string,
     callType: VoiceCallType = 'call',
     targetOrgName?: string,
     targetOrgId?: string
   ): Promise<boolean> {
     this.resetFullState();
+    const callerWhiteId = WhiteDeskCrypto.generateBlindId(rawCallerWhiteId || '');
+    const calleeWhiteId = rawCalleeWhiteId ? WhiteDeskCrypto.generateBlindId(rawCalleeWhiteId) : '';
 
     if (callType === 'ptt') {
       // ── PTT_P2P MODU ──────────────────────────────────────────────
@@ -279,15 +323,15 @@ export class VoiceCallService {
           payload,
           'direct_call'
         );
-
-        void apiClient.sendCallPushNotification(
-          calleeWhiteId,
-          callerAlias,
-          callerWhiteId,
-          ticketId,
-          'call'
-        );
       }
+
+      void apiClient.sendCallPushNotification(
+        calleeWhiteId || '',
+        callerAlias,
+        callerWhiteId,
+        ticketId,
+        'call'
+      );
     }
 
     this.startCallerCallPolling(this.currentSession.roomName);
@@ -339,10 +383,11 @@ export class VoiceCallService {
   leaveOrgChannel(): void {
     if (this.currentSession && this.currentSession.callType === 'ptt' && this.currentSession.scope === 'org_group') {
       const roomName = this.currentSession.roomName;
-      const myAlias = this.currentSession.callerAlias || this.currentSession.calleeAlias || 'Kullanıcı';
-      const myId = this.currentSession.callerWhiteId || this.currentSession.calleeWhiteId || '';
+      const wasStandby = Boolean(this.currentSession.isStandby);
+      const myId = this.getOwnSessionWhiteId();
+      const myAlias = this.getOwnSessionDisplayName();
 
-      if (roomName) {
+      if (roomName && !wasStandby) {
         void pttBroadcastService.broadcastPeerEvent(roomName, this.currentSession.role || 'callee', 'left', myAlias, myId);
       }
 
@@ -358,7 +403,9 @@ export class VoiceCallService {
       InWhiteRingtone.releaseVoipWakeLock();
       InWhiteRingtone.stopRingtone();
       InWhiteRingtone.stopRingback();
-      InWhiteRingtone.playRadioTone('close');
+      if (!wasStandby) {
+        InWhiteRingtone.playRadioTone('close');
+      }
       InWhiteRingtone.resetAudioMode();
 
       signalingService.cleanupMedia();
@@ -382,40 +429,87 @@ export class VoiceCallService {
     tenantId: string,
     orgId: string,
     orgName: string,
-    callerWhiteId: string,
+    rawCallerWhiteId: string,
     callerAlias: string,
     targetMembers: string[] = []
   ): Promise<boolean> {
     const cleanOrgId = orgId && orgId !== 'all' ? orgId : 'all';
     const roomName = buildPttRoomName(tenantId, cleanOrgId);
+    const callerWhiteId = WhiteDeskCrypto.generateBlindId(rawCallerWhiteId || '');
+    const resolvedCallerAlias = resolvePttPeerDisplayName(callerAlias, callerWhiteId);
+    this.ownWhiteId = callerWhiteId;
+    const normalizedTargets = (targetMembers || [])
+      .filter(Boolean)
+      .map(id => WhiteDeskCrypto.generateBlindId(id));
+
+    // KURAL 1 & 3: Havuzda (activePeers) en az 1 bağlı cihaz olup olmadığını ve kimlerin bağlı olduğunu kontrol et
+    let hasPeersInPool = false;
+    const connectedPoolIds = new Set<string>();
+    try {
+      const existingSignal = await apiClient.fetchFastSignal(roomName, 'caller') as any;
+      if (existingSignal && existingSignal.found) {
+        if (Array.isArray(existingSignal.activePeers) && existingSignal.activePeers.length > 0) {
+          for (const p of existingSignal.activePeers) {
+            const pid = WhiteDeskCrypto.generateBlindId(String(p?.whiteId || '')).toLowerCase().trim();
+            if (pid && pid !== callerWhiteId.toLowerCase().trim()) {
+              connectedPoolIds.add(pid);
+            }
+          }
+          hasPeersInPool = connectedPoolIds.size > 0;
+        } else if (
+          existingSignal.signalType !== 'hangup' &&
+          existingSignal.signalType !== 'reject' &&
+          existingSignal.targetMode !== 'peer_leave' &&
+          existingSignal.offerSdp
+        ) {
+          try {
+            const parsedOffer = JSON.parse(existingSignal.offerSdp);
+            const offerCaller = parsedOffer.callerWhiteId ? WhiteDeskCrypto.generateBlindId(parsedOffer.callerWhiteId).toLowerCase().trim() : '';
+            const joinerId = parsedOffer.whiteId ? WhiteDeskCrypto.generateBlindId(parsedOffer.whiteId).toLowerCase().trim() : '';
+            const isRecent = Date.now() - Number(existingSignal.updatedAt || parsedOffer.ts || 0) < 300_000;
+            if (isRecent && parsedOffer.action !== 'left') {
+              if (offerCaller && offerCaller !== callerWhiteId.toLowerCase().trim()) connectedPoolIds.add(offerCaller);
+              if (joinerId && joinerId !== callerWhiteId.toLowerCase().trim()) connectedPoolIds.add(joinerId);
+              hasPeersInPool = connectedPoolIds.size > 0;
+            }
+          } catch {}
+        }
+      }
+    } catch {}
+
+    // KURAL 3: Yalnızca havuzda bağlı OLMAYAN cihazlara davet zili gönderilir
+    const unconnectedTargets = normalizedTargets.filter(
+      (id) => id && id.toLowerCase() !== callerWhiteId.toLowerCase() && !connectedPoolIds.has(id.toLowerCase())
+    );
+    const skipPush = hasPeersInPool && unconnectedTargets.length === 0;
 
     this.resetFullState();
-    await apiClient.deleteFastSignal(roomName);
+    if (!hasPeersInPool) {
+      await apiClient.deleteFastSignal(roomName);
+    }
 
+    // Havuzda en az 1 cihaz varsa doğrudan 'connected', kimse yoksa 'outgoing_ringing'
     this.currentSession = pttBroadcastService.createActiveSession(
       tenantId,
       cleanOrgId,
       orgName,
       callerWhiteId,
-      callerAlias
+      resolvedCallerAlias,
+      hasPeersInPool ? 'connected' : 'outgoing_ringing'
     );
     this.notify();
 
-    InWhiteRingtone.startRadioRingback();
-
-    this.durationInterval = setInterval(() => {
-      if (this.currentSession && this.currentSession.state === 'connected') {
-        this.currentSession.durationSeconds++;
-        this.notify();
-      }
-    }, 1000);
+    void InWhiteRingtone.routeAudio(true);
+    if (!hasPeersInPool) {
+      InWhiteRingtone.startRadioRingback();
+    }
 
     await signalingService.setupPeerConnection('caller', roomName, true, {
       onRemoteTrackConnected: () => {
-        this.establishConnectedState();
+        this.establishConnectedState(true);
       },
       onConnectionConnected: () => {
-        this.establishConnectedState();
+        this.establishConnectedState(true);
       },
       onTurnFallbackNeeded: () => {
         void this.triggerCloudflareTurnFallback();
@@ -425,9 +519,22 @@ export class VoiceCallService {
     const sdpToSend = await signalingService.createOfferSdp();
     const payload = pttBroadcastService.buildBroadcastPayload(this.currentSession, tenantId, sdpToSend);
 
-    await pttBroadcastService.dispatchBroadcastOffer(this.currentSession, tenantId, payload, targetMembers);
+    await pttBroadcastService.dispatchBroadcastOffer(
+      this.currentSession,
+      tenantId,
+      payload,
+      unconnectedTargets,
+      skipPush
+    );
 
-    this.startCallerCallPolling(roomName);
+    if (hasPeersInPool) {
+      // Havuzda en az 1 cihaz olduğu için giden zil çalmadan doğrudan bağlı konuma geç!
+      void pttBroadcastService.broadcastPeerEvent(roomName, 'caller', 'joined', resolvedCallerAlias, callerWhiteId);
+      this.establishConnectedState(true);
+    } else {
+      // Havuz boş; ilk cihaz katıldığında giden zili susturup bağlı konuma geçmek için dinle
+      this.startCallerCallPolling(roomName, callerWhiteId);
+    }
     return true;
   }
 
@@ -448,6 +555,7 @@ export class VoiceCallService {
     }
 
     this.currentSession.state = 'connecting';
+    this.currentSession.isStandby = false;
     this.notify();
 
     await signalingService.setupPeerConnection('callee', roomName, this.currentSession.isMuted, {
@@ -477,25 +585,21 @@ export class VoiceCallService {
       'call_connected'
     );
 
-    if (roomName.includes('_default_')) {
-      const entRoom = roomName.replace('_default_', '_ent_1fc4c76b722c_');
-      void apiClient.publishFastSignal(entRoom, 'callee', 'answer', answerSdpToSend, 'call_connected');
-    } else if (roomName.includes('_ent_1fc4c76b722c_')) {
-      const defRoom = roomName.replace('_ent_1fc4c76b722c_', '_default_');
-      void apiClient.publishFastSignal(defRoom, 'callee', 'answer', answerSdpToSend, 'call_connected');
-    }
-
     if (this.currentSession?.scope === 'org_group') {
-      const myAlias = this.currentSession.calleeAlias || this.currentSession.callerAlias || 'Kullanıcı';
-      const myId = this.currentSession.calleeWhiteId || this.currentSession.callerWhiteId || '';
-      void pttBroadcastService.broadcastPeerEvent(roomName, 'callee', 'joined', myAlias, myId);
+      const myId = this.getOwnSessionWhiteId();
+      const myAlias = this.getOwnSessionDisplayName();
+      setTimeout(() => {
+        if (this.currentSession && this.currentSession.roomName === roomName && !this.currentSession.isStandby) {
+          void pttBroadcastService.broadcastPeerEvent(roomName, 'callee', 'joined', myAlias, myId);
+        }
+      }, 1800);
     }
 
     void InWhiteRingtone.routeAudio(true);
 
     setTimeout(() => {
-      this.establishConnectedState();
-    }, 400);
+      this.establishConnectedState(true);
+    }, 300);
   }
 
   async acceptCallRequest(): Promise<void> {
@@ -507,6 +611,7 @@ export class VoiceCallService {
     const roomName = this.currentSession.roomName;
     const calleeWhiteId = this.currentSession.calleeWhiteId;
     const callerWhiteId = this.currentSession.callerWhiteId;
+    const isOrgGroup = this.currentSession.scope === 'org_group';
     const currentTs = this.currentSession.requestTs || Date.now();
     this.lastHandledRequestTs = Math.max(this.lastHandledRequestTs, currentTs, Date.now());
 
@@ -524,11 +629,13 @@ export class VoiceCallService {
     InWhiteRingtone.resetAudioMode();
     this.cleanupSession();
 
-    void apiClient.publishFastSignal(roomName, 'callee', 'reject');
-    void apiClient.deleteFastSignal(roomName);
-    if (callerWhiteId) {
-      const callerDirectRoom = `whitedesk_user_signal_${callerWhiteId.toLowerCase().trim()}`;
-      void apiClient.publishFastSignal(callerDirectRoom, 'callee', 'reject');
+    if (!isOrgGroup) {
+      void apiClient.publishFastSignal(roomName, 'callee', 'reject');
+      void apiClient.deleteFastSignal(roomName);
+      if (callerWhiteId) {
+        const callerDirectRoom = `whitedesk_user_signal_${callerWhiteId.toLowerCase().trim()}`;
+        void apiClient.publishFastSignal(callerDirectRoom, 'callee', 'reject');
+      }
     }
     if (calleeWhiteId) {
       void apiClient.deleteFastSignal(`whitedesk_user_signal_${calleeWhiteId.toLowerCase().trim()}`);
@@ -543,15 +650,30 @@ export class VoiceCallService {
     if (!this.currentSession) return;
     const roomName = this.currentSession.roomName;
     const role = this.currentSession.role;
+    const isOrgGroup = this.currentSession.scope === 'org_group';
+    const wasStandby = Boolean(this.currentSession.isStandby);
+    const wasOutgoingRinging = this.currentSession.state === 'outgoing_ringing';
     const otherWhiteId = role === 'caller' ? this.currentSession.calleeWhiteId : this.currentSession.callerWhiteId;
+    const myId = this.getOwnSessionWhiteId();
+    const myAlias = this.getOwnSessionDisplayName();
 
     InWhiteRingtone.stopRingtone();
     InWhiteRingtone.stopRingback();
     NotificationService.dismissCallNotification();
     this.dismissedRooms.set(roomName, Date.now());
     const ticketId = this.currentSession.ticketId;
-    const myId = role === 'caller' ? this.currentSession.callerWhiteId : this.currentSession.calleeWhiteId;
     this.cleanupSession();
+
+    if (isOrgGroup) {
+      if (!wasStandby && roomName) {
+        await pttBroadcastService.broadcastPeerEvent(roomName, role || 'callee', 'left', myAlias, myId);
+      }
+      if (wasOutgoingRinging && roomName) {
+        await apiClient.publishFastSignal(roomName, role, 'hangup');
+        signalingService.schedulePendingDeletion(roomName, 1500);
+      }
+      return;
+    }
 
     await apiClient.publishFastSignal(roomName, role, 'hangup');
     if (otherWhiteId) {
@@ -578,8 +700,8 @@ export class VoiceCallService {
     signalingService.setMute(muted);
 
     if (this.currentSession.scope === 'org_group' && this.currentSession.roomName) {
-      const myAlias = this.currentSession.callerAlias || this.currentSession.calleeAlias || 'Kullanıcı';
-      const myId = this.currentSession.callerWhiteId || this.currentSession.calleeWhiteId || '';
+      const myId = this.getOwnSessionWhiteId();
+      const myAlias = this.getOwnSessionDisplayName();
 
       void pttBroadcastService.broadcastSpeakerState(
         this.currentSession.roomName,
@@ -616,22 +738,19 @@ export class VoiceCallService {
     }
   }
 
-  private startCallerCallPolling(roomName: string) {
+  private startCallerCallPolling(roomName: string, callerWhiteId?: string) {
     if (this.pollInterval) clearInterval(this.pollInterval);
 
     this.pollInterval = callService.startCallerPolling(
       roomName,
       async (remoteAnswerSdp) => {
+        InWhiteRingtone.stopRingback();
         if (remoteAnswerSdp) {
           await signalingService.setRemoteAnswerSdp(remoteAnswerSdp);
         }
         void InWhiteRingtone.routeAudio(true);
         if (this.currentSession) {
-          this.currentSession.state = 'connecting';
-          this.notify();
-          setTimeout(() => {
-            this.establishConnectedState();
-          }, 600);
+          this.establishConnectedState(true);
         }
       },
       (failureReason) => {
@@ -644,7 +763,8 @@ export class VoiceCallService {
       },
       () => {
         this.cleanupSession('Arama sonlandırıldı.');
-      }
+      },
+      callerWhiteId
     );
   }
 
@@ -662,9 +782,12 @@ export class VoiceCallService {
   private startConnectedHangupWatcher(roomName: string, role: 'caller' | 'callee') {
     if (this.pollInterval) clearInterval(this.pollInterval);
     let connectedNotFoundCount = 0;
+    let lastOfferTsHandled = this.currentSession?.requestTs || 0;
+    let lastPeerEventTsHandled = Date.now();
+    let answerSdpApplied = false;
 
     this.pollInterval = setInterval(async () => {
-      if (!this.currentSession || this.currentSession.state !== 'connected') {
+      if (!this.currentSession || this.currentSession.state !== 'connected' || this.currentSession.isStandby) {
         if (this.pollInterval) {
           clearInterval(this.pollInterval);
           this.pollInterval = null;
@@ -672,7 +795,7 @@ export class VoiceCallService {
         return;
       }
 
-      const signal = await apiClient.fetchFastSignal(roomName, role);
+      const signal = await apiClient.fetchFastSignal(roomName, role) as any;
       if (signal?.signalType === 'hangup' || signal?.signalType === 'reject') {
         if (this.currentSession.scope !== 'org_group') {
           console.warn('[VOICE] Counterpart hung up the call. Closing session.');
@@ -693,33 +816,94 @@ export class VoiceCallService {
       }
       connectedNotFoundCount = 0;
 
-      if (this.currentSession.scope === 'org_group') {
-        if (signal.targetMode === 'peer_join' || signal.targetMode === 'peer_leave') {
+      // ICE Candidate senkronizasyonu (bağlı durumdayken gelen adayları kaçırma)
+      if (signal.candidates && signal.candidates.length > 0) {
+        for (const candStr of signal.candidates) {
           try {
-            const data = JSON.parse(signal.offerSdp || signal.answerSdp || '{}');
-            const myId = this.currentSession.callerWhiteId || this.currentSession.calleeWhiteId || '';
-            if (data.whiteId && data.whiteId.toLowerCase() !== myId.toLowerCase()) {
-              const alias = data.alias || 'Birisi';
-              if (signal.targetMode === 'peer_join') {
-                this.setPeerEvent(`${alias} katıldı`, 'join', alias);
-              } else {
-                this.setPeerEvent(`${alias} ayrıldı`, 'leave', alias);
+            const candObj = JSON.parse(candStr);
+            signalingService.queueRemoteCandidate(candObj);
+          } catch {}
+        }
+      }
+
+      // Arayan (caller) bağlı konuma geçmişse ve karşıdan gerçek WebRTC Answer SDP geldiyse uygula
+      if (
+        this.currentSession.role === 'caller' &&
+        !answerSdpApplied &&
+        typeof signal.answerSdp === 'string' &&
+        (signal.answerSdp.includes('v=') || signal.answerSdp.includes('m='))
+      ) {
+        answerSdpApplied = true;
+        InWhiteRingtone.stopRingback();
+        await signalingService.setRemoteAnswerSdp(signal.answerSdp);
+      }
+
+      if (this.currentSession.scope === 'org_group') {
+        const myId = this.getOwnSessionWhiteId().toLowerCase();
+
+        if (signal.offerSdp && typeof signal.offerSdp === 'string' && signal.offerSdp.trim().startsWith('{')) {
+          try {
+            const offerData = JSON.parse(signal.offerSdp);
+            const offerCallerId = WhiteDeskCrypto.generateBlindId(offerData.callerWhiteId || '').toLowerCase();
+            const offerTs = Number(offerData.ts || 0);
+
+            // Havuzda bağlıyken başka bir cihaz yeni bir WebRTC Offer ile havuza katıldıysa sessizce yanıtla ve sesi bağla
+            if (
+              offerData.sdp &&
+              offerCallerId &&
+              offerCallerId !== myId &&
+              offerTs > lastOfferTsHandled
+            ) {
+              lastOfferTsHandled = offerTs;
+              const joinerAlias = resolvePttPeerDisplayName(offerData.callerAlias, offerCallerId);
+              this.setPeerEvent(`${joinerAlias} katıldı`, 'join', joinerAlias);
+
+              await signalingService.setupPeerConnection('callee', roomName, this.currentSession.isMuted, {
+                onRemoteTrackConnected: () => {
+                  void InWhiteRingtone.routeAudio(true);
+                },
+                onConnectionConnected: () => {
+                  void InWhiteRingtone.routeAudio(true);
+                },
+              });
+              const answerSdp = await signalingService.createAnswerSdp(offerData.sdp);
+              if (answerSdp) {
+                await apiClient.publishFastSignal(roomName, 'callee', 'answer', answerSdp, 'call_connected');
               }
             }
-          } catch {}
-        } else if (signal.targetMode === 'speaker_start' || signal.targetMode === 'speaker_stop') {
-          try {
-            const data = JSON.parse(signal.offerSdp || signal.answerSdp || '{}');
-            const myId = this.currentSession.callerWhiteId || this.currentSession.calleeWhiteId || '';
-            if (data.whiteId && data.whiteId.toLowerCase() !== myId.toLowerCase()) {
-              if (signal.targetMode === 'speaker_start') {
-                this.currentSession.activeSpeakerAlias = data.alias;
-                this.currentSession.activeSpeakerWhiteId = data.whiteId;
-              } else {
+
+            // Katıldı / Ayrıldı bildirimleri (isim girilmişse isim, yoksa 124495...77343 formatında Blind ID)
+            if (offerData.lastPeerEvent && Number(offerData.lastPeerEvent.ts || 0) > lastPeerEventTsHandled) {
+              lastPeerEventTsHandled = Number(offerData.lastPeerEvent.ts);
+              const evId = WhiteDeskCrypto.generateBlindId(offerData.lastPeerEvent.whiteId || '').toLowerCase();
+              if (evId && evId !== myId) {
+                const displayAlias = resolvePttPeerDisplayName(offerData.lastPeerEvent.alias, evId);
+                if (offerData.lastPeerEvent.action === 'joined') {
+                  this.setPeerEvent(`${displayAlias} katıldı`, 'join', displayAlias);
+                } else if (offerData.lastPeerEvent.action === 'left') {
+                  this.setPeerEvent(`${displayAlias} ayrıldı`, 'leave', displayAlias);
+                  InWhiteRingtone.playRadioTone('close');
+                }
+              }
+            }
+
+            // Konuşmacı durumu (isim girilmişse isim, yoksa 124495...77343 formatında Blind ID)
+            if (offerData.isSpeaking !== undefined) {
+              const spkId = offerData.activeSpeakerWhiteId
+                ? WhiteDeskCrypto.generateBlindId(offerData.activeSpeakerWhiteId).toLowerCase()
+                : (offerData.whiteId ? WhiteDeskCrypto.generateBlindId(offerData.whiteId).toLowerCase() : '');
+              if (offerData.isSpeaking && spkId && spkId !== myId) {
+                this.currentSession.activeSpeakerAlias = resolvePttPeerDisplayName(
+                  offerData.activeSpeakerAlias || offerData.alias,
+                  spkId
+                );
+                this.currentSession.activeSpeakerWhiteId = spkId;
+                this.notify();
+              } else if (!offerData.isSpeaking && this.currentSession.activeSpeakerAlias) {
                 this.currentSession.activeSpeakerAlias = '';
                 this.currentSession.activeSpeakerWhiteId = '';
+                this.notify();
               }
-              this.notify();
             }
           } catch {}
         }
@@ -727,10 +911,12 @@ export class VoiceCallService {
     }, 900);
   }
 
-  private establishConnectedState() {
-    if (!this.currentSession || this.currentSession.state === 'connected') return;
+  private establishConnectedState(force: boolean = false) {
+    if (!this.currentSession) return;
+    if (!force && this.currentSession.state === 'connected' && this.currentSession.scope !== 'org_group') return;
     this.currentSession.state = 'connected';
-    this.currentSession.startTime = Date.now();
+    this.currentSession.isStandby = false;
+    this.currentSession.startTime = this.currentSession.startTime || Date.now();
     this.notify();
 
     InWhiteRingtone.stopRingtone();
@@ -754,7 +940,7 @@ export class VoiceCallService {
 
     if (this.durationInterval) clearInterval(this.durationInterval);
     this.durationInterval = setInterval(() => {
-      if (this.currentSession && this.currentSession.state === 'connected') {
+      if (this.currentSession && this.currentSession.state === 'connected' && !this.currentSession.isStandby) {
         this.currentSession.durationSeconds += 1;
         this.notify();
       }
@@ -776,7 +962,13 @@ export class VoiceCallService {
     InWhiteRingtone.stopRingtone();
     InWhiteRingtone.stopRingback();
 
-    if (this.currentSession?.callType === 'ptt') {
+    // KURAL: Küçük "Bağlantıyı Kes" butonuyla zaten bekleme moduna (isStandby: true) geçilmişse,
+    // sağ üstteki çarpıdan (X) çıkarken bir daha "dıt" (close tonu) yapmaz; yalnızca aktif bağlantıdaysa yapar!
+    if (
+      this.currentSession?.callType === 'ptt' &&
+      this.currentSession.state === 'connected' &&
+      !this.currentSession.isStandby
+    ) {
       InWhiteRingtone.playRadioTone('close');
     }
 
@@ -818,10 +1010,22 @@ export class VoiceCallService {
   ): Promise<void> {
     try {
       if (this.currentSession && this.currentSession.state !== 'idle') {
-        if (autoAnswer && this.currentSession.state === 'incoming_ringing') {
-          void this.answerCall();
+        // KURAL 2 & 3: Eğer cihaz zaten aktif görüşmedeyse (isStandby: false) davet zili çalmaz;
+        // ancak modal açık ve BEKLEMEDE (isStandby: true) ise havuzda bağlı değildir, gelen çağrıyı kabul et!
+        if (!this.currentSession.isStandby) {
+          if (autoAnswer && this.currentSession.state === 'incoming_ringing') {
+            void this.answerCall();
+          }
+          return;
         }
-        return;
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval);
+          this.pollInterval = null;
+        }
+        if (this.durationInterval) {
+          clearInterval(this.durationInterval);
+          this.durationInterval = null;
+        }
       }
 
       const isPtt = data.callType === 'ptt' || data.type === 'org_ptt' || data.type === 'direct_ptt';
@@ -836,7 +1040,16 @@ export class VoiceCallService {
         const incTenant = (incomingTenant || '').trim().toLowerCase();
 
         // 1. Firma Kontrolü: Her iki tarafın firması da dolu olmalı ve birbirine BİREBİR eşit olmalıdır!
-        if (!incTenant || !myTenant || myTenant !== incTenant) {
+        const isTenantEquivalent = (t1: string, t2: string) => {
+          const c1 = (t1 || '').trim().toLowerCase();
+          const c2 = (t2 || '').trim().toLowerCase();
+          if (!c1 || !c2) return true;
+          if (c1 === c2) return true;
+          const isP1 = c1 === 'default' || c1.startsWith('ent_1fc4c76b722c');
+          const isP2 = c2 === 'default' || c2.startsWith('ent_1fc4c76b722c');
+          return isP1 && isP2;
+        };
+        if (!isTenantEquivalent(myTenant, incTenant)) {
           console.warn('[VOICE ISOLATION] Incoming PTT call BLOCKED! Callee tenant:', myTenant, 'vs Incoming tenant:', incTenant);
           return;
         }
@@ -880,6 +1093,7 @@ export class VoiceCallService {
         pttMode,
         targetOrgId: cleanOrgId,
         targetOrgName: (data as any).targetOrgName || (data as any).orgName || data.callerAlias || 'Kurumsal Telsiz',
+        isStandby: false,
       } as any;
       this.notify();
 
@@ -890,9 +1104,7 @@ export class VoiceCallService {
         InWhiteRingtone.startRingtone();
       }
 
-      if (!isOrgPtt) {
-        this.startCalleeRingingWatcher(actualCallRoom, ownWhiteId);
-      }
+      this.startCalleeRingingWatcher(actualCallRoom, ownWhiteId);
 
       void signalingService.fetchOfferSdpForRoom(actualCallRoom);
 
@@ -913,7 +1125,7 @@ export class VoiceCallService {
     orgId?: string,
     autoAnswer: boolean = false
   ): Promise<boolean> {
-    if (this.currentSession && this.currentSession.state !== 'idle') return false;
+    if (this.currentSession && this.currentSession.state !== 'idle' && !this.currentSession.isStandby) return false;
     try {
       const roomsToCheck: string[] = [];
       if (ownWhiteId) {
@@ -973,6 +1185,19 @@ export class VoiceCallService {
               ? (isOrgPttBroadcast ? 'PTT_broadcast' : 'PTT_P2P')
               : undefined;
 
+          const isRemoteDesktopInvite =
+            callData?.type === 'rd_invite' ||
+            signal.targetMode === 'rd_invite';
+
+          if (isRemoteDesktopInvite) {
+            const ticketId = callData?.ticketId || 'general';
+            const adminAlias = callData?.adminAlias || 'Destek Uzmanı';
+            console.warn('[VOICE/SIGNAL] Incoming remote desktop invite detected for ticket:', ticketId);
+            void remoteDesktopService.receiveIncomingInvite(ticketId, adminAlias, true);
+            void apiClient.deleteFastSignal(roomName);
+            continue;
+          }
+
           const isDirectCall =
             isOrgPttBroadcast ||
             callData?.type === 'direct_call' ||
@@ -1004,7 +1229,14 @@ export class VoiceCallService {
             if (isOrgPttBroadcast) {
               const incomingTenant = (callData?.tenantId || '').trim().toLowerCase();
               const expectedTenant = await this.resolveEffectiveTenantId(tenantId);
-              if (!incomingTenant || !expectedTenant || incomingTenant !== expectedTenant) {
+              const isEquivalent = (t1: string, t2: string) => {
+                const c1 = (t1 || '').trim().toLowerCase();
+                const c2 = (t2 || '').trim().toLowerCase();
+                if (!c1 || !c2) return true;
+                if (c1 === c2) return true;
+                return (c1 === 'default' || c1.startsWith('ent_1fc4c76b722c')) && (c2 === 'default' || c2.startsWith('ent_1fc4c76b722c'));
+              };
+              if (!isEquivalent(incomingTenant, expectedTenant)) {
                 console.warn('[VOICE ISOLATION] Dropping signal offer: Callee tenant:', expectedTenant, 'vs Incoming tenant:', incomingTenant);
                 void apiClient.deleteFastSignal(roomName);
                 continue;
@@ -1091,12 +1323,11 @@ export class VoiceCallService {
               activeSpeakerWhiteId: callData?.callerWhiteId,
               publisherCallsSessionId: callData?.callsSessionId,
               publisherTrackName: callData?.trackName,
+              isStandby: false,
             } as any;
             this.notify();
 
-            if (!isOrgPttBroadcast) {
-              this.startCalleeRingingWatcher(actualCallRoom, ownWhiteId);
-            }
+            this.startCalleeRingingWatcher(actualCallRoom, ownWhiteId);
             if (autoAnswer) {
               setTimeout(() => {
                 void this.answerCall();

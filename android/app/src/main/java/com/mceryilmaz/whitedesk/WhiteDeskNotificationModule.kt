@@ -117,6 +117,23 @@ class WhiteDeskNotificationModule(private val reactContext: ReactApplicationCont
             } catch (_: Exception) {
             }
         }
+
+        fun sendTicketPushEvent(ticketId: String, title: String, body: String) {
+            try {
+                instance?.let { module ->
+                    val params = Arguments.createMap().apply {
+                        putString("ticketId", ticketId)
+                        putString("title", title)
+                        putString("body", body)
+                        putDouble("timestamp", System.currentTimeMillis().toDouble())
+                    }
+                    module.reactContext
+                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                        ?.emit("onHelpDeskPushReceived", params)
+                }
+            } catch (_: Exception) {
+            }
+        }
     }
 
     init {
@@ -322,6 +339,28 @@ class WhiteDeskNotificationModule(private val reactContext: ReactApplicationCont
             endNormY.toFloat(),
             durationMs.toLong()
         )
+        promise.resolve(ok)
+    }
+
+    @ReactMethod
+    fun injectRemoteLongPress(normX: Double, normY: Double, promise: Promise) {
+        val svc = WhiteDeskRemoteInputService.instance
+        if (svc == null) {
+            promise.resolve(false)
+            return
+        }
+        val ok = svc.performLongPress(normX.toFloat(), normY.toFloat())
+        promise.resolve(ok)
+    }
+
+    @ReactMethod
+    fun injectRemoteText(text: String, promise: Promise) {
+        val svc = WhiteDeskRemoteInputService.instance
+        if (svc == null) {
+            promise.resolve(false)
+            return
+        }
+        val ok = svc.performTextInjection(text)
         promise.resolve(ok)
     }
 

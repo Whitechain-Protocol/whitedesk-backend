@@ -2,6 +2,20 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+
+// Auto-load .env.local if not already in process.env
+const envLocalPath = path.join(__dirname, '..', '.env.local');
+if (fs.existsSync(envLocalPath) && (!process.env.NEON_ENDPOINT || !process.env.NEON_CONNECTION_STRING)) {
+  const envContent = fs.readFileSync(envLocalPath, 'utf8');
+  envContent.split('\n').forEach((line) => {
+    const m = line.match(/^\s*([A-Za-z_0-9]+)\s*=\s*(.*)?\s*$/);
+    if (m && m[1] && !process.env[m[1]]) {
+      process.env[m[1]] = (m[2] || '').trim().replace(/^['"]|['"]$/g, '');
+    }
+  });
+}
+
+const QRCode = require('qrcode');
 const {
   startGenesis,
   createTenant,
@@ -74,6 +88,23 @@ const server = http.createServer(async (req, res) => {
   const pathname = url.pathname;
 
   try {
+    // 0. QR Code Image / DataURL Generation
+    if (pathname === '/api/qrcode' && req.method === 'GET') {
+      const text = url.searchParams.get('text') || '';
+      const dataUrl = await QRCode.toDataURL(text, { width: 260, margin: 2 });
+      return sendJson(res, 200, { success: true, dataUrl });
+    }
+    if (pathname === '/api/qrcode/png' && req.method === 'GET') {
+      const text = url.searchParams.get('text') || '';
+      const buf = await QRCode.toBuffer(text, { width: 300, margin: 2 });
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=86400',
+      });
+      return res.end(buf);
+    }
+
     // 1. Status Check
     if (pathname === '/api/status' && req.method === 'GET') {
       const tenants = await listTenants();

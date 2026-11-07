@@ -1,0 +1,16 @@
+{
+  "name": "whitedesk-auth-worker",
+  "version": "2.0.0",
+  "description": "WhiteDesk Sovereign Unified Edge Gateway using Cloudflare Workers, Durable Objects, D1 SQLite & R2",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "typescript": "^5.5.4",
+    "wrangler": "^3.78.0"
+  }
+}

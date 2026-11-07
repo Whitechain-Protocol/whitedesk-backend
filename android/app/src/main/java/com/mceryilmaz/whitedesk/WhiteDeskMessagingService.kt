@@ -24,8 +24,12 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         private const val TAG = "WhiteDeskFCM"
         const val CALL_CHANNEL_ID = "whitedesk_calls_v2"
         const val PTT_CHANNEL_ID = "whitedesk_ptt_v4"
+        const val RD_CHANNEL_ID = "whitedesk_rd_v5"
+        const val MESSAGE_CHANNEL_ID = "whitedesk_messages_v2"
         const val CALL_NOTIFICATION_ID = 77777
         const val PTT_NOTIFICATION_ID = 88888
+        const val RD_NOTIFICATION_ID = 99999
+        const val MESSAGE_NOTIFICATION_BASE_ID = 55000
         const val PREFS_NAME = "WhiteDeskPushPrefs"
         const val KEY_FCM_TOKEN = "latest_fcm_token"
 
@@ -54,11 +58,29 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         val data = remoteMessage.data
         val notification = remoteMessage.notification
 
-        val type = data["type"] ?: "incoming_call"
+        val rawType = (data["type"] ?: "").trim()
+        val isHelpDeskMsg = rawType == "helpdesk_message" ||
+            data["isHelpDesk"] == "true" ||
+            (rawType.isEmpty() && data["callType"] == null && (notification != null || data["title"] != null || data["body"] != null))
+        val type = if (isHelpDeskMsg) "helpdesk_message" else (if (rawType.isNotEmpty()) rawType else "incoming_call")
         val ticketId = data["ticketId"] ?: ""
         val callerAlias = data["callerAlias"] ?: data["callerName"] ?: "Destek Operatörü"
         val callerWhiteId = (data["callerWhiteId"] ?: "").trim().lowercase()
         val callType = data["callType"] ?: (if (type == "direct_ptt") "ptt" else "call")
+
+        // 0. DESTEK BİLETİ / MESAJI BİLDİRİMİ (Kesinlikle gelen arama çalmaz; Android Native varsayılan bildirim sesi çalar ve D1 senkronize edilir)
+        if (type == "helpdesk_message") {
+            val myWhiteId = WhiteDeskNotificationModule.getSavedWhiteId(applicationContext)
+            if (!myWhiteId.isNullOrEmpty() && callerWhiteId.isNotEmpty() && callerWhiteId.equals(myWhiteId, ignoreCase = true)) {
+                Log.i(TAG, "Self message push dropped.")
+                return
+            }
+            val msgTitle = notification?.title ?: data["title"] ?: "WhiteDesk Destek"
+            val msgBody = notification?.body ?: data["body"] ?: "Yeni destek mesajınız var."
+            WhiteDeskNotificationModule.sendTicketPushEvent(ticketId, msgTitle, msgBody)
+            showStandardMessageNotification(msgTitle, msgBody, ticketId)
+            return
+        }
 
         // 1. ÇAĞRI İPTAL PUSH BİLDİRİMİ (Arayan vazgeçtiğinde arananın zilini ve bildirimini derhal sustur)
         if (type == "cancel_call") {
@@ -92,17 +114,21 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         // Eğer push bildirimi belirli bir şirkete aitse ve bu cihaz o şirkete ait değilse DERHAL DÜŞÜR!
         val targetTenantId = (data["tenantId"] ?: "").trim().lowercase()
         val myTenantId = WhiteDeskNotificationModule.getSavedTenantId(applicationContext)?.trim()?.lowercase() ?: ""
-        if (isOrgPtt) {
-            // Telsiz anonsları için ZERO TRUST: Her iki tenant ID de kesinlikle dolu olmalı ve birbirine BİREBİR eşit olmalıdır!
-            if (targetTenantId.isEmpty() || myTenantId.isEmpty() || targetTenantId != myTenantId) {
-                Log.w(TAG, "Cross-tenant PTT push dropped at native level! TargetTenant: $targetTenantId, MyTenant: $myTenantId")
-                return
+        val isTenantEquivalent = { t1: String, t2: String ->
+            val c1 = t1.trim().lowercase()
+            val c2 = t2.trim().lowercase()
+            if (c1.isEmpty() || c2.isEmpty()) true
+            else if (c1 == c2) true
+            else {
+                val isP1 = c1 == "default" || c1.startsWith("ent_1fc4c76b722c")
+                val isP2 = c2 == "default" || c2.startsWith("ent_1fc4c76b722c")
+                isP1 && isP2
             }
-        } else if (targetTenantId.isNotEmpty()) {
-            if (myTenantId.isEmpty() || targetTenantId != myTenantId) {
-                Log.w(TAG, "Cross-tenant call push dropped at native level! TargetTenant: $targetTenantId, MyTenant: $myTenantId")
-                return
-            }
+        }
+
+        if (targetTenantId.isNotEmpty() && myTenantId.isNotEmpty() && !isTenantEquivalent(targetTenantId, myTenantId)) {
+            Log.w(TAG, "Cross-tenant call push dropped at native level! TargetTenant: $targetTenantId, MyTenant: $myTenantId")
+            return
         }
 
         // 2. KESİN VE KIRILAMAZ GRUP / BİRİM (ORG) İZOLASYONU (ZERO TRUST)
@@ -113,7 +139,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         val isSpecificOrg = targetOrgId.isNotEmpty() && targetOrgId != "all" && targetOrgId != "*" && targetOrgId != "global"
         if (isOrgPtt && isSpecificOrg) {
             val myOrgId = WhiteDeskNotificationModule.getSavedOrgId(applicationContext)?.trim()?.lowercase() ?: ""
-            if (myOrgId.isEmpty() || myOrgId != targetOrgId) {
+            if (myOrgId.isNotEmpty() && myOrgId != "all" && myOrgId != "*" && myOrgId != "global" && myOrgId != targetOrgId) {
                 Log.w(TAG, "Cross-group PTT broadcast push dropped at native level! TargetOrg: $targetOrgId, MyOrg: $myOrgId")
                 return
             }
@@ -206,8 +232,18 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         createCallNotificationChannels(notificationManager)
 
-        val isPtt = type == "org_ptt" || type == "direct_ptt" || callType == "ptt"
-        val targetChannelId = if (isPtt) PTT_CHANNEL_ID else CALL_CHANNEL_ID
+        val isRemoteDesktop = type == "remote_desktop_offer" || callType == "remote_desktop"
+        val isPtt = !isRemoteDesktop && (type == "org_ptt" || type == "direct_ptt" || callType == "ptt")
+        val targetChannelId = when {
+            isRemoteDesktop -> RD_CHANNEL_ID
+            isPtt -> PTT_CHANNEL_ID
+            else -> CALL_CHANNEL_ID
+        }
+        val targetNotificationId = when {
+            isRemoteDesktop -> RD_NOTIFICATION_ID
+            isPtt -> PTT_NOTIFICATION_ID
+            else -> CALL_NOTIFICATION_ID
+        }
 
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? android.app.KeyguardManager
@@ -217,12 +253,12 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
 
         val pendingIntent = PendingIntent.getActivity(
             this,
-            if (isPtt) PTT_NOTIFICATION_ID else CALL_NOTIFICATION_ID,
+            targetNotificationId,
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 2. "CEVAPLA" / "KATIL" Butonu İntenti
+        // 2. "CEVAPLA" / "KATIL" / "ONAYLA" Butonu İntenti
         val answerIntent = Intent(this, MainActivity::class.java).apply {
             action = "com.mceryilmaz.whitedesk.ACTION_ANSWER_CALL"
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
@@ -234,7 +270,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             putExtra("ticketId", ticketId)
             putExtra("callerAlias", callerAlias)
             putExtra("callerWhiteId", callerWhiteId)
-            putExtra("callType", if (isPtt) "ptt" else "call")
+            putExtra("callType", if (isRemoteDesktop) "remote_desktop" else if (isPtt) "ptt" else "call")
             putExtra("type", type)
             putExtra("targetOrgId", orgId)
             putExtra("targetOrgName", targetOrgName)
@@ -242,7 +278,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         }
         val answerPendingIntent = PendingIntent.getActivity(
             this,
-            if (isPtt) 88881 else 77771,
+            if (isRemoteDesktop) 99991 else if (isPtt) 88881 else 77771,
             answerIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -255,7 +291,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         }
         val rejectPendingIntent = PendingIntent.getBroadcast(
             this,
-            if (isPtt) 88882 else 77772,
+            if (isRemoteDesktop) 99992 else if (isPtt) 88882 else 77772,
             rejectIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -274,10 +310,12 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             }
         }
 
-        val soundUri = if (isPtt)
-            Uri.parse("android.resource://${packageName}/raw/radio_incoming")
-        else
-            Uri.parse("android.resource://${packageName}/raw/inwhite_ringtone")
+        // Uzak Masaüstü için SMS/bildirim sesi (TYPE_NOTIFICATION), telsiz için radio_incoming, sesli arama için inwhite_ringtone
+        val soundUri = when {
+            isRemoteDesktop -> android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+            isPtt -> Uri.parse("android.resource://${packageName}/raw/radio_incoming")
+            else -> Uri.parse("android.resource://${packageName}/raw/inwhite_ringtone")
+        }
         val vibrationPattern = longArrayOf(0, 600, 300, 600, 300, 600)
 
         // Yuvarlak ikon alanı ve büyük ikon için uygulamanın masaüstü launcher ikonu
@@ -305,7 +343,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             .setImportant(true)
             .build()
 
-        // Geniş CallStyle bandı (Yeşil Katıl, Kırmızı Kapat)
+        // Geniş CallStyle bandı (Yeşil Katıl/Cevapla, Tek Kırmızı Reddet - ekstra siyah buton yok!)
         val callStyle = NotificationCompat.CallStyle.forIncomingCall(
             callerPerson,
             rejectPendingIntent,
@@ -353,7 +391,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
                 manager.createNotificationChannel(callChannel)
             }
 
-            // 2. Telsiz Kanalı (WhiteDesk Melodisi ile çalar)
+            // 2. Telsiz Kanalı (radio_incoming ile çalar)
             if (manager.getNotificationChannel(PTT_CHANNEL_ID) == null) {
                 val pttChannel = NotificationChannel(
                     PTT_CHANNEL_ID,
@@ -369,6 +407,95 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
                 }
                 manager.createNotificationChannel(pttChannel)
             }
+
+            // 3. Uzak Masaüstü Kanalı (SMS / Bildirim Sesi ile çalar - telsiz giden zili değil)
+            try {
+                manager.deleteNotificationChannel("whitedesk_rd_v3")
+                manager.deleteNotificationChannel("whitedesk_rd_v4")
+            } catch (_: Exception) {}
+
+            val rdSoundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+            if (manager.getNotificationChannel(RD_CHANNEL_ID) == null) {
+                val rdChannel = NotificationChannel(
+                    RD_CHANNEL_ID,
+                    "WhiteDesk Uzak Masaüstü Talepleri",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Uzak masaüstü ekran paylaşımı onay bildirimleri"
+                    enableLights(true)
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 300, 200, 300)
+                    setSound(rdSoundUri, audioAttributes)
+                    lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                }
+                manager.createNotificationChannel(rdChannel)
+            }
+
+            // 4. Standart Destek Mesajı Kanalı (Android Native Varsayılan Bildirim Sesi ile çalar)
+            val msgAudioAttrs = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build()
+            if (manager.getNotificationChannel(MESSAGE_CHANNEL_ID) == null) {
+                val msgChannel = NotificationChannel(
+                    MESSAGE_CHANNEL_ID,
+                    "WhiteDesk Destek Bildirimleri",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Yeni destek biletleri ve mesaj bildirimleri"
+                    enableLights(true)
+                    enableVibration(true)
+                    setSound(rdSoundUri, msgAudioAttrs)
+                    lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+                }
+                manager.createNotificationChannel(msgChannel)
+            }
         }
+    }
+
+    private fun showStandardMessageNotification(title: String, body: String, ticketId: String) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        createCallNotificationChannels(notificationManager)
+
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            putExtra("ticketId", ticketId)
+            putExtra("type", "helpdesk_message")
+        }
+
+        val notifId = if (ticketId.isNotEmpty()) {
+            MESSAGE_NOTIFICATION_BASE_ID + (ticketId.hashCode() and 0x0FFF)
+        } else {
+            MESSAGE_NOTIFICATION_BASE_ID + (System.currentTimeMillis() and 0x0FFF).toInt()
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            notifId,
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val defaultSoundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+
+        val notification = NotificationCompat.Builder(this, MESSAGE_CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(notifId, notification)
     }
 }

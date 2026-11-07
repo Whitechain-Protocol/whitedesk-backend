@@ -11,7 +11,11 @@ import { VoiceCallSession } from './types';
  * 2. Birim (Org) İzolasyonu: Eğer birim seçilmişse sadece o birime, seçilmemişse tenant geneline (all) kilitlenir.
  */
 export function buildPttRoomName(tenantId?: string, orgId?: string): string {
-  const cleanTenant = (tenantId || 'unassigned').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+  const rawTenant = (tenantId || 'unassigned').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+  const cleanTenant =
+    !rawTenant || rawTenant === 'default' || rawTenant === 'unassigned' || rawTenant.startsWith('ent_1fc4c76b722c')
+      ? 'ent_1fc4c76b722c'
+      : rawTenant;
   const cleanOrg = (!orgId || orgId === 'all' || orgId === '*' || orgId === 'global')
     ? 'all'
     : orgId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -22,6 +26,65 @@ export function normalizeOrgPttTenant(tenantId?: string): string {
   if (!tenantId || tenantId === 'all') return 'default';
   const clean = tenantId.trim().toLowerCase();
   return clean.replace(/[^a-z0-9_-]/g, '_') || 'default';
+}
+
+/**
+ * KURAL 5: İsim girilmediğinde Blind ID `124495...77343` formatında
+ * (`blind_` sonrasındaki ilk 6 karakter, 7-8-9. karakterler yerine `...`, ve 10-14. karakterler) gösterilir.
+ */
+export function formatPttBlindId(rawBlindId?: string | null): string {
+  if (!rawBlindId) return '';
+  const cleanBlind = rawBlindId.startsWith('blind_') ? rawBlindId.substring(6) : rawBlindId;
+  if (cleanBlind.length >= 14) {
+    return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9, 14)}`;
+  } else if (cleanBlind.length >= 10) {
+    return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9)}`;
+  } else if (cleanBlind.length > 6) {
+    return `${cleanBlind.substring(0, 6)}...`;
+  }
+  return cleanBlind;
+}
+
+const GENERIC_PTT_ALIASES = new Set([
+  'kullanıcı',
+  'user',
+  'siz',
+  'you',
+  'birisi',
+  'someone',
+  'birim telsizi',
+  'kurumsal telsiz',
+  'saha görevlisi',
+  'operatör',
+  'destek operatörü',
+  'destek uzmanı',
+  'yetkili',
+  'genel',
+  'general',
+  'yönetici',
+  'admin',
+  'whitedesk admin',
+]);
+
+/**
+ * İsim girilmişse gerçek ismi, girilmemişse veya jenerik bir ifade ise `124495...77343` formatında Blind ID'yi döndürür.
+ */
+export function resolvePttPeerDisplayName(alias?: string | null, blindId?: string | null): string {
+  const trimmed = (alias || '').trim();
+  if (
+    trimmed &&
+    !GENERIC_PTT_ALIASES.has(trimmed.toLowerCase()) &&
+    !trimmed.toLowerCase().startsWith('blind_') &&
+    !trimmed.toLowerCase().startsWith('wh_') &&
+    !trimmed.toLowerCase().startsWith('usr_') &&
+    !trimmed.includes('...')
+  ) {
+    return trimmed;
+  }
+  if (blindId && blindId.trim()) {
+    return formatPttBlindId(blindId.trim());
+  }
+  return trimmed || 'Kullanıcı';
 }
 
 /**
@@ -77,7 +140,8 @@ export class PttBroadcastService {
     orgId: string,
     orgName: string,
     callerWhiteId: string,
-    callerAlias: string
+    callerAlias: string,
+    initialState: 'outgoing_ringing' | 'connected' = 'outgoing_ringing'
   ): VoiceCallSession {
     const cleanOrgId = orgId && orgId !== 'all' ? orgId : 'all';
     const roomName = buildPttRoomName(tenantId, cleanOrgId);
@@ -90,7 +154,7 @@ export class PttBroadcastService {
       callerAlias,
       calleeWhiteId: '',
       calleeAlias: orgName || '',
-      state: 'connected',
+      state: initialState,
       connectionMode: 'p2p_direct',
       durationSeconds: 0,
       isMuted: true,
@@ -151,9 +215,10 @@ export class PttBroadcastService {
     session: VoiceCallSession,
     tenantId: string,
     payload: string,
-    targetMembers: string[] = []
+    targetMembers: string[] = [],
+    skipPush: boolean = false
   ): Promise<void> {
-    console.warn('[PttBroadcastService] >>> DISPATCHING PTT_BROADCAST to room:', session.roomName, 'tenant:', tenantId, 'org:', session.targetOrgName, 'targetMembers:', targetMembers);
+    console.warn('[PttBroadcastService] >>> DISPATCHING PTT_BROADCAST to room:', session.roomName, 'tenant:', tenantId, 'org:', session.targetOrgName, 'targetMembers:', targetMembers, 'skipPush:', skipPush);
 
     await apiClient.publishFastSignal(
       session.roomName,
@@ -163,7 +228,11 @@ export class PttBroadcastService {
       'org_ptt_broadcast'
     );
 
-    // Hedef kayıtlı üyelerin özel odalarına fırlat
+    if (skipPush) {
+      return;
+    }
+
+    // Hedef kayıtlı üyelerin özel odalarına fırlat (yalnızca havuzda bağlı olmayanlara)
     if (targetMembers && targetMembers.length > 0) {
       for (const mId of targetMembers) {
         if (!mId || mId.toLowerCase() === session.callerWhiteId.toLowerCase()) continue;
@@ -178,7 +247,7 @@ export class PttBroadcastService {
       }
     }
 
-    // Google FCM push ile şirket üyelerini uyandır (firma izolasyonu korunarak)
+    // Google FCM push ile havuzda bağlı olmayan şirket üyelerini uyandır (firma izolasyonu korunarak)
     void apiClient.sendBroadcastPttPushNotification(
       session.callerWhiteId,
       session.callerAlias,

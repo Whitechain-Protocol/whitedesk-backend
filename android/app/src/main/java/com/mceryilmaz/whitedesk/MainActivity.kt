@@ -37,6 +37,7 @@ class MainActivity : ReactActivity() {
       val nm = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
       nm?.cancel(WhiteDeskMessagingService.CALL_NOTIFICATION_ID)
       nm?.cancel(WhiteDeskMessagingService.PTT_NOTIFICATION_ID)
+      nm?.cancel(WhiteDeskMessagingService.RD_NOTIFICATION_ID)
       intent?.let { WhiteDeskNotificationModule.sendCallIntentEvent(it) }
     }
   }
@@ -65,6 +66,7 @@ class MainActivity : ReactActivity() {
       val nm = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
       nm?.cancel(WhiteDeskMessagingService.CALL_NOTIFICATION_ID)
       nm?.cancel(WhiteDeskMessagingService.PTT_NOTIFICATION_ID)
+      nm?.cancel(WhiteDeskMessagingService.RD_NOTIFICATION_ID)
     }
     WhiteDeskNotificationModule.sendCallIntentEvent(intent)
   }

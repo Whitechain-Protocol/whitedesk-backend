@@ -121,8 +121,8 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
             </TouchableOpacity>
           )}
 
-          {/* 1.2 Lisans & Abonelik (Çalışma Durumu bölümünün hemen altında ayrı bir modal) */}
-          {(isMasterAdmin || isFounder || adminRole === 'global_admin' || adminRole === 'founder' || isAdmin) && onOpenLicense && (
+          {/* 1.2 Lisans & Abonelik (YALNIZCA GLOBAL ADMIN GÖRÜR - Kullanıcı ve normal adminlerde ASLA listelenmez) */}
+          {(isMasterAdmin || isFounder || adminRole === 'global_admin' || adminRole === 'founder') && onOpenLicense && (
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {

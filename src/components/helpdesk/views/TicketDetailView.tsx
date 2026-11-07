@@ -46,6 +46,7 @@ import {
   Clock,
 } from 'lucide-react-native';
 import { HelpDeskTicket, HelpDeskMessage, TicketStatus, helpDeskService } from '../../../services/helpDeskService';
+import { TicketCard } from './TicketCard';
 import { piiSanitizer } from '../../../services/piiSanitizer';
 import { WhiteDeskCrypto } from '../../../whitedesk-sdk';
 import { AdminBadge, tierFromRole, tierFromCategory } from '../AdminBadge';
@@ -112,6 +113,7 @@ interface TicketDetailViewProps {
   attachDiagnostics?: boolean;
   setAttachDiagnostics?: (v: boolean) => void;
   onMainMenuPress?: () => void;
+  onRemoteDesktopPress?: () => void;
   showRemoteDesktop?: boolean;
   userRemoteDesktopEnabled?: boolean;
   userRemoteDesktopScope?: RemoteDesktopScope;
@@ -197,6 +199,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   attachDiagnostics = false,
   setAttachDiagnostics,
   onMainMenuPress,
+  onRemoteDesktopPress,
   showRemoteDesktop = true,
   userRemoteDesktopEnabled = true,
   userRemoteDesktopScope = 'in_app',
@@ -231,7 +234,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   }, []);
 
   React.useEffect(() => {
-    if (!selectedTicket?.id || isAdmin) return;
+    if (!selectedTicket?.id) return;
     const stopWatch = remoteDesktopService.startUserWatcher(
       selectedTicket.id,
       isAdmin,
@@ -315,15 +318,6 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
         <View style={styles.pillClosed}>
           <Text style={styles.pillClosedText}>
             {getLabel('helpdesk.filterClosed', 'Kapalı', 'Closed')}
-          </Text>
-        </View>
-      );
-    }
-    if (status === 'revoked') {
-      return (
-        <View style={styles.pillRevoked}>
-          <Text style={styles.pillRevokedText}>
-            {getLabel('helpdesk.filterRevoked', 'Eskale Edildi', 'Escalated')}
           </Text>
         </View>
       );
@@ -439,12 +433,16 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                   },
                 ]}
                 onPress={() => {
-                  void remoteDesktopService.startAdminOffer(
-                    selectedTicket.id,
-                    customAlias || 'Admin',
-                    selectedTicket.user_white_id || selectedTicket.user_blind_id || '',
-                    ownWhiteId || ''
-                  );
+                  if (onRemoteDesktopPress) {
+                    onRemoteDesktopPress();
+                  } else {
+                    void remoteDesktopService.startAdminOffer(
+                      selectedTicket.id,
+                      customAlias || 'Admin',
+                      selectedTicket.user_white_id || selectedTicket.user_blind_id || (selectedTicket as any).created_by || '',
+                      ownWhiteId || ''
+                    );
+                  }
                 }}
                 activeOpacity={0.7}
                 hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
@@ -493,141 +491,17 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
             </View>
           )}
 
-          <View style={styles.cardHeaderTopRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.ticketIdMonoText}>{selectedTicket.id}</Text>
-              {/* Tenant Adı: Sabit 'inwhite' yerine gerçek kayıtlı Tenant Adı */}
-              {selectedTicket.enterprise_name ? (
-                <View style={styles.appTagBadge}>
-                  <Text style={styles.appTagBadgeText}>{selectedTicket.enterprise_name}</Text>
-                </View>
-              ) : (selectedTicket.app_id && selectedTicket.app_id.toLowerCase() !== 'inwhite' && selectedTicket.app_id.toLowerCase() !== 'whitedesk') ? (
-                <View style={styles.appTagBadge}>
-                  <Text style={styles.appTagBadgeText}>{selectedTicket.app_id}</Text>
-                </View>
-              ) : null}
-              {(() => {
-                const effectiveCat = selectedTicket.is_discussion ? 'discussion' : selectedTicket.category;
-                const tier = tierFromCategory(effectiveCat);
-                if (tier !== null) {
-                  return <View style={{ marginLeft: 4 }}><AdminBadge tier={tier} size={13} /></View>;
-                }
-                return selectedTicket.category && selectedTicket.category !== 'general' && selectedTicket.category.toLowerCase() !== 'voice' ? (
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>{getCategoryLabel(selectedTicket.category)}</Text>
-                  </View>
-                ) : null;
-              })()}
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {renderStatusPill(selectedTicket.status)}
-              {onTicketMenuPress && (
-                <TouchableOpacity
-                  style={{ marginLeft: 8, padding: 6 }}
-                  onPress={(e) => onTicketMenuPress(selectedTicket, e.nativeEvent?.pageY)}
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  activeOpacity={0.6}
-                >
-                  <MoreVertical size={18} color="#475569" strokeWidth={2.2} />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          <Text style={styles.detailSubjectText}>{piiSanitizer.sanitize(selectedTicket.subject).sanitizedText}</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.ticketDateMutedText}>
-                {getLabel('helpdesk.created', 'Oluşturma:', 'Created:')} {formatTicketDate(selectedTicket.created_at, true)}
-              </Text>
-              {selfDestructInfo.inDestruction && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-                  <Leaf size={12} color="#10B981" strokeWidth={2.4} />
-                  <Text style={{ fontSize: 10, fontWeight: '800', color: '#10B981', marginLeft: 3 }}>
-                    {selfDestructInfo.remainingText || `${selfDestructInfo.remainingDays} g`}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* 1. İletme esnasında (beklemede/gönderilirken): tarihin sağında YALNIZCA yeşil ok */}
-            {(isTransferMode || selectedTicket.transfer_status === 'pending') && (
-              <ArrowRight size={15} color="#10B981" strokeWidth={2.5} />
-            )}
-
-            {/* 2. Bileti kabul ettikten sonra: tarihin sağında sağa yanaşık, okun solunda hangi adminden geldiği, hem admin adı hem ok gri */}
-            {!isTransferMode && selectedTicket.transfer_status === 'accepted' && (selectedTicket.transferred_from_alias || selectedTicket.transfer_sender_alias) && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontSize: 11, fontWeight: '600', color: '#64748B' }}>
-                  @{selectedTicket.transferred_from_alias || selectedTicket.transfer_sender_alias}
-                </Text>
-                <ArrowRight size={13} color="#64748B" strokeWidth={2} />
-              </View>
-            )}
-          </View>
-
-          {/* Allocation & SLA Escalation Status & Claim Button */}
-          {(() => {
-            const isRevoked = selectedTicket.status === 'revoked';
-            const assignedName = selectedTicket.assigned_admin_name || selectedTicket.assigned_admin_alias;
-            const assignedBlind = selectedTicket.assigned_admin_blind_id;
-            const isPool = !assignedBlind || assignedBlind === 'unassigned';
-            const myBlindId = (ownWhiteId && typeof WhiteDeskCrypto?.generateBlindId === 'function')
-              ? WhiteDeskCrypto.generateBlindId(ownWhiteId)
-              : '';
-            const canClaim = isAdmin && (isRevoked || isPool || (myBlindId && myBlindId !== assignedBlind));
-
-            const showSection = isRevoked || selectedTicket.reassigned_from || assignedName || (assignedBlind && assignedBlind !== 'unassigned') || isPool || canClaim;
-            if (!showSection) return null;
-
-            return (
-              <View style={{ marginTop: 6 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    {isRevoked ? (
-                      <View style={styles.inlineEscalatedPill}>
-                        <Text style={styles.inlineEscalatedPillText}>
-                          ⚠️ Eskale Edildi (SLA Aşımı)
-                        </Text>
-                      </View>
-                    ) : selectedTicket.reassigned_from ? (
-                      <Text style={styles.allocationMutedText}>
-                        🔄 Yeniden Atandı: {assignedName ? `@${assignedName}` : (assignedBlind ? assignedBlind.substring(0, 14) + '...' : 'Havuz')}
-                      </Text>
-                    ) : assignedName ? (
-                      <Text style={styles.allocationMutedText}>
-                        👤 Atandı: @{assignedName}
-                      </Text>
-                    ) : assignedBlind && assignedBlind !== 'unassigned' ? (
-                      <Text style={styles.allocationMutedText}>
-                        👤 Atandı: {assignedBlind.substring(0, 14)}...
-                      </Text>
-                    ) : isPool ? (
-                      <View style={styles.poolBadge}>
-                        <Clock size={10} color="#3B82F6" style={{ marginRight: 3 }} />
-                        <Text style={styles.poolBadgeText}>Havuzda (Atama Bekliyor)</Text>
-                      </View>
-                    ) : null}
-                  </View>
-
-                  {/* Claim (Bileti Devral) Butonu (Karar 3: Claim Modeli) */}
-                  {canClaim && onTakeOverTicket && (
-                    <TouchableOpacity
-                      style={styles.claimActionBtn}
-                      onPress={() => onTakeOverTicket(selectedTicket)}
-                      activeOpacity={0.7}
-                    >
-                      <ShieldCheck size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
-                      <Text style={styles.claimActionBtnText}>
-                        {language === 'tr' ? 'Bileti Devral (Claim)' : 'Claim Ticket'}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            );
-          })()}
+          {/* Bilet Kartı (Ortak TicketCard Tasarımı - 2. Sayfanın Orijinal Beyaz Arka Plan Yapısıyla) */}
+          <TicketCard
+            ticket={selectedTicket}
+            onMenuPress={onTicketMenuPress}
+            getLabel={getLabel}
+            formatTicketDate={formatTicketDate}
+            getCategoryLabel={getCategoryLabel}
+            formatAppId={formatAppId}
+            formatWhiteId={formatWhiteId}
+            containerStyle={styles.detailCardHeaderInner}
+          />
 
           {/* Tarih-saatin altındaki Transfer Satırı & Admin Seçimi */}
           {(isTransferMode || selectedTicket.transfer_status === 'pending') && (
@@ -1469,6 +1343,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.03,
     shadowRadius: 12,
     elevation: 2,
+  },
+  detailCardHeaderInner: {
+    backgroundColor: 'transparent',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    marginBottom: 0,
+    borderRadius: 0,
   },
   cardHeaderTopRow: {
     flexDirection: 'row',

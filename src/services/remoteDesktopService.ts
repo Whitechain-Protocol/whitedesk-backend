@@ -7,6 +7,7 @@ import { apiClient } from './apiClient';
 import { P2P_STUN_SERVERS } from './voice/types';
 import { diagnosticRecorder } from './diagnosticRecorder';
 import { WhiteDeskCrypto } from '../whitedesk-sdk';
+import { InWhiteRingtone } from '../../modules/inwhite-ringtone';
 
 export interface RemoteDesktopSession {
   ticketId: string;
@@ -22,6 +23,7 @@ export interface RemoteDesktopSession {
     | 'disabled_by_user'
     | 'ended';
   peerAlias?: string;
+  peerPlatform?: 'android' | 'ios';
   liveFrameUri?: string | null;
   remoteControlGranted?: boolean;
   targetUserWhiteId?: string;
@@ -29,13 +31,16 @@ export interface RemoteDesktopSession {
 }
 
 type SessionListener = (session: RemoteDesktopSession | null) => void;
-
-const CHUNK_SIZE = 14000;
+type FrameListener = (frameUri: string) => void;
 
 class RemoteDesktopService {
   private currentSession: RemoteDesktopSession | null = null;
   private listeners: Set<SessionListener> = new Set();
+  private frameListeners: Set<FrameListener> = new Set();
+  private lastRenderedSeq: number = 0;
+  private lastRenderedFallbackTs: number = 0;
   private pollTimer: any = null;
+  private userPollTimer: any = null;
   private nativeFrameSub: any = null;
   private lastProcessedCmdTs: number = 0;
   private isUploadingFallbackFrame: boolean = false;
@@ -46,7 +51,7 @@ class RemoteDesktopService {
   private isP2pOpen: boolean = false;
   private handledOfferSdp: boolean = false;
   private handledAnswerSdp: boolean = false;
-  private incomingFrameChunks: Map<number, { total: number; parts: string[] }> = new Map();
+  private cachedOfferSdp: string | null = null;
   private frameSeq: number = 0;
 
   public subscribe(listener: SessionListener): () => void {
@@ -57,7 +62,17 @@ class RemoteDesktopService {
     };
   }
 
-  private notify(): void {
+  public onFrame(listener: FrameListener): () => void {
+    this.frameListeners.add(listener);
+    if (this.currentSession?.liveFrameUri) {
+      listener(this.currentSession.liveFrameUri);
+    }
+    return () => {
+      this.frameListeners.delete(listener);
+    };
+  }
+
+  public notify(): void {
     for (const l of this.listeners) {
       try {
         l(this.currentSession ? { ...this.currentSession } : null);
@@ -70,7 +85,30 @@ class RemoteDesktopService {
   }
 
   private getRoomName(ticketId: string): string {
-    return `whitedesk_rd_${ticketId.toLowerCase().trim()}`;
+    return `whitedesk_rd_${String(ticketId || '').replace(/^#/, '').toLowerCase().trim()}`;
+  }
+
+  // Aynı davetin (reddedildikten sonra) tekrar tekrar modal açmasını engelleyen zaman damgası kilidi
+  private lastHandledInviteTs: number = 0;
+
+  /**
+   * Fast-signal kaydından rd_invite davetini ayrıştırır.
+   * Yalnızca aktif (signalType === 'offer') ve daha önce işlenmemiş davetleri döndürür.
+   */
+  private parseFreshInvite(sig: any): { ticketId?: string; adminAlias?: string; timestamp: number } | null {
+    if (!sig || !sig.found || !sig.offerSdp) return null;
+    if (sig.signalType && sig.signalType !== 'offer') return null;
+    let data: any = null;
+    try {
+      data = JSON.parse(sig.offerSdp);
+    } catch {
+      return null;
+    }
+    if (!data || data.type !== 'rd_invite') return null;
+    const ts = Number(data.timestamp) || 0;
+    if (ts && ts <= this.lastHandledInviteTs) return null;
+    if (ts && Date.now() - ts > 60_000) return null;
+    return { ticketId: data.ticketId, adminAlias: data.adminAlias, timestamp: ts };
   }
 
   public async isNativeAccessibilityEnabled(): Promise<boolean> {
@@ -122,7 +160,7 @@ class RemoteDesktopService {
       this.nativeFrameSub = null;
     }
 
-    // Native Kotlin Handler(Looper.getMainLooper()) her ~260ms'de ve her dokunuş sonrasında
+    // Native Kotlin Handler(Looper.getMainLooper()) her ~350ms'de ve pencere değişimlerinde
     // arka planda (Masaüstünde / diğer uygulamalarda) hiç donmadan bu olayı tetikler!
     this.nativeFrameSub = DeviceEventEmitter.addListener(
       'onNativeRemoteScreenFrame',
@@ -130,28 +168,34 @@ class RemoteDesktopService {
         if (!this.currentSession || this.currentSession.status !== 'active') return;
         const frameUri = event?.frame;
         if (frameUri) {
-          const sentP2p = this.sendFrameOverP2p(frameUri);
-          if (!sentP2p && !this.isUploadingFallbackFrame) {
+          if (this.isP2pOpen) {
+            this.sendFrameOverP2p(frameUri);
+          } else if (!this.isUploadingFallbackFrame) {
+            // P2P DataChannel el sıkışması tamamlanana kadar kareleri FastSignal üzerinden aktar.
+            // KRİTİK: P2P Offer ve SDP bilgisini ASLA EZME! Admin P2P Offer'ı kaçırmasın diye
+            // el sıkışma bitene kadar offer tipini ve sdp'yi taşımaya devam et!
             this.isUploadingFallbackFrame = true;
             const roomName = this.currentSession.roomName;
+            const payload: any = {
+              type: this.cachedOfferSdp ? 'rd_p2p_offer' : 'rd_live_frame',
+              sdp: this.cachedOfferSdp || undefined,
+              platform: Platform.OS,
+              frame: frameUri,
+              timestamp: Date.now(),
+            };
             void apiClient
               .publishFastSignal(
                 roomName,
                 'callee',
                 'answer',
-                JSON.stringify({
-                  type: 'rd_live_frame',
-                  frame: frameUri,
-                  timestamp: Date.now(),
-                }),
-                'rd_live_frame'
+                JSON.stringify(payload),
+                payload.type
               )
               .finally(() => {
                 this.isUploadingFallbackFrame = false;
               });
           }
         }
-        // Masaüstündeyken JS setInterval uyutulsa bile native tick ile bekleyen P2P/komut sinyallerini kontrol et
         if (!this.isP2pOpen) {
           void this.pollUserSignalOnce();
         }
@@ -217,6 +261,10 @@ class RemoteDesktopService {
     this.dataChannel = dc;
     dc.onopen = () => {
       this.isP2pOpen = true;
+      this.stopPolling();
+      try {
+        InWhiteRingtone.stopRadioRingback();
+      } catch {}
     };
     dc.onclose = () => {
       this.isP2pOpen = false;
@@ -231,29 +279,15 @@ class RemoteDesktopService {
           return;
         }
 
-        if (msg.type === 'rd_frame_chunk') {
-          const { seq, idx, total, data } = msg;
-          let entry = this.incomingFrameChunks.get(seq);
-          if (!entry) {
-            if (this.incomingFrameChunks.size > 3) {
-              this.incomingFrameChunks.clear();
-            }
-            entry = { total, parts: new Array(total).fill('') };
-            this.incomingFrameChunks.set(seq, entry);
+        if (msg.type === 'rd_frame') {
+          this.stopPolling();
+          if (msg.seq && msg.seq < this.lastRenderedSeq) return;
+          this.lastRenderedSeq = msg.seq || 0;
+          if (this.currentSession) {
+            this.currentSession.liveFrameUri = msg.data;
           }
-          entry.parts[idx] = data;
-          const isComplete = entry.parts.every((p) => p.length > 0);
-          if (isComplete) {
-            const fullFrame = entry.parts.join('');
-            this.incomingFrameChunks.delete(seq);
-            if (this.currentSession) {
-              this.currentSession = {
-                ...this.currentSession,
-                status: 'active',
-                liveFrameUri: fullFrame,
-              };
-              this.notify();
-            }
+          for (const fl of this.frameListeners) {
+            fl(msg.data);
           }
           return;
         }
@@ -270,20 +304,18 @@ class RemoteDesktopService {
       return false;
     }
     try {
-      const seq = ++this.frameSeq;
-      const total = Math.ceil(frameUri.length / CHUNK_SIZE);
-      for (let i = 0; i < total; i++) {
-        const slice = frameUri.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        this.dataChannel.send(
-          JSON.stringify({
-            type: 'rd_frame_chunk',
-            seq,
-            idx: i,
-            total,
-            data: slice,
-          })
-        );
+      // Flow control / backpressure check: buffer doluysa kareyi atla (gecikmeyi ve donmayı sıfırlar)
+      if (typeof this.dataChannel.bufferedAmount === 'number' && this.dataChannel.bufferedAmount > 64 * 1024) {
+        return false;
       }
+      const seq = ++this.frameSeq;
+      this.dataChannel.send(
+        JSON.stringify({
+          type: 'rd_frame',
+          seq,
+          data: frameUri,
+        })
+      );
       return true;
     } catch {
       return false;
@@ -299,16 +331,28 @@ class RemoteDesktopService {
     targetUserWhiteId?: string,
     callerWhiteId?: string
   ): Promise<void> {
+    const sTicketId = String(ticketId || '');
+    if (!sTicketId) return;
+
+    if (
+      this.currentSession &&
+      this.currentSession.status === 'active' &&
+      this.currentSession.ticketId === sTicketId
+    ) {
+      this.notify();
+      return;
+    }
+
     this.cleanupP2p();
     this.stopPolling();
-    const roomName = this.getRoomName(ticketId);
-    await apiClient.deleteFastSignal(roomName);
+    const roomName = this.getRoomName(sTicketId);
 
     this.handledOfferSdp = false;
     this.handledAnswerSdp = false;
 
+    // 1. Modalı ANINDA aç ve kullanıcıya hissettir (0ms gecikme)
     this.currentSession = {
-      ticketId,
+      ticketId: sTicketId,
       roomName,
       role: 'admin',
       status: 'offering',
@@ -318,6 +362,12 @@ class RemoteDesktopService {
       callerWhiteId,
     };
     this.notify();
+
+    // 2. Uzak masaüstünde arayan cihazda giden zil çalmaz (sessiz bağlantı)
+
+    // 3. Eski sinyal temizliği KALDIRILDI: await edilmeyen DELETE, hemen ardından yazılan
+    // rd_invite POST'undan sonra D1'e ulaşıp yeni daveti siliyordu (race condition).
+    // publishFastSignal('offer') zaten offer_sdp'yi ezer, answer_sdp ve adayları sıfırlar.
 
     diagnosticRecorder.recordAction(`Uzak Masaüstü İsteği Gönderildi (#${ticketId})`, {
       biletNo: `#${ticketId}`,
@@ -331,7 +381,23 @@ class RemoteDesktopService {
       timestamp: Date.now(),
     });
 
+    console.warn('[RemoteDesktop] Publishing rd_invite signal to room:', roomName, 'target:', targetUserWhiteId);
     await apiClient.publishFastSignal(roomName, 'caller', 'offer', invitePayload, 'rd_invite');
+
+    if (targetUserWhiteId) {
+      const cleanTarget = targetUserWhiteId.toLowerCase().trim();
+      const userDirectRoom = `whitedesk_user_signal_${cleanTarget}`;
+      void apiClient.publishFastSignal(userDirectRoom, 'caller', 'offer', invitePayload, 'rd_invite');
+
+      try {
+        const targetBlind = cleanTarget.startsWith('blind_')
+          ? cleanTarget
+          : WhiteDeskCrypto.generateBlindId(cleanTarget).toLowerCase().trim();
+        if (targetBlind && targetBlind !== cleanTarget) {
+          void apiClient.publishFastSignal(`whitedesk_user_signal_${targetBlind}`, 'caller', 'offer', invitePayload, 'rd_invite');
+        }
+      } catch {}
+    }
 
     void apiClient.sendCallPushNotification(
       targetUserWhiteId || '',
@@ -370,13 +436,19 @@ class RemoteDesktopService {
         this.stopPolling();
         return;
       }
-      if (this.isP2pOpen) return;
+      if (this.isP2pOpen) {
+        this.stopPolling();
+        return;
+      }
 
       try {
         const sig = await apiClient.fetchFastSignal(roomName, 'caller');
         if (!sig || !sig.found) return;
 
         if (sig.signalType === 'reject') {
+          try {
+            InWhiteRingtone.stopRadioRingback();
+          } catch {}
           const isDisabled = sig.targetMode === 'rd_disabled_by_user';
           this.currentSession = {
             ...this.currentSession,
@@ -389,6 +461,9 @@ class RemoteDesktopService {
         }
 
         if (sig.signalType === 'hangup') {
+          try {
+            InWhiteRingtone.stopRadioRingback();
+          } catch {}
           void this.endSession(false);
           return;
         }
@@ -400,19 +475,36 @@ class RemoteDesktopService {
           } catch {}
 
           if (parsed && (parsed.type === 'rd_p2p_offer' || parsed.type === 'rd_live_frame')) {
+            try {
+              InWhiteRingtone.stopRadioRingback();
+            } catch {}
             if (this.currentSession && this.currentSession.status === 'offering') {
               this.currentSession = {
                 ...this.currentSession,
                 status: 'active',
+                peerPlatform: parsed.platform || 'android',
                 liveFrameUri: parsed.firstFrame || parsed.frame || this.currentSession.liveFrameUri,
               };
+              const initFrame = parsed.firstFrame || parsed.frame;
+              if (initFrame) {
+                for (const fl of this.frameListeners) {
+                  fl(initFrame);
+                }
+              }
               this.notify();
-            } else if (parsed.frame && this.currentSession) {
-              this.currentSession = {
-                ...this.currentSession,
-                liveFrameUri: parsed.frame,
-              };
-              this.notify();
+            } else if (parsed.frame && this.currentSession && !this.isP2pOpen) {
+              const ts = Number(parsed.timestamp) || 0;
+              if (!ts || ts > this.lastRenderedFallbackTs) {
+                this.lastRenderedFallbackTs = ts;
+                this.currentSession = {
+                  ...this.currentSession,
+                  liveFrameUri: parsed.frame,
+                };
+                for (const fl of this.frameListeners) {
+                  fl(parsed.frame);
+                }
+                this.notify();
+              }
             }
 
             if (parsed.type === 'rd_p2p_offer' && parsed.sdp && !this.handledOfferSdp) {
@@ -423,7 +515,7 @@ class RemoteDesktopService {
           }
         }
       } catch {}
-    }, 350);
+    }, 200);
   }
 
   private async acceptP2pOfferOnAdmin(roomName: string, offerSdp: string): Promise<void> {
@@ -445,7 +537,7 @@ class RemoteDesktopService {
       await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: offerSdp }));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      await this.waitForIceGathering(pc, 600);
+      await this.waitForIceGathering(pc, 750);
 
       const finalAnswerSdp = pc.localDescription?.sdp || answer.sdp;
       await apiClient.publishFastSignal(
@@ -476,11 +568,16 @@ class RemoteDesktopService {
     if (
       this.currentSession &&
       this.currentSession.ticketId === ticketId &&
-      (this.currentSession.status === 'incoming_offer' ||
-        this.currentSession.status === 'connecting' ||
-        this.currentSession.status === 'active')
+      this.currentSession.status === 'incoming_offer'
     ) {
+      // Zaten kullanıcıya bu bilet için onay penceresi açık durumda
       return;
+    }
+
+    // Önceki kapanmamış veya takılmış oturum varsa derhal temizle
+    if (this.currentSession) {
+      this.cleanupP2p();
+      this.stopPolling();
     }
 
     const roomName = this.getRoomName(ticketId);
@@ -492,6 +589,14 @@ class RemoteDesktopService {
 
     const hasAccess = await this.isNativeAccessibilityEnabled();
     this.handledAnswerSdp = false;
+    // Hangi kanaldan gelirse gelsin (push / relay / fast-signal) bu davet işlenmiş sayılır
+    this.lastHandledInviteTs = Math.max(this.lastHandledInviteTs, Date.now());
+
+    // Aranan kullanıcı cihazında SMS benzeri nezih bildirim akoru ("dınnn dınnnn dınnnn") çalar
+    try {
+      InWhiteRingtone.startNotificationChime();
+    } catch {}
+
     this.currentSession = {
       ticketId,
       roomName,
@@ -546,10 +651,40 @@ class RemoteDesktopService {
     } catch {}
   }
 
+  private startUserPollTimer(): void {
+    if (this.userPollTimer) {
+      clearInterval(this.userPollTimer);
+      this.userPollTimer = null;
+    }
+    this.userPollTimer = setInterval(() => {
+      if (!this.currentSession || this.currentSession.status !== 'active') {
+        if (this.userPollTimer) {
+          clearInterval(this.userPollTimer);
+          this.userPollTimer = null;
+        }
+        return;
+      }
+      if (this.isP2pOpen) return;
+      void this.pollUserSignalOnce();
+    }, 180);
+  }
+
   public startUserWatcher(
     _ticketId: string,
     _isAdmin: boolean,
     _userRemoteDesktopEnabled: boolean
+  ): () => void {
+    // Sıfır-Polling Kuralı (KURAL 7): Boşta periyodik sorgulama yasaktır.
+    // Uzak masaüstü davetleri FCM Push ve D1 Relay (rd_invite_signal) ile tetiklenir.
+    return () => {};
+  }
+
+  /**
+   * Bilet detay ekranından bağımsız GLOBAL davet dinleyicisi (Devre dışı - KURAL 7 Sıfır-Polling).
+   */
+  public startGlobalUserWatcher(
+    _ownWhiteId: string,
+    _userRemoteDesktopEnabled: boolean = true
   ): () => void {
     return () => {};
   }
@@ -562,9 +697,24 @@ class RemoteDesktopService {
     if (!this.currentSession) return;
     const { roomName, ticketId } = this.currentSession;
 
+    try {
+      InWhiteRingtone.stopNotificationChime();
+      InWhiteRingtone.stopRadioRingback();
+      InWhiteRingtone.acquireVoipWakeLock();
+    } catch {}
+
+    const hasAccess = await this.isNativeAccessibilityEnabled();
+    if (!hasAccess && Platform.OS === 'android') {
+      this.openNativeAccessibilitySettings();
+    }
+
+    const firstFrame = await this.captureSystemScreenFrame();
+
     this.currentSession = {
       ...this.currentSession,
       status: 'active',
+      remoteControlGranted: hasAccess,
+      liveFrameUri: firstFrame || this.currentSession.liveFrameUri,
     };
     this.notify();
 
@@ -589,10 +739,10 @@ class RemoteDesktopService {
         offerToReceiveVideo: false,
       } as any);
       await pc.setLocalDescription(offer);
-      await this.waitForIceGathering(pc, 550);
+      await this.waitForIceGathering(pc, 750);
 
-      const firstFrame = await this.captureSystemScreenFrame();
       const finalOfferSdp = pc.localDescription?.sdp || offer.sdp;
+      this.cachedOfferSdp = finalOfferSdp;
 
       await apiClient.publishFastSignal(
         roomName,
@@ -601,6 +751,7 @@ class RemoteDesktopService {
         JSON.stringify({
           type: 'rd_p2p_offer',
           sdp: finalOfferSdp,
+          platform: Platform.OS,
           firstFrame: firstFrame || undefined,
           timestamp: Date.now(),
         }),
@@ -610,11 +761,20 @@ class RemoteDesktopService {
       console.warn('[RemoteDesktopService] User P2P init error:', e);
     }
 
-    // Native Kotlin zamanlayıcısını başlat (Uygulama masaüstüne küçüldüğünde ASLA durmaz!)
-    this.startNativeStreamLoop();
+    // Kullanıcı tarafında admin cevabını karşılamak için aktif polling döngüsü
+    this.startUserPollTimer();
+
+    // Native ekran yayını döngüsünü başlat
+    setTimeout(() => {
+      this.startNativeStreamLoop();
+    }, 100);
   }
 
   public async rejectOffer(): Promise<void> {
+    try {
+      InWhiteRingtone.stopNotificationChime();
+      InWhiteRingtone.stopRadioRingback();
+    } catch {}
     if (!this.currentSession) return;
     const { roomName } = this.currentSession;
     await apiClient.publishFastSignal(roomName, 'callee', 'reject', '', 'rd_rejected');
@@ -696,6 +856,107 @@ class RemoteDesktopService {
     );
   }
 
+  public async sendRemoteLongPress(normX: number, normY: number): Promise<void> {
+    if (!this.currentSession || this.currentSession.role !== 'admin') return;
+    const cmd = {
+      type: 'rd_input',
+      action: 'long_press',
+      x: normX,
+      y: normY,
+      timestamp: Date.now(),
+    };
+
+    if (this.isP2pOpen && this.dataChannel && this.dataChannel.readyState === 'open') {
+      try {
+        this.dataChannel.send(JSON.stringify(cmd));
+        return;
+      } catch {}
+    }
+
+    await apiClient.publishFastSignal(
+      this.currentSession.roomName,
+      'caller',
+      'offer',
+      JSON.stringify(cmd),
+      'rd_input'
+    );
+  }
+
+  public async sendRemoteText(text: string): Promise<void> {
+    if (!this.currentSession || this.currentSession.role !== 'admin' || !text) return;
+    const cmd = {
+      type: 'rd_input',
+      action: 'type_text',
+      text,
+      timestamp: Date.now(),
+    };
+
+    if (this.isP2pOpen && this.dataChannel && this.dataChannel.readyState === 'open') {
+      try {
+        this.dataChannel.send(JSON.stringify(cmd));
+        return;
+      } catch {}
+    }
+
+    await apiClient.publishFastSignal(
+      this.currentSession.roomName,
+      'caller',
+      'offer',
+      JSON.stringify(cmd),
+      'rd_input'
+    );
+  }
+
+  public async sendRemoteKey(key: string): Promise<void> {
+    if (!this.currentSession || this.currentSession.role !== 'admin' || !key) return;
+    const cmd = {
+      type: 'rd_input',
+      action: 'key',
+      key,
+      timestamp: Date.now(),
+    };
+
+    if (this.isP2pOpen && this.dataChannel && this.dataChannel.readyState === 'open') {
+      try {
+        this.dataChannel.send(JSON.stringify(cmd));
+        return;
+      } catch {}
+    }
+
+    await apiClient.publishFastSignal(
+      this.currentSession.roomName,
+      'caller',
+      'offer',
+      JSON.stringify(cmd),
+      'rd_input'
+    );
+  }
+
+  public async sendRemoteSystemKey(key: string): Promise<void> {
+    if (!this.currentSession || this.currentSession.role !== 'admin') return;
+    const cmd = {
+      type: 'rd_input',
+      action: 'system_key',
+      key,
+      timestamp: Date.now(),
+    };
+
+    if (this.isP2pOpen && this.dataChannel && this.dataChannel.readyState === 'open') {
+      try {
+        this.dataChannel.send(JSON.stringify(cmd));
+        return;
+      } catch {}
+    }
+
+    await apiClient.publishFastSignal(
+      this.currentSession.roomName,
+      'caller',
+      'offer',
+      JSON.stringify(cmd),
+      'rd_input'
+    );
+  }
+
   private async executeIncomingRemoteCommand(cmd: any): Promise<void> {
     if (Platform.OS !== 'android') return;
     const mod = NativeModules.WhiteDeskNotificationModule;
@@ -704,6 +965,8 @@ class RemoteDesktopService {
     try {
       if (cmd.action === 'tap' && typeof mod.injectRemoteTap === 'function') {
         await mod.injectRemoteTap(Number(cmd.x || 0.5), Number(cmd.y || 0.5));
+      } else if (cmd.action === 'long_press' && typeof mod.injectRemoteLongPress === 'function') {
+        await mod.injectRemoteLongPress(Number(cmd.x || 0.5), Number(cmd.y || 0.5));
       } else if (cmd.action === 'swipe' && typeof mod.injectRemoteSwipe === 'function') {
         await mod.injectRemoteSwipe(
           Number(cmd.x || 0.5),
@@ -712,11 +975,23 @@ class RemoteDesktopService {
           Number(cmd.endY || 0.5),
           Number(cmd.durationMs || 220)
         );
+      } else if (
+        (cmd.action === 'system_key' || cmd.action === 'key') &&
+        cmd.key &&
+        typeof mod.injectRemoteKey === 'function'
+      ) {
+        await mod.injectRemoteKey(String(cmd.key));
+      } else if (cmd.action === 'type_text' && cmd.text && typeof mod.injectRemoteText === 'function') {
+        await mod.injectRemoteText(String(cmd.text));
       }
     } catch {}
   }
 
   public async endSession(publishHangup: boolean = true): Promise<void> {
+    try {
+      InWhiteRingtone.stopNotificationChime();
+      InWhiteRingtone.stopRadioRingback();
+    } catch {}
     const sess = this.currentSession;
     if (publishHangup && this.isP2pOpen && this.dataChannel && this.dataChannel.readyState === 'open') {
       try {
@@ -772,10 +1047,13 @@ class RemoteDesktopService {
    * Karşı taraf vazgeçtiğinde gelen tekil iptal sinyaliyle kullanıcının açık onay modalını anında kapatır.
    */
   public dismissIncomingOffer(ticketId?: string): void {
+    try {
+      InWhiteRingtone.stopNotificationChime();
+      InWhiteRingtone.stopRadioRingback();
+    } catch {}
     if (
       this.currentSession &&
-      this.currentSession.role === 'user' &&
-      this.currentSession.status === 'incoming_offer'
+      this.currentSession.role === 'user'
     ) {
       if (ticketId) {
         const cleanCurrent = (this.currentSession.ticketId || '').replace(/^#/, '').toLowerCase().trim();
@@ -793,7 +1071,13 @@ class RemoteDesktopService {
 
   private cleanupP2p(): void {
     this.isP2pOpen = false;
-    this.incomingFrameChunks.clear();
+    this.cachedOfferSdp = null;
+    try {
+      InWhiteRingtone.stopNotificationChime();
+      InWhiteRingtone.stopRadioRingback();
+      InWhiteRingtone.releaseVoipWakeLock();
+    } catch {}
+    this.stopNativeStreamLoop();
     if (this.dataChannel) {
       try {
         this.dataChannel.close();
@@ -813,7 +1097,10 @@ class RemoteDesktopService {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
     }
-    this.stopNativeStreamLoop();
+    if (this.userPollTimer) {
+      clearInterval(this.userPollTimer);
+      this.userPollTimer = null;
+    }
     this.isUploadingFallbackFrame = false;
   }
 }

@@ -8,7 +8,7 @@ import { relayClient, MailboxMessageItem, RelayInboxMessage } from './relayClien
  */
 
 // WhiteDesk Sovereign Backend (Vercel whitedesk-backend or Cloudflare Worker)
-const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://whitedesk-backend.vercel.app';
+const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one';
 const SIGNAL_RELAY_BACKEND_URL = DEFAULT_BACKEND_URL;
 
 export const apiClient = {
@@ -353,6 +353,7 @@ export const apiClient = {
   allocateTicketAdmin: relayClient.allocateTicketAdmin,
   reissueTwinTickets: relayClient.reissueTwinTickets,
   fetchAdminRoster: relayClient.fetchAdminRoster,
+  claimNextPoolTicket: relayClient.claimNextPoolTicket,
 };
 
 export { pushClient } from './pushClient';

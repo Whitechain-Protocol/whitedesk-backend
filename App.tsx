@@ -7,13 +7,10 @@ import { I18nProvider } from './src/services/i18nService';
 import { CryptoService } from './src/services/cryptoService';
 import HelpDeskScreen from './src/screens/HelpDeskScreen';
 import WhiteDeskScannerScreen from './src/screens/WhiteDeskScannerScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
-import WelcomeScreen from './src/screens/WelcomeScreen';
-import UserGuideScreen from './src/screens/UserGuideScreen';
-import TenantSetupScreen from './src/screens/TenantSetupScreen';
 import UnifiedAuthScreen from './src/screens/auth/UnifiedAuthScreen';
 import { NotificationService } from './src/services/notificationService';
 import { voiceCallService } from './src/services/voiceCallService';
+import { remoteDesktopService } from './src/services/remoteDesktopService';
 
 const Stack = createStackNavigator();
 export const navigationRef = createNavigationContainerRef<any>();
@@ -30,6 +27,20 @@ function AppContent() {
 
         if (initialCall?.ticketId || initialCall?.callerWhiteId) {
           console.warn('[APP] Instant cold start incoming call detected:', initialCall);
+          const isRemoteDesktop = initialCall?.callType === 'remote_desktop' || initialCall?.type === 'remote_desktop_offer';
+          if (isRemoteDesktop) {
+            if (initialCall?.callAction === 'reject') {
+              void remoteDesktopService.rejectOffer();
+            } else if (initialCall?.callAction === 'answer') {
+              await remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || 'Admin');
+              void remoteDesktopService.acceptOffer();
+            } else {
+              void remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || 'Admin');
+            }
+            if (storedId) void NotificationService.init(storedId);
+            return;
+          }
+
           const autoAnswer = initialCall?.callAction === 'answer';
           if (initialCall?.callAction === 'reject') {
             void voiceCallService.rejectCallRequest();
@@ -62,6 +73,45 @@ function AppContent() {
       }
     }
     checkAuth();
+
+    // Üst bildirim bandına tıklanması veya ön plandayken gelen push çağrı modalını anında tetikler
+    const unsubTapped = NotificationService.onIncomingCallTapped(async (event: any) => {
+      console.warn('[APP] Incoming call event from notification/foreground:', event);
+      const isRemoteDesktop = event?.callType === 'remote_desktop' || event?.type === 'remote_desktop_offer';
+      if (isRemoteDesktop) {
+        if (event?.callAction === 'reject') {
+          void remoteDesktopService.rejectOffer();
+        } else if (event?.callAction === 'answer') {
+          await remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || 'Admin');
+          void remoteDesktopService.acceptOffer();
+        } else {
+          void remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || 'Admin');
+        }
+        return;
+      }
+
+      const storedId = await CryptoService.getWhiteId().catch(() => null);
+      const autoAnswer = event?.callAction === 'answer';
+      if (event?.callAction === 'reject') {
+        void voiceCallService.rejectCallRequest();
+      } else {
+        voiceCallService.presentIncomingCallFromPush(event, storedId || '', autoAnswer);
+      }
+    });
+
+    // Bildirim bandındaki "Reddet" butonuna basıldığında çağrıyı reddeder
+    const unsubAction = NotificationService.onIncomingCallAction((actionEvent: any) => {
+      console.warn('[APP] Incoming call action event:', actionEvent);
+      if (actionEvent?.action === 'reject' || actionEvent?.action === 'hangup') {
+        void voiceCallService.rejectCallRequest();
+        void remoteDesktopService.rejectOffer();
+      }
+    });
+
+    return () => {
+      unsubTapped();
+      unsubAction();
+    };
   }, []);
 
   return (
@@ -70,9 +120,6 @@ function AppContent() {
         <Stack.Screen name="HelpDesk" component={HelpDeskScreen} />
         <Stack.Screen name="Auth" component={UnifiedAuthScreen} />
         <Stack.Screen name="Register" component={UnifiedAuthScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="UserGuide" component={UserGuideScreen} />
-        <Stack.Screen name="TenantSetup" component={TenantSetupScreen} />
         <Stack.Screen 
           name="WhiteDeskScanner" 
           component={WhiteDeskScannerScreen} 

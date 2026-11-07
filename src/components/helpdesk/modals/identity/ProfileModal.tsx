@@ -9,6 +9,7 @@ import {
   Image,
   Share,
   Alert,
+  TextInput,
 } from 'react-native';
 import {
   X,
@@ -36,6 +37,7 @@ export interface ProfileModalProps {
   onClose: () => void;
   ownWhiteId: string;
   customAlias: string | null;
+  onSaveCustomAlias?: (newAlias: string) => void;
   isAdmin: boolean;
   adminRole: 'founder' | 'global_admin' | 'admin' | 'none';
   isMasterAdmin: boolean;
@@ -50,6 +52,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   ownWhiteId,
   customAlias,
+  onSaveCustomAlias,
   isAdmin,
   adminRole,
   isMasterAdmin,
@@ -62,7 +65,48 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [isHashRevealed, setIsHashRevealed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isQrShareModalVisible, setIsQrShareModalVisible] = useState(false);
+  const [profileNameInput, setProfileNameInput] = useState<string>(customAlias || '');
+  const [isSavingName, setIsSavingName] = useState(false);
   const shareQrRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (visible) {
+      setProfileNameInput(customAlias || '');
+    }
+  }, [visible, customAlias]);
+
+  const isValidTwoWordName = (name: string): boolean => {
+    if (!name) return false;
+    const cleaned = name.trim().replace(/[.,/#!$%^&*;:{}=\-_`~()0-9]/g, '');
+    const words = cleaned.split(/\s+/).filter(w => w.length >= 2);
+    return words.length >= 2;
+  };
+
+  const handleSaveProfileName = async () => {
+    const trimmed = profileNameInput.trim();
+    if (!isValidTwoWordName(trimmed)) {
+      Alert.alert(
+        language === 'tr' ? 'Geçersiz İsim' : 'Invalid Name',
+        language === 'tr'
+          ? 'Lütfen en az iki kelimeden oluşan geçerli bir ad ve soyad giriniz (Örn: Ahmet Yılmaz).'
+          : 'Please enter at least two words.'
+      );
+      return;
+    }
+    setIsSavingName(true);
+    try {
+      await helpDeskService.setCustomAlias(ownWhiteId, trimmed, isAdmin);
+      onSaveCustomAlias?.(trimmed);
+      Alert.alert(
+        language === 'tr' ? 'Başarılı' : 'Success',
+        language === 'tr' ? 'Adınız ve soyadınız başarıyla kaydedildi.' : 'Your name has been updated.'
+      );
+    } catch (err: any) {
+      Alert.alert(language === 'tr' ? 'Hata' : 'Error', err?.message || 'Kaydedilemedi');
+    } finally {
+      setIsSavingName(false);
+    }
+  };
 
   const effectiveRole: 'founder' | 'global_admin' | 'admin' | 'user' =
     isFounder || adminRole === 'founder'
@@ -336,6 +380,38 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               {currentEnterpriseName ? (
                 <Text style={styles.enterpriseSubText}>{currentEnterpriseName}</Text>
               ) : null}
+
+              {/* Ad Soyad Girişi (Tenant Adının Altında) */}
+              <View style={styles.nameEditBox}>
+                <View style={styles.nameInputWrapper}>
+                  <TextInput
+                    style={styles.nameInputField}
+                    value={profileNameInput}
+                    onChangeText={setProfileNameInput}
+                    placeholder={language === 'tr' ? 'Ad Soyad (En az 2 kelime)' : 'Full Name (Min 2 words)'}
+                    placeholderTextColor="#94A3B8"
+                    autoCapitalize="words"
+                  />
+                  {profileNameInput.trim() !== (customAlias || '').trim() && (
+                    <TouchableOpacity
+                      style={[
+                        styles.nameSaveBtn,
+                        !isValidTwoWordName(profileNameInput) && { backgroundColor: '#CBD5E1' },
+                      ]}
+                      onPress={handleSaveProfileName}
+                      disabled={!isValidTwoWordName(profileNameInput) || isSavingName}
+                      activeOpacity={0.7}
+                    >
+                      <Check size={14} color="#FFFFFF" strokeWidth={2.5} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                {!isValidTwoWordName(profileNameInput) && profileNameInput.trim().length > 0 && (
+                  <Text style={styles.nameValidationHint}>
+                    {language === 'tr' ? 'En az iki kelime ad ve soyad giriniz.' : 'Please enter at least two words.'}
+                  </Text>
+                )}
+              </View>
             </View>
 
             {/* 3. BAĞLANTI HASH KODUNA AİT QR KODU */}
@@ -601,6 +677,47 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748B',
     marginTop: 2,
+  },
+  nameEditBox: {
+    width: '100%',
+    maxWidth: 240,
+    marginTop: 8,
+    marginBottom: 4,
+    alignItems: 'center',
+  },
+  nameInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    width: '100%',
+  },
+  nameInputField: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
+    paddingVertical: 5,
+  },
+  nameSaveBtn: {
+    backgroundColor: '#2563EB',
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
+  },
+  nameValidationHint: {
+    fontSize: 11,
+    color: '#DC2626',
+    marginTop: 4,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   qrCardContainer: {
     width: '100%',

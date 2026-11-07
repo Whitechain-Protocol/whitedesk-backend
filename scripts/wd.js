@@ -16,14 +16,21 @@ const { generateKeyPairSync, createHmac, randomBytes } = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const SYSTEM_SALT = 'WhiteDesk_ZeroKnowledge_Salt_2026_Secure';
-const NEON_ENDPOINT = process.env.NEON_ENDPOINT || process.env.EXPO_PUBLIC_NEON_ENDPOINT;
-const NEON_CONNECTION_STRING =
-  process.env.NEON_CONNECTION_STRING || process.env.EXPO_PUBLIC_NEON_CONNECTION_STRING;
-if (!NEON_ENDPOINT || !NEON_CONNECTION_STRING) {
-  console.error('[wd] NEON_ENDPOINT / NEON_CONNECTION_STRING missing. Set them in .env.local (never commit).');
-  process.exit(1);
+// Auto-load .env.local if not already in process.env
+const envLocalPath = path.join(__dirname, '..', '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  const envContent = fs.readFileSync(envLocalPath, 'utf8');
+  envContent.split('\n').forEach((line) => {
+    const m = line.match(/^\s*([A-Za-z_0-9]+)\s*=\s*(.*)?\s*$/);
+    if (m && m[1] && !process.env[m[1]]) {
+      process.env[m[1]] = (m[2] || '').trim().replace(/^['"]|['"]$/g, '');
+    }
+  });
 }
+
+const SYSTEM_SALT = 'WhiteDesk_ZeroKnowledge_Salt_2026_Secure';
+const BACKEND_URL = (process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one').replace(/\/$/, '');
+const D1_SQL_ENDPOINT = `${BACKEND_URL}/api/d1/query`;
 
 const C = {
   reset: '\x1b[0m',
@@ -39,7 +46,9 @@ const C = {
 
 function generateBlindId(whiteId, salt = SYSTEM_SALT) {
   if (!whiteId) return '';
-  const hash = createHmac('sha256', salt).update(whiteId.trim().toLowerCase()).digest('hex');
+  const clean = whiteId.trim().toLowerCase();
+  if (clean.startsWith('blind_') || clean.startsWith('ent_')) return clean;
+  const hash = createHmac('sha256', salt).update(clean).digest('hex');
   return 'blind_' + hash.slice(0, 32);
 }
 
@@ -49,18 +58,17 @@ function escapeSqlString(val) {
 }
 
 async function executeSql(query) {
-  const res = await fetch(NEON_ENDPOINT, {
+  const res = await fetch(D1_SQL_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Neon-Connection-String': NEON_CONNECTION_STRING,
     },
     body: JSON.stringify({ query }),
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`[Neon SQL HTTP ${res.status}] ${errText}`);
+    throw new Error(`[Cloudflare D1 SQL HTTP ${res.status}] ${errText}`);
   }
 
   const data = await res.json();
@@ -284,10 +292,45 @@ async function createTenant({
   `);
 
   await executeSql(`
-    INSERT INTO whitedesk_app_cat (app_id, enterprise_blind_id, categories, updated_at)
-    VALUES (${escapeSqlString(cleanApp)}, ${escapeSqlString(tenantBlindId)}, '${categoriesJson}', ${now})
-    ON CONFLICT (app_id) DO UPDATE SET enterprise_blind_id = EXCLUDED.enterprise_blind_id, categories = EXCLUDED.categories;
+    INSERT INTO whitedesk_apps (app_id, enterprise_blind_id, name, is_active, created_at)
+    VALUES (${escapeSqlString(cleanApp)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(cleanApp)}, TRUE, NOW())
+    ON CONFLICT (app_id) DO UPDATE SET enterprise_blind_id = EXCLUDED.enterprise_blind_id, is_active = TRUE;
   `);
+
+  const catList = Array.isArray(categories) ? categories : ['general', 'technical', 'billing'];
+  for (const c of catList) {
+    const cId = typeof c === 'string' ? c.toLowerCase().trim() : c.id;
+    const cTr = typeof c === 'string' ? c : (c.labelTr || c.name || cId);
+    const cEn = typeof c === 'string' ? c : (c.labelEn || c.name || cId);
+    const catPayload = [{
+      id: cId,
+      key: cId,
+      labelTr: cTr,
+      labelEn: cEn,
+      icon: 'HelpCircle',
+    }];
+    await executeSql(`
+      INSERT INTO whitedesk_categories (category_id, enterprise_blind_id, org_id, app_id, scope_type, categories, is_active, created_at, updated_at)
+      VALUES (
+        ${escapeSqlString(cId)}, 
+        ${escapeSqlString(tenantBlindId)}, 
+        ${escapeSqlString(orgId)}, 
+        ${escapeSqlString(cleanApp)}, 
+        'app', 
+        ${escapeSqlString(JSON.stringify(catPayload))}::jsonb, 
+        TRUE, 
+        NOW(), 
+        NOW()
+      )
+      ON CONFLICT (category_id) DO UPDATE SET 
+        enterprise_blind_id = EXCLUDED.enterprise_blind_id,
+        org_id = EXCLUDED.org_id,
+        app_id = EXCLUDED.app_id,
+        categories = EXCLUDED.categories,
+        updated_at = NOW(),
+        is_active = TRUE;
+    `);
+  }
 
   // 4. Save local folder tenants/<Tenant-Slug>/
   const keysData = {
@@ -375,13 +418,34 @@ async function createGlobalAdminHash(tenantBlindId) {
 }
 
 // ─── 5. CREATE DIVISIONAL USER HASH ─────────────────────────────────────────
-async function createUserDivisionalHash(tenantBlindId, orgId, appId) {
+async function createUserDivisionalHash(tenantBlindId, orgNameOrId = 'Merkez', appId = 'whitedesk', tenantName = '') {
   if (!tenantBlindId) {
     throw new Error('Tenant Blind ID zorunludur.');
   }
 
-  const hash = 'usr_div_' + randomBytes(24).toString('hex');
+  const rawOrg = (orgNameOrId || 'Merkez').trim();
+  const slugOrg = rawOrg
+    .toLowerCase()
+    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9_-]/g, '_')
+    .replace(/^_+|_+$/g, '') || 'merkez';
+  const orgId = slugOrg;
+
   const now = Date.now();
+
+  // 1. Alt birim (org) whitedesk_orgs tablosunda yoksa otomatik ekle
+  try {
+    await executeSql(`
+      INSERT INTO whitedesk_orgs (org_id, enterprise_blind_id, name, created_at)
+      VALUES (${escapeSqlString(orgId)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(rawOrg)}, ${now})
+      ON CONFLICT (org_id) DO NOTHING;
+    `);
+  } catch (err) {
+    // console.warn('[wd] org insert notice:', err.message);
+  }
+
+  const hash = 'usr_div_' + randomBytes(24).toString('hex');
 
   await executeSql(`
     INSERT INTO whitedesk_recovery_hashes (hash, type, tenant_blind_id, org_id, app_id, used, created_at)
@@ -389,18 +453,22 @@ async function createUserDivisionalHash(tenantBlindId, orgId, appId) {
       ${escapeSqlString(hash)},
       'user',
       ${escapeSqlString(tenantBlindId)},
-      ${escapeSqlString(orgId || 'default')},
-      ${escapeSqlString(appId || 'inwhite')},
+      ${escapeSqlString(orgId)},
+      ${escapeSqlString(appId || 'whitedesk')},
       FALSE,
       ${now}
     );
   `);
 
-  console.log(`\n${C.bold}${C.green}[BAŞARILI] Divisional User Hash Üretildi:${C.reset}`);
-  console.log(`${C.bold}${C.yellow}${hash}${C.reset}\n`);
-  console.log(`Kullanım: Kullanıcı bilet kutusuna şunu yazar:`);
-  console.log(`  ${C.cyan}${C.bold}user ${hash}${C.reset}`);
-  console.log(`Admin onayına düşer. Onaylandığında o bölüme dahil olur.\n`);
+  console.log(`\n${C.bold}${C.green}[BAŞARILI] Şirket ve Alt Birim (Org) Kullanıcı Hash'i Üretildi:${C.reset}`);
+  if (tenantName) console.log(`${C.dim}Şirket (Tenant) :${C.reset} ${C.bold}${tenantName}${C.reset} (${tenantBlindId})`);
+  console.log(`${C.dim}Alt Birim (Org) :${C.reset} ${C.bold}${rawOrg}${C.reset} (org_id: ${orgId})`);
+  console.log(`${C.dim}Uygulama (App)  :${C.reset} ${C.bold}${appId || 'whitedesk'}${C.reset}`);
+  console.log(`\n${C.bold}${C.yellow}${hash}${C.reset}\n`);
+  console.log(`Kullanım:`);
+  console.log(`  - İlk kurulum ekranında "Hash / Kurtarma Kodum Var" kutusuna yapıştırarak`);
+  console.log(`  - Veya ana ekrandaki QR tarayıcıya girerek/okutarak`);
+  console.log(`Kullanıcı doğrudan ${tenantName || tenantBlindId} şirketinin "${rawOrg}" birimine bağlanır.\n`);
 
   return { hash, type: 'user', tenantBlindId, orgId, appId, created_at: now };
 }
@@ -422,18 +490,31 @@ async function listOrgs(tenantBlindId) {
 
 async function listApps(tenantBlindId) {
   const where = tenantBlindId ? `WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)}` : '';
-  const rows = await executeSql(`SELECT app_id, enterprise_blind_id, categories, updated_at FROM whitedesk_app_cat ${where};`);
-  return rows;
+  const apps = await executeSql(`SELECT app_id, enterprise_blind_id, name, description, is_active FROM whitedesk_apps ${where};`);
+  const catRows = await executeSql(`SELECT category_id, enterprise_blind_id, org_id, app_id, scope_type, categories FROM whitedesk_categories WHERE is_active = TRUE;`);
+  
+  return apps.map((ap) => {
+    const matchingRows = catRows.filter(c => c.app_id === ap.app_id || c.app_id === 'all');
+    let cats = [];
+    matchingRows.forEach(r => {
+      const parsed = typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || []);
+      if (Array.isArray(parsed)) cats.push(...parsed);
+    });
+    return {
+      ...ap,
+      categories: cats,
+    };
+  });
 }
 
 // ─── AUDIT & SERVICE MANAGEMENT ─────────────────────────────────────────────
 
 async function getTenantAuditSummary() {
   const tenants = await listTenants();
-  const allAdmins = await executeSql(`SELECT white_id, enterprise_blind_id, alias, role, is_active, created_at FROM whitedesk_admins;`);
-  const allAllocations = await executeSql(`SELECT admin_white_id, org_id, app_id, categories, updated_at FROM whitedesk_admin_alloc;`);
+  const allAdmins = await executeSql(`SELECT white_id, enterprise_blind_id, alias, role, org_id, app_id, categories, is_active, created_at FROM whitedesk_admins;`);
   const allOrgs = await executeSql(`SELECT org_id, enterprise_blind_id, name, created_at FROM whitedesk_orgs;`);
-  const allApps = await executeSql(`SELECT app_id, enterprise_blind_id, categories, updated_at FROM whitedesk_app_cat;`);
+  const allApps = await executeSql(`SELECT app_id, enterprise_blind_id, name, description, is_active FROM whitedesk_apps;`);
+  const allCatRows = await executeSql(`SELECT category_id, enterprise_blind_id, org_id, app_id, scope_type, categories FROM whitedesk_categories WHERE is_active = TRUE;`);
   const allUsers = await executeSql(`SELECT user_blind_id, tenant_blind_id, org_id, app_id, alias, status, created_at FROM whitedesk_user_bindings;`);
   const allApprovals = await executeSql(`SELECT id, type, tenant_blind_id, tenant_name, candidate_white_id, candidate_blind_id, candidate_alias, target_org_id, target_app_id, target_categories, status, requested_at FROM whitedesk_approvals WHERE status = 'pending' ORDER BY requested_at DESC;`);
 
@@ -451,10 +532,20 @@ async function getTenantAuditSummary() {
     const tenantAdmins = allAdmins
       .filter((a) => a.enterprise_blind_id === tBlind && a.role === 'admin')
       .map((adm) => {
-        const allocs = allAllocations.filter((al) => al.admin_white_id === adm.white_id);
+        let cats = [];
+        try {
+          cats = typeof adm.categories === 'string' ? JSON.parse(adm.categories) : (adm.categories || []);
+        } catch (e) {
+          cats = [];
+        }
         return {
           ...adm,
-          allocations: allocs,
+          allocations: [{
+            admin_white_id: adm.white_id,
+            org_id: adm.org_id || 'default',
+            app_id: adm.app_id || 'all',
+            categories: Array.isArray(cats) ? cats : [cats],
+          }],
         };
       });
 
@@ -465,15 +556,22 @@ async function getTenantAuditSummary() {
     const tenantApps = allApps
       .filter((ap) => ap.enterprise_blind_id === tBlind)
       .map((ap) => {
-        let cats = [];
-        try {
-          cats = typeof ap.categories === 'string' ? JSON.parse(ap.categories) : ap.categories;
-        } catch (e) {
-          cats = [];
-        }
+        const matchingCatRows = allCatRows.filter(
+          (c) => (c.enterprise_blind_id === tBlind || c.enterprise_blind_id === 'default') && (c.app_id === ap.app_id || c.app_id === 'all')
+        );
+        let parsedCats = [];
+        matchingCatRows.forEach((r) => {
+          let list = [];
+          try {
+            list = typeof r.categories === 'string' ? JSON.parse(r.categories) : (r.categories || []);
+          } catch (e) {
+            list = [];
+          }
+          if (Array.isArray(list)) parsedCats.push(...list);
+        });
         return {
           ...ap,
-          parsed_categories: Array.isArray(cats) ? cats : [],
+          parsed_categories: parsedCats,
         };
       });
 
@@ -577,19 +675,21 @@ async function getUserAuditDetails(tenantBlindId, orgId, appId) {
 
 async function updateGlobalAdmin(tenantBlindId, adminBlindId, newAlias) {
   if (!tenantBlindId || !adminBlindId) throw new Error('tenantBlindId and adminBlindId required');
+  const normId = generateBlindId(adminBlindId);
   await executeSql(`
     UPDATE whitedesk_admins 
     SET alias = ${escapeSqlString(newAlias || 'WhiteCosmos')} 
-    WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} AND white_id = ${escapeSqlString(adminBlindId)};
+    WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} AND (white_id = ${escapeSqlString(normId)} OR blind_id = ${escapeSqlString(normId)});
   `);
   return { success: true };
 }
 
 async function deleteGlobalAdmin(tenantBlindId, adminBlindId) {
   if (!tenantBlindId || !adminBlindId) throw new Error('tenantBlindId and adminBlindId required');
+  const normId = generateBlindId(adminBlindId);
   await executeSql(`
     DELETE FROM whitedesk_admins 
-    WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} AND white_id = ${escapeSqlString(adminBlindId)};
+    WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} AND (white_id = ${escapeSqlString(normId)} OR blind_id = ${escapeSqlString(normId)});
   `);
   return { success: true };
 }
@@ -599,18 +699,20 @@ async function addAdminToTenant(tenantBlindId, adminWhiteId, alias, appId = '*',
   const blindId = generateBlindId(adminWhiteId);
   const now = Date.now();
   const cleanAlias = alias || 'Admin';
-
-  await executeSql(`
-    INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, alias, role, is_active, created_at)
-    VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(cleanAlias)}, 'admin', TRUE, ${now})
-    ON CONFLICT (white_id) DO UPDATE SET enterprise_blind_id = EXCLUDED.enterprise_blind_id, alias = EXCLUDED.alias, role = 'admin', is_active = TRUE;
-  `);
-
   const catsJson = JSON.stringify(Array.isArray(categories) ? categories : ['all']);
+
   await executeSql(`
-    INSERT INTO whitedesk_admin_alloc (admin_white_id, org_id, app_id, categories, updated_at)
-    VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(orgId)}, ${escapeSqlString(appId)}, '${catsJson}', ${now})
-    ON CONFLICT (admin_white_id, app_id) DO UPDATE SET categories = EXCLUDED.categories, updated_at = ${now};
+    INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, org_id, app_id, categories, is_active, created_at)
+    VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(cleanAlias)}, 'admin', ${escapeSqlString(orgId)}, ${escapeSqlString(appId)}, '${catsJson}'::jsonb, TRUE, ${now})
+    ON CONFLICT (white_id) DO UPDATE SET 
+      blind_id = EXCLUDED.blind_id,
+      enterprise_blind_id = EXCLUDED.enterprise_blind_id, 
+      alias = EXCLUDED.alias, 
+      role = 'admin', 
+      org_id = EXCLUDED.org_id, 
+      app_id = EXCLUDED.app_id, 
+      categories = EXCLUDED.categories, 
+      is_active = TRUE;
   `);
 
   return { success: true, blindId };
@@ -618,20 +720,22 @@ async function addAdminToTenant(tenantBlindId, adminWhiteId, alias, appId = '*',
 
 async function deleteAdminFromTenant(tenantBlindId, adminBlindId) {
   if (!adminBlindId) throw new Error('adminBlindId required');
-  await executeSql(`DELETE FROM whitedesk_admins WHERE white_id = ${escapeSqlString(adminBlindId)};`);
-  await executeSql(`DELETE FROM whitedesk_admin_alloc WHERE admin_white_id = ${escapeSqlString(adminBlindId)};`);
+  const normId = generateBlindId(adminBlindId);
+  await executeSql(`DELETE FROM whitedesk_admins WHERE white_id = ${escapeSqlString(normId)} OR blind_id = ${escapeSqlString(normId)};`);
   return { success: true };
 }
 
 async function updateAdminAllocations(adminBlindId, appId, orgId, categories) {
   if (!adminBlindId || !appId) throw new Error('adminBlindId and appId required');
-  const now = Date.now();
+  const normId = generateBlindId(adminBlindId);
   const catsJson = JSON.stringify(Array.isArray(categories) ? categories : ['all']);
 
   await executeSql(`
-    INSERT INTO whitedesk_admin_alloc (admin_white_id, org_id, app_id, categories, updated_at)
-    VALUES (${escapeSqlString(adminBlindId)}, ${escapeSqlString(orgId || 'default')}, ${escapeSqlString(appId)}, '${catsJson}', ${now})
-    ON CONFLICT (admin_white_id, app_id) DO UPDATE SET org_id = EXCLUDED.org_id, categories = EXCLUDED.categories, updated_at = ${now};
+    UPDATE whitedesk_admins 
+    SET org_id = ${escapeSqlString(orgId || 'default')}, 
+        app_id = ${escapeSqlString(appId)}, 
+        categories = '${catsJson}'::jsonb 
+    WHERE white_id = ${escapeSqlString(normId)} OR blind_id = ${escapeSqlString(normId)};
   `);
   return { success: true };
 }
@@ -657,66 +761,33 @@ async function addCategoryToTenantApp(tenantBlindId, appId, catId, labelTr, labe
   if (!tenantBlindId || !appId || !catId) throw new Error('tenantBlindId, appId and catId required');
   const cleanCat = catId.toLowerCase().trim();
   const cleanApp = appId.toLowerCase().trim();
-  const now = Date.now();
 
-  const rows = await executeSql(`SELECT categories FROM whitedesk_app_cat WHERE app_id = ${escapeSqlString(cleanApp)} LIMIT 1;`);
-  let cats = [];
-  if (rows.length > 0 && rows[0].categories) {
-    try {
-      cats = typeof rows[0].categories === 'string' ? JSON.parse(rows[0].categories) : rows[0].categories;
-    } catch (e) {
-      cats = [];
-    }
-  }
-
-  const existingIdx = cats.findIndex((c) => (typeof c === 'string' ? c : c.id) === cleanCat);
-  const newCatObj = {
-    id: cleanCat,
-    key: cleanCat,
-    labelTr: labelTr || cleanCat,
-    labelEn: labelEn || cleanCat,
-  };
-
-  if (existingIdx >= 0) {
-    cats[existingIdx] = newCatObj;
-  } else {
-    cats.push(newCatObj);
-  }
-
-  const catsJson = JSON.stringify(cats);
   await executeSql(`
-    INSERT INTO whitedesk_app_cat (app_id, enterprise_blind_id, categories, updated_at)
-    VALUES (${escapeSqlString(cleanApp)}, ${escapeSqlString(tenantBlindId)}, '${catsJson}', ${now})
-    ON CONFLICT (app_id) DO UPDATE SET categories = '${catsJson}', updated_at = ${now};
+    INSERT INTO whitedesk_categories (category_id, enterprise_blind_id, org_id, app_id, name_tr, name_en, is_active)
+    VALUES (${escapeSqlString(cleanCat)}, ${escapeSqlString(tenantBlindId)}, 'default', ${escapeSqlString(cleanApp)}, ${escapeSqlString(labelTr || cleanCat)}, ${escapeSqlString(labelEn || cleanCat)}, TRUE)
+    ON CONFLICT (category_id) DO UPDATE SET 
+      enterprise_blind_id = EXCLUDED.enterprise_blind_id, 
+      app_id = EXCLUDED.app_id, 
+      name_tr = EXCLUDED.name_tr, 
+      name_en = EXCLUDED.name_en, 
+      is_active = TRUE;
   `);
 
-  return { success: true, categories: cats };
+  const rows = await executeSql(`SELECT category_id as id, category_id as key, name_tr as "labelTr", name_en as "labelEn" FROM whitedesk_categories WHERE app_id = ${escapeSqlString(cleanApp)} AND is_active = TRUE;`);
+  return { success: true, categories: rows };
 }
 
 async function deleteCategoryFromTenantApp(tenantBlindId, appId, catId) {
   if (!appId || !catId) throw new Error('appId and catId required');
   const cleanCat = catId.toLowerCase().trim();
   const cleanApp = appId.toLowerCase().trim();
-  const now = Date.now();
-
-  const rows = await executeSql(`SELECT categories FROM whitedesk_app_cat WHERE app_id = ${escapeSqlString(cleanApp)} LIMIT 1;`);
-  if (rows.length === 0) return { success: true };
-
-  let cats = [];
-  try {
-    cats = typeof rows[0].categories === 'string' ? JSON.parse(rows[0].categories) : rows[0].categories;
-  } catch (e) {
-    cats = [];
-  }
-
-  cats = cats.filter((c) => (typeof c === 'string' ? c : c.id) !== cleanCat);
-  const catsJson = JSON.stringify(cats);
 
   await executeSql(`
-    UPDATE whitedesk_app_cat SET categories = '${catsJson}', updated_at = ${now} WHERE app_id = ${escapeSqlString(cleanApp)};
+    DELETE FROM whitedesk_categories WHERE category_id = ${escapeSqlString(cleanCat)} AND app_id = ${escapeSqlString(cleanApp)};
   `);
 
-  return { success: true, categories: cats };
+  const rows = await executeSql(`SELECT category_id as id, category_id as key, name_tr as "labelTr", name_en as "labelEn" FROM whitedesk_categories WHERE app_id = ${escapeSqlString(cleanApp)} AND is_active = TRUE;`);
+  return { success: true, categories: rows };
 }
 
 async function setUserBindingStatus(userBlindId, status) {
@@ -780,31 +851,34 @@ async function reviewApprovalDirect(approvalId, approve, reviewer = 'Console Adm
   `);
 
   if (approve) {
+    const candBlindId = generateBlindId(appr.candidate_blind_id);
     if (appr.type === 'global_admin') {
       await executeSql(`
-        INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, alias, role, is_active, created_at)
-        VALUES (${escapeSqlString(appr.candidate_blind_id)}, ${escapeSqlString(appr.tenant_blind_id)}, 'WhiteCosmos', 'global_admin', TRUE, ${now})
-        ON CONFLICT (white_id) DO UPDATE SET role = 'global_admin', alias = 'WhiteCosmos', is_active = TRUE;
+        INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
+        VALUES (${escapeSqlString(candBlindId)}, ${escapeSqlString(candBlindId)}, ${escapeSqlString(appr.tenant_blind_id)}, 'WhiteCosmos', 'global_admin', TRUE, ${now})
+        ON CONFLICT (white_id) DO UPDATE SET blind_id = EXCLUDED.blind_id, role = 'global_admin', alias = 'WhiteCosmos', is_active = TRUE;
       `);
     } else if (appr.type === 'admin') {
       const alias = appr.candidate_alias || 'Admin';
+      const orgId = appr.target_org_id || 'default';
+      const appId = appr.target_app_id || 'all';
+      const catsJson = JSON.stringify(appr.target_categories || ['all']);
       await executeSql(`
-        INSERT INTO whitedesk_admins (white_id, enterprise_blind_id, alias, role, is_active, created_at)
-        VALUES (${escapeSqlString(appr.candidate_blind_id)}, ${escapeSqlString(appr.tenant_blind_id)}, ${escapeSqlString(alias)}, 'admin', TRUE, ${now})
-        ON CONFLICT (white_id) DO UPDATE SET role = 'admin', alias = ${escapeSqlString(alias)}, is_active = TRUE;
+        INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, org_id, app_id, categories, is_active, created_at)
+        VALUES (${escapeSqlString(candBlindId)}, ${escapeSqlString(candBlindId)}, ${escapeSqlString(appr.tenant_blind_id)}, ${escapeSqlString(alias)}, 'admin', ${escapeSqlString(orgId)}, ${escapeSqlString(appId)}, '${catsJson}'::jsonb, TRUE, ${now})
+        ON CONFLICT (white_id) DO UPDATE SET 
+          blind_id = EXCLUDED.blind_id,
+          role = 'admin', 
+          alias = ${escapeSqlString(alias)}, 
+          org_id = EXCLUDED.org_id, 
+          app_id = EXCLUDED.app_id, 
+          categories = EXCLUDED.categories, 
+          is_active = TRUE;
       `);
-      if (appr.target_app_id) {
-        const catsJson = JSON.stringify(appr.target_categories || ['all']);
-        await executeSql(`
-          INSERT INTO whitedesk_admin_alloc (admin_white_id, org_id, app_id, categories, updated_at)
-          VALUES (${escapeSqlString(appr.candidate_blind_id)}, ${escapeSqlString(appr.target_org_id || 'default')}, ${escapeSqlString(appr.target_app_id)}, '${catsJson}', ${now})
-          ON CONFLICT (admin_white_id, app_id) DO UPDATE SET categories = '${catsJson}', updated_at = ${now};
-        `);
-      }
     } else if (appr.type === 'user') {
       await executeSql(`
         INSERT INTO whitedesk_user_bindings (user_blind_id, tenant_blind_id, org_id, app_id, status, created_at)
-        VALUES (${escapeSqlString(appr.candidate_blind_id)}, ${escapeSqlString(appr.tenant_blind_id)}, ${escapeSqlString(appr.target_org_id || 'default')}, ${escapeSqlString(appr.target_app_id || 'inwhite')}, 'approved', ${now})
+        VALUES (${escapeSqlString(candBlindId)}, ${escapeSqlString(appr.tenant_blind_id)}, ${escapeSqlString(appr.target_org_id || 'default')}, ${escapeSqlString(appr.target_app_id || 'inwhite')}, 'approved', ${now})
         ON CONFLICT (user_blind_id) DO UPDATE SET status = 'approved', org_id = EXCLUDED.org_id, app_id = EXCLUDED.app_id;
       `);
     }
@@ -813,10 +887,45 @@ async function reviewApprovalDirect(approvalId, approve, reviewer = 'Console Adm
   return { success: true, status };
 }
 
+function extractCliParam(args, rawStr, paramNames) {
+  // 1. Check process.argv elements first (preserves quotes handled by shell)
+  if (Array.isArray(args)) {
+    for (const arg of args) {
+      for (const name of paramNames) {
+        const p1 = `${name}:`.toLowerCase();
+        const p2 = `${name}=`.toLowerCase();
+        const p3 = `--${name}=`.toLowerCase();
+        const lower = arg.toLowerCase();
+        if (lower.startsWith(p1)) return arg.slice(p1.length).replace(/^["']|["']$/g, '').trim();
+        if (lower.startsWith(p2)) return arg.slice(p2.length).replace(/^["']|["']$/g, '').trim();
+        if (lower.startsWith(p3)) return arg.slice(p3.length).replace(/^["']|["']$/g, '').trim();
+      }
+    }
+  }
+
+  // 2. Check raw string with strict boundaries
+  for (const name of paramNames) {
+    // Quoted value: (?:^|\s)(?:--)?name[:=]\s*["']([^"']+)["']
+    const quotedMatch = rawStr.match(new RegExp(`(?:^|\\s)(?:--)?${name}[:=]\\s*["']([^"']+)["']`, 'i'));
+    if (quotedMatch && quotedMatch[1]) return quotedMatch[1].trim();
+
+    // Space-separated with flag: (?:^|\s)(?:--|-)${name}\\s+["']([^"']+)["']
+    const flagQuotedMatch = rawStr.match(new RegExp(`(?:^|\\s)(?:--|-)${name}\\s+["']([^"']+)["']`, 'i'));
+    if (flagQuotedMatch && flagQuotedMatch[1]) return flagQuotedMatch[1].trim();
+
+    // Unquoted value: matches up to the next known flag or end of string
+    // e.g. tenant:Whitechain org:Saha Ekibi -> captures "Saha Ekibi" if nothing follows, or up to next " xxx:"
+    const unquotedMatch = rawStr.match(new RegExp(`(?:^|\\s)(?:--)?${name}[:=]\\s*([^"':]+?)(?=\\s+[a-z_]+:|$)`, 'i'));
+    if (unquotedMatch && unquotedMatch[1]) return unquotedMatch[1].trim();
+  }
+  return null;
+}
+
 // ─── CLI PARSER ─────────────────────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);
-  const cmd = args.join(' ').toLowerCase();
+  const rawCmd = args.join(' ');
+  const cmd = rawCmd.toLowerCase();
 
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
     console.log(`\n${C.bold}inWhite / WhiteDesk Sovereign CLI ("wd")${C.reset}`);
@@ -824,8 +933,20 @@ async function main() {
     console.log(`  ${C.cyan}npm run wd run gen create${C.reset}                (Root Genesis başlat)`);
     console.log(`  ${C.cyan}npm run wd run tenant create org:"Atlas Global" app:"SupportDesk"${C.reset}`);
     console.log(`  ${C.cyan}npm run wd run hash founder${C.reset}              (TheWhite kurtarma hash'i)`);
-    console.log(`  ${C.cyan}npm run wd run hash cosmos org:"Atlas Global"${C.reset} (Global Admin hash'i)`);
-    console.log(`  ${C.cyan}npm run wd run hash user org:"Atlas Global" app:"SupportDesk"${C.reset}\n`);
+    console.log(`  ${C.cyan}npm run wd run hash cosmos tenant:"Whitechain"${C.reset} (Global Admin hash'i)`);
+    console.log(`  ${C.cyan}npm run wd run hash user tenant:"Whitechain" org:"Saha Ekibi"${C.reset} (Birim kullanıcısı)`);
+    console.log(`  ${C.cyan}npm run wd blind <WHITE_ID>${C.reset}             (Blind ID hesapla)\n`);
+    return;
+  }
+
+  if (cmd.includes('blind')) {
+    const targetId = args[args.length - 1];
+    if (!targetId || targetId === 'blind') {
+      console.log('Lütfen bir White ID belirtin: npm run wd blind <WHITE_ID>');
+      return;
+    }
+    console.log(`\n${C.dim}White ID :${C.reset} ${targetId}`);
+    console.log(`${C.bold}Blind ID :${C.reset} ${C.green}${C.bold}${generateBlindId(targetId)}${C.reset}\n`);
     return;
   }
 
@@ -835,15 +956,13 @@ async function main() {
   }
 
   if (cmd.includes('tenant create')) {
-    const orgMatch = cmd.match(/(?:--org|-o|org)[:=\s]+["']?([^"',]+?)["']?(?:,|$|\s+app:)/i);
-    const appMatch = cmd.match(/(?:--app|-a|app)[:=\s]+["']?([^"',]+?)["']?(?:,|$|\s+org:)/i);
-    const tenantName = orgMatch && orgMatch[1] ? orgMatch[1].trim() : 'Atlas Global Inc.';
-    const appName = appMatch && appMatch[1] ? appMatch[1].trim() : 'SupportDesk';
+    const tenantName = extractCliParam(args, rawCmd, ['org', 'tenant', 'name']) || 'Atlas Global Inc.';
+    const appName = extractCliParam(args, rawCmd, ['app']) || 'SupportDesk';
     await createTenant({ tenantName, appName });
     return;
   }
 
-  if (cmd.includes('hash founder')) {
+  if (cmd.includes('hash founder') || cmd.includes('hash owner')) {
     await createFounderHash();
     return;
   }
@@ -854,7 +973,13 @@ async function main() {
       console.error(`${C.red}[HATA] Sistemde kayıtlı tenant bulunamadı.${C.reset}`);
       return;
     }
-    const tenant = tenants[0];
+    const tenantParam = extractCliParam(args, rawCmd, ['tenant', 't']);
+    let tenant = tenants[0];
+    if (tenantParam) {
+      const searchName = tenantParam.trim().toLowerCase();
+      const found = tenants.find(t => t.name.toLowerCase().includes(searchName) || t.enterprise_blind_id.toLowerCase().includes(searchName));
+      if (found) tenant = found;
+    }
     await createGlobalAdminHash(tenant.enterprise_blind_id);
     return;
   }
@@ -865,8 +990,23 @@ async function main() {
       console.error(`${C.red}[HATA] Sistemde kayıtlı tenant bulunamadı.${C.reset}`);
       return;
     }
-    const tenant = tenants[0];
-    await createUserDivisionalHash(tenant.enterprise_blind_id, 'merkez', 'inwhite');
+
+    const tenantParam = extractCliParam(args, rawCmd, ['tenant', 't']);
+    const orgParam = extractCliParam(args, rawCmd, ['org']);
+    const appParam = extractCliParam(args, rawCmd, ['app']);
+
+    let tenant = null;
+    if (tenantParam) {
+      const search = tenantParam.toLowerCase();
+      tenant = tenants.find(t => t.name.toLowerCase().includes(search) || t.enterprise_blind_id.toLowerCase().includes(search));
+    }
+    if (!tenant) tenant = tenants[0];
+
+    // Organizasyon (org): Verildiyse o organizasyon, verilmediyse varsayılan "Merkez"
+    const rawOrg = orgParam || 'Merkez';
+    const cleanApp = appParam ? appParam.toLowerCase() : 'whitedesk';
+
+    await createUserDivisionalHash(tenant.enterprise_blind_id, rawOrg, cleanApp, tenant.name);
     return;
   }
 

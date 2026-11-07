@@ -102,9 +102,12 @@ export class CallService {
     roomName: string,
     onAnswerReceived: (answerSdp: string) => Promise<void>,
     onRejected: (reason: string) => void,
-    onHangup: () => void
+    onHangup: () => void,
+    callerWhiteId?: string
   ): NodeJS.Timeout {
     let attempts = 0;
+    let answerHandled = false;
+    const cleanCallerId = (callerWhiteId || '').toLowerCase().trim();
     return setInterval(async () => {
       attempts++;
       if (attempts > 60) {
@@ -112,10 +115,20 @@ export class CallService {
         return;
       }
 
-      const signal = await apiClient.fetchFastSignal(roomName, 'caller');
+      const signal = await apiClient.fetchFastSignal(roomName, 'caller') as any;
       if (signal && signal.found) {
-        const isConnected = signal.signalType === 'answer' || signal.signalType === 'answered' || !!signal.answerSdp;
-        const remoteAnswerSdp = signal.answerSdp || '';
+        const hasValidAnswerSdp = typeof signal.answerSdp === 'string' && (signal.answerSdp.includes('v=') || signal.answerSdp.includes('m='));
+        const remoteAnswerSdp = hasValidAnswerSdp ? (signal.answerSdp || '') : '';
+        const hasOtherPeerInPool =
+          roomName.startsWith('wd_ptt_t_') &&
+          ((Array.isArray(signal.activePeers) &&
+            signal.activePeers.some((p: any) => {
+              const pid = String(p?.whiteId || '').toLowerCase().trim();
+              return pid && (!cleanCallerId || pid !== cleanCallerId);
+            })) ||
+            signal.targetMode === 'peer_join' ||
+            signal.targetMode === 'call_connected' ||
+            signal.targetMode === 'speaker_start');
 
         if (signal.candidates && signal.candidates.length > 0) {
           for (const candStr of signal.candidates) {
@@ -126,16 +139,17 @@ export class CallService {
           }
         }
 
-        if (isConnected) {
+        if ((hasValidAnswerSdp || hasOtherPeerInPool) && !answerHandled) {
+          answerHandled = true;
           InWhiteRingtone.stopRingback();
           await onAnswerReceived(remoteAnswerSdp);
-        } else if (signal.signalType === 'reject') {
+        } else if (signal.signalType === 'reject' && !roomName.startsWith('wd_ptt_t_')) {
           void apiClient.deleteFastSignal(roomName);
           const failureReason = signal.targetMode === 'call_disabled_by_user'
             ? 'call_disabled_by_user'
             : 'rejected';
           onRejected(failureReason);
-        } else if (signal.signalType === 'hangup') {
+        } else if (signal.signalType === 'hangup' && !roomName.startsWith('wd_ptt_t_')) {
           onHangup();
         }
       }

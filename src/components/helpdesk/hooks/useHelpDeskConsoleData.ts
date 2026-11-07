@@ -106,7 +106,7 @@ export function useHelpDeskConsoleData({
       if (isFounderUser && !effectiveAdmins.some(a => a.role === 'founder' || a.alias?.toLowerCase() === 'thewhite')) {
         const rootAdmins = await helpDeskService.getAdminsList('blind_11fcac28453c3eaa3a06a5db6caf4ca1');
         const founderEntry = rootAdmins.find(a => a.role === 'founder' || a.alias?.toLowerCase() === 'thewhite') || {
-          white_id: myId || '0362bed5a6ce6940d9956f4d2f00457cf9aa28424075f1b206c88b64e52f01',
+          white_id: myId || 'blind_4fb078269e270cce65f3bd3214142a82',
           alias: 'TheWhite',
           role: 'founder',
           enterprise_blind_id: 'blind_11fcac28453c3eaa3a06a5db6caf4ca1',

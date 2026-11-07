@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
  * Zero Personal Data: Only WhiteID + Device Push Token.
  */
 
-const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://whitedesk-backend.vercel.app';
+const DEFAULT_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one';
 
 export const pushClient = {
   /**
@@ -100,7 +100,8 @@ export const pushClient = {
     callerWhiteId: string,
     ticketId: string,
     callType: 'call' | 'ptt' | 'remote_desktop' = 'call',
-    backendUrl: string = DEFAULT_BACKEND_URL
+    backendUrl: string = DEFAULT_BACKEND_URL,
+    tenantId?: string
   ): Promise<boolean> {
     try {
       const sanitizedUrl = backendUrl.replace(/\/$/, '');
@@ -117,6 +118,7 @@ export const pushClient = {
           callerWhiteId,
           ticketId,
           callType,
+          tenantId,
         }),
       });
       return response.ok;

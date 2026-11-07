@@ -66,12 +66,12 @@ export const SlaPolicy: React.FC<SlaPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Escalation & SLA Policy' : 'Tırmanma & Yanıt Süresi (SLA)'}
+            {isEn ? 'Ticket Response Time – SLA' : 'Bilet Cevaplama Süresi – SLA'}
           </Text>
           <Text style={styles.cardDesc}>
             {isEn
-              ? 'Automatically re-allocate and twin re-key unaddressed tickets upon SLA breach.'
-              : 'Süresi içinde yanıtlanmayan talepleri otomatik olarak yeni bir temsilciye aktarır.'}
+              ? 'Automatically revokes and re-allocates tickets if the assigned admin does not respond within this SLA limit.'
+              : 'Atanan admin bu süre içinde ilk yanıtı vermezse bilet geri alınır (revoke) ve sıradaki admine veya havuza aktarılır.'}
           </Text>
         </View>
         <Switch

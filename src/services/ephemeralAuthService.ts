@@ -1,5 +1,6 @@
 import { SafeSecureStore } from './storageService';
 import { CryptoService } from './cryptoService';
+import { WhiteDeskCrypto } from '../whitedesk-sdk';
 import { invalidateHelpDeskRoleCache } from './helpDeskService';
 
 export interface AuthActionPayload {
@@ -27,7 +28,7 @@ const STORAGE_KEYS = {
 
 // Configurable endpoint for Cloudflare Worker & Durable Object Relay
 const RELAY_BASE_URL =
-  process.env.EXPO_PUBLIC_DO_RELAY_URL || 'https://whitedesk-auth-relay.whitechain.workers.dev';
+  process.env.EXPO_PUBLIC_DO_RELAY_URL || 'https://api.whitedesk.one';
 
 class EphemeralAuthService {
   private ws: WebSocket | null = null;
@@ -42,7 +43,7 @@ class EphemeralAuthService {
    * Initializes real-time Durable Object listener for this client enclave.
    */
   public init(ownWhiteId: string, currentRole: string = 'user', tenantBlindId: string = 'default') {
-    this.ownWhiteId = ownWhiteId.trim().toLowerCase();
+    this.ownWhiteId = ownWhiteId ? WhiteDeskCrypto.generateBlindId(ownWhiteId).toLowerCase() : '';
     this.ownRole = currentRole;
     this.tenantBlindId = tenantBlindId || 'default';
     this.isDestroyed = false;
@@ -140,11 +141,11 @@ class EphemeralAuthService {
   }): Promise<{ success: boolean; deliveredOnline?: boolean }> {
     const payload: AuthActionPayload = {
       action: 'PROMOTE',
-      targetWhiteId: params.targetWhiteId.trim().toLowerCase(),
+      targetWhiteId: WhiteDeskCrypto.generateBlindId(params.targetWhiteId).toLowerCase(),
       targetRole: params.targetRole,
       tenantBlindId: params.tenantBlindId,
       enterpriseName: params.enterpriseName,
-      initiatorWhiteId: params.initiatorWhiteId,
+      initiatorWhiteId: WhiteDeskCrypto.generateBlindId(params.initiatorWhiteId).toLowerCase(),
       initiatorRole: params.initiatorRole,
       timestamp: Date.now(),
     };
@@ -169,10 +170,10 @@ class EphemeralAuthService {
   }): Promise<{ success: boolean; deliveredOnline?: boolean }> {
     const payload: AuthActionPayload = {
       action: 'REVOKE',
-      targetWhiteId: params.targetWhiteId.trim().toLowerCase(),
+      targetWhiteId: WhiteDeskCrypto.generateBlindId(params.targetWhiteId).toLowerCase(),
       targetRole: 'none',
       tenantBlindId: params.tenantBlindId,
-      initiatorWhiteId: params.initiatorWhiteId,
+      initiatorWhiteId: WhiteDeskCrypto.generateBlindId(params.initiatorWhiteId).toLowerCase(),
       initiatorRole: params.initiatorRole,
       timestamp: Date.now(),
     };
@@ -228,8 +229,8 @@ class EphemeralAuthService {
   public async handleIncomingAction(payload: AuthActionPayload) {
     if (!payload || !payload.targetWhiteId) return;
 
-    const myId = this.ownWhiteId.toLowerCase();
-    const targetId = payload.targetWhiteId.toLowerCase();
+    const myId = WhiteDeskCrypto.generateBlindId(this.ownWhiteId).toLowerCase();
+    const targetId = WhiteDeskCrypto.generateBlindId(payload.targetWhiteId).toLowerCase();
 
     if (myId !== targetId) return;
 

@@ -5,12 +5,14 @@ import android.accessibilityservice.GestureDescription
 import android.graphics.Bitmap
 import android.graphics.Path
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
 import android.view.Display
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
@@ -31,12 +33,16 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
     private var isStreaming = false
     @Volatile
     private var isCaptureInFlight = false
+    @Volatile
+    private var pendingImmediateCapture = false
+
+    private var lastWindowEventTime = 0L
 
     private val streamRunnable = object : Runnable {
         override fun run() {
             if (!isStreaming) return
             triggerImmediateFrameCapture()
-            mainHandler.postDelayed(this, 260L)
+            mainHandler.postDelayed(this, 110L)
         }
     }
 
@@ -46,9 +52,13 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Ekran veya pencere değiştiğinde (örn. masaüstünden başka uygulama açıldığında) anında yeni kare yakala
-        if (isStreaming && event != null) {
-            mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 80L)
+        // Yalnızca pencere/ekran değiştiğinde (örn. masaüstü veya başka uygulama açıldığında) kontrollü kare yakala
+        if (isStreaming && event != null && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val now = System.currentTimeMillis()
+            if (now - lastWindowEventTime > 300L) {
+                lastWindowEventTime = now
+                mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 80L)
+            }
         }
     }
 
@@ -65,21 +75,30 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
     fun startNativeStreaming() {
         isStreaming = true
         mainHandler.removeCallbacks(streamRunnable)
-        mainHandler.postDelayed(streamRunnable, 150L)
+        mainHandler.postDelayed(streamRunnable, 80L)
     }
 
     fun stopNativeStreaming() {
         isStreaming = false
+        pendingImmediateCapture = false
         mainHandler.removeCallbacks(streamRunnable)
     }
 
     fun triggerImmediateFrameCapture() {
-        if (!isStreaming || isCaptureInFlight) return
+        if (!isStreaming) return
+        if (isCaptureInFlight) {
+            pendingImmediateCapture = true
+            return
+        }
         isCaptureInFlight = true
         captureScreenBase64 { b64 ->
             isCaptureInFlight = false
             if (b64 != null && isStreaming) {
                 frameListener?.invoke(b64)
+            }
+            if (pendingImmediateCapture && isStreaming) {
+                pendingImmediateCapture = false
+                mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 20L)
             }
         }
     }
@@ -133,7 +152,7 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
                                 return
                             }
 
-                            val targetW = 432
+                            val targetW = 380
                             val ratio = targetW.toFloat() / softBitmap.width.coerceAtLeast(1).toFloat()
                             val targetH = (softBitmap.height * ratio).toInt().coerceAtLeast(1)
                             val scaled = Bitmap.createScaledBitmap(softBitmap, targetW, targetH, true)
@@ -142,7 +161,7 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
                             }
 
                             val baos = ByteArrayOutputStream()
-                            scaled.compress(Bitmap.CompressFormat.JPEG, 56, baos)
+                            scaled.compress(Bitmap.CompressFormat.JPEG, 45, baos)
                             scaled.recycle()
 
                             val b64 = Base64.encodeToString(baos.toByteArray(), Base64.NO_WRAP)
@@ -172,15 +191,15 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
                 moveTo(x, y)
             }
             val gesture = GestureDescription.Builder()
-                .addStroke(GestureDescription.StrokeDescription(path, 0L, 60L))
+                .addStroke(GestureDescription.StrokeDescription(path, 0L, 40L))
                 .build()
             dispatchGesture(
                 gesture,
                 object : GestureResultCallback() {
                     override fun onCompleted(gestureDescription: GestureDescription?) {
                         super.onCompleted(gestureDescription)
-                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 70L)
-                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 240L)
+                        triggerImmediateFrameCapture()
+                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 90L)
                     }
                 },
                 mainHandler
@@ -195,7 +214,7 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
         startNormY: Float,
         endNormX: Float,
         endNormY: Float,
-        durationMs: Long = 220L
+        durationMs: Long = 140L
     ): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return false
         return try {
@@ -208,7 +227,7 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
                 moveTo(sx, sy)
                 lineTo(ex, ey)
             }
-            val safeDuration = durationMs.coerceIn(80L, 1000L)
+            val safeDuration = durationMs.coerceIn(60L, 260L)
             val gesture = GestureDescription.Builder()
                 .addStroke(GestureDescription.StrokeDescription(path, 0L, safeDuration))
                 .build()
@@ -217,8 +236,37 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
                 object : GestureResultCallback() {
                     override fun onCompleted(gestureDescription: GestureDescription?) {
                         super.onCompleted(gestureDescription)
-                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 70L)
-                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 240L)
+                        triggerImmediateFrameCapture()
+                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 60L)
+                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 130L)
+                    }
+                },
+                mainHandler
+            )
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun performLongPress(normX: Float, normY: Float): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return false
+        return try {
+            val (w, h) = getScreenDimensions()
+            val x = (normX.coerceIn(0.01f, 0.99f) * w)
+            val y = (normY.coerceIn(0.01f, 0.99f) * h)
+            val path = Path().apply {
+                moveTo(x, y)
+            }
+            val gesture = GestureDescription.Builder()
+                .addStroke(GestureDescription.StrokeDescription(path, 0L, 450L))
+                .build()
+            dispatchGesture(
+                gesture,
+                object : GestureResultCallback() {
+                    override fun onCompleted(gestureDescription: GestureDescription?) {
+                        super.onCompleted(gestureDescription)
+                        triggerImmediateFrameCapture()
+                        mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 90L)
                     }
                 },
                 mainHandler
@@ -230,14 +278,42 @@ class WhiteDeskRemoteInputService : AccessibilityService() {
 
     fun performSystemAction(actionName: String): Boolean {
         return try {
-            val ok = when (actionName.uppercase()) {
+            val key = actionName.uppercase()
+            val ok = when (key) {
                 "BACK" -> performGlobalAction(GLOBAL_ACTION_BACK)
                 "HOME" -> performGlobalAction(GLOBAL_ACTION_HOME)
-                "RECENTS" -> performGlobalAction(GLOBAL_ACTION_RECENTS)
+                "RECENTS", "APPS", "APP_SWITCHER" -> performGlobalAction(GLOBAL_ACTION_RECENTS)
+                "NOTIFICATIONS", "NOTIFICATION_CENTER" -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
+                "QUICK_SETTINGS", "CONTROL_CENTER" -> performGlobalAction(GLOBAL_ACTION_QUICK_SETTINGS)
+                "LOCK" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN) else false
+                "SWIPE_UP", "HOME_INDICATOR" -> {
+                    performSwipe(0.5f, 0.98f, 0.5f, 0.55f, 160L)
+                }
                 else -> false
             }
+            triggerImmediateFrameCapture()
+            mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 50L)
             mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 120L)
             ok
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun performTextInjection(text: String): Boolean {
+        return try {
+            val root = rootInActiveWindow ?: return false
+            val focused = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            if (focused != null) {
+                val args = Bundle().apply {
+                    putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+                }
+                val res = focused.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+                mainHandler.postDelayed({ triggerImmediateFrameCapture() }, 100L)
+                res
+            } else {
+                false
+            }
         } catch (_: Exception) {
             false
         }

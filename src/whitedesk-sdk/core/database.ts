@@ -5,9 +5,9 @@
 
 // SECURITY: Credentials are NEVER committed. Loaded from gitignored .env.local at bundle time.
 // TEMPORARY — will be removed entirely once whitedesk-api (Vercel) backend is live.
-export const DEFAULT_NEON_ENDPOINT = process.env.EXPO_PUBLIC_NEON_ENDPOINT || '';
+export const DEFAULT_NEON_ENDPOINT = `${(process.env.EXPO_PUBLIC_BACKEND_URL || 'https://api.whitedesk.one').replace(/\/$/, '')}/api/d1/query`;
 
-export const DEFAULT_CONNECTION_STRING = process.env.EXPO_PUBLIC_NEON_CONNECTION_STRING || '';
+export const DEFAULT_CONNECTION_STRING = '';
 
 export function escapeSql(val: any): string {
   if (val === null || val === undefined) return 'NULL';
@@ -78,6 +78,17 @@ export class WhiteDeskDatabase {
         enterprise_blind_id VARCHAR(64) UNIQUE NOT NULL,
         name VARCHAR(100) NOT NULL,
         org_pub VARCHAR(64) NOT NULL,
+        plan_id VARCHAR(32) DEFAULT 'trial',
+        billing_cycle VARCHAR(16) DEFAULT 'monthly',
+        license_status VARCHAR(32) DEFAULT 'trial_active',
+        trial_start_at TEXT,
+        trial_end_at TEXT,
+        subscription_start_at TEXT,
+        subscription_end_at TEXT,
+        grace_period_days INTEGER DEFAULT 3,
+        warning_intervals INTEGER DEFAULT 12,
+        grace_ends_at TEXT,
+        license_hash TEXT,
         created_at BIGINT NOT NULL
       );`,
 

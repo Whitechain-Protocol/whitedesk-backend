@@ -40,6 +40,8 @@ import {
 import { TenantLogo } from '../components/TenantLogo';
 import { TicketComposeView } from '../components/helpdesk/views/TicketComposeView';
 import { TicketDetailView } from '../components/helpdesk/views/TicketDetailView';
+import { remoteDesktopService } from '../services/remoteDesktopService';
+import { WhiteDeskCrypto } from '../whitedesk-sdk';
 import { TicketListView } from '../components/helpdesk/views/TicketListView';
 import { 
   useHelpDeskAttachments,
@@ -551,6 +553,71 @@ export default function HelpDeskScreen() {
     setReplyFocused(true);
   };
 
+  // Sıfır-Polling Kuralı (KURAL 7): Boşta arka plan veya ön plan polling döngüsü çalıştırılmaz.
+  // Uzak masaüstü ve çağrı uyandırmaları FCM Push (WhiteDeskMessagingService) üzerinden yürütülür.
+
+  const handleRemoteDesktopPress = useCallback(() => {
+    if (!selectedTicket) return;
+
+    const sess = remoteDesktopService.getSession();
+    if (sess && sess.status === 'active' && String(sess.ticketId) === String(selectedTicket.id)) {
+      remoteDesktopService.notify();
+      return;
+    }
+
+    const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
+    const callerAlias = customAlias || (isAdmin ? 'Destek Uzmanı' : 'Kullanıcı');
+
+    let targetWhiteId = selectedTicket.user_blind_id || selectedTicket.user_white_id || '';
+    const ownBlind = callerWhiteId.toLowerCase();
+
+    const isSelf = (id?: string) => {
+      if (!id) return false;
+      const b = WhiteDeskCrypto.generateBlindId(id.trim()).toLowerCase();
+      return b === ownBlind;
+    };
+
+    if (!targetWhiteId || isSelf(targetWhiteId)) {
+      const clientMsg = [...ticketMessages].reverse().find(m => {
+        const sender = ((m as any).sender_blind_id || m.sender_white_id || '').trim();
+        return !m.is_admin && sender && !isSelf(sender);
+      });
+      if (clientMsg) {
+        targetWhiteId = (clientMsg as any).sender_blind_id || clientMsg.sender_white_id || '';
+      }
+    }
+
+    const ticketCreatedBy = (selectedTicket as any).created_by;
+    if ((!targetWhiteId || isSelf(targetWhiteId)) && ticketCreatedBy && !isSelf(ticketCreatedBy)) {
+      targetWhiteId = ticketCreatedBy;
+    }
+    if (targetWhiteId) {
+      targetWhiteId = WhiteDeskCrypto.generateBlindId(targetWhiteId);
+    }
+
+    setConfirmSheet({
+      visible: true,
+      title: currentLanguage === 'tr' ? 'Uzak Masaüstü' : 'Remote Desktop',
+      description: currentLanguage === 'tr'
+        ? `Bu bilet (#${selectedTicket.id}) kapsamında kullanıcıya ekran izleme ve uzaktan kontrol isteği gönderilsin mi?`
+        : `Send remote desktop screen sharing and control request for ticket #${selectedTicket.id}?`,
+      actionText: currentLanguage === 'tr' ? 'İsteği Gönder' : 'Send Request',
+      actionColor: '#2563EB',
+      cancelText: currentLanguage === 'tr' ? 'Vazgeç' : 'Cancel',
+      onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
+      onAction: async () => {
+        setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
+        console.warn('[RemoteDesktop] startAdminOffer ticketId:', selectedTicket.id, 'targetWhiteId:', targetWhiteId, 'caller:', callerWhiteId);
+        await remoteDesktopService.startAdminOffer(
+          String(selectedTicket.id),
+          callerAlias,
+          targetWhiteId,
+          callerWhiteId
+        );
+      },
+    });
+  }, [selectedTicket, ownWhiteId, customAlias, isAdmin, currentLanguage, setConfirmSheet, ticketMessages]);
+
   const modalsContainerProps = useHelpDeskModalsProps({
     language: (language === 'en' ? 'en' : 'tr'),
     getLabel,
@@ -768,6 +835,7 @@ export default function HelpDeskScreen() {
           attachDiagnostics={attachDiagnostics}
           setAttachDiagnostics={setAttachDiagnostics}
           onMainMenuPress={() => setAdminMenuVisible(true)}
+          onRemoteDesktopPress={handleRemoteDesktopPress}
           showRemoteDesktop={advancedFeaturesConfig?.remoteDesktop?.enabled !== false}
           userRemoteDesktopEnabled={userAdvancedPrefs?.remoteDesktopEnabled !== false}
           userRemoteDesktopScope={userAdvancedPrefs?.remoteDesktopScope || 'in_app'}
@@ -949,6 +1017,7 @@ export default function HelpDeskScreen() {
           isAdmin={isAdmin}
           isFounder={isFounder}
           isMasterAdmin={isMasterAdmin}
+          isGlobalAdmin={adminRole === 'global_admin'}
           currentEnterpriseName={currentEnterpriseName || ''}
           customAlias={customAlias}
           onIdentifyPress={() => {
@@ -956,7 +1025,20 @@ export default function HelpDeskScreen() {
             setIdentityModalVisible(true);
           }}
           onNewTicketPress={() => {
-            setIsCreatingDiscussion(isAdmin);
+            setIsCreatingDiscussion(false);
+            if (adminRole === 'global_admin') {
+              setEscalationTarget('thewhite');
+              setComposeCategory('internal_admin_ticket');
+            } else if (isAdmin) {
+              setEscalationTarget('global_admin');
+              setComposeCategory('internal_admin_ticket');
+            } else {
+              setEscalationTarget('none');
+            }
+            setCurrentView('compose');
+          }}
+          onNewDiscussionPress={() => {
+            setIsCreatingDiscussion(true);
             setEscalationTarget('none');
             setCurrentView('compose');
           }}

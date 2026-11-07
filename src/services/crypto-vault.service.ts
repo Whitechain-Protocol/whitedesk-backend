@@ -100,16 +100,16 @@ export class CryptoVaultService {
     const extendedSeed = concatBytes(seed, sha256(seed));
     const privateKey = p256.utils.randomSecretKey(extendedSeed.subarray(0, 48));
     const publicKey = p256.getPublicKey(privateKey, true);
-    const whiteId = bytesToHex(publicKey);
+    const publicKeyHex = bytesToHex(publicKey);
 
-    // Neon DB'ye yazılacak ve aranacak tek yönlü Kör Kimlik (Blind ID)
-    const blindId = WhiteDeskCrypto.generateBlindId(whiteId);
+    // Kökten tek yönlü Kör Kimlik (Blind ID) üretimi — açık white_id asla dışarı çıkmaz
+    const blindId = WhiteDeskCrypto.generateBlindId(publicKeyHex);
 
     return {
       accessKey: cleanKey,
-      whiteId,
+      whiteId: blindId,
       blindId,
-      publicKey: whiteId,
+      publicKey: publicKeyHex,
       privateKey: bytesToHex(privateKey),
     };
   }

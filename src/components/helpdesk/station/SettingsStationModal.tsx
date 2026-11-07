@@ -151,12 +151,12 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
             </View>
 
             <View style={styles.toggleCardContainer}>
-              {/* Ana ekranda / Ad Soyad Girişi */}
+              {/* Ana ekranda / Ad Soyad Girişi Zorunluluğu */}
               <View style={styles.toggleRow}>
                 <View style={{ flex: 1, paddingRight: 10 }}>
-                  <Text style={styles.toggleTitle}>Ana ekranda / Ad Soyad Girişi</Text>
+                  <Text style={styles.toggleTitle}>Ana ekranda Ad Soyad Girişi Zorunlu</Text>
                   <Text style={styles.toggleDesc}>
-                    {allowNameEntry ? 'Açık • Kullanıcı adı ve bilet transferi aktif' : 'Kapalı • Bilet transferi devre dışı'}
+                    {allowNameEntry ? 'Açık • En az iki kelime ad-soyad girişi zorunludur' : 'Kapalı • Anonim bilet girişi serbest'}
                   </Text>
                 </View>
                 <Switch
@@ -171,28 +171,10 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 <View style={styles.warningNoteBox}>
                   <AlertCircle size={15} color="#D97706" style={{ marginRight: 6, marginTop: 1 }} />
                   <Text style={styles.warningNoteText}>
-                    Ad soyad girişi kapalı olduğunda bilet transferi yapılamaz.
+                    Ad soyad zorunluluğu kapalı olduğunda kullanıcılar anonim bilet açabilir.
                   </Text>
                 </View>
               )}
-
-              <View style={styles.toggleDivider} />
-
-              {/* Giriş sorunlu */}
-              <View style={styles.toggleRow}>
-                <View style={{ flex: 1, paddingRight: 10 }}>
-                  <Text style={styles.toggleTitle}>Giriş sorunlu</Text>
-                  <Text style={styles.toggleDesc}>
-                    {loginIssueEnabled ? 'Açık • Giriş sorun bildirim modu devrede' : 'Kapalı • Normal çalışma modu'}
-                  </Text>
-                </View>
-                <Switch
-                  value={loginIssueEnabled}
-                  onValueChange={onToggleLoginIssue}
-                  trackColor={{ false: '#CBD5E1', true: '#BFDBFE' }}
-                  thumbColor={loginIssueEnabled ? '#2563EB' : '#94A3B8'}
-                />
-              </View>
             </View>
 
             {/* SECTION 2: LOGO YÖNETİMİ */}

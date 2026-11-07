@@ -14,6 +14,7 @@ import {
   ArrowDown,
   ArrowLeftRight,
   ArrowUp,
+  ArrowRight,
   Search,
   X,
   MessageSquare,
@@ -37,6 +38,7 @@ interface TicketListViewProps {
   customAlias: string | null;
   onIdentifyPress: () => void;
   onNewTicketPress: () => void;
+  onNewDiscussionPress?: () => void;
   ticketSearchQuery: string;
   setTicketSearchQuery: (q: string) => void;
   statusFilter: TicketFilterStatus;
@@ -78,10 +80,12 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
   isAdmin,
   isFounder,
   isMasterAdmin = false,
+  isGlobalAdmin = false,
   currentEnterpriseName,
   customAlias,
   onIdentifyPress,
   onNewTicketPress,
+  onNewDiscussionPress,
   ticketSearchQuery,
   setTicketSearchQuery,
   statusFilter,
@@ -155,34 +159,11 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         </View>
       </View>
 
-      {/* FLUID ACTION BUTTON: Yeni bir tartışma başlat (Admin) OR Yeni bir bilet oluştur (User) */}
-      <TouchableOpacity
-        style={[styles.fluidNewTicketBtn, isSearchActive && { display: 'none' }]}
-        onPress={onNewTicketPress}
-        activeOpacity={0.85}
-      >
-        <Plus size={18} color="#FFFFFF" strokeWidth={2.5} style={{ marginRight: 6 }} />
-        <Text style={styles.fluidNewTicketBtnText}>
-          {isAdmin
-            ? (language === 'en' ? 'Start a new discussion' : 'Yeni bir tartışma başlat')
-            : (language === 'en' ? 'Create a new ticket' : 'Yeni bir bilet oluştur')}
-        </Text>
-        {isAdmin ? (
-          (isMasterAdmin || isFounder || isTheWhite) ? (
-            <ArrowDown size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
-          ) : (
-            <ArrowLeftRight size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
-          )
-        ) : (
-          <ArrowUp size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
-        )}
-      </TouchableOpacity>
-
-      {/* YEŞİL "YENİ BİR BİLET OLUŞTUR" BUTONU (GLOBAL ADMİNLER VE ADMİNLER İÇİN KADEMELİ ESKALASYON - THEWHITE'TA GİZLİ) */}
-      {isAdmin && !isMasterAdmin && !isFounder && !isTheWhite && onAdminSupportTicketPress && (
+      {/* 1. MAVİ: Yeni bir bilet oluştur (Herkeste yukarı ok: Kullanıcı, admin, global admin. Kurucuda bulunmaz.) */}
+      {!isFounder && !isTheWhite && (!isMasterAdmin || isGlobalAdmin) && (
         <TouchableOpacity
-          style={[styles.fluidNewTicketBtn, styles.fluidAdminGreenBtn, isSearchActive && { display: 'none' }]}
-          onPress={onAdminSupportTicketPress}
+          style={[styles.fluidNewTicketBtn, isSearchActive && { display: 'none' }]}
+          onPress={onNewTicketPress}
           activeOpacity={0.85}
         >
           <Plus size={18} color="#FFFFFF" strokeWidth={2.5} style={{ marginRight: 6 }} />
@@ -193,7 +174,29 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* YEŞİL "BİR TELSİZ YAYINI BAŞLAT" BUTONU */}
+      {/* 2. MOR: Bir Tartışma Başlat (Admin, Global Admin, Kurucu) */}
+      {(isAdmin || isFounder || isMasterAdmin || isTheWhite) && (
+        <TouchableOpacity
+          style={[styles.fluidNewTicketBtn, styles.fluidDiscussionPurpleBtn, isSearchActive && { display: 'none' }]}
+          onPress={onNewDiscussionPress || onNewTicketPress}
+          activeOpacity={0.85}
+        >
+          <MessageSquare size={18} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 6 }} />
+          <Text style={styles.fluidNewTicketBtnText}>
+            {language === 'en' ? 'Start a discussion' : 'Bir tartışma başlat'}
+          </Text>
+          {isMasterAdmin || isFounder || isTheWhite || isGlobalAdmin ? (
+            <ArrowDown size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 6 }}>
+              <ArrowRight size={15} color="#FFFFFF" strokeWidth={2.5} />
+              <ArrowUp size={15} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 2 }} />
+            </View>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {/* 3. YEŞİL: Bir telsiz yayını başlat (Oksuz, sol ikonlu, lisanslandığında herkeste var) */}
       {showRadioBroadcastBar && onRadioBroadcastPress && (
         <TouchableOpacity
           style={[styles.fluidNewTicketBtn, styles.fluidRadioBroadcastBtn, isSearchActive && { display: 'none' }]}
@@ -378,6 +381,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
                 formatAppId={formatAppId}
                 formatTicketDate={formatTicketDate}
                 getCategoryLabel={getCategoryLabel}
+                orgsList={orgsList}
               />
             ))}
           </View>
@@ -455,6 +459,12 @@ const styles = Object.freeze(StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  fluidDiscussionPurpleBtn: {
+    backgroundColor: '#7C3AED',
+    shadowColor: '#7C3AED',
+    marginTop: -4,
+    marginBottom: 14,
   },
   fluidAdminGreenBtn: {
     backgroundColor: '#16A34A',

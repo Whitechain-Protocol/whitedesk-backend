@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { AppState } from 'react-native';
 import { HelpDeskModalsContainerProps } from '../modals/HelpDeskModalsContainer';
 import { SafeSecureStore } from '../../../services/storageService';
-import { helpDeskService } from '../../../services/helpDeskService';
+import { helpDeskService, TenantLicenseData } from '../../../services/helpDeskService';
 import { AdvancedFeaturesConfig, UserAdvancedPreferences } from '../types';
 
 export interface UseHelpDeskModalsPropsOptions {
@@ -216,6 +217,12 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
     setIdentityModalVisible(false);
   }, [identityInput, ownWhiteId, isAdmin, setCustomAlias, setIdentityModalVisible]);
 
+  const handleSaveCustomAlias = useCallback(async (alias: string) => {
+    const trimmed = alias.trim();
+    await helpDeskService.setCustomAlias(ownWhiteId, trimmed, isAdmin);
+    setCustomAlias(trimmed || null);
+  }, [ownWhiteId, isAdmin, setCustomAlias]);
+
   const handleReviewApproval = useCallback(async (approvalId: number, status: 'approved' | 'rejected') => {
     try {
       ticketState.setLoading(true);
@@ -290,6 +297,86 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
   const [workStatusModalVisible, setWorkStatusModalVisible] = useState(false);
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
 
+  const presentGraceOrExpiredSheet = useCallback(async (lic: TenantLicenseData | null) => {
+    if (!lic || licenseModalVisible) return;
+
+    // 2. Aşama: Ek Süre Tamamen Dolduğunda (now >= graceEndsAt)
+    if (lic.isGraceExpired) {
+      setConfirmSheet({
+        visible: true,
+        title: 'Lisans Süresi Sona Erdi',
+        description: 'Ek kullanım süreniz tamamlandı. Kesintisiz ve güvenli iletişime devam edebilmek için lütfen bir abonelik planı seçin.',
+        actionText: 'Lisansı Yükselt',
+        actionColor: '#2563EB',
+        onCancel: undefined,
+        onAction: () => {
+          setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
+          setLicenseModalVisible(true);
+        },
+      });
+      return;
+    }
+
+    // 1. Aşama: Ek Süre (Grace Period) Devam Ederken
+    if (lic.isInGracePeriod) {
+      const shouldShow = await helpDeskService.shouldShowGracePeriodWarning(lic);
+      if (!shouldShow) return;
+
+      const days = lic.gracePeriodDays || (lic.planId === 'trial' ? 3 : lic.billingCycle === 'annual' ? 15 : 5);
+      setConfirmSheet({
+        visible: true,
+        title: 'Ek Kullanım Süresi Aktif',
+        description: `Lisans süreniz doldu ancak iletişiminizin kesilmemesi için +${days} günlük ek kullanım süreniz tanımlandı. Kesintisiz özgür iletişime devam etmek için bir lisans planı seçebilirsiniz.`,
+        cancelText: 'Anladım',
+        actionText: 'Lisansı Yükselt',
+        actionColor: '#2563EB',
+        onCancel: async () => {
+          await helpDeskService.acknowledgeGraceWarning();
+          setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
+        },
+        onAction: () => {
+          setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
+          setLicenseModalVisible(true);
+        },
+      });
+    }
+  }, [licenseModalVisible, setConfirmSheet]);
+
+  const checkTenantLicenseGraceStatus = useCallback(async () => {
+    const entId = (activeEnterpriseBlindId || '').trim();
+    if (!entId || entId === 'all' || entId === 'blind_thewhite_root' || entId === 'thewhite') return;
+
+    try {
+      // 1) 0ms Instant Device Vault Check
+      const localLic = await helpDeskService.getTenantActiveLicense(entId, false);
+      if (localLic?.isGraceExpired || localLic?.isInGracePeriod) {
+        await presentGraceOrExpiredSheet(localLic);
+        return;
+      }
+
+      // 2) Background D1 Sync Check
+      const remoteLic = await helpDeskService.fetchAndCacheTenantLicenseFromD1(entId);
+      if (remoteLic?.isGraceExpired || remoteLic?.isInGracePeriod) {
+        await presentGraceOrExpiredSheet(remoteLic);
+      }
+    } catch (e) {
+      console.warn('[useHelpDeskModalsProps] checkTenantLicenseGraceStatus error:', e);
+    }
+  }, [activeEnterpriseBlindId, presentGraceOrExpiredSheet]);
+
+  useEffect(() => {
+    void checkTenantLicenseGraceStatus();
+  }, [checkTenantLicenseGraceStatus]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void checkTenantLicenseGraceStatus();
+      }
+    });
+    return () => sub.remove();
+  }, [checkTenantLicenseGraceStatus]);
+
   return {
     language,
     getLabel: (a: string, b?: string, c?: string) => {
@@ -321,6 +408,7 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
 
     profileModalVisible,
     setProfileModalVisible,
+    onSaveCustomAlias: handleSaveCustomAlias,
 
     workStatusModalVisible,
     setWorkStatusModalVisible,

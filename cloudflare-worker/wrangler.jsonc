@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "whitedesk-auth-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-09-09",
+  "routes": [
+    {
+      "pattern": "api.whitedesk.one/*",
+      "zone_name": "whitedesk.one"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "AUTH_RELAY",
+        "class_name": "WhiteDeskAuthDO"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["WhiteDeskAuthDO"]
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "whitedesk_d1_relay",
+      "database_id": "3604a42f-2803-4c40-9cde-aad220a20b50"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "whitedesk-r2-attachments"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  }
+}

@@ -7,7 +7,8 @@ import type {
   HelpDeskCategory, 
   OrgEntry, 
   AppCatEntry, 
-  TenantEntry 
+  TenantEntry,
+  TenantLicenseData
 } from './helpDeskService';
 import {
   AdvancedFeaturesConfig,
@@ -50,6 +51,7 @@ export interface TenantMetaVault {
   customFields?: Array<{ key: string; label: string; required?: boolean }>;
   catalog?: Array<Record<string, string>>;
   advancedConfig?: AdvancedFeaturesConfig;
+  license?: TenantLicenseData;
   updatedAt?: number;
 }
 
@@ -59,6 +61,7 @@ export interface SystemVaultConfig {
   orgs: Record<string, OrgEntry[]>;
   apps: Record<string, AppCatEntry[]>;
   allTenants: TenantEntry[];
+  licensePlans?: any[];
   lastSyncedAt?: number;
 }
 
@@ -68,6 +71,7 @@ const DEFAULT_CONFIG: SystemVaultConfig = {
   orgs: {},
   apps: {},
   allTenants: [],
+  licensePlans: [],
   lastSyncedAt: 0,
 };
 
@@ -209,6 +213,39 @@ class KeystoreConfigVault {
   async setAllTenants(tenants: TenantEntry[]): Promise<void> {
     const config = await this.getConfig();
     config.allTenants = tenants;
+    await this.saveConfig(config);
+  }
+
+  // --- TENANT LICENSE (0ms Instant Read + Grace Period & Warning Intervals) ---
+  async getTenantLicense(tenantId: string = 'default'): Promise<TenantLicenseData | null> {
+    const config = await this.getConfig();
+    const meta = config.tenantsMeta[tenantId] || config.tenantsMeta['default'];
+    return meta?.license || null;
+  }
+
+  async setTenantLicense(tenantId: string = 'default', license: TenantLicenseData): Promise<void> {
+    const config = await this.getConfig();
+    const existing = config.tenantsMeta[tenantId] || { enterpriseBlindId: tenantId };
+    config.tenantsMeta[tenantId] = {
+      ...existing,
+      license: {
+        ...license,
+        updatedAt: Date.now(),
+      },
+      updatedAt: Date.now(),
+    };
+    await this.saveConfig(config);
+  }
+
+  // --- LICENSE PLANS ---
+  async getLicensePlans(): Promise<any[]> {
+    const config = await this.getConfig();
+    return config.licensePlans || [];
+  }
+
+  async setLicensePlans(plans: any[]): Promise<void> {
+    const config = await this.getConfig();
+    config.licensePlans = plans;
     await this.saveConfig(config);
   }
 }

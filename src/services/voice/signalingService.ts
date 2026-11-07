@@ -261,10 +261,27 @@ export class SignalingService {
 
   async setRemoteAnswerSdp(answerSdp: string): Promise<boolean> {
     if (!this.pc || !answerSdp) return false;
+    if (this.pc.signalingState === 'stable') {
+      return true;
+    }
+
+    let sdpText = answerSdp;
+    try {
+      if (typeof sdpText === 'string' && sdpText.trim().startsWith('{')) {
+        const parsed = JSON.parse(sdpText);
+        if (parsed?.sdp) sdpText = parsed.sdp;
+      }
+    } catch {}
+
+    if (!sdpText || typeof sdpText !== 'string' || !sdpText.includes('v=') || !sdpText.includes('m=')) {
+      console.warn('[VOICE/SIGNALING] Ignored invalid/non-SDP answer:', sdpText ? sdpText.slice(0, 50) : null);
+      return false;
+    }
+
     try {
       await this.pc.setRemoteDescription(new RTCSessionDescription({
         type: 'answer',
-        sdp: answerSdp,
+        sdp: sdpText,
       }));
       this.remoteDescriptionSet = true;
       this.flushRemoteCandidates();
@@ -278,10 +295,24 @@ export class SignalingService {
 
   async createAnswerSdp(offerSdp: string): Promise<string> {
     if (!this.pc || !offerSdp) return '';
+
+    let sdpText = offerSdp;
+    try {
+      if (typeof sdpText === 'string' && sdpText.trim().startsWith('{')) {
+        const parsed = JSON.parse(sdpText);
+        if (parsed?.sdp) sdpText = parsed.sdp;
+      }
+    } catch {}
+
+    if (!sdpText || typeof sdpText !== 'string' || !sdpText.includes('v=') || !sdpText.includes('m=')) {
+      console.warn('[VOICE/SIGNALING] Ignored invalid/non-SDP offer:', sdpText ? sdpText.slice(0, 50) : null);
+      return '';
+    }
+
     try {
       await this.pc.setRemoteDescription(new RTCSessionDescription({
         type: 'offer',
-        sdp: offerSdp,
+        sdp: sdpText,
       }));
       this.remoteDescriptionSet = true;
       this.flushRemoteCandidates();

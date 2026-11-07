@@ -74,15 +74,16 @@ class SlaEscalationService {
       const ownBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
       const allTickets = await keystoreTicketVault.getTickets();
 
-      // Filter only user-owned active open tickets (never discussions)
+      // Filter open tickets subject to SLA: user's ticket or assigned admin's ticket
       const userOpenTickets = allTickets.filter(t => {
         const isOwner = (t.user_white_id && t.user_white_id.toLowerCase() === ownWhiteId.toLowerCase()) ||
                         (t.user_blind_id && t.user_blind_id.toLowerCase() === ownBlindId.toLowerCase());
+        const isAssigned = (t.assigned_admin_blind_id && t.assigned_admin_blind_id.toLowerCase() === ownBlindId.toLowerCase());
         const isOpen = t.status === 'open';
         const notDiscussion = !t.is_discussion;
         const hasAssignedAdmin = !!t.assigned_admin_blind_id && t.assigned_admin_blind_id !== 'unassigned';
         const notMaxStage = (t.escalation_stage || 0) < 3; // Max 2 escalations
-        return isOwner && isOpen && notDiscussion && hasAssignedAdmin && notMaxStage;
+        return (isOwner || isAssigned) && isOpen && notDiscussion && hasAssignedAdmin && notMaxStage;
       });
 
       if (userOpenTickets.length === 0) {
@@ -108,8 +109,10 @@ class SlaEscalationService {
           // Fetch enterprise SLA configuration
           const advConfig = await helpDeskLicenseService.getAdvancedFeaturesConfig(ticket.enterprise_blind_id);
           
-          let slaLimitMs = 120 * 60 * 1000; // Default: 120 mins
-          if (params?.forceSlaMinutes && params.forceSlaMinutes > 0) {
+          let slaLimitMs = 30 * 60 * 1000; // Varsayılan 30 dk
+          if (ticket.sla_limit_minutes && ticket.sla_limit_minutes > 0) {
+            slaLimitMs = ticket.sla_limit_minutes * 60 * 1000;
+          } else if (params?.forceSlaMinutes && params.forceSlaMinutes > 0) {
             slaLimitMs = params.forceSlaMinutes * 60 * 1000;
           } else if (advConfig?.escalation?.enabled) {
             if (advConfig.escalation.slaMinutes && advConfig.escalation.slaMinutes > 0) {
@@ -178,6 +181,7 @@ class SlaEscalationService {
             reassigned_from: oldAdminBlindId,
             escalation_stage: nextStage,
             audit_trail: updatedAudit,
+            assigned_at: now,
             updated_at: now,
           };
 
@@ -205,6 +209,7 @@ class SlaEscalationService {
             revocation_reason: 'sla_timeout',
             escalation_stage: nextStage,
             audit_trail: updatedAudit,
+            assigned_at: now,
             updated_at: now,
           };
 

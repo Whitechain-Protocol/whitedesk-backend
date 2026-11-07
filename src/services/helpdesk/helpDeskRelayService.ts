@@ -4,6 +4,7 @@ import { keystoreConfigVault } from '../keystoreConfigVault';
 import { remoteDesktopService } from '../remoteDesktopService';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { HelpDeskMessage, HelpDeskTicket } from './types';
+import { helpDeskAuthService } from './helpDeskAuthService';
 
 export interface RelayAuthDelegate {
   getAdminRole: (ownWhiteId: string) => Promise<'founder' | 'global_admin' | 'admin' | 'none'>;
@@ -29,22 +30,37 @@ export const helpDeskRelayService = {
       const recipientIdsToCheck = new Set<string>();
       recipientIdsToCheck.add(ownBlindId);
 
+      // Cihazdaki mevcut biletlerin oluşturan / atanan kimliklerini de alıcı listesine ekle (geçiş öncesi bilet yanıtlarını kaçırmamak için)
+      try {
+        const localTickets = await keystoreTicketVault.getTickets();
+        for (const t of localTickets) {
+          if (t.user_blind_id && !t.is_discussion) {
+            const uBlind = WhiteDeskCrypto.generateBlindId(t.user_blind_id);
+            if (uBlind === ownBlindId) {
+              recipientIdsToCheck.add(t.user_blind_id);
+              if (t.user_white_id) recipientIdsToCheck.add(t.user_white_id);
+            }
+          }
+        }
+      } catch {}
+
       let isFounder = false;
       let isAdmin = false;
       let isPrivilegedMonitor = false;
+      const delegate = authDelegate || helpDeskAuthService;
 
       // YALNIZCA Admin veya Kurucu ise kurum gelen kutularını denetle
       try {
         let adminRole: 'founder' | 'global_admin' | 'admin' | 'none' | undefined = callerRole;
-        if (adminRole === undefined && authDelegate) {
-          adminRole = await authDelegate.getAdminRole(ownWhiteId);
+        if (adminRole === undefined && delegate) {
+          adminRole = await delegate.getAdminRole(ownBlindId);
         }
         isFounder = adminRole === 'founder' || (adminRole as string) === 'master';
         isAdmin = adminRole !== undefined && adminRole !== 'none';
         isPrivilegedMonitor = isFounder || adminRole === 'global_admin' || callerRole === 'global_admin' || callerRole === 'founder';
 
-        if (isAdmin && authDelegate) {
-          const adminEnt = await authDelegate.getAdminEnterprise(ownWhiteId);
+        if (isAdmin && delegate) {
+          const adminEnt = await delegate.getAdminEnterprise(ownBlindId);
           if (adminEnt.enterpriseBlindId && adminEnt.enterpriseBlindId !== 'default') {
             recipientIdsToCheck.add(adminEnt.enterpriseBlindId);
           }
@@ -54,6 +70,7 @@ export const helpDeskRelayService = {
           if (isFounder) {
             recipientIdsToCheck.add('blind_thewhite_root');
             recipientIdsToCheck.add('blind_11fcac28453c3eaa3a06a5db6caf4ca1');
+            recipientIdsToCheck.add('default');
             try {
               const tenants = await keystoreConfigVault.getAllTenants();
               for (const t of tenants) {
@@ -173,7 +190,8 @@ export const helpDeskRelayService = {
                 payloadData.initial_message.attachments = attachmentsList;
               }
 
-              if (isPrivilegedMonitor) {
+              const isAssignedToMe = payloadData.ticket?.assigned_admin_blind_id === ownBlindId;
+              if (isPrivilegedMonitor && !isAssignedToMe) {
                 payloadData.ticket.is_relay_pending = true;
                 payloadData.ticket.relay_item_id = item.id;
                 payloadData.ticket.relay_attachment_r2_key = item.attachment_r2_key || payloadData.ticket?.attachment_r2_key || null;
@@ -410,6 +428,7 @@ export const helpDeskRelayService = {
                 if (target) {
                   target.transfer_status = 'accepted';
                   target.assigned_admin_blind_id = payloadData.accepted_by_blind_id;
+                  target.assigned_at = Number(payloadData.created_at || Date.now());
                   await keystoreTicketVault.upsertTicket(target);
                   const acceptNote: HelpDeskMessage = {
                     id: 'msg_' + Math.random().toString(36).substring(2, 10),

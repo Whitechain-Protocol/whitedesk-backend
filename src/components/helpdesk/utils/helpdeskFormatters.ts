@@ -37,6 +37,24 @@ export function formatWhiteId(
   return '';
 }
 
+/**
+ * Formats a blind ID for display (e.g. for ticket creator or assigned admin) when no name is available.
+ * Rule: 124495...77343
+ * (First 6 characters after 'blind_', 3 dots for 7th-8th-9th, and 10th-14th characters)
+ */
+export function formatDisplayBlindId(rawBlindId?: string | null): string {
+  if (!rawBlindId) return '';
+  const cleanBlind = rawBlindId.startsWith('blind_') ? rawBlindId.substring(6) : rawBlindId;
+  if (cleanBlind.length >= 14) {
+    return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9, 14)}`;
+  } else if (cleanBlind.length >= 10) {
+    return `${cleanBlind.substring(0, 6)}...${cleanBlind.substring(9)}`;
+  } else if (cleanBlind.length > 6) {
+    return `${cleanBlind.substring(0, 6)}...`;
+  }
+  return cleanBlind;
+}
+
 export function formatAppId(appId?: string | null): string {
   if (!appId) return '';
   const low = appId.toLowerCase();
