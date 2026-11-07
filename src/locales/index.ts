@@ -38,6 +38,11 @@ const lazyLoaders: Record<string, () => any> = {
   he: () => require('./he.json'),
   ur: () => require('./ur.json'),
   hi: () => require('./hi.json'),
+  // 2nd+3rd expansion waves: zh-CN reuses the existing Simplified Chinese pack (zh.json).
+  // da, el, tl, zh-TW, zh-HK, zh-SG, ms, sk, bg, hr, sr, sl, kk, az, bn, ka, uz, ca, eu, is
+  // and sw intentionally have no loader yet — getTranslation() automatically falls back to
+  // English until their own JSON packs are created.
+  'zh-CN': () => require('./zh.json'),
 };
 
 export function getTranslation(lang: string): any {
