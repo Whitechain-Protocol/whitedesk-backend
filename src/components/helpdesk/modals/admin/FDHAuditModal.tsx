@@ -160,7 +160,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
   const formatDate = (ts: number) => {
     if (!ts) return '-';
     const d = new Date(ts);
-    const locale = i18nService.getLanguage() || language;
+    const locale = i18nService.getCurrentLanguage() || language;
     return `${d.toLocaleDateString(locale)} ${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`;
   };
 

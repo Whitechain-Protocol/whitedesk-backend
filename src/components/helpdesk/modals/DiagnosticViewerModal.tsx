@@ -32,6 +32,7 @@ import {
 import { DiagnosticPackage, DiagnosticEvent } from '../../../services/diagnosticRecorder';
 import { HelpDeskTicket } from '../../../services/helpDeskService';
 import { useTranslation } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 interface DiagnosticViewerModalProps {
   visible: boolean;
@@ -138,7 +139,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
               subject: ticket.subject,
               status: ticket.status,
               category: ticket.category,
-              enterprise: ticket.enterprise_name || ticket.app_id || 'WhiteDesk',
+              enterprise: ticket.enterprise_name || ticket.app_id || BRAND.whitedesk,
               createdAt: new Date(ticket.created_at).toISOString(),
             }
           : null,

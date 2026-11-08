@@ -3,6 +3,7 @@ import { keystoreTicketVault } from '../keystoreTicketVault';
 import { apiClient } from '../apiClient';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { i18nService } from '../i18nService';
+import { BRAND } from '../../config/brand';
 import { executeSql, escapeSqlString, generateTicketId } from './db';
 import {
   CURRENT_APP_ID,
@@ -271,7 +272,7 @@ export const helpDeskTicketService = {
     const finalEnterpriseBlindId = enterpriseBlindId || userEnt.enterpriseBlindId || adminEnt.enterpriseBlindId || undefined;
     const isUserAdmin = Boolean(localRole && localRole !== 'none');
     const senderAlias = customAlias || (isUserAdmin ? await helpDeskAuthService.getAdminAlias(blindId) : null);
-    const entName = userEnt.enterpriseName || adminEnt.enterpriseName || 'TheWhite Enterprises';
+    const entName = userEnt.enterpriseName || adminEnt.enterpriseName || BRAND.enterprise;
 
     const userPubKey = WhiteDeskCrypto.generateBlindId(blindId + '_pub').replace('blind_', '');
     const ephemeral = WhiteDeskCrypto.generateEphemeralKeyPair();

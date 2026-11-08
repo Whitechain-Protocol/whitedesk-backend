@@ -26,6 +26,7 @@ import { BlurView } from 'expo-blur';
 import { VoiceCallSession } from '../../../services/voiceCallService';
 import { apiClient } from '../../../services/apiClient';
 import { useTranslation } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export interface OrgChannelItem {
   id: string;
@@ -265,7 +266,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
     // 1. Organizasyonel Grup Telsizi Modu
     if (session.scope === 'org_group') {
       if (isAdmin) {
-        return session.callerAlias || (isFounder ? 'TheWhite' : t('helpdesk.ptt.role_admin'));
+        return session.callerAlias || (isFounder ? BRAND.thewhite : t('helpdesk.ptt.role_admin'));
       }
       return session.activeSpeakerAlias || session.callerAlias || t('helpdesk.ptt.role_user');
     }
@@ -417,7 +418,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
 
                   <View style={styles.hierarchyCenterBox}>
                     <Text style={styles.tenantTitleText} numberOfLines={1}>
-                      {selectedPttTenantName || currentTenantName || session.targetOrgName || 'Whitechain'}
+                      {selectedPttTenantName || currentTenantName || session.targetOrgName || BRAND.whitechain}
                     </Text>
                   </View>
 
@@ -439,7 +440,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                 <View style={[styles.hierarchyRow, styles.tenantRow]}>
                   <View style={styles.hierarchyCenterBox}>
                     <Text style={styles.tenantTitleText} numberOfLines={1}>
-                      {selectedPttTenantName || currentTenantName || 'Whitechain'}
+                      {selectedPttTenantName || currentTenantName || BRAND.whitechain}
                     </Text>
                   </View>
                 </View>

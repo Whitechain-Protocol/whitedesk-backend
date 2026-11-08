@@ -25,6 +25,7 @@ import { apiClient } from '../../../services/apiClient';
 import { keystoreTicketVault } from '../../../services/keystoreTicketVault';
 import { voiceCallService } from '../../../services/voiceCallService';
 import { i18nService } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 import {
   AttachedFile,
   AdvancedFeaturesConfig,
@@ -1459,7 +1460,7 @@ export function useHelpDeskTicketState({
         await apiClient.confirmRelayAck(ticket.relay_item_id, ticket.relay_attachment_r2_key || undefined);
       }
       const myBlindId = ownWhiteId ? WhiteDeskCrypto.generateBlindId(ownWhiteId) : 'admin_node';
-      const myAlias = customAlias || (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin'));
+      const myAlias = customAlias || (isFounder ? BRAND.thewhite : i18nService.t('helpdesk.tierAdmin'));
       ticket.is_relay_pending = false;
       ticket.assigned_admin_blind_id = myBlindId;
       ticket.assigned_admin_name = myAlias;

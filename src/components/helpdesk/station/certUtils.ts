@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { i18nService } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export async function exportOrgPubCertificate(data: {
   enterpriseName?: string;
@@ -13,7 +14,7 @@ export async function exportOrgPubCertificate(data: {
     const orgName = data.enterpriseName || i18nService.t('helpdesk.cert_default_org');
     const certData = {
       enterprise_name: orgName,
-      app_name: data.appName || 'WhiteDesk',
+      app_name: data.appName || BRAND.whitedesk,
       org_pub: data.orgPub || '',
       enterprise_blind_id: data.enterpriseBlindId || '',
       issued_at: new Date().toISOString(),

@@ -6,6 +6,7 @@ import { helpDeskService, HelpDeskTicket, HelpDeskMessage, OrgEntry, AdminEntry,
 import { NotificationService } from '../../../services/notificationService';
 import { WhiteDeskCrypto } from '../../../services/cryptoService';
 import { i18nService } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export interface UseHelpDeskVoiceProps {
   ownWhiteId: string;
@@ -453,7 +454,7 @@ export function useHelpDeskVoice({
     try {
       const tenantId = pttTenantId || activeEnterpriseBlindId;
       if (!tenantId || tenantId === 'all' || tenantId === 'unassigned') {
-        console.warn('[useHelpDeskVoice] Telsiz başlatılamadı: Geçerli ve izole bir kurumsal firma seçilmelidir!');
+        console.warn('[useHelpDeskVoice] Radio could not be started: a valid isolated enterprise tenant must be selected!');
         Alert.alert(
           i18nService.t('helpdesk.err_enterprise_required_title'),
           i18nService.t('helpdesk.err_enterprise_required_ptt_desc')
@@ -469,7 +470,7 @@ export function useHelpDeskVoice({
       const validOrgItem = availableOrgChannels.find(c => c.id !== 'all' && c.id === rawOrgId);
       const cleanOrgId = validOrgItem ? validOrgItem.id : (rawOrgId !== 'global' ? rawOrgId : 'global');
       const orgName = validOrgItem?.name || (rawOrgId !== 'global' ? rawOrgId : i18nService.t('helpdesk.channel_general'));
-      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
+      const callerAlias = customAlias || (isAdmin ? (isFounder ? BRAND.thewhite : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
       const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       if (!pttTenantId || pttTenantId !== tenantId) {
@@ -525,7 +526,7 @@ export function useHelpDeskVoice({
     try {
       const tenantId = pttTenantId || activeEnterpriseBlindId;
       if (!tenantId || tenantId === 'all' || tenantId === 'unassigned') {
-        console.warn('[useHelpDeskVoice] Telsiz daveti gönderilemedi: Geçerli ve izole bir kurumsal firma seçilmelidir!');
+        console.warn('[useHelpDeskVoice] Radio invite could not be sent: a valid isolated enterprise tenant must be selected!');
         return;
       }
 
@@ -534,7 +535,7 @@ export function useHelpDeskVoice({
       const orgName = validOrgItem?.name || (cleanOrgId !== 'global' ? cleanOrgId : i18nService.t('helpdesk.channel_general'));
 
       const targetMembers = collectChannelTargetBlindIds(tenantId, cleanOrgId);
-      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
+      const callerAlias = customAlias || (isAdmin ? (isFounder ? BRAND.thewhite : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
       const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       await voiceCallService.startOrgGroupPttCall(

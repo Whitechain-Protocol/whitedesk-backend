@@ -354,7 +354,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                       activeOpacity={0.8}
                     >
                       <Text style={[styles.catPillText, selectedCatIds.includes('all') && styles.catPillTextSelected]}>
-                        {t('all')}
+                        {i18nT('common.all')}
                       </Text>
                     </TouchableOpacity>
                     {currentAppCategories.map((cat) => {

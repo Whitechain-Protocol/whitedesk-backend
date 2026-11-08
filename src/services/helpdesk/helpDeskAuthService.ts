@@ -8,6 +8,7 @@ import { STORAGE_KEYS, CURRENT_APP_ID, HelpDeskTicket, HelpDeskMessage } from '.
 import { helpDeskStationService } from './helpDeskStationService';
 import { helpDeskLicenseService } from './helpDeskLicenseService';
 import { i18nService } from '../i18nService';
+import { BRAND } from '../../config/brand';
 
 /**
  * WhiteDesk Auth & Identity Service:
@@ -218,7 +219,7 @@ export const helpDeskAuthService = {
     enterpriseName: string;
     alias?: string;
   }): Promise<void> {
-    const alias = params.alias || 'WhiteCosmos';
+    const alias = params.alias || BRAND.whitecosmos;
     const adminBlindId = WhiteDeskCrypto.generateBlindId(params.ownWhiteId);
     await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ROLE, 'global_admin');
     await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_BLIND_ID, params.enterpriseBlindId);

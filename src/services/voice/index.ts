@@ -1287,7 +1287,7 @@ export class VoiceCallService {
               }
             }
 
-            console.warn('[VOICE] <<< INCOMING DIRECT CALL RECEIVED! From:', callData?.callerAlias || 'Operatör', 'Ticket:', resolvedTicketId, 'type:', incomingCallType, 'pttMode:', pttMode);
+            console.warn('[VOICE] <<< INCOMING DIRECT CALL RECEIVED! From:', callData?.callerAlias || 'Operator', 'Ticket:', resolvedTicketId, 'type:', incomingCallType, 'pttMode:', pttMode);
             this.lastHandledRequestTs = signalTs;
             signalingService.cancelPendingDeletion(roomName);
             signalingService.cancelPendingDeletion(actualCallRoom);

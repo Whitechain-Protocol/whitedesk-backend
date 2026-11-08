@@ -129,7 +129,7 @@ export class WhiteDeskAuthority {
       if (isValid) {
         validAllocations.push(rec);
       } else {
-        console.warn('[WhiteDeskAuthority] Geçersiz/Sahte admin imzası reddedildi:', rec);
+        console.warn('[WhiteDeskAuthority] Invalid/forged admin signature rejected:', rec);
       }
     }
 

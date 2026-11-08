@@ -12,6 +12,7 @@ import { AdvancedFeaturesSection } from './AdvancedFeaturesSection';
 import { AdvancedFeaturesConfig } from '../types';
 import { OrgEntry } from '../../../services/helpDeskService';
 import { useTranslation } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export interface AdvancedStationModalProps {
   visible: boolean;
@@ -44,7 +45,7 @@ export const AdvancedStationModal: React.FC<AdvancedStationModalProps> = ({
     !currentEnterpriseName.toLowerCase().includes('thewhite') &&
     !currentEnterpriseName.startsWith('blind_')
       ? currentEnterpriseName
-      : 'Whitechain';
+      : BRAND.whitechain;
 
   return (
     <Modal

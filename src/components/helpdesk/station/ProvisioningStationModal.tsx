@@ -22,6 +22,7 @@ import {
 } from 'lucide-react-native';
 import { ProvisioningHashModal } from '../../ProvisioningHashModal';
 import { useTranslation } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export interface AdminItem {
   white_id: string;
@@ -147,7 +148,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
     ? activeTenantObj.name
     : currentEnterpriseName && !currentEnterpriseName.toLowerCase().includes('thewhite')
     ? currentEnterpriseName
-    : 'Whitechain';
+    : BRAND.whitechain;
 
   const defaultTenantId =
     selectedTenantBlindId ||

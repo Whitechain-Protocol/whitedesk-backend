@@ -8,6 +8,7 @@ import {
 } from '../../../services/helpDeskService';
 import { ephemeralAuthService } from '../../../services/ephemeralAuthService';
 import { i18nService } from '../../../services/i18nService';
+import { BRAND } from '../../../config/brand';
 
 export interface UseHelpDeskConsoleDataProps {
   ownWhiteId: string;
@@ -113,7 +114,7 @@ export function useHelpDeskConsoleData({
           alias: 'TheWhite',
           role: 'founder',
           enterprise_blind_id: 'blind_11fcac28453c3eaa3a06a5db6caf4ca1',
-          enterprise_name: 'TheWhite Enterprises',
+          enterprise_name: BRAND.enterprise,
           is_active: true,
           org_id: 'all',
           app_id: 'all',
