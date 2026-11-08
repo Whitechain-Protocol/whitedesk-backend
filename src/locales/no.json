@@ -852,5 +852,29 @@
     "feat2": "Suveren WhiteMail & krypterte vedlegg",
     "feat3": "Flernivå sensursikre tunneler (TLS / HTTP3)",
     "feat4": "Maskinvaresikret hvelvlagring & null telemetri"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Pålogging med tilgangsnøkkel",
+      "description": "Skriv inn tilgangsnøkkelen du har fått av administratoren eller organisasjonen (administrator- eller brukernøkkel). Rollen og organisasjonen din gjenkjennes automatisk.",
+      "input_placeholder": "Lim inn tilgangsnøkkelen din...",
+      "verify_btn": "Logg inn",
+      "back_btn": "Tilbake til påloggingsskjermen",
+      "error_length": "Ugyldig lengde på tilgangsnøkkelen.",
+      "error_invalid": "Tilgangsnøkkelen kunne ikke bekreftes. Kontroller den.",
+      "camera_permission_desc": "Tillat kameratilgang for å lese QR-koder.",
+      "char_count": "{count} tegn",
+      "code_input_placeholder": "Din påloggingskode...",
+      "code_login_subtitle": "Skriv inn koden du har fått av systemadministratoren",
+      "code_login_title": "Pålogging med kode",
+      "error_invalid_key": "Skriv inn en gyldig tilgangsnøkkel på minst 10 tegn.",
+      "invalid_key_title": "Ugyldig nøkkel",
+      "login_exception_desc": "Det oppstod en feil under pålogging med tilgangsnøkkelen.",
+      "login_failed_desc": "Tilgangsnøkkelen kunne ikke bekreftes.",
+      "login_failed_title": "Påloggingen mislyktes",
+      "scanner_helper_text": "Juster identitets- eller invitasjons-QR-koden innenfor rammen",
+      "scanner_modal_title": "PÅLOGGING MED KODE",
+      "verifying_auth": "Bekrefter..."
+    }
   }
 }

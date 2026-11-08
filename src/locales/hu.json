@@ -852,5 +852,29 @@
     "feat2": "Szuverén WhiteMail és titkosított csatolmányok",
     "feat3": "Többszintű cenzúrázhatatlan alagutak (TLS / HTTP3)",
     "feat4": "Hardveresen védett tárolás és zéró telemetria"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Bejelentkezés hozzáférési kulccsal",
+      "description": "Adja meg a rendszergazdától vagy a szervezettől kapott hozzáférési kulcsot (rendszergazdai vagy felhasználói kulcs). Szerepköre és szervezete automatikusan felismerésre kerül.",
+      "input_placeholder": "Illessze be hozzáférési kulcsát...",
+      "verify_btn": "Bejelentkezés",
+      "back_btn": "Vissza a bejelentkezési képernyőre",
+      "error_length": "A hozzáférési kulcs hossza érvénytelen.",
+      "error_invalid": "A hozzáférési kulcs nem ellenőrizhető. Kérjük, ellenőrizze.",
+      "camera_permission_desc": "A QR-kódok olvasásához engedélyezze a kamera hozzáférését.",
+      "char_count": "{count} karakter",
+      "code_input_placeholder": "Bejelentkezési kódja...",
+      "code_login_subtitle": "Írja be a rendszergazdától kapott kódot",
+      "code_login_title": "Bejelentkezés kóddal",
+      "error_invalid_key": "Adjon meg legalább 10 karakteres érvényes hozzáférési kulcsot.",
+      "invalid_key_title": "Érvénytelen kulcs",
+      "login_exception_desc": "Hiba történt a hozzáférési kulccsal való bejelentkezés közben.",
+      "login_failed_desc": "A hozzáférési kulcs nem ellenőrizhető.",
+      "login_failed_title": "Sikertelen bejelentkezés",
+      "scanner_helper_text": "Igazítsa az azonosító vagy meghívó QR-kódot a keretbe",
+      "scanner_modal_title": "BEJELENTKEZÉS KÓDDAL",
+      "verifying_auth": "Ellenőrzés..."
+    }
   }
 }

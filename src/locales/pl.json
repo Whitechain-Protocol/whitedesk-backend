@@ -852,5 +852,29 @@
     "feat2": "Suwerenna poczta WhiteMail i szyfrowane załączniki",
     "feat3": "Wielopoziomowe tunele chroniące przed cenzurą (TLS / HTTP3)",
     "feat4": "Sprzętowy bezpieczny magazyn i zero telemetrii"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Logowanie kluczem dostępu",
+      "description": "Wpisz klucz dostępu otrzymany od administratora lub organizacji (klucz administratora lub użytkownika). Twoja rola i organizacja zostaną rozpoznane automatycznie.",
+      "input_placeholder": "Wklej swój klucz dostępu...",
+      "verify_btn": "Zaloguj się",
+      "back_btn": "Wróć do ekranu logowania",
+      "error_length": "Nieprawidłowa długość klucza dostępu.",
+      "error_invalid": "Nie można zweryfikować klucza dostępu. Sprawdź go.",
+      "camera_permission_desc": "Zezwól na dostęp do aparatu, aby skanować kody QR.",
+      "char_count": "{count} znaków",
+      "code_input_placeholder": "Twój kod logowania...",
+      "code_login_subtitle": "Wpisz kod otrzymany od administratora systemu",
+      "code_login_title": "Logowanie kodem",
+      "error_invalid_key": "Wpisz prawidłowy klucz dostępu o długości co najmniej 10 znaków.",
+      "invalid_key_title": "Nieprawidłowy klucz",
+      "login_exception_desc": "Wystąpił błąd podczas logowania kluczem dostępu.",
+      "login_failed_desc": "Nie można zweryfikować klucza dostępu.",
+      "login_failed_title": "Logowanie nie powiodło się",
+      "scanner_helper_text": "Wyrównaj kod QR tożsamości lub zaproszenia w ramce",
+      "scanner_modal_title": "LOGOWANIE KODEM",
+      "verifying_auth": "Weryfikacja..."
+    }
   }
 }

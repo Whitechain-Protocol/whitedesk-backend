@@ -852,5 +852,29 @@
     "feat2": "Suvereeni WhiteMail & salatut liitteet",
     "feat3": "Monitasoiset sensuurisuojatunnelit (TLS / HTTP3)",
     "feat4": "Laitteistosuojattu holvitallennus & nolla telemetriaa"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Kirjautuminen käyttöavaimella",
+      "description": "Anna järjestelmänvalvojan tai organisaation antama käyttöavain (ylläpitäjän tai käyttäjän avain). Roolisi ja organisaatiosi tunnistetaan automaattisesti.",
+      "input_placeholder": "Liitä käyttöavaimesi...",
+      "verify_btn": "Kirjaudu sisään",
+      "back_btn": "Takaisin kirjautumisnäyttöön",
+      "error_length": "Käyttöavaimen pituus on virheellinen.",
+      "error_invalid": "Käyttöavainta ei voitu vahvistaa. Tarkista se.",
+      "camera_permission_desc": "Salli kameran käyttö QR-koodien lukemista varten.",
+      "char_count": "{count} merkkiä",
+      "code_input_placeholder": "Kirjautumiskoodisi...",
+      "code_login_subtitle": "Syötä järjestelmänvalvojan antama koodi",
+      "code_login_title": "Kirjaudu koodilla",
+      "error_invalid_key": "Anna kelvollinen vähintään 10 merkin käyttöavain.",
+      "invalid_key_title": "Virheellinen avain",
+      "login_exception_desc": "Käyttöavaimella kirjautumisessa tapahtui virhe.",
+      "login_failed_desc": "Käyttöavainta ei voitu vahvistaa.",
+      "login_failed_title": "Kirjautuminen epäonnistui",
+      "scanner_helper_text": "Aseta henkilöllisyyden tai kutsun QR-koodi kehyksen sisään",
+      "scanner_modal_title": "KIRJAUTUMINEN KOODILLA",
+      "verifying_auth": "Vahvistetaan..."
+    }
   }
 }

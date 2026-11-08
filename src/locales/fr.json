@@ -852,5 +852,29 @@
     "feat2": "Messagerie souveraine WhiteMail & pièces jointes chiffrées",
     "feat3": "Tunnels anti-censure multi-niveaux (TLS / HTTP3)",
     "feat4": "Stockage en coffre-fort sécurisé matériel & zéro télémétrie"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Connexion par clé d'accès",
+      "description": "Saisissez la clé d'accès fournie par votre administrateur ou votre organisation (clé admin ou utilisateur). Votre rôle et votre organisation seront reconnus automatiquement.",
+      "input_placeholder": "Collez votre clé d'accès...",
+      "verify_btn": "Se connecter",
+      "back_btn": "Retour à l'écran de connexion",
+      "error_length": "Longueur de clé d'accès invalide.",
+      "error_invalid": "La clé d'accès n'a pas pu être vérifiée. Veuillez la vérifier.",
+      "camera_permission_desc": "Veuillez autoriser l'accès à la caméra pour lire les codes QR.",
+      "char_count": "{count} caractères",
+      "code_input_placeholder": "Votre code de connexion...",
+      "code_login_subtitle": "Saisissez le code fourni par votre administrateur système",
+      "code_login_title": "Connexion par code",
+      "error_invalid_key": "Veuillez saisir une clé d'accès valide d'au moins 10 caractères.",
+      "invalid_key_title": "Clé invalide",
+      "login_exception_desc": "Une erreur est survenue lors de la connexion avec la clé d'accès.",
+      "login_failed_desc": "La clé d'accès n'a pas pu être vérifiée.",
+      "login_failed_title": "Échec de la connexion",
+      "scanner_helper_text": "Alignez le QR code d'identité ou d'invitation dans le cadre",
+      "scanner_modal_title": "CONNEXION PAR CODE",
+      "verifying_auth": "Vérification..."
+    }
   }
 }

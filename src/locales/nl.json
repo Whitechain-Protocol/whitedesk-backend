@@ -852,5 +852,29 @@
     "feat2": "Soevereine WhiteMail & versleutelde bijlagen",
     "feat3": "Multi-tier censuurbestendige tunnels (TLS / HTTP3)",
     "feat4": "Hardware-beveiligde kluisopslag & nul telemetrie"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Inloggen met toegangssleutel",
+      "description": "Voer de toegangssleutel in die door uw beheerder of organisatie is verstrekt (beheerders- of gebruikerssleutel). Uw rol en organisatie worden automatisch herkend.",
+      "input_placeholder": "Plak uw toegangssleutel...",
+      "verify_btn": "Inloggen",
+      "back_btn": "Terug naar het inlogscherm",
+      "error_length": "Ongeldige lengte van toegangssleutel.",
+      "error_invalid": "De toegangssleutel kon niet worden geverifieerd. Controleer deze.",
+      "camera_permission_desc": "Sta cameratoegang toe om QR-codes te scannen.",
+      "char_count": "{count} tekens",
+      "code_input_placeholder": "Uw inlogcode...",
+      "code_login_subtitle": "Voer de code in die u van uw systeembeheerder hebt ontvangen",
+      "code_login_title": "Inloggen met code",
+      "error_invalid_key": "Voer een geldige toegangssleutel van minimaal 10 tekens in.",
+      "invalid_key_title": "Ongeldige sleutel",
+      "login_exception_desc": "Er is een fout opgetreden bij het inloggen met de toegangssleutel.",
+      "login_failed_desc": "De toegangssleutel kon niet worden geverifieerd.",
+      "login_failed_title": "Inloggen mislukt",
+      "scanner_helper_text": "Lijn de identiteits- of uitnodigings-QR-code uit binnen het kader",
+      "scanner_modal_title": "INLOGGEN MET CODE",
+      "verifying_auth": "Verifiëren..."
+    }
   }
 }

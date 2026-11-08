@@ -852,5 +852,29 @@
     "feat2": "Terowongan Cloud TLS 1.3",
     "feat3": "Steganografi Siluman HTTP/3",
     "feat4": "Dukungan Berdaulat Prioritas WhiteDesk"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Masuk dengan Kunci Akses",
+      "description": "Masukkan kunci akses yang diberikan oleh admin atau organisasi Anda (kunci admin atau pengguna). Peran dan organisasi Anda akan dikenali secara otomatis.",
+      "input_placeholder": "Tempel kunci akses Anda...",
+      "verify_btn": "Masuk",
+      "back_btn": "Kembali ke Layar Masuk",
+      "error_length": "Panjang kunci akses tidak valid.",
+      "error_invalid": "Kunci akses tidak dapat diverifikasi. Silakan periksa.",
+      "camera_permission_desc": "Izinkan akses kamera untuk memindai kode QR.",
+      "char_count": "{count} karakter",
+      "code_input_placeholder": "Kode Masuk Anda...",
+      "code_login_subtitle": "Masukkan kode yang diberikan oleh administrator sistem",
+      "code_login_title": "Masuk dengan Kode",
+      "error_invalid_key": "Masukkan kunci akses valid minimal 10 karakter.",
+      "invalid_key_title": "Kunci Tidak Valid",
+      "login_exception_desc": "Terjadi kesalahan saat masuk dengan kunci akses.",
+      "login_failed_desc": "Kunci akses tidak dapat diverifikasi.",
+      "login_failed_title": "Gagal Masuk",
+      "scanner_helper_text": "Sejajarkan kode QR identitas atau undangan di dalam bingkai",
+      "scanner_modal_title": "MASUK DENGAN KODE",
+      "verifying_auth": "Memverifikasi..."
+    }
   }
 }

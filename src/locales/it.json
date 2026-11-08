@@ -852,5 +852,29 @@
     "feat2": "WhiteMail sovrana e allegati crittografati",
     "feat3": "Tunnel anti-censura multilivello (TLS / HTTP3)",
     "feat4": "Cassaforte di sicurezza hardware e zero telemetria"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Accesso con chiave di accesso",
+      "description": "Inserisci la chiave di accesso fornita dall'amministratore o dalla tua organizzazione (chiave amministratore o utente). Il tuo ruolo e la tua organizzazione verranno riconosciuti automaticamente.",
+      "input_placeholder": "Incolla la tua chiave di accesso...",
+      "verify_btn": "Accedi",
+      "back_btn": "Torna alla schermata di accesso",
+      "error_length": "Lunghezza della chiave di accesso non valida.",
+      "error_invalid": "Impossibile verificare la chiave di accesso. Controllala.",
+      "camera_permission_desc": "Consenti l'accesso alla fotocamera per leggere i codici QR.",
+      "char_count": "{count} caratteri",
+      "code_input_placeholder": "Il tuo codice di accesso...",
+      "code_login_subtitle": "Inserisci il codice fornito dall'amministratore di sistema",
+      "code_login_title": "Accesso con codice",
+      "error_invalid_key": "Inserisci una chiave di accesso valida di almeno 10 caratteri.",
+      "invalid_key_title": "Chiave non valida",
+      "login_exception_desc": "Si è verificato un errore durante l'accesso con la chiave.",
+      "login_failed_desc": "Impossibile verificare la chiave di accesso.",
+      "login_failed_title": "Accesso non riuscito",
+      "scanner_helper_text": "Allinea il QR code di identità o invito dentro la cornice",
+      "scanner_modal_title": "ACCESSO CON CODICE",
+      "verifying_auth": "Verifica..."
+    }
   }
 }

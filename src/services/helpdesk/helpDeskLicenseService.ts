@@ -815,7 +815,31 @@ export const helpDeskLicenseService = {
     enterpriseBlindId: string;
     message: string;
   }> {
-    const input = (rawHashInput || '').trim();
+    const rawInput = (rawHashInput || '').trim();
+    if (!rawInput || rawInput.length < 8) {
+      return {
+        success: false,
+        role: 'user',
+        enterpriseName: '',
+        enterpriseBlindId: '',
+        message: i18nService.t('license_service.provide_valid_access_key'),
+      };
+    }
+
+    // GİRİŞ NORMALİZASYONU: Kullanıcı QR / derin bağlantı yükünü
+    // (whitedesk://claim/<type>?hash=XXXX) veya komut biçimini
+    // ("admin <hash>" / "user <hash>" / "desktop <hash>") yapıştırabilir.
+    // Her ikisini de ham hash'e indirge ki DB araması doğru çalışsın.
+    let input = rawInput;
+    const uriHash = input.match(/[?&]hash=([a-zA-Z0-9_\-\.]+)/i);
+    if (uriHash && uriHash[1]) {
+      input = uriHash[1];
+    } else {
+      const cmdHash = input.match(/^(?:admin|user|desktop)\s+([a-zA-Z0-9_\-\.]+)/i);
+      if (cmdHash && cmdHash[1]) {
+        input = cmdHash[1];
+      }
+    }
     if (!input || input.length < 8) {
       return {
         success: false,

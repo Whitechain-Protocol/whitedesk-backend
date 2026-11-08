@@ -852,5 +852,29 @@
     "feat2": "Suveräänne WhiteMail ja krüpteeritud manused",
     "feat3": "Tsensuurikindlad mitmetasemelised tunnelid (TLS / HTTP3)",
     "feat4": "Riistvaraliselt kaitstud salvestus ja null telemeetriat"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Sisselogimine pääsuvõtmega",
+      "description": "Sisestage administraatori või organisatsiooni antud pääsuvõti (halduri või kasutaja võti). Teie roll ja organisatsioon tuvastatakse automaatselt.",
+      "input_placeholder": "Kleepige oma pääsuvõti...",
+      "verify_btn": "Logi sisse",
+      "back_btn": "Tagasi sisselogimiskuvale",
+      "error_length": "Pääsuvõtme pikkus on vigane.",
+      "error_invalid": "Pääsuvõtit ei saanud kinnitada. Kontrollige seda.",
+      "camera_permission_desc": "QR-koodide lugemiseks lubage juurdepääs kaamerale.",
+      "char_count": "{count} tähemärki",
+      "code_input_placeholder": "Teie sisselogimiskood...",
+      "code_login_subtitle": "Sisestage süsteemiadministraatorilt saadud kood",
+      "code_login_title": "Koodiga sisselogimine",
+      "error_invalid_key": "Sisestage vähemalt 10 märgi pikkune kehtiv pääsuvõti.",
+      "invalid_key_title": "Vigane võti",
+      "login_exception_desc": "Pääsuvõtmega sisselogimisel tekkis viga.",
+      "login_failed_desc": "Pääsuvõtit ei saanud kinnitada.",
+      "login_failed_title": "Sisselogimine ebaõnnestus",
+      "scanner_helper_text": "Joondage identiteedi või kutse QR-kood raami sisse",
+      "scanner_modal_title": "SISSELOGIMINE KOODIGA",
+      "verifying_auth": "Kontrollimine..."
+    }
   }
 }

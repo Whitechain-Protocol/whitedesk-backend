@@ -852,5 +852,29 @@
     "feat2": "Suverénní pošta WhiteMail a šifrované přílohy",
     "feat3": "Víceúrovňové tunely odolné vůči cenzuře (TLS / HTTP3)",
     "feat4": "Hardwarově chráněné úložiště a nulová telemetrie"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Přihlášení přístupovým klíčem",
+      "description": "Zadejte přístupový klíč, který vám poskytl správce nebo organizace (klíč správce nebo uživatele). Vaše role a organizace budou rozpoznány automaticky.",
+      "input_placeholder": "Vložte svůj přístupový klíč...",
+      "verify_btn": "Přihlásit se",
+      "back_btn": "Zpět na přihlašovací obrazovku",
+      "error_length": "Přístupový klíč má neplatnou délku.",
+      "error_invalid": "Přístupový klíč nelze ověřit. Zkontrolujte jej.",
+      "camera_permission_desc": "Pro skenování QR kódů povolte přístup ke kameře.",
+      "char_count": "{count} znaků",
+      "code_input_placeholder": "Váš přihlašovací kód...",
+      "code_login_subtitle": "Zadejte kód, který vám poskytl správce systému",
+      "code_login_title": "Přihlášení kódem",
+      "error_invalid_key": "Zadejte platný přístupový klíč o délce alespoň 10 znaků.",
+      "invalid_key_title": "Neplatný klíč",
+      "login_exception_desc": "Při přihlašování přístupovým klíčem došlo k chybě.",
+      "login_failed_desc": "Přístupový klíč nelze ověřit.",
+      "login_failed_title": "Přihlášení se nezdařilo",
+      "scanner_helper_text": "Namiřte identifikační nebo zvací QR kód do rámečku",
+      "scanner_modal_title": "PŘIHLÁŠENÍ KÓDEM",
+      "verifying_auth": "Ověřování..."
+    }
   }
 }

@@ -852,5 +852,29 @@
     "feat2": "Correio soberano WhiteMail e anexos encriptados",
     "feat3": "Túneis anticensura multinível (TLS / HTTP3)",
     "feat4": "Armazenamento em cofre de hardware seguro e zero telemetria"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Entrar com chave de acesso",
+      "description": "Insira a chave de acesso fornecida pelo seu administrador ou organização (chave de administrador ou usuário). Sua função e organização serão reconhecidas automaticamente.",
+      "input_placeholder": "Cole sua chave de acesso...",
+      "verify_btn": "Entrar",
+      "back_btn": "Voltar à tela de login",
+      "error_length": "Comprimento da chave de acesso inválido.",
+      "error_invalid": "Não foi possível verificar a chave de acesso. Verifique-a.",
+      "camera_permission_desc": "Permita o acesso à câmera para ler códigos QR.",
+      "char_count": "{count} caracteres",
+      "code_input_placeholder": "Seu código de acesso...",
+      "code_login_subtitle": "Insira o código fornecido pelo administrador do sistema",
+      "code_login_title": "Entrar com código",
+      "error_invalid_key": "Insira uma chave de acesso válida com pelo menos 10 caracteres.",
+      "invalid_key_title": "Chave inválida",
+      "login_exception_desc": "Ocorreu um erro ao entrar com a chave de acesso.",
+      "login_failed_desc": "Não foi possível verificar a chave de acesso.",
+      "login_failed_title": "Falha ao entrar",
+      "scanner_helper_text": "Alinhe o QR code de identidade ou convite dentro do quadro",
+      "scanner_modal_title": "ENTRAR COM CÓDIGO",
+      "verifying_auth": "Verificando..."
+    }
   }
 }

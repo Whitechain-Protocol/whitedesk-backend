@@ -852,5 +852,29 @@
     "feat2": "クラウドTLS 1.3トンネリング",
     "feat3": "ステルスHTTP/3ステガノグラフィ",
     "feat4": "優先WhiteDesk主権型サポート"
+  },
+  "auth": {
+    "recovery": {
+      "title": "アクセスキーでログイン",
+      "description": "管理者または組織から提供されたアクセスキー（管理者キーまたはユーザーキー）を入力してください。役割と組織は自動的に認識されます。",
+      "input_placeholder": "アクセスキーを貼り付け...",
+      "verify_btn": "ログイン",
+      "back_btn": "ログイン画面に戻る",
+      "error_length": "アクセスキーの長さが無効です。",
+      "error_invalid": "アクセスキーを確認できませんでした。ご確認ください。",
+      "camera_permission_desc": "QRコードを読み取るためにカメラへのアクセスを許可してください。",
+      "char_count": "{count} 文字",
+      "code_input_placeholder": "ログインコード...",
+      "code_login_subtitle": "システム管理者から提供されたコードを入力してください",
+      "code_login_title": "コードでログイン",
+      "error_invalid_key": "10文字以上の有効なアクセスキーを入力してください。",
+      "invalid_key_title": "無効なキー",
+      "login_exception_desc": "アクセスキーでのログイン中にエラーが発生しました。",
+      "login_failed_desc": "アクセスキーを確認できませんでした。",
+      "login_failed_title": "ログイン失敗",
+      "scanner_helper_text": "本人確認または招待のQRコードを枠内に合わせてください",
+      "scanner_modal_title": "コードでログイン",
+      "verifying_auth": "確認中..."
+    }
   }
 }

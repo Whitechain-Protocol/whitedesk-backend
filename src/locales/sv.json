@@ -852,5 +852,29 @@
     "feat2": "Suverän WhiteMail & krypterade bilagor",
     "feat3": "Flernivå censurskyddstunnlar (TLS / HTTP3)",
     "feat4": "Hårdvarusäkrad valflagring & noll telemetri"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Inloggning med åtkomstnyckel",
+      "description": "Ange åtkomstnyckeln som tillhandahållits av din administratör eller organisation (administratörs- eller användarnyckel). Din roll och organisation identifieras automatiskt.",
+      "input_placeholder": "Klistra in din åtkomstnyckel...",
+      "verify_btn": "Logga in",
+      "back_btn": "Tillbaka till inloggningsskärmen",
+      "error_length": "Ogiltig längd på åtkomstnyckeln.",
+      "error_invalid": "Åtkomstnyckeln kunde inte verifieras. Kontrollera den.",
+      "camera_permission_desc": "Tillåt kameraåtkomst för att läsa QR-koder.",
+      "char_count": "{count} tecken",
+      "code_input_placeholder": "Din inloggningskod...",
+      "code_login_subtitle": "Ange koden du fått av systemadministratören",
+      "code_login_title": "Logga in med kod",
+      "error_invalid_key": "Ange en giltig åtkomstnyckel med minst 10 tecken.",
+      "invalid_key_title": "Ogiltig nyckel",
+      "login_exception_desc": "Ett fel uppstod vid inloggning med åtkomstnyckeln.",
+      "login_failed_desc": "Åtkomstnyckeln kunde inte verifieras.",
+      "login_failed_title": "Inloggningen misslyckades",
+      "scanner_helper_text": "Placera identitets- eller inbjudnings-QR-koden inom ramen",
+      "scanner_modal_title": "LOGGA IN MED KOD",
+      "verifying_auth": "Verifierar..."
+    }
   }
 }

@@ -852,5 +852,29 @@
     "feat2": "Đường hầm Cloud TLS 1.3",
     "feat3": "Kỹ thuật ẩn danh HTTP/3 Steganography",
     "feat4": "Hỗ trợ chủ quyền ưu tiên WhiteDesk"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Đăng nhập bằng khóa truy cập",
+      "description": "Nhập khóa truy cập do quản trị viên hoặc tổ chức của bạn cung cấp (khóa quản trị viên hoặc người dùng). Vai trò và tổ chức của bạn sẽ được nhận diện tự động.",
+      "input_placeholder": "Dán khóa truy cập của bạn...",
+      "verify_btn": "Đăng nhập",
+      "back_btn": "Quay lại màn hình đăng nhập",
+      "error_length": "Độ dài khóa truy cập không hợp lệ.",
+      "error_invalid": "Không thể xác minh khóa truy cập. Vui lòng kiểm tra.",
+      "camera_permission_desc": "Vui lòng cấp quyền camera để quét mã QR.",
+      "char_count": "{count} ký tự",
+      "code_input_placeholder": "Mã đăng nhập của bạn...",
+      "code_login_subtitle": "Nhập mã do quản trị viên hệ thống cung cấp",
+      "code_login_title": "Đăng nhập bằng mã",
+      "error_invalid_key": "Vui lòng nhập khóa truy cập hợp lệ có ít nhất 10 ký tự.",
+      "invalid_key_title": "Khóa không hợp lệ",
+      "login_exception_desc": "Đã xảy ra lỗi khi đăng nhập bằng khóa truy cập.",
+      "login_failed_desc": "Không thể xác minh khóa truy cập.",
+      "login_failed_title": "Đăng nhập thất bại",
+      "scanner_helper_text": "Đặt mã QR danh tính hoặc lời mời vào trong khung",
+      "scanner_modal_title": "ĐĂNG NHẬP BẰNG MÃ",
+      "verifying_auth": "Đang xác minh..."
+    }
   }
 }

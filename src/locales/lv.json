@@ -852,5 +852,29 @@
     "feat2": "Suverēns WhiteMail un šifrēti pielikumi",
     "feat3": "Pret cenzūru noturīgi daudzlīmeņu tuneļi (TLS / HTTP3)",
     "feat4": "Aparatūras aizsargāta krātuve un nulle telemetrijas"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Pieteikšanās ar piekļuves atslēgu",
+      "description": "Ievadiet administratora vai organizācijas izsniegto piekļuves atslēgu (administratora vai lietotāja atslēgu). Jūsu loma un organizācija tiks atpazīta automātiski.",
+      "input_placeholder": "Ielīmējiet piekļuves atslēgu...",
+      "verify_btn": "Pieteikties",
+      "back_btn": "Atpakaļ uz pieteikšanās ekrānu",
+      "error_length": "Nederīgs piekļuves atslēgas garums.",
+      "error_invalid": "Piekļuves atslēgu nevarēja apstiprināt. Lūdzu, pārbaudiet.",
+      "camera_permission_desc": "Lai lasītu QR kodus, lūdzu, atļaujiet piekļuvi kamerai.",
+      "char_count": "{count} rakstzīmes",
+      "code_input_placeholder": "Jūsu pieteikšanās kods...",
+      "code_login_subtitle": "Ievadiet sistēmas administratora izsniegto kodu",
+      "code_login_title": "Pieteikšanās ar kodu",
+      "error_invalid_key": "Ievadiet derīgu piekļuves atslēgu vismaz 10 rakstzīmju garumā.",
+      "invalid_key_title": "Nederīga atslēga",
+      "login_exception_desc": "Piesakoties ar piekļuves atslēgu, radās kļūda.",
+      "login_failed_desc": "Piekļuves atslēgu nevarēja apstiprināt.",
+      "login_failed_title": "Pieteikšanās neizdevās",
+      "scanner_helper_text": "Izlīdziniet identitātes vai ielūguma QR kodu rāmī",
+      "scanner_modal_title": "PIETEIKŠANĀS AR KODU",
+      "verifying_auth": "Pārbaude..."
+    }
   }
 }

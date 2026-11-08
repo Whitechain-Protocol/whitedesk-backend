@@ -31,6 +31,7 @@ import {
   Copy,
   ArrowRight,
   CheckCircle2,
+  ClipboardPaste,
   HelpCircle,
   UploadCloud,
   QrCode,
@@ -407,6 +408,17 @@ export default function UnifiedAuthScreen({ navigation }: any) {
     const cleaned = data.trim();
     setRecoveryHash(cleaned);
     void handleEmergencyRecovery(cleaned);
+  };
+
+  // Kod giriş kutusu: panodan yapıştır (sol üst köşe paste ikonu)
+  const handlePasteCode = async () => {
+    try {
+      const text = await Clipboard.getStringAsync();
+      const cleaned = (text || '').trim();
+      if (cleaned) setRecoveryHash(cleaned);
+    } catch (err) {
+      console.warn('[UnifiedAuth] paste failed:', err);
+    }
   };
 
   // ---------------------------------------------------------------------------
@@ -875,6 +887,22 @@ export default function UnifiedAuthScreen({ navigation }: any) {
 
               <View style={styles.fieldGroup}>
                 <View style={styles.inputWithScannerWrapper}>
+                  <View style={styles.inputLeftToolbar}>
+                    <TouchableOpacity
+                      onPress={handlePasteCode}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
+                    >
+                      <ClipboardPaste size={16} color="#64748B" strokeWidth={2} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setRecoveryHash('')}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
+                    >
+                      <X size={15} color="#94A3B8" strokeWidth={2.2} />
+                    </TouchableOpacity>
+                  </View>
                   <TextInput
                     style={[styles.singleLineInput, styles.monospaceInput, styles.inputWithScannerField]}
                     placeholder={t('auth.recovery.code_input_placeholder')}
@@ -1487,6 +1515,16 @@ const styles = StyleSheet.create({
   inputWithScannerField: {
     marginBottom: 0,
     paddingRight: 52,
+    paddingLeft: 62,
+  },
+  inputLeftToolbar: {
+    position: 'absolute',
+    left: 12,
+    top: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    zIndex: 2,
   },
   qrScannerTriggerBtn: {
     position: 'absolute',

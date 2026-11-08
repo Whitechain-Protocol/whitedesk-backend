@@ -852,5 +852,29 @@
     "feat2": "Mesagerie suverană WhiteMail și atașamente criptate",
     "feat3": "Tuneluri multi-nivel rezistente la cenzură (TLS / HTTP3)",
     "feat4": "Stocare securizată hardware și zero telemetrie"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Autentificare cu cheie de acces",
+      "description": "Introduceți cheia de acces furnizată de administrator sau de organizație (cheie de administrator sau utilizator). Rolul și organizația dvs. vor fi recunoscute automat.",
+      "input_placeholder": "Lipiți cheia de acces...",
+      "verify_btn": "Autentificare",
+      "back_btn": "Înapoi la ecranul de autentificare",
+      "error_length": "Lungimea cheii de acces este invalidă.",
+      "error_invalid": "Cheia de acces nu a putut fi verificată. Verificați-o.",
+      "camera_permission_desc": "Permiteți accesul la cameră pentru a citi coduri QR.",
+      "char_count": "{count} caractere",
+      "code_input_placeholder": "Codul dvs. de conectare...",
+      "code_login_subtitle": "Introduceți codul furnizat de administratorul de sistem",
+      "code_login_title": "Autentificare cu cod",
+      "error_invalid_key": "Introduceți o cheie de acces validă de cel puțin 10 caractere.",
+      "invalid_key_title": "Cheie invalidă",
+      "login_exception_desc": "A apărut o eroare la autentificarea cu cheia de acces.",
+      "login_failed_desc": "Cheia de acces nu a putut fi verificată.",
+      "login_failed_title": "Autentificare eșuată",
+      "scanner_helper_text": "Aliniați codul QR de identitate sau invitație în cadru",
+      "scanner_modal_title": "AUTENTIFICARE CU COD",
+      "verifying_auth": "Se verifică..."
+    }
   }
 }

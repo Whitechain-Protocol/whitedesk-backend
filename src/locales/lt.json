@@ -852,5 +852,29 @@
     "feat2": "Suverenus WhiteMail ir šifruoti priedai",
     "feat3": "Cenzūrai atsparūs daugiapakopiai tuneliai (TLS / HTTP3)",
     "feat4": "Aparatinė saugykla ir nulinė teleometrija"
+  },
+  "auth": {
+    "recovery": {
+      "title": "Prisijungimas prieigos raktu",
+      "description": "Įveskite administratoriaus arba organizacijos suteiktą prieigos raktą (administratoriaus arba naudotojo raktą). Jūsų vaidmuo ir organizacija bus atpažinti automatiškai.",
+      "input_placeholder": "Įklijuokite prieigos raktą...",
+      "verify_btn": "Prisijungti",
+      "back_btn": "Grįžti į prisijungimo ekraną",
+      "error_length": "Neteisingas prieigos rakto ilgis.",
+      "error_invalid": "Prieigos rakto patvirtinti nepavyko. Patikrinkite jį.",
+      "camera_permission_desc": "Leiskite prieigą prie kameros QR kodams nuskaityti.",
+      "char_count": "{count} simbolių",
+      "code_input_placeholder": "Jūsų prisijungimo kodas...",
+      "code_login_subtitle": "Įveskite sistemos administratoriaus pateiktą kodą",
+      "code_login_title": "Prisijungimas kodu",
+      "error_invalid_key": "Įveskite galiojantį bent 10 simbolių prieigos raktą.",
+      "invalid_key_title": "Neteisingas raktas",
+      "login_exception_desc": "Prisijungiant prieigos raktu įvyko klaida.",
+      "login_failed_desc": "Prieigos rakto patvirtinti nepavyko.",
+      "login_failed_title": "Prisijungti nepavyko",
+      "scanner_helper_text": "Sulygiuokite tapatybės arba kvietimo QR kodą rėmelyje",
+      "scanner_modal_title": "PRISIJUNGIMAS KODU",
+      "verifying_auth": "Tikrinama..."
+    }
   }
 }

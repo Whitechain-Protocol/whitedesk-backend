@@ -852,5 +852,29 @@
     "feat2": "云端 TLS 1.3 隧道传输",
     "feat3": "隐写 HTTP/3 隐身技术",
     "feat4": "WhiteDesk 优先技术支持"
+  },
+  "auth": {
+    "recovery": {
+      "title": "使用访问密钥登录",
+      "description": "输入管理员或组织提供的访问密钥（管理员或用户密钥）。您的角色和组织将被自动识别。",
+      "input_placeholder": "粘贴您的访问密钥...",
+      "verify_btn": "登录",
+      "back_btn": "返回登录界面",
+      "error_length": "访问密钥长度无效。",
+      "error_invalid": "无法验证访问密钥。请检查。",
+      "camera_permission_desc": "请允许相机权限以扫描二维码。",
+      "char_count": "{count} 个字符",
+      "code_input_placeholder": "您的登录代码...",
+      "code_login_subtitle": "请输入系统管理员提供的代码",
+      "code_login_title": "使用代码登录",
+      "error_invalid_key": "请输入至少 10 个字符的有效访问密钥。",
+      "invalid_key_title": "密钥无效",
+      "login_exception_desc": "使用访问密钥登录时出错。",
+      "login_failed_desc": "无法验证访问密钥。",
+      "login_failed_title": "登录失败",
+      "scanner_helper_text": "将身份或邀请二维码对准框内",
+      "scanner_modal_title": "使用代码登录",
+      "verifying_auth": "验证中..."
+    }
   }
 }
