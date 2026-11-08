@@ -28,6 +28,7 @@ import {
 import * as Sharing from 'expo-sharing';
 import { federalHarvestService } from '../../../../services/harvest/federalHarvestService';
 import { FDHScope } from '../../../../services/harvest/types';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface FederalHarvestModalProps {
   visible: boolean;
@@ -62,6 +63,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
   language,
   onOpenAuditModal,
 }) => {
+  const { t } = useTranslation();
   // Storage Path
   const [storagePath, setStoragePath] = useState('');
 
@@ -104,25 +106,25 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
 
   // Resolve active tenant name
   const effectiveTenantName = (() => {
-    if (selectedTenantBlindId === 'all') return 'Tüm Firmalar';
-    const found = tenantsList.find(t => t.enterprise_blind_id === selectedTenantBlindId);
-    return found?.name || currentEnterpriseName || 'Kuruluş';
+    if (selectedTenantBlindId === 'all') return t('fdh.harvest.all_enterprises');
+    const found = tenantsList.find(tenant => tenant.enterprise_blind_id === selectedTenantBlindId);
+    return found?.name || currentEnterpriseName || t('fdh.harvest.default_org');
   })();
 
   const handleStartHarvest = async () => {
     if (!targetAdmins && !targetUsers) {
-      Alert.alert('Eksik Seçim', 'Lütfen en az bir hedef kitle (Yöneticiler veya Kullanıcılar) seçin.');
+      Alert.alert(t('fdh.harvest.missing_selection_title'), t('fdh.harvest.missing_selection_desc'));
       return;
     }
     if (!storagePath.trim()) {
-      Alert.alert('Geçersiz Yol', 'Lütfen geçerli bir depolama klasör yolu girin.');
+      Alert.alert(t('fdh.harvest.invalid_path_title'), t('fdh.harvest.invalid_path_desc'));
       return;
     }
 
     setIsHarvesting(true);
     setErrorMessage(null);
     setHarvestResult(null);
-    setProgressStage('Hasat oturumu başlatılıyor...');
+    setProgressStage(t('fdh.harvest.stage_starting'));
     setProgressPercent(5);
 
     const roles: ('admin' | 'user')[] = [];
@@ -165,7 +167,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
     setIsHarvesting(false);
     if (res.success) {
       setProgressPercent(100);
-      setProgressStage('Hasat tamamlandı!');
+      setProgressStage(t('fdh.harvest.stage_completed'));
       setHarvestResult({
         totalTickets: res.totalTickets,
         totalMessages: res.totalMessages,
@@ -174,7 +176,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
         targetDir: res.targetDir,
       });
     } else {
-      setErrorMessage(res.error || 'Hasat sırasında bir hata oluştu.');
+      setErrorMessage(res.error || t('fdh.harvest.error_default'));
     }
   };
 
@@ -186,13 +188,13 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
       if (canShare) {
         await Sharing.shareAsync(manifestFile, {
           mimeType: 'application/json',
-          dialogTitle: 'Federal Veri Hasadı Manifesti',
+          dialogTitle: t('fdh.harvest.manifest_dialog_title'),
         });
       } else {
-        Alert.alert('Bilgi', `Veriler kaydedildi:\n${harvestResult.targetDir}`);
+        Alert.alert(t('common.info'), t('fdh.harvest.saved_to_dir', { dir: harvestResult.targetDir }));
       }
     } catch (e: any) {
-      Alert.alert('Hata', 'Paylaşım başlatılamadı: ' + e.message);
+      Alert.alert(t('common.error'), t('fdh.harvest.share_error', { error: e.message }));
     }
   };
 
@@ -222,10 +224,10 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
               </View>
               <View>
                 <Text style={styles.headerTitle}>
-                  {language === 'tr' ? 'Federal Veri Hasadı' : 'Federal Data Harvesting'}
+                  {t('fdh.harvest.title')}
                 </Text>
                 <Text style={styles.headerSub}>
-                  {language === 'tr' ? 'Yönetici Verisi Toplama' : 'Admin Data Collection'}
+                  {t('fdh.harvest.subtitle')}
                 </Text>
               </View>
             </View>
@@ -244,19 +246,19 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
             <View style={styles.fieldSection}>
               <View style={styles.fieldLabelRow}>
                 <Folder size={14} color="#475569" style={{ marginRight: 6 }} />
-                <Text style={styles.fieldLabel}>Depolama Yolu</Text>
+                <Text style={styles.fieldLabel}>{t('fdh.harvest.storage_path_label')}</Text>
               </View>
               <TextInput
                 style={styles.pathInput}
                 value={storagePath}
                 onChangeText={setStoragePath}
-                placeholder="Örn: /storage/emulated/0/Download/WhiteDesk_Harvest"
+                placeholder={t('fdh.harvest.storage_path_placeholder')}
                 placeholderTextColor="#94A3B8"
                 autoCapitalize="none"
                 editable={!isHarvesting}
               />
               <Text style={styles.fieldHint}>
-                Veritabanı ve ek dosyalar bu dizine kaydedilir.
+                {t('fdh.harvest.storage_path_hint')}
               </Text>
             </View>
 
@@ -265,7 +267,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
               <View style={styles.fieldLabelRow}>
                 <Users size={14} color="#475569" style={{ marginRight: 6 }} />
                 <Text style={styles.fieldLabel}>
-                  {language === 'tr' ? 'Hasat Hedefi' : 'Harvest Target'}
+                  {t('fdh.harvest.target_label')}
                 </Text>
               </View>
               <View style={styles.checkboxRow}>
@@ -278,7 +280,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                     {targetAdmins && <Check size={12} color="#FFFFFF" strokeWidth={3} />}
                   </View>
                   <Text style={[styles.checkboxText, targetAdmins && styles.checkboxTextActive]}>
-                    Yöneticiler
+                    {t('fdh.harvest.target_admins')}
                   </Text>
                 </TouchableOpacity>
 
@@ -291,7 +293,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                     {targetUsers && <Check size={12} color="#FFFFFF" strokeWidth={3} />}
                   </View>
                   <Text style={[styles.checkboxText, targetUsers && styles.checkboxTextActive]}>
-                    Kullanıcılar
+                    {t('fdh.harvest.target_users')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -301,7 +303,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
             <View style={styles.fieldSection}>
               <View style={styles.fieldLabelRow}>
                 <Building size={14} color="#475569" style={{ marginRight: 6 }} />
-                <Text style={styles.fieldLabel}>Firma</Text>
+                <Text style={styles.fieldLabel}>{t('fdh.harvest.enterprise_label')}</Text>
               </View>
               {isFounder ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
@@ -310,18 +312,18 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                     onPress={() => !isHarvesting && setSelectedTenantBlindId('all')}
                   >
                     <Text style={[styles.pillText, selectedTenantBlindId === 'all' && styles.pillTextActive]}>
-                      Tüm Firmalar
+                      {t('fdh.harvest.all_enterprises')}
                     </Text>
                   </TouchableOpacity>
-                  {tenantsList.map(t => {
-                    const isSel = selectedTenantBlindId === t.enterprise_blind_id;
+                  {tenantsList.map(tenant => {
+                    const isSel = selectedTenantBlindId === tenant.enterprise_blind_id;
                     return (
                       <TouchableOpacity
-                        key={t.enterprise_blind_id}
+                        key={tenant.enterprise_blind_id}
                         style={[styles.pill, isSel && styles.pillActive]}
-                        onPress={() => !isHarvesting && setSelectedTenantBlindId(t.enterprise_blind_id)}
+                        onPress={() => !isHarvesting && setSelectedTenantBlindId(tenant.enterprise_blind_id)}
                       >
-                        <Text style={[styles.pillText, isSel && styles.pillTextActive]}>{t.name}</Text>
+                        <Text style={[styles.pillText, isSel && styles.pillTextActive]}>{tenant.name}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -339,7 +341,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
             <View style={styles.fieldSection}>
               <View style={styles.fieldLabelRow}>
                 <Briefcase size={14} color="#475569" style={{ marginRight: 6 }} />
-                <Text style={styles.fieldLabel}>Birim</Text>
+                <Text style={styles.fieldLabel}>{t('fdh.harvest.org_label')}</Text>
               </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
                 <TouchableOpacity
@@ -347,7 +349,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                   onPress={() => !isHarvesting && setSelectedOrgId('all')}
                 >
                   <Text style={[styles.pillText, selectedOrgId === 'all' && styles.pillTextActive]}>
-                    Tüm Birimler
+                    {t('fdh.harvest.all_orgs')}
                   </Text>
                 </TouchableOpacity>
                 {orgsList.map((org: any) => {
@@ -370,7 +372,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
             <View style={styles.fieldSection}>
               <View style={styles.fieldLabelRow}>
                 <Layers size={14} color="#475569" style={{ marginRight: 6 }} />
-                <Text style={styles.fieldLabel}>Uygulama</Text>
+                <Text style={styles.fieldLabel}>{t('fdh.harvest.app_label')}</Text>
               </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
                 <TouchableOpacity
@@ -378,7 +380,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                   onPress={() => !isHarvesting && setSelectedAppId('all')}
                 >
                   <Text style={[styles.pillText, selectedAppId === 'all' && styles.pillTextActive]}>
-                    Tüm Uygulamalar
+                    {t('fdh.harvest.all_apps')}
                   </Text>
                 </TouchableOpacity>
                 {appsList.map((app: any) => {
@@ -401,9 +403,9 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
             <View style={styles.engineCard}>
               <HardDrive size={16} color="#475569" style={{ marginRight: 8 }} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.engineTitle}>SQLite ve PostgreSQL Uyumlu</Text>
+                <Text style={styles.engineTitle}>{t('fdh.harvest.engine_title')}</Text>
                 <Text style={styles.engineSub}>
-                  Hasat edilen veriler FDH Sorgulama ekranından filtrelenip incelenebilir.
+                  {t('fdh.harvest.engine_subtitle')}
                 </Text>
               </View>
             </View>
@@ -423,20 +425,20 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
               <View style={styles.resultCard}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <CheckCircle2 size={18} color="#16A34A" style={{ marginRight: 6 }} />
-                  <Text style={styles.resultTitle}>Federal Hasat Başarıyla Tamamlandı</Text>
+                  <Text style={styles.resultTitle}>{t('fdh.harvest.result_success_title')}</Text>
                 </View>
                 <View style={styles.statGrid}>
                   <View style={styles.statBox}>
                     <Text style={styles.statVal}>{harvestResult.totalTickets}</Text>
-                    <Text style={styles.statLbl}>Bilet</Text>
+                    <Text style={styles.statLbl}>{t('fdh.harvest.stat_tickets')}</Text>
                   </View>
                   <View style={styles.statBox}>
                     <Text style={styles.statVal}>{harvestResult.totalMessages}</Text>
-                    <Text style={styles.statLbl}>Mesaj</Text>
+                    <Text style={styles.statLbl}>{t('fdh.harvest.stat_messages')}</Text>
                   </View>
                   <View style={styles.statBox}>
                     <Text style={styles.statVal}>{harvestResult.totalAttachments}</Text>
-                    <Text style={styles.statLbl}>Ek Dosya</Text>
+                    <Text style={styles.statLbl}>{t('fdh.harvest.stat_attachments')}</Text>
                   </View>
                 </View>
                 <Text style={styles.resultPath} numberOfLines={2}>
@@ -467,7 +469,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <Database size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.inspectBtnText}>FDH Sorgulama</Text>
+                    <Text style={styles.inspectBtnText}>{t('fdh.harvest.btn_open_audit')}</Text>
                   </TouchableOpacity>
                 )}
                 <View style={styles.footerBtnRow}>
@@ -477,14 +479,14 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                     activeOpacity={0.7}
                   >
                     <Share2 size={15} color="#475569" style={{ marginRight: 6 }} />
-                    <Text style={styles.shareBtnText}>Manifesti Paylaş</Text>
+                    <Text style={styles.shareBtnText}>{t('fdh.harvest.btn_share_manifest')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.confirmBtn}
                     onPress={onClose}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.confirmBtnText}>Kapat</Text>
+                    <Text style={styles.confirmBtnText}>{t('common.close')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -496,7 +498,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                   disabled={isHarvesting}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.cancelBtnText}>Vazgeç</Text>
+                  <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.confirmBtn, isHarvesting && { opacity: 0.6 }]}
@@ -506,7 +508,7 @@ export const FederalHarvestModal: React.FC<FederalHarvestModalProps> = ({
                 >
                   <Database size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
                   <Text style={styles.confirmBtnText}>
-                    {isHarvesting ? 'Hasat Ediliyor...' : 'Hasadı Başlat'}
+                    {isHarvesting ? t('fdh.harvest.btn_harvesting') : t('fdh.harvest.btn_start_harvest')}
                   </Text>
                 </TouchableOpacity>
               </View>

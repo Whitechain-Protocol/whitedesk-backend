@@ -804,7 +804,18 @@
     "appNamePlaceholder": "Tên ứng dụng (vd. WhiteDesk)",
     "appDescPlaceholder": "Mô tả ngắn gọn...",
     "newDiscussion": "Bắt đầu cuộc thảo luận mới",
-    "tierTenant": "Người thuê"
+    "tierTenant": "Người thuê",
+    "adminRevokeDesc": "Đặc quyền quản trị viên sẽ bị thu hồi khỏi thiết bị này và bảng điều khiển sẽ bị khóa.",
+    "removeAdminTitle": "Xóa quản trị viên",
+    "removeAdminConfirm": "Bạn có chắc chắn muốn xóa quản trị viên này và tất cả các phân bổ của họ không?",
+    "selectAdminReq": "Chọn quản trị viên",
+    "selectAdminReqDesc": "Vui lòng chọn quản trị viên để phân bổ.",
+    "created": "Đã tạo",
+    "lastAction": "Cập nhật lần cuối",
+    "attachment": "Tệp đính kèm",
+    "tierAppOrg": "Ứng dụng / Tổ chức",
+    "default": "Mặc định",
+    "all": "Tất cả"
   },
   "license": {
     "title": "Giấy phép & Đăng ký",

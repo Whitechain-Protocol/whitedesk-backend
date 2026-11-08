@@ -2,6 +2,7 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import * as Sharing from 'expo-sharing';
 import { federalHarvestService } from './federalHarvestService';
 import { keystoreTicketVault } from '../keystoreTicketVault';
+import { i18nService } from '../i18nService';
 
 export interface FDHUnifiedMessage {
   id: string;
@@ -101,10 +102,10 @@ class FDHQueryService {
           id: t.id,
           ticketNumber: t.ticketNumber || t.id,
           tenantBlindId: t.tenantBlindId || '',
-          tenantName: t.tenantName || 'Kuruluş',
-          organizationId: t.organizationId || 'Genel',
+          tenantName: t.tenantName || i18nService.t('fdh.default_tenant_name'),
+          organizationId: t.organizationId || i18nService.t('fdh.default_org_name'),
           applicationId: t.applicationId || 'whitedesk',
-          title: t.title || 'Başlıksız',
+          title: t.title || i18nService.t('fdh.untitled'),
           status: t.status || 'open',
           priority: t.priority || 'medium',
           creatorType: t.creatorType || 'user',
@@ -124,8 +125,8 @@ class FDHQueryService {
         const batch: FDHBatchSummary = {
           jobId: parsed.jobId || 'local_batch',
           harvestedAt: parsed.harvestedAt || Date.now(),
-          harvestedByRole: parsed.harvestedByRole || 'Admin',
-          tenantName: parsed.scope?.tenantName || 'Yerel Arşiv',
+          harvestedByRole: parsed.harvestedByRole || i18nService.t('fdh.audit.role_admin'),
+          tenantName: parsed.scope?.tenantName || i18nService.t('fdh.local_archive'),
           totalTickets: tickets.length,
           totalMessages: parsed.summary?.totalMessages || tickets.reduce((s, t) => s + t.messageCount, 0),
           totalAttachments: parsed.summary?.totalAttachments || tickets.reduce((s, t) => s + t.attachmentCount, 0),
@@ -149,10 +150,10 @@ class FDHQueryService {
           id: t.id,
           ticketNumber: t.ticketNumber || t.id,
           tenantBlindId: t.tenantBlindId || '',
-          tenantName: t.tenantName || 'Kuruluş',
-          organizationId: t.organizationId || 'Genel',
+          tenantName: t.tenantName || i18nService.t('fdh.default_tenant_name'),
+          organizationId: t.organizationId || i18nService.t('fdh.default_org_name'),
           applicationId: t.applicationId || 'whitedesk',
-          title: t.title || 'Başlıksız',
+          title: t.title || i18nService.t('fdh.untitled'),
           status: t.status || 'open',
           priority: t.priority || 'medium',
           creatorType: t.creatorType || 'user',
@@ -170,8 +171,8 @@ class FDHQueryService {
         const batch: FDHBatchSummary = {
           jobId: parsed.jobId || 'manifest_batch',
           harvestedAt: parsed.harvestedAt || Date.now(),
-          harvestedByRole: parsed.harvestedByRole || 'Admin',
-          tenantName: parsed.scope?.tenantName || 'Yerel Arşiv',
+          harvestedByRole: parsed.harvestedByRole || i18nService.t('fdh.audit.role_admin'),
+          tenantName: parsed.scope?.tenantName || i18nService.t('fdh.local_archive'),
           totalTickets: parsed.summary?.totalTickets || tickets.length,
           totalMessages: parsed.summary?.totalMessages || 0,
           totalAttachments: parsed.summary?.totalAttachments || 0,
@@ -195,10 +196,10 @@ class FDHQueryService {
         id: vt.id,
         ticketNumber: (vt as any).ticket_number || vt.id,
         tenantBlindId: vt.enterprise_blind_id || '',
-        tenantName: 'Canlı Kasa',
-        organizationId: vt.org_id || 'Genel',
+        tenantName: i18nService.t('fdh.live_vault'),
+        organizationId: vt.org_id || i18nService.t('fdh.default_org_name'),
         applicationId: vt.app_id || 'whitedesk',
-        title: vt.subject || 'Başlıksız',
+        title: vt.subject || i18nService.t('fdh.untitled'),
         status: vt.status || 'open',
         priority: (vt as any).priority || 'medium',
         creatorType: vt.user_blind_id ? 'user' : 'admin',
@@ -230,7 +231,7 @@ class FDHQueryService {
       jobId: 'live_vault',
       harvestedAt: Date.now(),
       harvestedByRole: 'founder',
-      tenantName: 'Yerel Güvenli Kasa (Canlı)',
+      tenantName: i18nService.t('fdh.local_secure_vault_live'),
       totalTickets: tickets.length,
       totalMessages: tickets.reduce((s, t) => s + t.messageCount, 0),
       totalAttachments: tickets.reduce((s, t) => s + t.attachmentCount, 0),
@@ -250,7 +251,7 @@ class FDHQueryService {
   }> {
     const rawUrl = config.endpointUrl.trim().replace(/\/$/, '');
     if (!rawUrl) {
-      throw new Error('Geçerli bir PostgreSQL ağ geçidi / REST URL giriniz.');
+      throw new Error(i18nService.t('fdh.invalid_postgres_url'));
     }
 
     const headers: Record<string, string> = {
@@ -289,10 +290,10 @@ class FDHQueryService {
               id: String(t.id || t.ticket_id),
               ticketNumber: String(t.ticket_number || t.id),
               tenantBlindId: t.tenant_blind_id || '',
-              tenantName: t.tenant_name || 'PostgreSQL Deposu',
-              organizationId: t.organization_id || 'Genel',
+              tenantName: t.tenant_name || i18nService.t('fdh.postgres_repository'),
+              organizationId: t.organization_id || i18nService.t('fdh.default_org_name'),
               applicationId: t.application_id || 'whitedesk',
-              title: t.title || 'Başlıksız',
+              title: t.title || i18nService.t('fdh.untitled'),
               status: t.status || 'open',
               priority: t.priority || 'medium',
               creatorType: t.creator_type || 'user',
@@ -324,7 +325,7 @@ class FDHQueryService {
             jobId: `pg_${Date.now()}`,
             harvestedAt: Date.now(),
             harvestedByRole: 'enterprise_pg',
-            tenantName: config.databaseName || 'PostgreSQL Kurumsal Havuz',
+            tenantName: config.databaseName || i18nService.t('fdh.postgres_enterprise_pool'),
             totalTickets: tickets.length,
             totalMessages: tickets.reduce((s, t) => s + t.messageCount, 0),
             totalAttachments: tickets.reduce((s, t) => s + t.attachmentCount, 0),
@@ -340,7 +341,7 @@ class FDHQueryService {
     }
 
     throw new Error(
-      lastError?.message || 'PostgreSQL uç noktasına bağlanılamadı. Lütfen URL ve yetki anahtarını kontrol edin.'
+      lastError?.message || i18nService.t('fdh.postgres_connection_failed')
     );
   }
 

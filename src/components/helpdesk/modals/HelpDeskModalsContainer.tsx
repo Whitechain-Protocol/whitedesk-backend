@@ -71,8 +71,8 @@ import { VoiceCallSession, voiceCallService } from '../../../services/voiceCallS
 
 export interface HelpDeskModalsContainerProps {
   language: 'tr' | 'en';
-  getLabel: (a: string, b?: string, c?: string) => string;
-  t: (key: string) => string;
+  getLabel: (a: string, b?: string | Record<string, string | number>, c?: string) => string;
+  t: (key: string, params?: any) => string;
   safeTop: number;
   adminModalHeight: number;
   isAdmin: boolean;
@@ -1190,7 +1190,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
         <SdkIntegrationModal
           visible={sdkIntegrationVisible}
           onClose={() => setSdkIntegrationVisible(false)}
-          enterpriseName={currentEnterpriseName || 'Sovereign Node'}
+          enterpriseName={currentEnterpriseName || t('helpdesk.sovereign_node_default')}
           enterpriseBlindId={activeEnterpriseBlindId || ''}
         />
       )}
@@ -1273,7 +1273,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
           language={language}
           tenants={tenantsList}
           currentTenantId={pttTenantId || activeEnterpriseBlindId || 'default'}
-          currentTenantName={pttTenantName || currentEnterpriseName || 'Whitechain'}
+          currentTenantName={pttTenantName || currentEnterpriseName || t('helpdesk.tenant_enterprise_default')}
           onChangeTenant={onChangePttTenant}
           onAnswer={() => {
             void voiceCallService.answerCall();
@@ -1318,7 +1318,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
                   {callSession.targetOrgName || callSession.calleeAlias || currentEnterpriseName || ''}
                 </Text>
                 <Text style={bannerStyles.orgPttTopBannerSubtitle} numberOfLines={1}>
-                  {callSession.callerAlias || 'Admin'} canlı anons yapıyor...
+                  {t('helpdesk.ptt_banner.live_broadcast_sub', { caller: callSession.callerAlias || t('helpdesk.admin_role_short') })}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -1332,7 +1332,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
                 activeOpacity={0.8}
               >
                 <Text style={bannerStyles.orgPttJoinBtnText}>
-                  {language === 'tr' ? 'Katıl' : 'Join'}
+                  {t('helpdesk.ptt_banner.join_btn')}
                 </Text>
               </TouchableOpacity>
 

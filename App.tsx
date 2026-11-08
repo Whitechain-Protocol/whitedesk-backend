@@ -3,7 +3,7 @@ import { StatusBar } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { I18nProvider } from './src/services/i18nService';
+import { I18nProvider, i18nService } from './src/services/i18nService';
 import { CryptoService } from './src/services/cryptoService';
 import HelpDeskScreen from './src/screens/HelpDeskScreen';
 import WhiteDeskScannerScreen from './src/screens/WhiteDeskScannerScreen';
@@ -32,10 +32,10 @@ function AppContent() {
             if (initialCall?.callAction === 'reject') {
               void remoteDesktopService.rejectOffer();
             } else if (initialCall?.callAction === 'answer') {
-              await remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || 'Admin');
+              await remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || i18nService.t('helpdesk.admin_role_short'));
               void remoteDesktopService.acceptOffer();
             } else {
-              void remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || 'Admin');
+              void remoteDesktopService.receiveIncomingInvite(initialCall.ticketId, initialCall.callerAlias || i18nService.t('helpdesk.admin_role_short'));
             }
             if (storedId) void NotificationService.init(storedId);
             return;
@@ -82,10 +82,10 @@ function AppContent() {
         if (event?.callAction === 'reject') {
           void remoteDesktopService.rejectOffer();
         } else if (event?.callAction === 'answer') {
-          await remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || 'Admin');
+          await remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || i18nService.t('helpdesk.admin_role_short'));
           void remoteDesktopService.acceptOffer();
         } else {
-          void remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || 'Admin');
+          void remoteDesktopService.receiveIncomingInvite(event.ticketId, event.callerAlias || i18nService.t('helpdesk.admin_role_short'));
         }
         return;
       }

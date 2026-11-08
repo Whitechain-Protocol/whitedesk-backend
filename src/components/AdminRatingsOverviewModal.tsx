@@ -39,11 +39,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
   orgsList = [],
   appsList = [],
 }) => {
-  const { t: baseT } = useTranslation();
-  const t = (key: string, fallback?: string): string => {
-    const val = baseT(key);
-    return (val && val !== key) ? val : (fallback || key);
-  };
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -183,10 +179,10 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
   const needleY = 100 - needleLength * Math.sin(gaugeAngleRad);
 
   const getGaugeStatusLabel = (score: number) => {
-    if (score >= 4.5) return t('ticket.admin_ratings.gauge_status_excellent', 'Mükemmel');
-    if (score >= 3.5) return t('ticket.admin_ratings.gauge_status_good', 'Yüksek');
-    if (score >= 2.5) return t('ticket.admin_ratings.gauge_status_average', 'Dengeli');
-    return t('ticket.admin_ratings.gauge_status_low', 'Geliştirilmeli');
+    if (score >= 4.5) return t('ticket.admin_ratings.gauge_status_excellent');
+    if (score >= 3.5) return t('ticket.admin_ratings.gauge_status_good');
+    if (score >= 2.5) return t('ticket.admin_ratings.gauge_status_average');
+    return t('ticket.admin_ratings.gauge_status_low');
   };
 
   const getGaugeStatusColor = (score: number) => {
@@ -211,7 +207,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
   const onTimeScore = data?.kpis?.onTimeScore ?? 10.0;
 
   // Subtitle format without company name
-  const headerSubtitleText = 'Performans & Memnuniyet Analitiği';
+  const headerSubtitleText = t('ticket.admin_ratings.header_subtitle');
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
@@ -224,7 +220,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             </View>
             <View style={styles.headerTextGroup}>
               <Text style={styles.headerTitle}>
-                {t('ticket.admin_ratings.console_title', 'Yönetici Değerlendirmeleri')}
+                {t('ticket.admin_ratings.console_title')}
               </Text>
               <Text style={styles.headerSubtitle} numberOfLines={1}>
                 {headerSubtitleText}
@@ -247,18 +243,18 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             {/* 1. Firma (Tenant) Filter - Only for Founder when multiple tenants exist */}
             {showTenantFilter && (
               <View style={styles.filterRow}>
-                <Text style={styles.filterRowLabel}>Firma:</Text>
+                <Text style={styles.filterRowLabel}>{t('ticket.admin_ratings.filter_tenant_label')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterPillsScroll}>
                   <TouchableOpacity
                     style={[styles.filterPill, selectedTenant === 'all' && styles.filterPillActive]}
                     onPress={() => setSelectedTenant('all')}
                   >
                     <Text style={[styles.filterPillText, selectedTenant === 'all' && styles.filterPillTextActive]}>
-                      Tüm Firmalar
+                      {t('ticket.admin_ratings.filter_all_tenants')}
                     </Text>
                   </TouchableOpacity>
-                  {(tenantsList || []).map((t: any) => {
-                    const bId = t.enterprise_blind_id || t.id;
+                  {(tenantsList || []).map((tenantItem: any) => {
+                    const bId = tenantItem.enterprise_blind_id || tenantItem.id;
                     const isSel = selectedTenant === bId;
                     return (
                       <TouchableOpacity
@@ -267,7 +263,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                         onPress={() => setSelectedTenant(bId)}
                       >
                         <Text style={[styles.filterPillText, isSel && styles.filterPillTextActive]}>
-                          {t.name || bId}
+                          {tenantItem.name || bId}
                         </Text>
                       </TouchableOpacity>
                     );
@@ -279,14 +275,14 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             {/* 2. Bölüm / Organizasyon Filter - Only if defined in database for this tenant */}
             {showOrgFilter && (
               <View style={styles.filterRow}>
-                <Text style={styles.filterRowLabel}>Bölüm:</Text>
+                <Text style={styles.filterRowLabel}>{t('ticket.admin_ratings.filter_org_label')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterPillsScroll}>
                   <TouchableOpacity
                     style={[styles.filterPill, selectedOrg === 'all' && styles.filterPillActive]}
                     onPress={() => setSelectedOrg('all')}
                   >
                     <Text style={[styles.filterPillText, selectedOrg === 'all' && styles.filterPillTextActive]}>
-                      Tüm Bölümler
+                      {t('ticket.admin_ratings.filter_all_orgs')}
                     </Text>
                   </TouchableOpacity>
                   {availableOrgs.map((o: any) => {
@@ -311,14 +307,14 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             {/* 3. Uygulama Filter - Only if defined in database for this tenant */}
             {showAppFilter && (
               <View style={styles.filterRow}>
-                <Text style={styles.filterRowLabel}>Uygulama:</Text>
+                <Text style={styles.filterRowLabel}>{t('ticket.admin_ratings.filter_app_label')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterPillsScroll}>
                   <TouchableOpacity
                     style={[styles.filterPill, selectedApp === 'all' && styles.filterPillActive]}
                     onPress={() => setSelectedApp('all')}
                   >
                     <Text style={[styles.filterPillText, selectedApp === 'all' && styles.filterPillTextActive]}>
-                      Tüm Uygulamalar
+                      {t('ticket.admin_ratings.filter_all_apps')}
                     </Text>
                   </TouchableOpacity>
                   {availableApps.map((a: any) => {
@@ -357,7 +353,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             <View style={styles.card}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardTitle}>
-                  {t('ticket.admin_ratings.gauge_title', 'Memnuniyet Endeksi')}
+                  {t('ticket.admin_ratings.gauge_title')}
                 </Text>
                 <View style={[styles.statusBadge, { backgroundColor: `${statusColor}18`, borderColor: statusColor }]}>
                   <Text style={[styles.statusBadgeText, { color: statusColor }]}>{statusLabel}</Text>
@@ -423,7 +419,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                   <Text style={styles.gaugeScoreMax}>/ 5.0</Text>
                 </View>
                 <Text style={styles.gaugeHint}>
-                  {totalRatings} {t('ticket.admin_ratings.kpi_total', 'Toplam Değerlendirme')} üzerinden hesaplandı
+                  {t('ticket.admin_ratings.gauge_calculated_from', { count: totalRatings })}
                 </Text>
               </View>
             </View>
@@ -435,22 +431,22 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                 <View style={styles.statBoxHeader}>
                   <Ionicons name="pie-chart-outline" size={16} color="#0284C7" />
                   <Text style={styles.statBoxTitle}>
-                    {t('ticket.admin_ratings.ticket_ratio_title', 'Talep Durumu')}
+                    {t('ticket.admin_ratings.ticket_ratio_title')}
                   </Text>
                 </View>
                 <View style={styles.statBigValueRow}>
                   <Text style={styles.statBigValue}>%{closedRatio}</Text>
-                  <Text style={styles.statSmallLabel}>Çözüldü</Text>
+                  <Text style={styles.statSmallLabel}>{t('ticket.admin_ratings.resolved_label')}</Text>
                 </View>
                 <View style={styles.progressBarBg}>
                   <View style={[styles.progressBarFill, { width: `${closedRatio}%`, backgroundColor: '#0284C7' }]} />
                 </View>
                 <View style={styles.statLegendRow}>
                   <Text style={styles.statLegendText}>
-                    {t('ticket.admin_ratings.closed_tickets', 'Kapatılan')}: {closedTickets}
+                    {t('ticket.admin_ratings.closed_tickets')}: {closedTickets}
                   </Text>
                   <Text style={styles.statLegendText}>
-                    {t('ticket.admin_ratings.open_tickets', 'Açık')}: {openTickets}
+                    {t('ticket.admin_ratings.open_tickets')}: {openTickets}
                   </Text>
                 </View>
               </View>
@@ -460,12 +456,12 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                 <View style={styles.statBoxHeader}>
                   <Ionicons name="ribbon-outline" size={16} color="#059669" />
                   <Text style={styles.statBoxTitle}>
-                    {t('ticket.admin_ratings.score_distribution_title', 'Başarı Oranı')}
+                    {t('ticket.admin_ratings.score_distribution_title')}
                   </Text>
                 </View>
                 <View style={styles.statBigValueRow}>
                   <Text style={[styles.statBigValue, { color: '#059669' }]}>%{highRatio}</Text>
-                  <Text style={styles.statSmallLabel}>Yüksek</Text>
+                  <Text style={styles.statSmallLabel}>{t('ticket.admin_ratings.gauge_status_good')}</Text>
                 </View>
                 <View style={styles.progressBarBg}>
                   <View style={[styles.progressBarFill, { width: `${highRatio}%`, backgroundColor: '#10B981' }]} />
@@ -481,17 +477,17 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             {/* Quick KPI Strip (Light Mode) */}
             <View style={styles.kpiStrip}>
               <View style={styles.kpiItem}>
-                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_total_tickets', 'Toplam Talep')}</Text>
+                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_total_tickets')}</Text>
                 <Text style={styles.kpiValue}>{totalTickets}</Text>
               </View>
               <View style={styles.kpiDivider} />
               <View style={styles.kpiItem}>
-                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_total', 'Değerlendirme')}</Text>
+                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_total')}</Text>
                 <Text style={styles.kpiValue}>{totalRatings}</Text>
               </View>
               <View style={styles.kpiDivider} />
               <View style={styles.kpiItem}>
-                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_active', 'Aktif Yönetici')}</Text>
+                <Text style={styles.kpiLabel}>{t('ticket.admin_ratings.kpi_active')}</Text>
                 <Text style={styles.kpiValue}>{data?.kpis?.activeAdminsCount || 1}</Text>
               </View>
             </View>
@@ -502,13 +498,13 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                 <View style={styles.scorecardTitleGroup}>
                   <Ionicons name="speedometer-outline" size={17} color="#059669" />
                   <Text style={styles.scorecardTitle}>
-                    {t('ticket.admin_ratings.scorecard_title', 'SLA & Performans Karnesi')}
+                    {t('ticket.admin_ratings.scorecard_title')}
                   </Text>
                 </View>
                 <View style={[styles.scorecardGradeBadge, { backgroundColor: slaRate >= 90 ? '#ECFDF5' : '#FEF3C7' }]}>
                   <Ionicons name="trophy" size={12} color={slaRate >= 90 ? '#059669' : '#D97706'} />
                   <Text style={[styles.scorecardGradeText, { color: slaRate >= 90 ? '#059669' : '#D97706' }]}>
-                    {slaRate >= 95 ? 'A+ Karne' : slaRate >= 85 ? 'A Karne' : 'B Karne'}
+                    {slaRate >= 95 ? t('ticket.admin_ratings.grade_a_plus') : slaRate >= 85 ? t('ticket.admin_ratings.grade_a') : t('ticket.admin_ratings.grade_b')}
                   </Text>
                 </View>
               </View>
@@ -518,43 +514,43 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                 {/* 1. Ort. Yanıt Hızı */}
                 <View style={styles.slaMetricBox}>
                   <Text style={styles.slaMetricLabel}>
-                    {t('ticket.admin_ratings.avg_response_speed', 'Ort. Yanıt Hızı')}
+                    {t('ticket.admin_ratings.avg_response_speed')}
                   </Text>
                   <View style={styles.slaMetricValRow}>
                     <Ionicons name="flash" size={13} color="#0284C7" />
-                    <Text style={styles.slaMetricValueBold}>{avgResponseMin} dk</Text>
+                    <Text style={styles.slaMetricValueBold}>{avgResponseMin} {t('ticket.admin_ratings.minutes_short')}</Text>
                   </View>
-                  <Text style={styles.slaMetricSubText}>İlk müdahale</Text>
+                  <Text style={styles.slaMetricSubText}>{t('ticket.admin_ratings.first_response_sub')}</Text>
                 </View>
 
                 {/* 2. SLA Başarısı */}
                 <View style={styles.slaMetricBox}>
                   <Text style={styles.slaMetricLabel}>
-                    {t('ticket.admin_ratings.sla_compliance_rate', 'SLA Başarısı')}
+                    {t('ticket.admin_ratings.sla_compliance_rate')}
                   </Text>
                   <View style={styles.slaMetricValRow}>
                     <Ionicons name="checkmark-circle" size={13} color="#10B981" />
                     <Text style={[styles.slaMetricValueBold, { color: '#059669' }]}>%{slaRate}</Text>
                   </View>
-                  <Text style={styles.slaMetricSubText}>Zamanında yanıt</Text>
+                  <Text style={styles.slaMetricSubText}>{t('ticket.admin_ratings.on_time_response_sub')}</Text>
                 </View>
 
                 {/* 3. Müdahale Skoru */}
                 <View style={styles.slaMetricBox}>
                   <Text style={styles.slaMetricLabel}>
-                    {t('ticket.admin_ratings.intervention_score', 'Müdahale Skoru')}
+                    {t('ticket.admin_ratings.intervention_score')}
                   </Text>
                   <View style={styles.slaMetricValRow}>
                     <Ionicons name="shield-checkmark" size={13} color="#8B5CF6" />
                     <Text style={[styles.slaMetricValueBold, { color: '#7C3AED' }]}>{onTimeScore} / 10</Text>
                   </View>
-                  <Text style={styles.slaMetricSubText}>Hizmet düzeyi</Text>
+                  <Text style={styles.slaMetricSubText}>{t('ticket.admin_ratings.service_level_sub')}</Text>
                 </View>
 
                 {/* 4. SLA İhlalleri / Eskalasyon */}
                 <View style={styles.slaMetricBox}>
                   <Text style={styles.slaMetricLabel}>
-                    {t('ticket.admin_ratings.sla_breaches', 'SLA Aşımı')}
+                    {t('ticket.admin_ratings.sla_breaches')}
                   </Text>
                   <View style={styles.slaMetricValRow}>
                     <Ionicons 
@@ -567,7 +563,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                     </Text>
                   </View>
                   <Text style={styles.slaMetricSubText}>
-                    {slaBreaches === 0 ? 'Sıfır İhlal' : 'Eskalasyon'}
+                    {slaBreaches === 0 ? t('ticket.admin_ratings.zero_breaches') : t('ticket.admin_ratings.escalation')}
                   </Text>
                 </View>
               </View>
@@ -576,10 +572,10 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             {/* Admin Performance Section */}
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>
-                {t('ticket.admin_ratings.col_admin', 'Yönetici')} Performans Matrisi
+                {t('ticket.admin_ratings.performance_matrix_title')}
               </Text>
               <Text style={styles.sectionSubtitle}>
-                {data?.admins?.length || 0} Yönetici
+                {data?.admins?.length || 0} {t('ticket.admin_ratings.col_admin')}
               </Text>
             </View>
 
@@ -616,7 +612,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                   {/* Primary Metrics Bar: Score, Success, Resolved */}
                   <View style={styles.adminMetricsBar}>
                     <View style={styles.adminMetricCol}>
-                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_score', 'Ortalama Puan')}</Text>
+                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_score')}</Text>
                       <View style={styles.scoreRow}>
                         <Ionicons name="star" size={13} color="#F59E0B" />
                         <Text style={styles.adminMetricValueBold}>{admin.averageScore.toFixed(1)}</Text>
@@ -627,7 +623,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                     <View style={styles.adminMetricDivider} />
 
                     <View style={styles.adminMetricCol}>
-                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_success_rate', 'Başarı Oranı')}</Text>
+                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_success_rate')}</Text>
                       <Text style={[styles.adminMetricValueBold, { color: '#059669' }]}>
                         %{admin.successRate}
                       </Text>
@@ -636,7 +632,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                     <View style={styles.adminMetricDivider} />
 
                     <View style={styles.adminMetricCol}>
-                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_resolved', 'Çözülen')}</Text>
+                      <Text style={styles.adminMetricLabel}>{t('ticket.admin_ratings.col_resolved')}</Text>
                       <Text style={styles.adminMetricValueBold}>{admin.resolvedCount}</Text>
                     </View>
                   </View>
@@ -645,18 +641,18 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                   <View style={styles.adminSlaSubRow}>
                     <View style={styles.adminSlaItem}>
                       <Ionicons name="flash-outline" size={12} color="#0284C7" />
-                      <Text style={styles.adminSlaItemLabel}>Ort. Yanıt:</Text>
-                      <Text style={styles.adminSlaItemVal}>{admin.avgResponseMinutes ?? 12} dk</Text>
+                      <Text style={styles.adminSlaItemLabel}>{t('ticket.admin_ratings.avg_response_short')}</Text>
+                      <Text style={styles.adminSlaItemVal}>{admin.avgResponseMinutes ?? 12} {t('ticket.admin_ratings.minutes_short')}</Text>
                     </View>
                     <View style={styles.adminSlaItem}>
                       <Ionicons name="checkmark-circle-outline" size={12} color="#10B981" />
-                      <Text style={styles.adminSlaItemLabel}>SLA Uyumu:</Text>
+                      <Text style={styles.adminSlaItemLabel}>{t('ticket.admin_ratings.sla_compliance_short')}</Text>
                       <Text style={[styles.adminSlaItemVal, { color: '#059669' }]}>%{admin.slaComplianceRate ?? 100}</Text>
                     </View>
                     <View style={styles.adminSlaItem}>
                       <Ionicons name="briefcase-outline" size={12} color="#64748B" />
-                      <Text style={styles.adminSlaItemLabel}>Atanan:</Text>
-                      <Text style={styles.adminSlaItemVal}>{admin.assignedCount ?? admin.resolvedCount} bilet</Text>
+                      <Text style={styles.adminSlaItemLabel}>{t('ticket.admin_ratings.assigned_short')}</Text>
+                      <Text style={styles.adminSlaItemVal}>{admin.assignedCount ?? admin.resolvedCount} {t('ticket.admin_ratings.ticket_unit')}</Text>
                     </View>
                   </View>
 
@@ -665,7 +661,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                     <View style={styles.notesSection}>
                       <Text style={styles.notesTitle}>
                         <Ionicons name="chatbubble-ellipses-outline" size={12} color="#64748B" />{' '}
-                        {t('ticket.admin_ratings.col_latest_notes', 'Son Notlar')}:
+                        {t('ticket.admin_ratings.col_latest_notes')}:
                       </Text>
                       {admin.latestNotes.map((note, nIdx) => (
                         <View key={`n_${nIdx}`} style={styles.noteItem}>
@@ -677,7 +673,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
                   ) : (
                     <View style={styles.noNotesRow}>
                       <Text style={styles.noNotesText}>
-                        {t('ticket.admin_ratings.no_notes', 'Henüz yazılı not iletilmedi')}
+                        {t('ticket.admin_ratings.no_notes')}
                       </Text>
                     </View>
                   )}
@@ -686,7 +682,7 @@ export const AdminRatingsOverviewModal: React.FC<AdminRatingsOverviewModalProps>
             ) : (
               <View style={styles.emptyContainer}>
                 <Ionicons name="shield-checkmark-outline" size={36} color="#94A3B8" />
-                <Text style={styles.emptyText}>Henüz değerlendirme kaydı bulunmuyor</Text>
+                <Text style={styles.emptyText}>{t('ticket.admin_ratings.empty_ratings')}</Text>
               </View>
             )}
 

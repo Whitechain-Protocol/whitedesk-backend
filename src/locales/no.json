@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App-navn (f.eks. Support Desk)",
     "appDescPlaceholder": "Kort beskrivelse (valgfritt)",
     "newDiscussion": "Start ny diskusjon",
-    "tierTenant": "Leietaker"
+    "tierTenant": "Leietaker",
+    "adminRevokeDesc": "Administratorrettigheter fjernes fra denne enheten, og konsollen låses.",
+    "removeAdminTitle": "Fjern administrator",
+    "removeAdminConfirm": "Er du sikker på at du vil fjerne denne administratoren og alle tilordningene?",
+    "selectAdminReq": "Velg administrator",
+    "selectAdminReqDesc": "Velg en administrator som skal tilordnes.",
+    "created": "Opprettet",
+    "lastAction": "Siste oppdatering",
+    "attachment": "Vedlegg",
+    "tierAppOrg": "Applikasjon / Organisasjon",
+    "default": "Standard",
+    "all": "Alle"
   },
   "license": {
     "title": "Lisens & Abonnement",

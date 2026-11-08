@@ -31,6 +31,7 @@ import {
 } from 'lucide-react-native';
 import { DiagnosticPackage, DiagnosticEvent } from '../../../services/diagnosticRecorder';
 import { HelpDeskTicket } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 interface DiagnosticViewerModalProps {
   visible: boolean;
@@ -45,8 +46,8 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
   onClose,
   ticket,
   diagnosticData,
-  language = 'tr',
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'replay' | 'blackbox'>('replay');
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -154,7 +155,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
               suggestedName: fileName,
               types: [
                 {
-                  description: 'WhiteDesk Sistem Tanı Paketi (.txt / .json)',
+                  description: t('helpdesk.diagnostics.file_picker_desc'),
                   accept: { 'text/plain': ['.txt', '.json', '.whitedesk'] },
                 },
               ],
@@ -188,7 +189,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'text/plain',
-          dialogTitle: language === 'tr' ? 'Sistem Tanısını Dışarı Aktar' : 'Export System Diagnostics',
+          dialogTitle: t('helpdesk.diagnostics.export_dialog_title'),
           UTI: 'public.plain-text',
         });
       } else {
@@ -231,21 +232,21 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
   const renderEventBadge = (type: string) => {
     switch (type) {
       case 'navigation':
-        return { label: 'EKRAN', bg: '#EFF6FF', text: '#1D4ED8', border: '#DBEAFE' };
+        return { label: t('helpdesk.diagnostics.badge_navigation'), bg: '#EFF6FF', text: '#1D4ED8', border: '#DBEAFE' };
       case 'action':
-        return { label: 'EYLEM', bg: '#F0FDF4', text: '#15803D', border: '#DCFCE7' };
+        return { label: t('helpdesk.diagnostics.badge_action'), bg: '#F0FDF4', text: '#15803D', border: '#DCFCE7' };
       case 'network':
-        return { label: 'AĞ (HTTP)', bg: '#FFFBEB', text: '#B45309', border: '#FEF3C7' };
+        return { label: t('helpdesk.diagnostics.badge_network'), bg: '#FFFBEB', text: '#B45309', border: '#FEF3C7' };
       case 'warning':
-        return { label: 'UYARI', bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' };
+        return { label: t('helpdesk.diagnostics.badge_warning'), bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' };
       case 'lifecycle':
-        return { label: 'DURUM', bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE' };
+        return { label: t('helpdesk.diagnostics.badge_lifecycle'), bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE' };
       case 'sdk':
-        return { label: 'YAZILIM (SDK)', bg: '#F0FDFA', text: '#0F766E', border: '#CCFBF1' };
+        return { label: t('helpdesk.diagnostics.badge_sdk'), bg: '#F0FDFA', text: '#0F766E', border: '#CCFBF1' };
       case 'error':
-        return { label: 'HATA', bg: '#FEF2F2', text: '#B91C1C', border: '#FEE2E2' };
+        return { label: t('helpdesk.diagnostics.badge_error'), bg: '#FEF2F2', text: '#B91C1C', border: '#FEE2E2' };
       default:
-        return { label: 'BİLGİ', bg: '#F8FAFC', text: '#64748B', border: '#E2E8F0' };
+        return { label: t('helpdesk.diagnostics.badge_info'), bg: '#F8FAFC', text: '#64748B', border: '#E2E8F0' };
     }
   };
 
@@ -261,10 +262,10 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
               </View>
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.headerTitle}>
-                  {language === 'tr' ? 'Sistem Tanısı' : 'System Diagnostics'}
+                  {t('helpdesk.diagnostics.title')}
                 </Text>
                 <Text style={styles.headerSubtitle}>
-                  {ticket?.id ? `#${ticket.id}` : ''} • {language === 'tr' ? 'Sıfır-Bilgi İstemci Mühürlü' : 'Zero-Knowledge Sealed'}
+                  {ticket?.id ? `#${ticket.id}` : ''} • {t('helpdesk.diagnostics.subtitle_sealed')}
                 </Text>
               </View>
             </View>
@@ -281,7 +282,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
             >
               <Play size={13} color={activeTab === 'replay' ? '#2563EB' : '#64748B'} style={{ marginRight: 6 }} />
               <Text style={[styles.tabBtnText, activeTab === 'replay' && styles.tabBtnTextActive]}>
-                {language === 'tr' ? 'Canlandırma' : 'Action Timeline'}
+                {t('helpdesk.diagnostics.tab_replay')}
               </Text>
             </TouchableOpacity>
 
@@ -291,7 +292,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
             >
               <Cpu size={13} color={activeTab === 'blackbox' ? '#2563EB' : '#64748B'} style={{ marginRight: 6 }} />
               <Text style={[styles.tabBtnText, activeTab === 'blackbox' && styles.tabBtnTextActive]}>
-                {language === 'tr' ? 'Sistem Logları' : 'System Logs'}
+                {t('helpdesk.diagnostics.tab_logs')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -316,7 +317,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                   </Text>
                   {isPlaying && (
                     <Text style={{ fontSize: 11, color: '#2563EB', fontWeight: '600', marginLeft: 8 }}>
-                      {language === 'tr' ? 'Oynatılıyor...' : 'Playing...'}
+                      {t('helpdesk.diagnostics.playing')}
                     </Text>
                   )}
                 </View>
@@ -325,7 +326,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                   <TouchableOpacity style={styles.jumpErrorBtn} onPress={handleJumpToError}>
                     <AlertTriangle size={12} color="#DC2626" style={{ marginRight: 4 }} />
                     <Text style={styles.jumpErrorText}>
-                      {language === 'tr' ? 'Hata Anına Git' : 'Jump to Error'}
+                      {t('helpdesk.diagnostics.jump_to_error')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -382,14 +383,14 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
               ) : (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>
-                    {language === 'tr' ? 'Bu bilet için kaydedilmiş eylem akışı bulunamadı.' : 'No action stream recorded for this ticket.'}
+                    {t('helpdesk.diagnostics.empty_stream')}
                   </Text>
                 </View>
               )}
 
               {/* Step Sequence List */}
               <Text style={styles.sectionHeaderTitle}>
-                {language === 'tr' ? 'Olay Zaman Çizelgesi' : 'Event Timeline'}
+                {t('helpdesk.diagnostics.event_timeline')}
               </Text>
               <ScrollView ref={timelineScrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                 {events.map((ev, idx) => {
@@ -428,46 +429,46 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                 <View style={styles.telemetryHeader}>
                   <Smartphone size={16} color="#2563EB" style={{ marginRight: 6 }} />
                   <Text style={styles.telemetryTitle}>
-                    {language === 'tr' ? 'Cihaz, Ekran ve Çalışma Ortamı' : 'Device, Viewport & Environment'}
+                    {t('helpdesk.diagnostics.device_telemetry_title')}
                   </Text>
                 </View>
                 <View style={styles.telemetryGrid}>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Platform / OS</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_platform')}</Text>
                     <Text style={styles.metaValue}>
                       {diagnosticData?.device.platform?.toUpperCase() || Platform.OS.toUpperCase()} v{diagnosticData?.device.osVersion || Platform.Version}
                     </Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Çalışma Süresi</Text>
-                    <Text style={styles.metaValue}>{diagnosticData?.device.sessionUptime || 'Aktif'}</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_uptime')}</Text>
+                    <Text style={styles.metaValue}>{diagnosticData?.device.sessionUptime || t('helpdesk.diagnostics.status_active')}</Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Motor / Sürüm</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_version')}</Text>
                     <Text style={styles.metaValue}>{diagnosticData?.device.appVersion || '1.0.0'}</Text>
                   </View>
                 </View>
 
                 <View style={[styles.telemetryGrid, { marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0' }]}>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Ekran Boyutu</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_screen_size')}</Text>
                     <Text style={styles.metaValue}>{diagnosticData?.device.screenResolution || '-'}</Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Yazı Ölçeği</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_font_scale')}</Text>
                     <Text
                       style={[
                         styles.metaValue,
-                        diagnosticData?.device.fontScale?.includes('Büyük') && { color: '#D97706' },
+                        diagnosticData?.device.fontScale?.includes(t('helpdesk.diagnostics.font_scale_large')) && { color: '#D97706' },
                       ]}
                     >
-                      {diagnosticData?.device.fontScale || '1.0x'}
+                      {diagnosticData?.device.fontScale || t('common.default_speed')}
                     </Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Uygulama Durumu</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_app_state')}</Text>
                     <Text style={[styles.metaValue, { color: '#059669' }]}>
-                      {diagnosticData?.device.appState === 'background' ? 'Arka Plan' : 'Ön Plan (Aktif)'}
+                      {diagnosticData?.device.appState === 'background' ? t('helpdesk.diagnostics.app_state_background') : t('helpdesk.diagnostics.app_state_foreground')}
                     </Text>
                   </View>
                 </View>
@@ -475,31 +476,31 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                 {diagnosticData?.device.permissions && (
                   <View style={[styles.telemetryGrid, { marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E2E8F0' }]}>
                     <View style={styles.telemetryCol}>
-                      <Text style={styles.metaKey}>Mikrofon İzni</Text>
+                      <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_mic_perm')}</Text>
                       <Text
                         style={[
                           styles.metaValue,
-                          { color: diagnosticData.device.permissions.microphone === 'Açık' ? '#059669' : '#DC2626' },
+                          { color: diagnosticData.device.permissions.microphone === t('helpdesk.diagnostics.perm_granted') ? '#059669' : '#DC2626' },
                         ]}
                       >
                         {diagnosticData.device.permissions.microphone}
                       </Text>
                     </View>
                     <View style={styles.telemetryCol}>
-                      <Text style={styles.metaKey}>Kamera İzni</Text>
+                      <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_camera_perm')}</Text>
                       <Text
                         style={[
                           styles.metaValue,
-                          { color: diagnosticData.device.permissions.camera === 'Açık' ? '#059669' : '#DC2626' },
+                          { color: diagnosticData.device.permissions.camera === t('helpdesk.diagnostics.perm_granted') ? '#059669' : '#DC2626' },
                         ]}
                       >
                         {diagnosticData.device.permissions.camera}
                       </Text>
                     </View>
                     <View style={styles.telemetryCol}>
-                      <Text style={styles.metaKey}>Bildirim / Kasa</Text>
+                      <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_notif_vault')}</Text>
                       <Text style={[styles.metaValue, { color: '#059669' }]}>
-                        {diagnosticData.device.permissions.notifications} • Mühürlü
+                        {diagnosticData.device.permissions.notifications} • {t('helpdesk.diagnostics.vault_sealed')}
                       </Text>
                     </View>
                   </View>
@@ -511,16 +512,16 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                 <View style={styles.telemetryHeader}>
                   <Wifi size={16} color="#D97706" style={{ marginRight: 6 }} />
                   <Text style={styles.telemetryTitle}>
-                    {language === 'tr' ? 'Ağ Performans Özeti' : 'Network Performance'}
+                    {t('helpdesk.diagnostics.network_summary_title')}
                   </Text>
                 </View>
                 <View style={styles.telemetryGrid}>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Toplam İstek</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_total_requests')}</Text>
                     <Text style={styles.metaValue}>{diagnosticData?.networkSummary.total || 0}</Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Başarısız / Yavaş</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_failed_slow')}</Text>
                     <Text
                       style={[
                         styles.metaValue,
@@ -535,8 +536,8 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                     </Text>
                   </View>
                   <View style={styles.telemetryCol}>
-                    <Text style={styles.metaKey}>Ortalama Yanıt</Text>
-                    <Text style={styles.metaValue}>{diagnosticData?.networkSummary.avgDurationMs || 0} ms</Text>
+                    <Text style={styles.metaKey}>{t('helpdesk.diagnostics.meta_avg_response')}</Text>
+                    <Text style={styles.metaValue}>{diagnosticData?.networkSummary.avgDurationMs || 0} {t('common.ms')}</Text>
                   </View>
                 </View>
 
@@ -559,7 +560,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                             {netEv.label}
                           </Text>
                           <Text style={{ fontSize: 11, color: isSlow ? '#D97706' : '#64748B', fontWeight: isSlow ? '700' : '400', marginLeft: 8 }}>
-                            {netEv.details?.süre || (netEv.details?.durationMs ? `${netEv.details.durationMs} ms` : '')}
+                            {netEv.details?.durationMs ? `${netEv.details.durationMs} ${t('common.ms')}` : ''}
                           </Text>
                         </View>
                       );
@@ -573,7 +574,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                 <View style={styles.telemetryHeader}>
                   <AlertTriangle size={16} color="#DC2626" style={{ marginRight: 6 }} />
                   <Text style={styles.telemetryTitle}>
-                    {language === 'tr' ? 'Hata ve Uyarı Yığını (Stack Trace)' : 'Error & Warning Stack Trace'}
+                    {t('helpdesk.diagnostics.stack_trace_title')}
                   </Text>
                 </View>
 
@@ -590,12 +591,12 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                       >
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
                           <Text style={{ fontSize: 10, fontWeight: '700', color: isWarn ? '#B45309' : '#991B1B' }}>
-                            {err.type === 'network' ? 'AĞ HATASI' : isWarn ? 'SERVİS UYARISI' : 'SİSTEM HATASI'}
+                            {err.type === 'network' ? t('helpdesk.diagnostics.err_network') : isWarn ? t('helpdesk.diagnostics.err_service_warn') : t('helpdesk.diagnostics.err_system')}
                           </Text>
                           <Text style={{ fontSize: 10, color: isWarn ? '#D97706' : '#B91C1C' }}>{formatTime(err.timestamp)}</Text>
                         </View>
                         <Text style={[styles.errorMessageText, isWarn && { color: '#92400E' }]}>
-                          {err.details?.message || err.details?.hata || err.label}
+                          {err.details?.message || err.label}
                         </Text>
                         {err.details?.stack && (
                           <ScrollView horizontal style={styles.stackBox}>
@@ -609,7 +610,7 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
                   <View style={{ paddingVertical: 12, alignItems: 'center' }}>
                     <ShieldCheck size={24} color="#10B981" />
                     <Text style={{ fontSize: 12, color: '#059669', fontWeight: '600', marginTop: 4 }}>
-                      {language === 'tr' ? 'Oturum boyunca kaydedilmiş sistem hatası veya uyarı yok.' : 'No system errors or warnings recorded during session.'}
+                      {t('helpdesk.diagnostics.no_errors')}
                     </Text>
                   </View>
                 )}
@@ -621,13 +622,13 @@ export const DiagnosticViewerModal: React.FC<DiagnosticViewerModalProps> = ({
           <View style={styles.footerRow}>
             <TouchableOpacity style={styles.doneBtn} onPress={onClose} activeOpacity={0.8}>
               <Text style={styles.doneBtnText}>
-                {language === 'tr' ? 'İncelemeyi Kapat' : 'Close Diagnostic'}
+                {t('helpdesk.diagnostics.close_btn')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.exportBtn} onPress={handleExportDiagnostics} activeOpacity={0.8}>
               <Share2 size={15} color="#2563EB" style={{ marginRight: 6 }} />
               <Text style={styles.exportBtnText}>
-                {language === 'tr' ? 'Dışarı Aktar' : 'Export'}
+                {t('helpdesk.diagnostics.export_btn')}
               </Text>
             </TouchableOpacity>
           </View>

@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "بدء مناقشة جديدة",
-    "tierTenant": "المستأجر"
+    "tierTenant": "المستأجر",
+    "adminRevokeDesc": "سيتم إزالة صلاحيات المسؤول من هذا الجهاز وقفل وحدة التحكم.",
+    "removeAdminTitle": "إزالة المسؤول",
+    "removeAdminConfirm": "هل أنت متأكد من رغبتك في إزالة هذا المسؤول وجميع تخصيصاته؟",
+    "selectAdminReq": "تحديد المسؤول",
+    "selectAdminReqDesc": "يرجى تحديد مسؤول للتخصيص.",
+    "created": "تم الإنشاء",
+    "lastAction": "آخر تحديث",
+    "attachment": "مرفق",
+    "tierAppOrg": "التطبيق / المؤسسة",
+    "default": "الافتراضي",
+    "all": "الكل"
   },
   "license": {
     "title": "تراخيصي",

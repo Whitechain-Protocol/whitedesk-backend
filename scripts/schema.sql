@@ -16,12 +16,8 @@ CREATE TABLE IF NOT EXISTS whitedesk_enterprises (
   logo_align TEXT DEFAULT 'left',
   plan_id TEXT DEFAULT 'trial',
   billing_cycle TEXT DEFAULT 'monthly',
-  license_status TEXT DEFAULT 'trial_active',
-  trial_start_at TEXT DEFAULT (datetime('now')),
-  trial_end_at TEXT DEFAULT (datetime('now', '+15 days')),
-  subscription_start_at TEXT,
-  subscription_end_at TEXT,
-  license_hash TEXT,
+  subscription_start_at TEXT DEFAULT (datetime('now')),
+  subscription_end_at TEXT DEFAULT (datetime('now', '+14 days')),
   created_at INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER) * 1000)
 );
 
@@ -37,19 +33,12 @@ CREATE TABLE IF NOT EXISTS whitedesk_genesis_vault (
 CREATE TABLE IF NOT EXISTS whitedesk_license_plans (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  tier_level INTEGER NOT NULL DEFAULT 1,
+  tier_level INTEGER NOT NULL DEFAULT 0,
   monthly_price REAL DEFAULT 0,
-  annual_monthly_price REAL DEFAULT 0,
-  price REAL DEFAULT 0,
-  operators INTEGER DEFAULT 5,
-  customers INTEGER DEFAULT 100,
-  is_recommended INTEGER DEFAULT 0,
-  sort_order INTEGER DEFAULT 1,
-  features TEXT DEFAULT '{}',
-  max_admins INTEGER DEFAULT 5,
-  max_users INTEGER DEFAULT 100,
-  has_remote_desktop INTEGER DEFAULT 0,
-  has_audit_logs INTEGER DEFAULT 0,
+  annual_price REAL DEFAULT 0,
+  features TEXT DEFAULT '[]',
+  grace_period TEXT DEFAULT '3',
+  grace_period_warning_interval TEXT DEFAULT '12',
   is_active INTEGER DEFAULT 1,
   created_at TEXT DEFAULT (datetime('now'))
 );

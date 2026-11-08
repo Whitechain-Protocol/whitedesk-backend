@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Alusta uut arutelu",
-    "tierTenant": "Rentnik"
+    "tierTenant": "Rentnik",
+    "adminRevokeDesc": "Administraatori õigused eemaldatakse sellest seadmest ja konsool lukustatakse.",
+    "removeAdminTitle": "Eemalda administraator",
+    "removeAdminConfirm": "Kas soovite kindlasti selle administraatori ja kõik tema jaotused eemaldada?",
+    "selectAdminReq": "Vali administraator",
+    "selectAdminReqDesc": "Palun valige jaotamiseks administraator.",
+    "created": "Loodud",
+    "lastAction": "Viimane uuendus",
+    "attachment": "Manus",
+    "tierAppOrg": "Rakendus / Organisatsioon",
+    "default": "Vaikimisi",
+    "all": "Kõik"
   },
   "license": {
     "title": "Minu litsentsid",

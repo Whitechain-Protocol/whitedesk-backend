@@ -101,7 +101,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
   }>({ visible: false, title: '', description: '' });
 
   const showAlert = (title: string, description: string) => {
-    setAlertConfig({ visible: true, title, description, actionText: 'Tamam' });
+    setAlertConfig({ visible: true, title, description, actionText: t('common.ok') });
   };
 
   // Yeni kuruluş akışı başladığında arka planda güvenli anahtarları üret
@@ -118,7 +118,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
       return newVault;
     } catch (err: any) {
       console.error('[UnifiedAuth] Vault generation error:', err);
-      showAlert('Güvenlik Kurulum Hatası', err?.message || 'Kök anahtar kümesi oluşturulamadı.');
+      showAlert(t('auth.ceremony.setup_error_title'), err?.message || t('auth.ceremony.setup_error_desc'));
       return null;
     }
   };
@@ -192,8 +192,8 @@ export default function UnifiedAuthScreen({ navigation }: any) {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permissionResult.granted) {
         Alert.alert(
-          'İzin Gerekli',
-          'Logo yükleyebilmek için galeri erişim izni vermeniz gerekmektedir.'
+          t('auth.customization.permission_required_title'),
+          t('auth.customization.permission_required_desc')
         );
         return;
       }
@@ -214,7 +214,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
       }
     } catch (err: any) {
       console.warn('ImagePicker error:', err);
-      Alert.alert('Hata', 'Logo seçilirken bir hata oluştu: ' + (err?.message || err));
+      Alert.alert(t('common.error'), t('auth.customization.logo_pick_error', { error: String(err?.message || err) }));
     }
   };
 
@@ -320,7 +320,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
       // EKRAN 4'e geç
       setCurrentState('genesis_success');
     } catch (err: any) {
-      showAlert('Hata', err?.message || 'Kuruluş alanı oluşturulurken bir hata oluştu.');
+      showAlert(t('common.error'), err?.message || t('auth.genesis.create_error_desc'));
     } finally {
       setIsProcessing(false);
     }
@@ -332,7 +332,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
     const text = CryptoVaultService.formatGenesisBundleText(genesisBundle);
     try {
       await Share.share({
-        title: `${genesisBundle.tenantName} - WhiteDesk Erişim Anahtarları`,
+        title: t('auth.genesis_success.share_title', { tenantName: genesisBundle.tenantName }),
         message: text,
       });
     } catch (err) {
@@ -345,7 +345,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
     if (!genesisBundle) return;
     const text = CryptoVaultService.formatGenesisBundleText(genesisBundle);
     await Clipboard.setStringAsync(text);
-    showAlert('Başarılı', 'Başlangıç anahtarları panoya kopyalandı.');
+    showAlert(t('common.success'), t('auth.genesis_success.keys_copied_desc'));
   };
 
   // EKRAN 5: Erişim Anahtarı ile Giriş (Otomatik Yetki Çözümleme)
@@ -353,7 +353,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
     const rawKey = typeof overrideKey === 'string' ? overrideKey : recoveryHash;
     const trimmed = rawKey.trim();
     if (!CryptoVaultService.validateAccessKeyFormat(trimmed)) {
-      showAlert('Geçersiz Anahtar', 'Lütfen en az 10 karakterlik geçerli bir erişim anahtarı giriniz.');
+      showAlert(t('auth.recovery.invalid_key_title'), t('auth.recovery.error_invalid_key'));
       return;
     }
 
@@ -380,10 +380,10 @@ export default function UnifiedAuthScreen({ navigation }: any) {
           enterpriseBlindId: result.enterpriseBlindId,
         });
       } else {
-        showAlert('Giriş Başarısız', result?.message || 'Erişim anahtarı doğrulanamadı.');
+        showAlert(t('auth.recovery.login_failed_title'), result?.message || t('auth.recovery.login_failed_desc'));
       }
     } catch (err: any) {
-      showAlert('Hata', err?.message || 'Erişim anahtarı ile giriş yapılırken bir sorun oluştu.');
+      showAlert(t('common.error'), err?.message || t('auth.recovery.login_exception_desc'));
     } finally {
       setIsProcessing(false);
     }
@@ -394,7 +394,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
     if (!cameraPermission?.granted) {
       const permissionResponse = await requestCameraPermission();
       if (!permissionResponse.granted) {
-        showAlert('Kamera İzni Gerekli', 'QR kod okuyabilmek için lütfen kamera izni veriniz.');
+        showAlert(t('scanner.permission_required_title'), t('auth.recovery.camera_permission_desc'));
         return;
       }
     }
@@ -433,7 +433,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
               <Text style={styles.whiteOnWhiteLogoText}>WhiteDesk</Text>
 
               <Text style={styles.heroSubtitle}>
-                Sunucusuz, uçtan uca yerelde şifrelenen ve hiçbir kişisel veri barındırmayan kurumsal destek masası.
+                {t('auth.hub.hero_subtitle')}
               </Text>
 
               <View style={styles.actionGroupHub}>
@@ -445,7 +445,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 >
                   <Key size={20} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 10 }} />
                   <Text style={styles.primaryActionButtonText}>
-                    Çalışma Alanına Giriş Yapın
+                    {t('auth.hub.login_workspace_btn')}
                   </Text>
                 </TouchableOpacity>
 
@@ -457,7 +457,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 >
                   <Building2 size={20} color="#2563EB" strokeWidth={2.2} style={{ marginRight: 10 }} />
                   <Text style={styles.secondaryActionButtonText}>
-                    Yeni Bir Çalışma Alanı Oluşturun
+                    {t('auth.hub.create_workspace_btn')}
                   </Text>
                 </TouchableOpacity>
 
@@ -469,7 +469,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 >
                   <ShieldCheck size={20} color="#475569" strokeWidth={2.2} style={{ marginRight: 10 }} />
                   <Text style={[styles.secondaryActionButtonText, { color: '#334155' }]}>
-                    Kod ile Giriş Yapın
+                    {t('auth.hub.code_login_btn')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -502,7 +502,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 activeOpacity={0.8}
               >
                 <Text style={styles.primaryActionButtonText}>
-                  {isProcessing ? 'Doğrulanıyor...' : t('auth.login.action_btn')}
+                  {isProcessing ? t('auth.login.verifying') : t('auth.login.action_btn')}
                 </Text>
               </TouchableOpacity>
 
@@ -581,7 +581,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
 
               {/* Logo Bölümü */}
               <View style={styles.customSectionBox}>
-                <Text style={styles.sectionMiniTitle}>{t('auth.customization.logo_section.title') || 'Kuruluş Logosu'}</Text>
+                <Text style={styles.sectionMiniTitle}>{t('auth.customization.logo_section.title')}</Text>
                 <TouchableOpacity
                   style={styles.logoDropzone}
                   onPress={handlePickLogo}
@@ -595,9 +595,9 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                         resizeMode="cover"
                       />
                       <Text style={[styles.dropzoneText, { color: '#2563EB', fontWeight: '700' }]}>
-                        Logo Başarıyla Seçildi
+                        {t('auth.customization.logo_section.selected_success')}
                       </Text>
-                      <Text style={styles.dropzoneHint}>Değiştirmek için dokunun</Text>
+                      <Text style={styles.dropzoneHint}>{t('auth.customization.logo_section.tap_to_change')}</Text>
                       <TouchableOpacity
                         style={{ marginTop: 8, paddingHorizontal: 12, paddingVertical: 5, backgroundColor: '#FEE2E2', borderRadius: 8 }}
                         onPress={(e) => {
@@ -606,16 +606,16 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                           setLogoSelected(false);
                         }}
                       >
-                        <Text style={{ fontSize: 12, color: '#DC2626', fontWeight: '600' }}>Logoyu Kaldır</Text>
+                        <Text style={{ fontSize: 12, color: '#DC2626', fontWeight: '600' }}>{t('auth.customization.logo_section.remove_logo')}</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
                     <View style={{ alignItems: 'center' }}>
                       <UploadCloud size={28} color="#2563EB" />
                       <Text style={styles.dropzoneText}>
-                        Logoyu buraya sürükleyin veya dosya seçin
+                        {t('auth.customization.logo_section.dropzone_text')}
                       </Text>
-                      <Text style={styles.dropzoneHint}>PNG, JPG veya SVG (Önerilen: 512x512)</Text>
+                      <Text style={styles.dropzoneHint}>{t('auth.customization.logo_section.format_hint')}</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -697,13 +697,13 @@ export default function UnifiedAuthScreen({ navigation }: any) {
             <View style={[styles.sectionContainer, { alignItems: 'center', paddingVertical: 40 }]}>
               <ActivityIndicator size="large" color="#2563EB" />
               <Text style={[styles.screenSubtitle, { marginTop: 16, textAlign: 'center' }]}>
-                Kök güvenlik anahtarları hazırlanıyor...
+                {t('auth.ceremony.preparing_keys')}
               </Text>
               <TouchableOpacity
                 style={[styles.primaryActionButton, { marginTop: 24, width: '100%' }]}
                 onPress={prepareSecurityCeremony}
               >
-                <Text style={styles.primaryActionButtonText}>Yeniden Dene</Text>
+                <Text style={styles.primaryActionButtonText}>{t('common.retry')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -728,7 +728,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 style={styles.copyMnemonicButton}
                 onPress={async () => {
                   await Clipboard.setStringAsync(vault.mnemonic);
-                  showAlert('Bilgi', t('auth.ceremony.copied'));
+                  showAlert(t('common.info'), t('auth.ceremony.copied'));
                 }}
                 activeOpacity={0.8}
               >
@@ -754,7 +754,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                     </Text>
                     <TextInput
                       style={styles.singleLineInput}
-                      placeholder="Sözcük..."
+                      placeholder={t('auth.ceremony.word_placeholder')}
                       placeholderTextColor="#94A3B8"
                       autoCapitalize="none"
                       autoCorrect={false}
@@ -769,7 +769,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                     </Text>
                     <TextInput
                       style={styles.singleLineInput}
-                      placeholder="Sözcük..."
+                      placeholder={t('auth.ceremony.word_placeholder')}
                       placeholderTextColor="#94A3B8"
                       autoCapitalize="none"
                       autoCorrect={false}
@@ -787,7 +787,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 activeOpacity={0.8}
               >
                 <Text style={styles.primaryActionButtonText}>
-                  {isProcessing ? 'Kuruluyor...' : t('auth.ceremony.verify_action')}
+                  {isProcessing ? t('auth.ceremony.setting_up') : t('auth.ceremony.verify_action')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -802,21 +802,21 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 <CheckCircle2 size={36} color="#2563EB" strokeWidth={2} />
               </View>
 
-              <Text style={styles.screenTitle}>Kuruluş ve Erişim Anahtarları Hazır</Text>
-              <Text style={styles.screenSubtitle}>Kuruluş alanınız ve asimetrik anahtar kümeniz (Key Set) başarıyla oluşturuldu.</Text>
+              <Text style={styles.screenTitle}>{t('auth.genesis_success.ready_title')}</Text>
+              <Text style={styles.screenSubtitle}>{t('auth.genesis_success.ready_subtitle')}</Text>
 
               {/* Deneme Sürümü ve Anahtar Bilgi Kartı */}
               <View style={styles.trialInfoCard}>
                 <View style={styles.trialBadgeHeader}>
-                  <Text style={styles.trialBadgeHeaderText}>14 Günlük Ücretsiz Deneme Paketi</Text>
+                  <Text style={styles.trialBadgeHeaderText}>{t('auth.genesis_success.trial_badge')}</Text>
                 </View>
                 <Text style={styles.trialBodyText}>
-                  Kuruluşunuz için 1 Yönetici Erişim Anahtarı ve 10 Kullanıcı Erişim Anahtarı üretilmiştir. Bu anahtarlar cihazınızda yerel olarak güvenle mühürlenmiş olup kullanıcılar doğrudan sisteme bağlanabilir.
+                  {t('auth.genesis_success.trial_body')}
                 </Text>
 
                 <View style={styles.bundleKeySummary}>
-                  <Text style={styles.bundleKeyItem}>• 1 Yönetici Erişim Anahtarı: {genesisBundle.adminRecoveryKey.substring(0, 16)}...</Text>
-                  <Text style={styles.bundleKeyItem}>• 10 Kullanıcı Erişim Anahtarı: Hazırlandı ve kaydedildi</Text>
+                  <Text style={styles.bundleKeyItem}>{t('auth.genesis_success.bundle_admin_key_item', { keyPrefix: genesisBundle.adminRecoveryKey.substring(0, 16) })}</Text>
+                  <Text style={styles.bundleKeyItem}>{t('auth.genesis_success.bundle_user_keys_item')}</Text>
                 </View>
               </View>
 
@@ -827,7 +827,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 activeOpacity={0.8}
               >
                 <Download size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.downloadActionButtonText}>Başlangıç Paketini İndir / Paylaş</Text>
+                <Text style={styles.downloadActionButtonText}>{t('auth.genesis_success.download_share_btn')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -836,14 +836,14 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 activeOpacity={0.8}
               >
                 <Copy size={18} color="#2563EB" style={{ marginRight: 8 }} />
-                <Text style={styles.copyActionButtonText}>Tüm Erişim Anahtarlarını Kopyala</Text>
+                <Text style={styles.copyActionButtonText}>{t('auth.genesis_success.copy_all_keys_btn')}</Text>
               </TouchableOpacity>
 
               {/* Tek Seferlik Uyarı Rozeti */}
               <View style={styles.oneTimeNoticeCard}>
                 <ShieldCheck size={16} color="#475569" style={{ marginRight: 6 }} />
                 <Text style={styles.oneTimeNoticeText}>
-                  Bu anahtarlar yalnızca cihazınızda üretilmiştir. Lütfen güvenli bir yere kaydediniz.
+                  {t('auth.genesis_success.one_time_notice')}
                 </Text>
               </View>
 
@@ -857,7 +857,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 })}
                 activeOpacity={0.8}
               >
-                <Text style={styles.primaryActionButtonText}>Yönetim Masasına Giriş Yap</Text>
+                <Text style={styles.primaryActionButtonText}>{t('auth.genesis_success.enter_admin_desk_btn')}</Text>
                 <ArrowRight size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
               </TouchableOpacity>
             </View>
@@ -868,16 +868,16 @@ export default function UnifiedAuthScreen({ navigation }: any) {
           {/* ================================================================= */}
           {currentState === 'emergency_recovery' && (
             <View style={styles.sectionContainer}>
-              <Text style={styles.screenTitle}>Kod ile Giriş Yapın</Text>
+              <Text style={styles.screenTitle}>{t('auth.recovery.code_login_title')}</Text>
               <Text style={styles.screenSubtitle}>
-                Profilinizden dışa aktardığınız veya provizyon ekranından üretilen davet/giriş kodunu (Kurucu, Küresel Yönetici, Yönetici veya Kullanıcı kodu) giriniz. Sistem yetkinizi ve çalışma alanınızı otomatik olarak tanımlayacaktır.
+                {t('auth.recovery.code_login_subtitle')}
               </Text>
 
               <View style={styles.fieldGroup}>
                 <View style={styles.inputWithScannerWrapper}>
                   <TextInput
                     style={[styles.singleLineInput, styles.monospaceInput, styles.inputWithScannerField]}
-                    placeholder="Giriş kodunuz (örn: adm_oper_..., usr_div_... veya kimlik kodunuz)"
+                    placeholder={t('auth.recovery.code_input_placeholder')}
                     placeholderTextColor="#94A3B8"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -895,7 +895,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.charCountText}>
-                  {recoveryHash.trim().length} karakter
+                  {t('auth.recovery.char_count', { count: recoveryHash.trim().length })}
                 </Text>
               </View>
 
@@ -906,7 +906,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 activeOpacity={0.8}
               >
                 <Text style={styles.primaryActionButtonText}>
-                  {isProcessing ? 'Yetki Doğrulanıyor...' : 'Kod ile Giriş Yapın'}
+                  {isProcessing ? t('auth.recovery.verifying_auth') : t('auth.recovery.code_login_title')}
                 </Text>
               </TouchableOpacity>
 
@@ -926,7 +926,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
         visible={alertConfig.visible}
         title={alertConfig.title}
         description={alertConfig.description}
-        actionText={alertConfig.actionText || 'Tamam'}
+        actionText={alertConfig.actionText || t('common.ok')}
         onAction={() => setAlertConfig(p => ({ ...p, visible: false }))}
       />
 
@@ -957,7 +957,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
               >
                 <X size={20} color="#FFFFFF" strokeWidth={2.2} />
               </TouchableOpacity>
-              <Text style={styles.scannerModalTitle}>KOD İLE GİRİŞ YAPIN</Text>
+              <Text style={styles.scannerModalTitle}>{t('auth.recovery.scanner_modal_title')}</Text>
               <View style={{ width: 40 }} />
             </View>
 
@@ -969,7 +969,7 @@ export default function UnifiedAuthScreen({ navigation }: any) {
                 <View style={[styles.scannerCorner, styles.sCornerBR]} />
               </View>
               <Text style={styles.scannerHelperText}>
-                Kimlik veya davet QR kodunu çerçeve içine hizalayın
+                {t('auth.recovery.scanner_helper_text')}
               </Text>
             </View>
           </SafeAreaView>

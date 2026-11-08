@@ -23,25 +23,29 @@ CREATE TABLE IF NOT EXISTS whitedesk_license_plans (
 );
 
 -- ============================================================================
--- 2. KURULUŞ / TENANT LİSANS DURUM TABLOSU (whitedesk_tenant_licenses)
+-- 2. KURULUŞ & LİSANS DURUM TABLOSU (whitedesk_enterprises - Birleşik)
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS whitedesk_tenant_licenses (
-    enterprise_blind_id VARCHAR(128) PRIMARY KEY, -- Kuruluş kör kimliği (Tenant ID)
-    plan_id VARCHAR(32) NOT NULL REFERENCES whitedesk_license_plans(id),
-    billing_cycle VARCHAR(16) NOT NULL DEFAULT 'annual', -- 'monthly' | 'annual'
-    status VARCHAR(32) NOT NULL DEFAULT 'active',        -- 'trialing' | 'active' | 'expired'
-    trial_start_at TIMESTAMPTZ,
-    trial_end_at TIMESTAMPTZ,
-    subscription_start_at TIMESTAMPTZ,
-    subscription_end_at TIMESTAMPTZ,
-    license_hash TEXT,                                  -- Opsiyonel E2EE lisans anahtarı
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS whitedesk_enterprises (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    enterprise_blind_id TEXT UNIQUE NOT NULL,            -- Kuruluş kör kimliği (Tenant ID)
+    name TEXT NOT NULL,
+    plan_id TEXT NOT NULL DEFAULT 'trial',               -- 'trial' | 'core' | 'live'
+    billing_cycle TEXT NOT NULL DEFAULT 'monthly',       -- 'monthly' | 'annual'
+    license_status TEXT NOT NULL DEFAULT 'trialing',     -- 'trialing' | 'active' | 'grace_period' | 'expired'
+    trial_start_at TEXT,
+    trial_end_at TEXT,
+    subscription_start_at TEXT,
+    subscription_end_at TEXT,
+    grace_period_days INTEGER DEFAULT 3,                 -- Trial: 3, Monthly: 5, Annual: 15
+    warning_intervals INTEGER DEFAULT 12,                -- Trial: 12h, Monthly: 24h, Annual: 48h
+    grace_ends_at TEXT,
+    license_hash TEXT,                                   -- Opsiyonel E2EE lisans anahtarı
+    created_at INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER) * 1000)
 );
 
 -- Hızlı sorgular için indeksler
-CREATE INDEX IF NOT EXISTS idx_tenant_licenses_plan ON whitedesk_tenant_licenses(plan_id);
-CREATE INDEX IF NOT EXISTS idx_tenant_licenses_status ON whitedesk_tenant_licenses(status);
+CREATE INDEX IF NOT EXISTS idx_enterprises_plan ON whitedesk_enterprises(plan_id);
+CREATE INDEX IF NOT EXISTS idx_enterprises_status ON whitedesk_enterprises(license_status);
 
 -- ============================================================================
 -- 3. BAŞLANGIÇ PLANLARI (SEED DATA)
@@ -104,20 +108,22 @@ ON CONFLICT (id) DO UPDATE SET
 
 1. **Lazy Trial Oluşturma:** Kuruluş ilk kez sorgulandığında lisans tablosunda kaydı yoksa, arka planda anında 14 günlük `trialing` kaydı oluşturulur (`ON CONFLICT DO NOTHING`).
 2. **Kısıtlamasız Masaüstü İstemcisi:** Masaüstü istemcisi yetkisi yıllık abonelik şartına bağlı değildir; aktif deneme süresi olanlar, `CORE` ve `LIVE` sahipleri anında masaüstü oturumu açabilir.
-3. **Upsert Lisans Güncelleme:**
+3. **Upsert Lisans Güncelleme (`whitedesk_enterprises`):**
 ```sql
-INSERT INTO whitedesk_tenant_licenses (
-    enterprise_blind_id, plan_id, billing_cycle, status, subscription_start_at, subscription_end_at, updated_at
+INSERT INTO whitedesk_enterprises (
+    enterprise_blind_id, name, plan_id, billing_cycle, license_status, subscription_start_at, subscription_end_at, grace_period_days, warning_intervals, grace_ends_at
 ) VALUES (
-    $1, $2, $3, 'active', NOW(), NOW() + INTERVAL '1 year', NOW()
+    ?1, ?2, ?3, ?4, 'active', datetime('now'), datetime('now', '+1 year'), 15, 48, datetime('now', '+380 days')
 )
 ON CONFLICT (enterprise_blind_id) DO UPDATE SET
     plan_id = EXCLUDED.plan_id,
     billing_cycle = EXCLUDED.billing_cycle,
-    status = 'active',
+    license_status = 'active',
     subscription_start_at = EXCLUDED.subscription_start_at,
     subscription_end_at = EXCLUDED.subscription_end_at,
-    updated_at = NOW();
+    grace_period_days = EXCLUDED.grace_period_days,
+    warning_intervals = EXCLUDED.warning_intervals,
+    grace_ends_at = EXCLUDED.grace_ends_at;
 ```
 
 ---
@@ -148,9 +154,9 @@ Aşağıdaki promptu herhangi bir AI ajanına veya yeni projeye verdiğinizde bu
 ```markdown
 Bize kurumsal bir "Lisans & Abonelik Modülü" geliştir. Sistem aşağıdaki spesifikasyona birebir uymalıdır:
 
-1. VERİTABANI (PostgreSQL / Neon):
-   - `whitedesk_license_plans`: id (trial, core, live), name, tier_level (0, 1, 2), monthly_price, annual_monthly_price, features (JSONB).
-   - `whitedesk_tenant_licenses`: enterprise_blind_id (PK), plan_id (FK), billing_cycle ('monthly'|'annual'), status ('trialing'|'active'), trial_end_at, subscription_end_at, updated_at.
+1. VERİTABANI (Cloudflare D1 - SQLite):
+   - `whitedesk_license_plans`: id (trial, core, live), name, tier_level (0, 1, 2), monthly_price, annual_monthly_price, grace_period_days, annual_grace_period_days, warning_intervals, annual_warning_intervals, features (JSON).
+   - `whitedesk_enterprises`: enterprise_blind_id (UNIQUE), name, plan_id, billing_cycle ('monthly'|'annual'), license_status ('trialing'|'active'|'grace_period'|'expired'), trial_end_at, subscription_end_at, grace_period_days, warning_intervals, grace_ends_at.
    - İlk sorguda tenant kaydı yoksa 14 günlük trial kaydı otomatik oluşturulmalıdır.
 
 2. LİSANS POLİTİKASI:

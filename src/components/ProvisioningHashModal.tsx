@@ -25,6 +25,7 @@ import {
   ShieldCheck,
 } from 'lucide-react-native';
 import { helpDeskService } from '../services/helpDeskService';
+import { useTranslation } from '../services/i18nService';
 import QRCode from 'react-native-qrcode-svg';
 
 export type ProvisionRoleType = 'global_admin' | 'admin' | 'user';
@@ -50,12 +51,13 @@ export function ProvisioningHashModal({
   enterpriseBlindId,
   enterpriseName,
   ownWhiteId = '',
-  currentAdminAlias = 'Siz (Yönetici)',
+  currentAdminAlias = '',
   tenants = [],
   orgs = [],
   apps = [],
   onHashCreated,
 }: ProvisioningHashModalProps) {
+  const { t, language } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<ProvisionRoleType>('admin');
   const [selectedTenantBlindId, setSelectedTenantBlindId] = useState<string>(enterpriseBlindId);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('default');
@@ -168,8 +170,8 @@ export function ProvisioningHashModal({
   };
 
   const getTargetTenantName = () => {
-    const t = availableTenants.find(item => item.enterprise_blind_id === selectedTenantBlindId);
-    return t?.name || enterpriseName || 'Kuruluş';
+    const tenantItem = availableTenants.find(item => item.enterprise_blind_id === selectedTenantBlindId);
+    return tenantItem?.name || enterpriseName || t('provisioning.default_company');
   };
 
   const handleCopy = async () => {
@@ -183,46 +185,46 @@ export function ProvisioningHashModal({
     if (!generatedHash) return;
 
     const tenantNameStr = getTargetTenantName();
-    let roleLabel = 'Yönetici Yetki Anahtarı';
-    let instruction = `Bilet arama kutusuna 'admin ${generatedHash}' yazarak yetkinizi tanımlayabilirsiniz.`;
+    let roleLabel = t('provisioning.role_label_admin');
+    let instruction = t('provisioning.instruction_admin', { hash: generatedHash });
 
     if (selectedRole === 'global_admin') {
-      roleLabel = 'Küresel Yönetici Yetki Anahtarı';
-      instruction = `Bilet arama kutusuna 'admin ${generatedHash}' yazarak Küresel Yönetici yetkisini üstlenebilirsiniz.`;
+      roleLabel = t('provisioning.role_label_global_admin');
+      instruction = t('provisioning.instruction_global_admin', { hash: generatedHash });
     } else if (selectedRole === 'user') {
-      roleLabel = 'Kullanıcı Erişim Anahtarı';
-      instruction = `Bilet kutusuna 'user ${generatedHash}' yazarak kuruluşa dahil olabilirsiniz.`;
+      roleLabel = t('provisioning.role_label_user');
+      instruction = t('provisioning.instruction_user', { hash: generatedHash });
     }
 
     const orgNameStr = selectedOrgId !== 'default'
       ? (availableOrgs.find(o => o.org_id === selectedOrgId)?.name || selectedOrgId)
-      : 'Tüm Birimler';
+      : t('provisioning.all_units');
 
     const appNameStr = selectedAppId !== 'inwhite'
       ? (availableApps.find(a => a.app_id === selectedAppId)?.name || selectedAppId)
-      : 'Tüm Uygulamalar';
+      : t('provisioning.all_apps');
 
     const message = [
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      'WHITEDESK YETKİ ANAHTARI',
+      t('provisioning.share_header'),
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      `Kuruluş      : ${tenantNameStr}`,
-      `Yetki Rolü   : ${roleLabel}`,
-      selectedRole === 'admin' || selectedRole === 'user' ? `Organizasyon : ${orgNameStr}` : null,
-      selectedRole === 'admin' || selectedRole === 'user' ? `Uygulama     : ${appNameStr}` : null,
-      `Tarih        : ${new Date().toLocaleString('tr-TR')}`,
+      `${t('provisioning.share_field_company')} : ${tenantNameStr}`,
+      `${t('provisioning.share_field_role')} : ${roleLabel}`,
+      selectedRole === 'admin' || selectedRole === 'user' ? `${t('provisioning.share_field_org')} : ${orgNameStr}` : null,
+      selectedRole === 'admin' || selectedRole === 'user' ? `${t('provisioning.share_field_app')} : ${appNameStr}` : null,
+      `${t('provisioning.share_field_date')} : ${new Date().toLocaleString(language)}`,
       '',
-      'LİSANS ANAHTARI (HASH):',
+      t('provisioning.share_license_key_label'),
       generatedHash,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      'TALİMAT:',
+      t('provisioning.share_instruction_label'),
       instruction,
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     ].filter(Boolean).join('\n');
 
     try {
       await Share.share({
-        title: `WhiteDesk Yetki Kodu - ${tenantNameStr}`,
+        title: t('provisioning.share_title', { company: tenantNameStr }),
         message,
       });
     } catch (e) {
@@ -251,9 +253,9 @@ export function ProvisioningHashModal({
           {/* Modal Başlık Çubuğu: Yetki Yönetimi */}
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.titleText}>Yetki Yönetimi</Text>
+              <Text style={styles.titleText}>{t('provisioning.modal_title')}</Text>
               <Text style={styles.subtitleText}>
-                Masa operatörü, kiracı veya kullanıcı yetki anahtarı üretin
+                {t('provisioning.modal_subtitle')}
               </Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
@@ -271,20 +273,20 @@ export function ProvisioningHashModal({
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderRow}>
                   <Building2 size={15} color="#3B82F6" style={{ marginRight: 6 }} />
-                  <Text style={styles.sectionLabel}>Kiracı</Text>
+                  <Text style={styles.sectionLabel}>{t('provisioning.section_tenant')}</Text>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
-                  {availableTenants.map(t => {
-                    const isSelected = selectedTenantBlindId === t.enterprise_blind_id;
+                  {availableTenants.map(tenantItem => {
+                    const isSelected = selectedTenantBlindId === tenantItem.enterprise_blind_id;
                     return (
                       <TouchableOpacity
-                        key={`tenant_opt_${t.enterprise_blind_id}`}
+                        key={`tenant_opt_${tenantItem.enterprise_blind_id}`}
                         style={[styles.chipPill, isSelected && styles.chipPillActive]}
-                        onPress={() => setSelectedTenantBlindId(t.enterprise_blind_id)}
+                        onPress={() => setSelectedTenantBlindId(tenantItem.enterprise_blind_id)}
                         activeOpacity={0.7}
                       >
                         <Text style={[styles.chipPillText, isSelected && styles.chipPillTextActive]}>
-                          {t.name}
+                          {tenantItem.name}
                         </Text>
                         {isSelected && <Check size={13} color="#FFFFFF" style={{ marginLeft: 5 }} />}
                       </TouchableOpacity>
@@ -298,7 +300,7 @@ export function ProvisioningHashModal({
             <View style={styles.sectionContainer}>
               <View style={styles.sectionHeaderRow}>
                 <ShieldCheck size={15} color="#3B82F6" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionLabel}>Roller</Text>
+                <Text style={styles.sectionLabel}>{t('provisioning.section_roles')}</Text>
               </View>
               <View style={styles.roleToggleContainer}>
                 {/* Küresel Yönetici (TheWhite / Founder ise) */}
@@ -310,7 +312,7 @@ export function ProvisioningHashModal({
                   >
                     <Crown size={14} color={selectedRole === 'global_admin' ? '#FFFFFF' : '#D97706'} style={{ marginRight: 5 }} />
                     <Text style={[styles.roleToggleTabText, selectedRole === 'global_admin' && styles.roleToggleTabTextActive]}>
-                      Küresel Yönetici
+                      {t('provisioning.role_global_admin')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -323,7 +325,7 @@ export function ProvisioningHashModal({
                 >
                   <Users size={14} color={selectedRole === 'admin' ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
                   <Text style={[styles.roleToggleTabText, selectedRole === 'admin' && styles.roleToggleTabTextActive]}>
-                    Yönetici
+                    {t('provisioning.role_admin')}
                   </Text>
                 </TouchableOpacity>
 
@@ -335,7 +337,7 @@ export function ProvisioningHashModal({
                 >
                   <User size={14} color={selectedRole === 'user' ? '#FFFFFF' : '#7C3AED'} style={{ marginRight: 5 }} />
                   <Text style={[styles.roleToggleTabText, selectedRole === 'user' && styles.roleToggleTabTextActive]}>
-                    Kullanıcı
+                    {t('provisioning.role_user')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -348,7 +350,7 @@ export function ProvisioningHashModal({
                 <View style={{ marginBottom: 14 }}>
                   <View style={styles.subOptionHeaderRow}>
                     <Layers size={14} color="#64748B" style={{ marginRight: 6 }} />
-                    <Text style={styles.subOptionLabel}>Organizasyon</Text>
+                    <Text style={styles.subOptionLabel}>{t('provisioning.section_organization')}</Text>
                   </View>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
                     <TouchableOpacity
@@ -357,7 +359,7 @@ export function ProvisioningHashModal({
                       activeOpacity={0.7}
                     >
                       <Text style={[styles.subChipPillText, selectedOrgId === 'default' && styles.subChipPillTextActive]}>
-                        Tüm Birimler
+                        {t('provisioning.all_units')}
                       </Text>
                     </TouchableOpacity>
                     {availableOrgs.map(org => {
@@ -382,7 +384,7 @@ export function ProvisioningHashModal({
                 <View>
                   <View style={styles.subOptionHeaderRow}>
                     <Grid size={14} color="#64748B" style={{ marginRight: 6 }} />
-                    <Text style={styles.subOptionLabel}>Uygulama</Text>
+                    <Text style={styles.subOptionLabel}>{t('provisioning.section_application')}</Text>
                   </View>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
                     <TouchableOpacity
@@ -391,7 +393,7 @@ export function ProvisioningHashModal({
                       activeOpacity={0.7}
                     >
                       <Text style={[styles.subChipPillText, selectedAppId === 'inwhite' && styles.subChipPillTextActive]}>
-                        Tüm Uygulamalar
+                        {t('provisioning.all_apps')}
                       </Text>
                     </TouchableOpacity>
                     {availableApps.map(ap => {
@@ -417,7 +419,7 @@ export function ProvisioningHashModal({
             {/* 4. ÜRETİLEN YETKİ ANAHTARI */}
             <View style={styles.resultCard}>
               <View style={styles.resultCardHeader}>
-                <Text style={styles.resultCardLabel}>Üretilen Yetki Anahtarı</Text>
+                <Text style={styles.resultCardLabel}>{t('provisioning.generated_key_label')}</Text>
                 {loading && <ActivityIndicator size="small" color="#3B82F6" />}
               </View>
 
@@ -437,7 +439,7 @@ export function ProvisioningHashModal({
 
               <View style={styles.hashBox}>
                 <Text style={styles.hashText} numberOfLines={2} selectable>
-                  {generatedHash || (loading ? 'Anahtar türetiliyor...' : 'Anahtar hazır değil')}
+                  {generatedHash || (loading ? t('provisioning.deriving_key') : t('provisioning.key_not_ready'))}
                 </Text>
               </View>
 
@@ -456,7 +458,7 @@ export function ProvisioningHashModal({
                     <Copy size={16} color="#334155" strokeWidth={2} style={{ marginRight: 6 }} />
                   )}
                   <Text style={[styles.copyButtonText, copied && { color: '#16A34A', fontWeight: '800' }]}>
-                    {copied ? 'Kopyalandı' : 'Kopyala'}
+                    {copied ? t('common.copied') : t('common.copy')}
                   </Text>
                 </TouchableOpacity>
 
@@ -468,7 +470,7 @@ export function ProvisioningHashModal({
                   disabled={!generatedHash || loading}
                 >
                   <Share2 size={16} color="#FFFFFF" strokeWidth={2.3} style={{ marginRight: 7 }} />
-                  <Text style={styles.shareButtonText}>Paylaş</Text>
+                  <Text style={styles.shareButtonText}>{t('common.share')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

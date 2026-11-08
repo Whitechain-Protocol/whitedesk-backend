@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch, TouchableOpacity } from 'react-native';
 import { TrendingUp, Clock } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface SlaPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -11,20 +12,19 @@ interface SlaPolicyProps {
 }
 
 const SLA_PRESETS = [
-  { label: '15 dk', mins: 15, hours: 0.25 },
-  { label: '30 dk', mins: 30, hours: 0.5 },
-  { label: '1 sa', mins: 60, hours: 1 },
-  { label: '2 sa', mins: 120, hours: 2 },
-  { label: '4 sa', mins: 240, hours: 4 },
-  { label: '24 sa', mins: 1440, hours: 24 },
+  { labelKey: 'settings.advanced_features.escalation.preset_15m', mins: 15, hours: 0.25 },
+  { labelKey: 'settings.advanced_features.escalation.preset_30m', mins: 30, hours: 0.5 },
+  { labelKey: 'settings.advanced_features.escalation.preset_1h', mins: 60, hours: 1 },
+  { labelKey: 'settings.advanced_features.escalation.preset_2h', mins: 120, hours: 2 },
+  { labelKey: 'settings.advanced_features.escalation.preset_4h', mins: 240, hours: 4 },
+  { labelKey: 'settings.advanced_features.escalation.preset_24h', mins: 1440, hours: 24 },
 ];
 
 export const SlaPolicy: React.FC<SlaPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
 
   const currentMins = config.escalation?.slaMinutes || (config.escalation?.slaHours ? config.escalation.slaHours * 60 : 120);
 
@@ -66,12 +66,10 @@ export const SlaPolicy: React.FC<SlaPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Ticket Response Time – SLA' : 'Bilet Cevaplama Süresi – SLA'}
+            {t('settings.advanced_features.escalation.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Automatically revokes and re-allocates tickets if the assigned admin does not respond within this SLA limit.'
-              : 'Atanan admin bu süre içinde ilk yanıtı vermezse bilet geri alınır (revoke) ve sıradaki admine veya havuza aktarılır.'}
+            {t('settings.advanced_features.escalation.description')}
           </Text>
         </View>
         <Switch
@@ -87,7 +85,7 @@ export const SlaPolicy: React.FC<SlaPolicyProps> = ({
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Clock size={13} color="#64748B" style={{ marginRight: 5 }} />
             <Text style={styles.subOptionLabel}>
-              {isEn ? 'Maximum Response Time (SLA)' : 'Maksimum Temsilci Yanıt Süresi (SLA)'}
+              {t('settings.advanced_features.escalation.sla_label')}
             </Text>
           </View>
 
@@ -105,7 +103,7 @@ export const SlaPolicy: React.FC<SlaPolicyProps> = ({
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.presetChipText, isSelected && styles.presetChipTextActive]}>
-                    {p.label}
+                    {t(p.labelKey)}
                   </Text>
                 </TouchableOpacity>
               );

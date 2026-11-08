@@ -22,8 +22,8 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
 
     companion object {
         private const val TAG = "WhiteDeskFCM"
-        const val CALL_CHANNEL_ID = "whitedesk_calls_v2"
-        const val PTT_CHANNEL_ID = "whitedesk_ptt_v4"
+        const val CALL_CHANNEL_ID = "whitedesk_calls_v5"
+        const val PTT_CHANNEL_ID = "whitedesk_ptt_v5"
         const val RD_CHANNEL_ID = "whitedesk_rd_v5"
         const val MESSAGE_CHANNEL_ID = "whitedesk_messages_v2"
         const val CALL_NOTIFICATION_ID = 77777
@@ -64,7 +64,7 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             (rawType.isEmpty() && data["callType"] == null && (notification != null || data["title"] != null || data["body"] != null))
         val type = if (isHelpDeskMsg) "helpdesk_message" else (if (rawType.isNotEmpty()) rawType else "incoming_call")
         val ticketId = data["ticketId"] ?: ""
-        val callerAlias = data["callerAlias"] ?: data["callerName"] ?: "Destek Operatörü"
+        val callerAlias = data["callerAlias"] ?: data["callerName"] ?: getString(R.string.wd_default_caller_admin)
         val callerWhiteId = (data["callerWhiteId"] ?: "").trim().lowercase()
         val callType = data["callType"] ?: (if (type == "direct_ptt") "ptt" else "call")
 
@@ -75,8 +75,8 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
                 Log.i(TAG, "Self message push dropped.")
                 return
             }
-            val msgTitle = notification?.title ?: data["title"] ?: "WhiteDesk Destek"
-            val msgBody = notification?.body ?: data["body"] ?: "Yeni destek mesajınız var."
+            val msgTitle = notification?.title ?: data["title"] ?: getString(R.string.wd_support_title)
+            val msgBody = notification?.body ?: data["body"] ?: getString(R.string.wd_support_new_msg)
             WhiteDeskNotificationModule.sendTicketPushEvent(ticketId, msgTitle, msgBody)
             showStandardMessageNotification(msgTitle, msgBody, ticketId)
             return
@@ -107,8 +107,8 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         }
 
         val isRemoteDesktop = type == "remote_desktop_offer" || callType == "remote_desktop"
-        val isOrgPtt = !isRemoteDesktop && (type == "org_ptt" || (callType == "ptt" && type != "direct_ptt"))
-        val isDirectPtt = !isRemoteDesktop && type == "direct_ptt"
+        val isOrgPtt = !isRemoteDesktop && type == "org_ptt"
+        val isDirectPtt = !isRemoteDesktop && !isOrgPtt && (type == "direct_ptt" || callType == "ptt")
 
         // 1. KESİN VE KIRILAMAZ FİRMA (TENANT) İZOLASYONU (ZERO TRUST)
         // Eğer push bildirimi belirli bir şirkete aitse ve bu cihaz o şirkete ait değilse DERHAL DÜŞÜR!
@@ -146,31 +146,31 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         }
 
         val title = when {
-            isRemoteDesktop -> "Uzak Masaüstü İsteği"
-            isOrgPtt -> "Telsiz Yayını"
-            isDirectPtt -> "Bas-konuş araması"
-            type == "incoming_call" -> "Gelen Sesli Çağrı"
-            else -> notification?.title ?: data["title"] ?: "WhiteDesk Destek Çağrısı"
+            isRemoteDesktop -> getString(R.string.wd_rd_request_title)
+            isOrgPtt -> getString(R.string.wd_ptt_broadcast_title)
+            isDirectPtt -> getString(R.string.wd_ptt_call_title)
+            type == "incoming_call" -> getString(R.string.wd_voice_call_title)
+            else -> notification?.title ?: data["title"] ?: getString(R.string.wd_support_call_title)
         }
 
         val body = when {
             isRemoteDesktop -> {
-                val caller = if (callerAlias.isNotBlank()) callerAlias else "Destek Uzmanı"
-                "$caller cihaz ekranınıza bağlanmak için onayınızı bekliyor."
+                val caller = if (callerAlias.isNotBlank()) callerAlias else getString(R.string.wd_default_caller_admin)
+                getString(R.string.wd_rd_request_body, caller)
             }
             isOrgPtt -> {
-                val caller = if (callerAlias.isNotBlank()) callerAlias else "Yetkili"
-                "$caller telsiz yayını başlattı."
+                val caller = if (callerAlias.isNotBlank()) callerAlias else getString(R.string.wd_default_caller_admin)
+                getString(R.string.wd_ptt_broadcast_body, caller)
             }
             isDirectPtt -> {
-                val caller = if (callerAlias.isNotBlank()) callerAlias else "Admin"
-                "$caller Bas Konuş araması yapıyor"
+                val caller = if (callerAlias.isNotBlank()) callerAlias else getString(R.string.wd_default_caller_admin)
+                getString(R.string.wd_ptt_call_body, caller)
             }
             type == "incoming_call" -> {
-                val caller = if (callerAlias.isNotBlank()) callerAlias else "Destek Yetkilisi"
-                "$caller sesli arama yapıyor..."
+                val caller = if (callerAlias.isNotBlank()) callerAlias else getString(R.string.wd_default_caller_admin)
+                getString(R.string.wd_voice_call_body, caller)
             }
-            else -> notification?.body ?: data["body"] ?: "Arama isteği"
+            else -> notification?.body ?: data["body"] ?: getString(R.string.wd_call_request_fallback)
         }
 
         val orgId = data["orgId"] ?: ""
@@ -363,8 +363,12 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 manager.deleteNotificationChannel("whitedesk_calls")
+                manager.deleteNotificationChannel("whitedesk_calls_v2")
+                manager.deleteNotificationChannel("whitedesk_calls_v3")
+                manager.deleteNotificationChannel("whitedesk_calls_v4")
                 manager.deleteNotificationChannel("whitedesk_ptt_v2")
                 manager.deleteNotificationChannel("whitedesk_ptt_v3")
+                manager.deleteNotificationChannel("whitedesk_ptt_v4")
             } catch (_: Exception) {}
 
             val callSoundUri = Uri.parse("android.resource://${packageName}/raw/inwhite_ringtone")
@@ -378,10 +382,10 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             if (manager.getNotificationChannel(CALL_CHANNEL_ID) == null) {
                 val callChannel = NotificationChannel(
                     CALL_CHANNEL_ID,
-                    "WhiteDesk Güvenli Sesli Görüşmeler",
+                    getString(R.string.wd_channel_calls_name),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "WhiteDesk gelen 1-e-1 sesli aramalar"
+                    description = getString(R.string.wd_channel_calls_desc)
                     enableLights(true)
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 600, 300, 600, 300, 600)
@@ -395,10 +399,10 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             if (manager.getNotificationChannel(PTT_CHANNEL_ID) == null) {
                 val pttChannel = NotificationChannel(
                     PTT_CHANNEL_ID,
-                    "WhiteDesk Saha Telsizi Anonsları",
+                    getString(R.string.wd_channel_ptt_name),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "Kurumsal telsiz ve bas-konuş anons bildirimleri"
+                    description = getString(R.string.wd_channel_ptt_desc)
                     enableLights(true)
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 600, 300, 600, 300, 600)
@@ -418,10 +422,10 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             if (manager.getNotificationChannel(RD_CHANNEL_ID) == null) {
                 val rdChannel = NotificationChannel(
                     RD_CHANNEL_ID,
-                    "WhiteDesk Uzak Masaüstü Talepleri",
+                    getString(R.string.wd_channel_rd_name),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "Uzak masaüstü ekran paylaşımı onay bildirimleri"
+                    description = getString(R.string.wd_channel_rd_desc)
                     enableLights(true)
                     enableVibration(true)
                     vibrationPattern = longArrayOf(0, 300, 200, 300)
@@ -439,10 +443,10 @@ class WhiteDeskMessagingService : FirebaseMessagingService() {
             if (manager.getNotificationChannel(MESSAGE_CHANNEL_ID) == null) {
                 val msgChannel = NotificationChannel(
                     MESSAGE_CHANNEL_ID,
-                    "WhiteDesk Destek Bildirimleri",
+                    getString(R.string.wd_channel_tickets_name),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "Yeni destek biletleri ve mesaj bildirimleri"
+                    description = getString(R.string.wd_channel_tickets_desc)
                     enableLights(true)
                     enableVibration(true)
                     setSound(rdSoundUri, msgAudioAttrs)

@@ -11,6 +11,7 @@ import { Sliders, X } from 'lucide-react-native';
 import { AdvancedFeaturesSection } from './AdvancedFeaturesSection';
 import { AdvancedFeaturesConfig } from '../types';
 import { OrgEntry } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface AdvancedStationModalProps {
   visible: boolean;
@@ -21,7 +22,7 @@ export interface AdvancedStationModalProps {
   config: AdvancedFeaturesConfig;
   onSave: (cfg: AdvancedFeaturesConfig) => Promise<void>;
   saving: boolean;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel?: (key: string, tr?: string, en?: string) => string;
   availableOrgs: OrgEntry[];
 }
 
@@ -37,6 +38,7 @@ export const AdvancedStationModal: React.FC<AdvancedStationModalProps> = ({
   getLabel,
   availableOrgs,
 }) => {
+  const { t } = useTranslation();
   const displayEnterpriseName =
     currentEnterpriseName &&
     !currentEnterpriseName.toLowerCase().includes('thewhite') &&
@@ -62,10 +64,10 @@ export const AdvancedStationModal: React.FC<AdvancedStationModalProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.titleText}>
-                  {language === 'en' ? 'Advanced Features' : 'Gelişmiş Özellikler'}
+                  {t('settings.advanced_features.menu_title')}
                 </Text>
                 <Text style={styles.subtitleText} numberOfLines={1}>
-                  {displayEnterpriseName} • {language === 'en' ? 'Security & Communication Policies' : 'Güvenlik ve İletişim Politikaları'}
+                  {displayEnterpriseName} • {t('settings.advanced_features.menu_subtitle')}
                 </Text>
               </View>
             </View>

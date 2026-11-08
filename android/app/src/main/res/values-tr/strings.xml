@@ -3,4 +3,25 @@
   <string name="call_notification_answer_action">Katıl</string>
   <string name="call_notification_decline_action">Kapat</string>
   <string name="call_notification_hang_up_action">Kapat</string>
+  <string name="wd_default_caller_admin">Admin</string>
+  <string name="wd_support_title">WhiteDesk Destek</string>
+  <string name="wd_support_new_msg">Yeni destek mesajınız var.</string>
+  <string name="wd_rd_request_title">Uzak Masaüstü İsteği</string>
+  <string name="wd_ptt_broadcast_title">Telsiz Yayını</string>
+  <string name="wd_ptt_call_title">Bas-konuş araması</string>
+  <string name="wd_voice_call_title">Gelen Sesli Çağrı</string>
+  <string name="wd_support_call_title">WhiteDesk Destek Çağrısı</string>
+  <string name="wd_rd_request_body">%1$s cihaz ekranınıza bağlanmak için onayınızı bekliyor.</string>
+  <string name="wd_ptt_broadcast_body">%1$s telsiz yayını başlattı.</string>
+  <string name="wd_ptt_call_body">%1$s Bas Konuş araması yapıyor</string>
+  <string name="wd_voice_call_body">%1$s sesli arama yapıyor...</string>
+  <string name="wd_call_request_fallback">Arama isteği</string>
+  <string name="wd_channel_calls_name">WhiteDesk Güvenli Sesli Görüşmeler</string>
+  <string name="wd_channel_calls_desc">WhiteDesk gelen 1-e-1 sesli aramalar</string>
+  <string name="wd_channel_ptt_name">WhiteDesk Saha Telsizi Anonsları</string>
+  <string name="wd_channel_ptt_desc">Kurumsal telsiz ve bas-konuş anons bildirimleri</string>
+  <string name="wd_channel_rd_name">WhiteDesk Uzak Masaüstü Talepleri</string>
+  <string name="wd_channel_rd_desc">Uzak masaüstü ekran paylaşımı onay bildirimleri</string>
+  <string name="wd_channel_tickets_name">WhiteDesk Destek Bildirimleri</string>
+  <string name="wd_channel_tickets_desc">Yeni destek biletleri ve mesaj bildirimleri</string>
 </resources>

@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Начать новое обсуждение",
-    "tierTenant": "Арендатор"
+    "tierTenant": "Арендатор",
+    "adminRevokeDesc": "Права администратора будут отозваны с этого устройства, а консоль заблокирована.",
+    "removeAdminTitle": "Удалить администратора",
+    "removeAdminConfirm": "Вы уверены, что хотите удалить этого администратора и все его назначения?",
+    "selectAdminReq": "Выберите администратора",
+    "selectAdminReqDesc": "Пожалуйста, выберите администратора для назначения.",
+    "created": "Создано",
+    "lastAction": "Последнее обновление",
+    "attachment": "Вложение",
+    "tierAppOrg": "Приложение / Организация",
+    "default": "По умолчанию",
+    "all": "Все"
   },
   "license": {
     "title": "Мои лицензии",

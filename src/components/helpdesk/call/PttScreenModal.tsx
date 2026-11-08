@@ -25,6 +25,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { VoiceCallSession } from '../../../services/voiceCallService';
 import { apiClient } from '../../../services/apiClient';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface OrgChannelItem {
   id: string;
@@ -87,6 +88,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
   onBroadcastChannelInvite,
   visible = true,
 }) => {
+  const { t } = useTranslation();
   // PTT Modu: Konuşuyor mu? (isMuted false ise kullanıcı konuşuyor)
   const isTalking = session ? !session.isMuted : false;
 
@@ -134,7 +136,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
     if (currentTenantId) {
       setSelectedPttTenantId(currentTenantId);
     }
-    if (currentTenantName && currentTenantName !== 'Kuruluş') {
+    if (currentTenantName && currentTenantName !== t('helpdesk.ptt.default_org')) {
       setSelectedPttTenantName(currentTenantName);
     }
   }, [currentTenantId, currentTenantName]);
@@ -165,8 +167,8 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
         const ev = session.lastPeerEvent;
         const text = ev.alias
           ? (ev.type === 'join'
-              ? `${ev.alias} ${language === 'tr' ? 'katıldı' : 'joined'}`
-              : `${ev.alias} ${language === 'tr' ? 'ayrıldı' : 'left'}`)
+              ? t('helpdesk.ptt.peer_joined', { alias: ev.alias })
+              : t('helpdesk.ptt.peer_left', { alias: ev.alias }))
           : ev.text;
         setActiveNotice(text);
         const timer = setTimeout(() => {
@@ -263,16 +265,16 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
     // 1. Organizasyonel Grup Telsizi Modu
     if (session.scope === 'org_group') {
       if (isAdmin) {
-        return session.callerAlias || (isFounder ? 'TheWhite' : 'Yönetici');
+        return session.callerAlias || (isFounder ? 'TheWhite' : t('helpdesk.ptt.role_admin'));
       }
-      return session.activeSpeakerAlias || session.callerAlias || 'Kullanıcı';
+      return session.activeSpeakerAlias || session.callerAlias || t('helpdesk.ptt.role_user');
     }
 
     // 2. Bilet İçi 1-e-1 Telsiz Modu
     const isCurrentDeviceAdmin = !!isAdmin;
 
     if (!isCurrentDeviceAdmin) {
-      return 'Admin';
+      return t('helpdesk.ptt.role_admin');
     }
 
     const otherAlias = session.role === 'caller' ? session.calleeAlias : session.callerAlias;
@@ -280,11 +282,11 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
 
     if (
       otherAlias &&
-      otherAlias !== 'Kullanıcı' &&
+      otherAlias !== t('helpdesk.ptt.role_user') &&
       otherAlias !== 'User' &&
-      otherAlias !== 'Siz' &&
+      otherAlias !== t('helpdesk.ptt.you') &&
       !otherAlias.toLowerCase().includes('admin') &&
-      !otherAlias.toLowerCase().includes('operatör') &&
+      !otherAlias.toLowerCase().includes(t('helpdesk.ptt.operator_keyword')) &&
       !otherAlias.startsWith('wh_') &&
       !otherAlias.startsWith('usr_')
     ) {
@@ -302,7 +304,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
       return cleanBlind;
     }
 
-    return 'Kullanıcı';
+    return t('helpdesk.ptt.role_user');
   };
 
   /**
@@ -311,18 +313,18 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
   const getSpeakerSubtext = (): string => {
     if (session.scope === 'org_group') {
       if (isTalking) {
-        return language === 'tr' ? 'Siz konuşuyorsunuz' : 'You are speaking';
+        return t('helpdesk.ptt.you_are_speaking');
       }
       const speakerAlias = session.activeSpeakerAlias;
       const speakerId = session.activeSpeakerWhiteId;
       const myId = session.role === 'caller' ? session.callerWhiteId : session.calleeWhiteId;
       // Yalnızca karşı tarafta birisi mikrofonu açmışsa ve konuşuyorsa göster
       if (speakerAlias && speakerId && speakerId.toLowerCase() !== (myId || '').toLowerCase()) {
-        return `${speakerAlias} ${language === 'tr' ? 'konuşuyor...' : 'is speaking...'}`;
+        return t('helpdesk.ptt.peer_is_speaking_dots', { alias: speakerAlias });
       }
       // Grupta kimse yoksa "Kimse Yok" yaz
       if (channelMemberCount === 0) {
-        return language === 'tr' ? 'Kimse Yok' : 'No One';
+        return t('helpdesk.ptt.no_one');
       }
       return '';
     }
@@ -371,7 +373,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel="Kapat ve Sonlandır"
+              accessibilityLabel={t('helpdesk.ptt.close_and_end')}
             >
               <X size={18} color="#FFFFFF" strokeWidth={2.5} />
             </TouchableOpacity>
@@ -384,7 +386,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
               <View style={styles.cryptoBadge}>
                 <Radio size={12} color="#6EE7B7" style={{ marginRight: 6 }} />
                 <Text style={styles.cryptoBadgeText}>
-                  {session.scope === 'org_group' ? 'TELSİZ YAYINI' : 'P2P - BAS KONUŞ'}
+                  {session.scope === 'org_group' ? t('helpdesk.ptt.badge_radio_broadcast') : t('helpdesk.ptt.badge_p2p_ptt')}
                 </Text>
               </View>
             </View>
@@ -458,7 +460,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                   );
                   const activeGroupName = (!isGlobalChannel && currentOrgItem)
                     ? currentOrgItem.name
-                    : (language === 'tr' ? 'Genel' : 'General');
+                    : t('helpdesk.ptt.channel_general');
 
                   return (
                     <View style={[styles.hierarchyRow, styles.groupRow]}>
@@ -520,7 +522,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                 <View style={[styles.hierarchyRow, styles.groupRow]}>
                   <View style={styles.hierarchyCenterBox}>
                     <Text style={styles.groupTitleText} numberOfLines={1}>
-                      {session.targetOrgName || (language === 'tr' ? 'Genel Destek' : 'General Support')}
+                      {session.targetOrgName || t('helpdesk.ptt.general_support')}
                     </Text>
                   </View>
                 </View>
@@ -530,13 +532,13 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
               <View style={styles.statusRowContainer}>
                 {!isNetworkOnline ? (
                   <Text style={[styles.statusEmptyText, { color: '#F87171' }]} numberOfLines={1}>
-                    {language === 'tr' ? 'Ağ bağlantısı yok' : 'No network connection'}
+                    {t('helpdesk.ptt.no_network')}
                   </Text>
                 ) : activeNotice ? (
                   <Text
                     style={[
                       styles.statusTextNotice,
-                      activeNotice.includes('ayrıldı') || activeNotice.includes('left') || activeNotice.includes('gitti')
+                      activeNotice.includes(t('helpdesk.ptt.left_keyword')) || activeNotice.includes('left') || activeNotice.includes('gitti')
                         ? styles.statusTextNoticeLeave
                         : styles.statusTextNoticeJoin,
                     ]}
@@ -546,26 +548,26 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                   </Text>
                 ) : isOutgoing ? (
                   <Text style={styles.statusText} numberOfLines={1}>
-                    {language === 'tr' ? 'Bas-konuş çağrısı gönderiliyor...' : 'Calling...'}
+                    {t('helpdesk.ptt.calling_ptt')}
                   </Text>
                 ) : isIncoming ? (
                   <Text style={styles.statusText} numberOfLines={1}>
-                    {language === 'tr' ? 'Gelen bas-konuş çağrısı' : 'Incoming call...'}
+                    {t('helpdesk.ptt.incoming_ptt')}
                   </Text>
                 ) : isConnecting ? (
                   <Text style={styles.statusText} numberOfLines={1}>
-                    {language === 'tr' ? 'Telsiz bağlanıyor...' : 'Connecting...'}
+                    {t('helpdesk.ptt.connecting_ptt')}
                   </Text>
                 ) : isConnected ? (
                   (session as any).isStandby ? (
                     <Text style={styles.statusEmptyText} numberOfLines={1}>
-                      {language === 'tr' ? 'Katılımcı yayını yok' : 'No participant transmission'}
+                      {t('helpdesk.ptt.no_participant_transmission')}
                     </Text>
                   ) : session.scope === 'org_group' ? (
                     isTalking ? (
                       <View style={styles.talkingRowInline}>
                         <Text style={styles.statusTalkingText}>
-                          {language === 'tr' ? 'Siz konuşuyorsunuz' : 'You are speaking'}
+                          {t('helpdesk.ptt.you_are_speaking')}
                         </Text>
                         <View style={styles.waveformContainer}>
                           {[wave1, wave2, wave3, wave4, wave5].map((w, idx) => (
@@ -597,7 +599,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                         return (
                           <View style={styles.talkingRowInline}>
                             <Text style={styles.statusOtherTalkingText} numberOfLines={1}>
-                              {speakerAlias} {language === 'tr' ? 'konuşuyor' : 'is speaking'}
+                              {t('helpdesk.ptt.peer_is_speaking', { alias: speakerAlias })}
                             </Text>
                             <View style={styles.waveformContainer}>
                               {[wave1, wave2, wave3, wave4, wave5].map((w, idx) => (
@@ -622,7 +624,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                       return (
                         <View style={styles.talkingRowInline}>
                           <Text style={styles.statusEmptyText} numberOfLines={1}>
-                            {language === 'tr' ? 'Katılımcı yayını yok' : 'No participant transmission'}
+                            {t('helpdesk.ptt.no_participant_transmission')}
                           </Text>
                           <Text style={styles.timerSmallText}>
                             {formatDuration(session.durationSeconds)}
@@ -691,7 +693,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                       style={{ marginBottom: 4 }}
                     />
                     <Text style={styles.giantPttButtonText}>
-                      {isTalking ? 'KONUŞ' : 'DİNLE'}
+                      {isTalking ? t('helpdesk.ptt.btn_talk') : t('helpdesk.ptt.btn_listen')}
                     </Text>
                   </TouchableOpacity>
 
@@ -713,7 +715,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                             />
                           </TouchableOpacity>
                           <Text style={styles.channelActionLabel}>
-                            {language === 'tr' ? 'Sonlandır' : 'End Call'}
+                            {t('helpdesk.ptt.end_call')}
                           </Text>
                         </View>
                       );
@@ -749,8 +751,8 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                           </TouchableOpacity>
                           <Text style={[styles.channelActionLabel, !isNetworkOnline && styles.channelActionLabelDisabled]}>
                             {!isNetworkOnline
-                              ? (language === 'tr' ? 'Bağlantı Yok' : 'Offline')
-                              : (language === 'tr' ? 'Bağlan' : 'Connect')}
+                              ? t('helpdesk.ptt.offline')
+                              : t('helpdesk.ptt.connect')}
                           </Text>
                         </View>
                       );
@@ -771,7 +773,7 @@ export const PttScreenModal: React.FC<PttScreenModalProps> = ({
                           />
                         </TouchableOpacity>
                         <Text style={styles.channelActionLabel}>
-                          {language === 'tr' ? 'Bağlantıyı Kes' : 'Disconnect'}
+                          {t('helpdesk.ptt.disconnect')}
                         </Text>
                       </View>
                     );

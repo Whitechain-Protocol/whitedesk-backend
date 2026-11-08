@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Switch } from 'react-native';
 import { Clock } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface DestructionPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface DestructionPolicyProps {
 export const DestructionPolicy: React.FC<DestructionPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
 
   const handleToggleSelfDestruct = (val: boolean) => {
     onChange(prev => ({
@@ -45,12 +45,10 @@ export const DestructionPolicy: React.FC<DestructionPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Cryptographic Data Purge (Vaporization)' : 'Kriptografik Veri İmhası (Buharlaşma)'}
+            {t('settings.advanced_features.self_destruct.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Purge encryption keys and message history from devices automatically after ticket resolution.'
-              : 'Çözülen taleplerin şifreleme anahtarlarını ve mesaj geçmişini belirlenen süre sonunda cihazlardan kalıcı olarak siler.'}
+            {t('settings.advanced_features.self_destruct.description')}
           </Text>
         </View>
         <Switch
@@ -64,14 +62,14 @@ export const DestructionPolicy: React.FC<DestructionPolicyProps> = ({
       {config.selfDestruct.enabled && (
         <View style={styles.subOptionBox}>
           <Text style={styles.subOptionLabel}>
-            {isEn ? 'Key Destruction Timer' : 'İmha Zamanlayıcısı'}
+            {t('settings.advanced_features.self_destruct.timer_label')}
           </Text>
 
           <View style={styles.radioList}>
             {[
-              { h: 24, label: isEn ? '24 Hours After Resolution' : 'Çözümden 24 Saat Sonra' },
-              { h: 72, label: isEn ? '72 Hours After Resolution (Recommended)' : 'Çözümden 72 Saat Sonra (Önerilen)' },
-              { h: 168, label: isEn ? '7 Days After Resolution' : 'Çözümden 7 Gün Sonra' },
+              { h: 24, label: t('settings.advanced_features.self_destruct.opt_24h') },
+              { h: 72, label: t('settings.advanced_features.self_destruct.opt_72h') },
+              { h: 168, label: t('settings.advanced_features.self_destruct.opt_7d') },
             ].map(item => {
               const isSelected = config.selfDestruct.retentionAfterResolvedHours === item.h;
               return (

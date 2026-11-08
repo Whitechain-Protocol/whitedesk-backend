@@ -804,7 +804,18 @@
     "appNamePlaceholder": "ایپ کا نام (مثلاً WhiteDesk)",
     "appDescPlaceholder": "مختصر تفصیل...",
     "newDiscussion": "نئی بحث شروع کریں",
-    "tierTenant": "کرایہ دار"
+    "tierTenant": "کرایہ دار",
+    "adminRevokeDesc": "اس ڈیوائس سے ایڈمن کے اختیارات ختم کر دیے جائیں گے اور کنسول لاک ہو جائے گا۔",
+    "removeAdminTitle": "ایڈمن کو ہٹائیں",
+    "removeAdminConfirm": "کیا آپ واقعی اس ایڈمن اور اس کی تمام تخصیصات کو ہٹانا چاہتے ہیں؟",
+    "selectAdminReq": "ایڈمن منتخب کریں",
+    "selectAdminReqDesc": "براہ کرم تخصیص کے لیے ایک ایڈمن منتخب کریں۔",
+    "created": "بنایا گیا",
+    "lastAction": "آخری اپ ڈیٹ",
+    "attachment": "منسلکہ",
+    "tierAppOrg": "ایپلیکیشن / تنظیم",
+    "default": "طے شدہ",
+    "all": "تمام"
   },
   "license": {
     "title": "لائسنس اور سبسکرپشن",

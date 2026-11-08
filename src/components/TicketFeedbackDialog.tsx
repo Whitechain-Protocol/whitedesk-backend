@@ -22,8 +22,7 @@ export function TicketFeedbackDialog({
   onClose,
   onSubmit,
 }: TicketFeedbackDialogProps) {
-  const { t, language } = useTranslation();
-  const isTr = language === 'tr';
+  const { t } = useTranslation();
 
   const [selectedScore, setSelectedScore] = useState<number>(5);
   const [comment, setComment] = useState('');
@@ -49,12 +48,10 @@ export function TicketFeedbackDialog({
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.title}>
-                {isTr ? 'Hizmeti Değerlendirin' : 'Rate Service'}
+                {t('ticket.feedback.dialog_title')}
               </Text>
               <Text style={styles.subtitle}>
-                {isTr
-                  ? 'Destek kalitemizi 1-5 arasında puanlayın.'
-                  : 'Rate the support quality from 1 to 5.'}
+                {t('ticket.feedback.dialog_subtitle')}
               </Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -83,8 +80,8 @@ export function TicketFeedbackDialog({
             </View>
 
             <View style={styles.scaleLabelsRow}>
-              <Text style={styles.scaleSubLabel}>1: {isTr ? 'Geliştirilmeli' : 'Needs Improvement'}</Text>
-              <Text style={styles.scaleSubLabel}>5: {isTr ? 'Kusursuz' : 'Exceptional'}</Text>
+              <Text style={styles.scaleSubLabel}>1: {t('ticket.feedback.scale_1_label')}</Text>
+              <Text style={styles.scaleSubLabel}>5: {t('ticket.feedback.scale_5_label')}</Text>
             </View>
           </View>
 
@@ -92,7 +89,7 @@ export function TicketFeedbackDialog({
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.textInput}
-              placeholder={isTr ? 'Görüşünüz (isteğe bağlı)...' : 'Feedback (optional)...'}
+              placeholder={t('ticket.feedback.feedback_placeholder')}
               placeholderTextColor="#94A3B8"
               multiline
               maxLength={250}
@@ -106,9 +103,7 @@ export function TicketFeedbackDialog({
           <View style={styles.secureNotice}>
             <ShieldCheck size={14} color="#64748B" style={{ marginRight: 6 }} />
             <Text style={styles.secureNoticeText}>
-              {isTr
-                ? 'Uçtan uca şifreli ve sıfır kişisel veri güvenceli.'
-                : 'End-to-end encrypted with zero personal data.'}
+              {t('ticket.feedback.e2ee_notice')}
             </Text>
           </View>
 
@@ -125,7 +120,7 @@ export function TicketFeedbackDialog({
               <>
                 <Star size={16} color="#FFFFFF" fill="#FFFFFF" style={{ marginRight: 6 }} />
                 <Text style={styles.submitButtonText}>
-                  {isTr ? 'Puanla' : 'Submit'}
+                  {t('ticket.feedback.rate_btn')}
                 </Text>
               </>
             )}

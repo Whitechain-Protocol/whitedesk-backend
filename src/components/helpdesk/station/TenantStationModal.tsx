@@ -14,6 +14,7 @@ import { TenantProfileSection } from './TenantProfileSection';
 import { TenantLicenseSection } from './TenantLicenseSection';
 import { TenantStaffSection } from './TenantStaffSection';
 import { AdminEntry, HelpDeskCategory } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 interface TenantStationModalProps {
   visible: boolean;
@@ -64,6 +65,7 @@ export const TenantStationModal: React.FC<TenantStationModalProps> = ({
   onSaveAllocation,
   tAllLabel,
 }) => {
+  const { t } = useTranslation();
   const { height: windowHeight } = useWindowDimensions();
   const modalContainerHeight = Math.round(windowHeight * 0.86);
 
@@ -85,10 +87,10 @@ export const TenantStationModal: React.FC<TenantStationModalProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.consoleTitleText}>
-                  {language === 'tr' ? 'Yönetim & Kiracı Masası' : 'Tenant & Admin Station'}
+                  {t('provisioning.tenant_station.title')}
                 </Text>
                 <Text style={styles.consoleSubtitleText} numberOfLines={1}>
-                  {currentEnterpriseName} • WhiteCosmos (*)
+                  {currentEnterpriseName} • {t('provisioning.tenant_station.header_subtitle_cosmos')}
                 </Text>
               </View>
             </View>

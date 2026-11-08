@@ -23,6 +23,7 @@ import {
   AlertCircle,
 } from 'lucide-react-native';
 import { TenantLogo } from '../../TenantLogo';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface CustomFieldItem {
   key: string;
@@ -85,6 +86,18 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
   loginIssueEnabled = false,
   onToggleLoginIssue,
 }) => {
+  const { t } = useTranslation();
+
+  const quickChips = [
+    t('settings.station.chip_model'),
+    t('settings.station.chip_serial_no'),
+    t('settings.station.chip_product_name'),
+    t('settings.station.chip_counter'),
+    t('settings.station.chip_order_no'),
+    t('settings.station.chip_color'),
+    t('settings.station.chip_dimension'),
+  ];
+
   return (
     <Modal
       visible={visible}
@@ -102,9 +115,9 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 <Settings size={20} color="#2563EB" strokeWidth={2.2} />
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.consoleTitleText}>Kuruluş Ayarları</Text>
+                <Text style={styles.consoleTitleText}>{t('settings.station.title')}</Text>
                 <Text style={styles.consoleSubtitleText} numberOfLines={1}>
-                  {currentEnterpriseName} • Özelleştirme
+                  {currentEnterpriseName} • {t('settings.station.subtitle')}
                 </Text>
               </View>
             </View>
@@ -125,28 +138,28 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
             {/* SECTION 1: FİRMA ADI DÜZENLEME */}
             <View style={styles.adminSectionHeaderRow}>
               <View>
-                <Text style={styles.adminSectionTitleText}>Firma / Kuruluş Resmi Adı</Text>
-                <Text style={styles.adminSectionSubText}>Destek masasında ve başlıklarda görünen ad</Text>
+                <Text style={styles.adminSectionTitleText}>{t('settings.station.company_name_title')}</Text>
+                <Text style={styles.adminSectionSubText}>{t('settings.station.company_name_sub')}</Text>
               </View>
             </View>
             <View style={styles.inlineInputRow}>
               <TextInput
                 style={styles.inlineInputText}
-                placeholder="Kuruluş adı girin..."
+                placeholder={t('settings.station.company_name_placeholder')}
                 placeholderTextColor="#94A3B8"
                 value={editTenantNameInput}
                 onChangeText={onChangeTenantNameInput}
               />
               <TouchableOpacity style={styles.inlineAddButton} onPress={onSaveEnterpriseName}>
-                <Text style={styles.inlineAddButtonText}>Güncelle</Text>
+                <Text style={styles.inlineAddButtonText}>{t('settings.station.update_btn')}</Text>
               </TouchableOpacity>
             </View>
 
             {/* SECTION: GİRİŞ VE GÜVENLİK İLKELERİ */}
             <View style={[styles.adminSectionHeaderRow, { marginTop: 14 }]}>
               <View>
-                <Text style={styles.adminSectionTitleText}>Giriş İlkeleri</Text>
-                <Text style={styles.adminSectionSubText}>Kullanıcı giriş ve bilet transfer kuralları</Text>
+                <Text style={styles.adminSectionTitleText}>{t('settings.station.login_policies_title')}</Text>
+                <Text style={styles.adminSectionSubText}>{t('settings.station.login_policies_sub')}</Text>
               </View>
             </View>
 
@@ -154,9 +167,9 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
               {/* Ana ekranda / Ad Soyad Girişi Zorunluluğu */}
               <View style={styles.toggleRow}>
                 <View style={{ flex: 1, paddingRight: 10 }}>
-                  <Text style={styles.toggleTitle}>Ana ekranda Ad Soyad Girişi Zorunlu</Text>
+                  <Text style={styles.toggleTitle}>{t('settings.station.require_name_title')}</Text>
                   <Text style={styles.toggleDesc}>
-                    {allowNameEntry ? 'Açık • En az iki kelime ad-soyad girişi zorunludur' : 'Kapalı • Anonim bilet girişi serbest'}
+                    {allowNameEntry ? t('settings.station.require_name_desc_on') : t('settings.station.require_name_desc_off')}
                   </Text>
                 </View>
                 <Switch
@@ -171,7 +184,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 <View style={styles.warningNoteBox}>
                   <AlertCircle size={15} color="#D97706" style={{ marginRight: 6, marginTop: 1 }} />
                   <Text style={styles.warningNoteText}>
-                    Ad soyad zorunluluğu kapalı olduğunda kullanıcılar anonim bilet açabilir.
+                    {t('settings.station.require_name_warning')}
                   </Text>
                 </View>
               )}
@@ -180,8 +193,8 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
             {/* SECTION 2: LOGO YÖNETİMİ */}
             <View style={[styles.adminSectionHeaderRow, { marginTop: 14 }]}>
               <View>
-                <Text style={styles.adminSectionTitleText}>Kuruluş Logosu</Text>
-                <Text style={styles.adminSectionSubText}>Destek ekranlarında görüntülenecek kurum amblemi</Text>
+                <Text style={styles.adminSectionTitleText}>{t('settings.station.logo_title')}</Text>
+                <Text style={styles.adminSectionSubText}>{t('settings.station.logo_sub')}</Text>
               </View>
             </View>
 
@@ -205,9 +218,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
 
                   {/* HINT TEXT FOR RE-CROPPING */}
                   <Text style={styles.logoLongPressHint}>
-                    {language === 'tr'
-                      ? '💡 Kırpmak ve yeniden boyutlandırmak için logoya uzun basın'
-                      : '💡 Long-press on the logo to crop and re-adjust'}
+                    {t('settings.station.logo_long_press_hint')}
                   </Text>
 
                   {/* 3-SEGMENT HORIZONTAL ALIGNMENT BUTTONS */}
@@ -231,7 +242,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                           tenantLogoAlign === 'left' && styles.alignControlBtnTextActive,
                         ]}
                       >
-                        Sola Yasla
+                        {t('settings.station.align_left')}
                       </Text>
                     </TouchableOpacity>
 
@@ -254,7 +265,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                           tenantLogoAlign === 'center' && styles.alignControlBtnTextActive,
                         ]}
                       >
-                        Ortala
+                        {t('settings.station.align_center')}
                       </Text>
                     </TouchableOpacity>
 
@@ -277,7 +288,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                           tenantLogoAlign === 'right' && styles.alignControlBtnTextActive,
                         ]}
                       >
-                        Sağa Yasla
+                        {t('settings.station.align_right')}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -290,7 +301,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <Crop size={16} color="#2563EB" style={{ marginRight: 6 }} />
-                      <Text style={styles.snippingToolBtnText}>Yeniden Kırp</Text>
+                      <Text style={styles.snippingToolBtnText}>{t('settings.station.recrop_btn')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -299,7 +310,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <Trash2 size={16} color="#DC2626" style={{ marginRight: 6 }} />
-                      <Text style={styles.logoActionBtnDangerText}>Logoyu Kaldır</Text>
+                      <Text style={styles.logoActionBtnDangerText}>{t('settings.station.remove_logo_btn')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -307,7 +318,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 <View style={{ alignItems: 'center', width: '100%' }}>
                   <View style={styles.logoPlaceholderBox}>
                     <ImageIcon size={32} color="#94A3B8" />
-                    <Text style={{ fontSize: 12, color: '#94A3B8', marginTop: 6 }}>Henüz logo yüklenmedi</Text>
+                    <Text style={{ fontSize: 12, color: '#94A3B8', marginTop: 6 }}>{t('settings.station.no_logo_uploaded')}</Text>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 10, marginTop: 14, width: '100%' }}>
                     <TouchableOpacity
@@ -316,7 +327,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <UploadCloud size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.bluePillButtonText}>Logo Yükle</Text>
+                      <Text style={styles.bluePillButtonText}>{t('settings.station.upload_logo_btn')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -325,7 +336,7 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <Crop size={16} color="#2563EB" style={{ marginRight: 6 }} />
-                      <Text style={styles.snippingToolBtnText}>Alıntı Aracı</Text>
+                      <Text style={styles.snippingToolBtnText}>{t('settings.station.snipping_tool_btn')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -335,16 +346,16 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
             {/* SECTION 3: ÖZEL ALAN GİRİŞİ (CUSTOM TICKET FIELDS) */}
             <View style={[styles.adminSectionHeaderRow, { marginTop: 20 }]}>
               <View>
-                <Text style={styles.adminSectionTitleText}>Bilet Özel Alan Girişi</Text>
-                <Text style={styles.adminSectionSubText}>Kullanıcı bilet açarken istenecek ek alanlar (Model, Seri No vb.)</Text>
+                <Text style={styles.adminSectionTitleText}>{t('settings.station.custom_fields_title')}</Text>
+                <Text style={styles.adminSectionSubText}>{t('settings.station.custom_fields_sub')}</Text>
               </View>
             </View>
 
             {/* HIZLI ŞABLON ÇİPLERİ */}
             <View style={{ marginTop: 6, marginBottom: 8 }}>
-              <Text style={styles.quickChipsLabel}>Hızlı Ekle:</Text>
+              <Text style={styles.quickChipsLabel}>{t('settings.station.quick_add_label')}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 6 }}>
-                {['Model', 'Seri No', 'Ürün Adı', 'Sayaç', 'Sipariş No', 'Renk', 'Ölçü'].map((chip) => {
+                {quickChips.map((chip) => {
                   const isAdded = tenantCustomFields.some(
                     f => f.label.toLowerCase() === chip.toLowerCase() || f.key.toLowerCase().includes(chip.toLowerCase().replace(/[^a-z0-9]/g, ''))
                   );
@@ -370,14 +381,14 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
 
             {tenantCustomFields.length === 0 ? (
               <Text style={{ fontSize: 12, color: '#94A3B8', marginVertical: 6, fontStyle: 'italic' }}>
-                Tanımlanmış özel alan bulunmuyor.
+                {t('settings.station.no_custom_fields')}
               </Text>
             ) : (
               tenantCustomFields.map((field) => (
                 <View key={`cf_${field.key}`} style={styles.adminItemCard}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.adminItemName}>{field.label}</Text>
-                    <Text style={styles.adminItemSub}>{field.required ? 'Zorunlu Alan' : 'İsteğe Bağlı'}</Text>
+                    <Text style={styles.adminItemSub}>{field.required ? t('settings.station.field_required') : t('settings.station.field_optional')}</Text>
                   </View>
                   <TouchableOpacity
                     style={styles.deleteIconButton}
@@ -393,13 +404,13 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
             <View style={[styles.inlineInputRow, { marginTop: 10 }]}>
               <TextInput
                 style={styles.inlineInputText}
-                placeholder="Örn: Cihaz Seri No, Departman..."
+                placeholder={t('settings.station.custom_field_placeholder')}
                 placeholderTextColor="#94A3B8"
                 value={newCustomFieldName}
                 onChangeText={onChangeNewCustomFieldName}
               />
               <TouchableOpacity style={styles.inlineAddButton} onPress={onAddCustomField}>
-                <Text style={styles.inlineAddButtonText}>Özel Alan Ekle</Text>
+                <Text style={styles.inlineAddButtonText}>{t('settings.station.add_custom_field_btn')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

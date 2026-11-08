@@ -5,6 +5,7 @@ import { remoteDesktopService } from '../../../services/remoteDesktopService';
 import { helpDeskService, HelpDeskTicket, HelpDeskMessage, OrgEntry, AdminEntry, TenantEntry } from '../../../services/helpDeskService';
 import { NotificationService } from '../../../services/notificationService';
 import { WhiteDeskCrypto } from '../../../services/cryptoService';
+import { i18nService } from '../../../services/i18nService';
 
 export interface UseHelpDeskVoiceProps {
   ownWhiteId: string;
@@ -88,7 +89,7 @@ export function useHelpDeskVoice({
         if (data?.type === 'remote_desktop_offer' || data?.callType === 'remote_desktop') {
           void remoteDesktopService.receiveIncomingInvite(
             data.ticketId,
-            data.callerAlias || 'Destek Uzmanı',
+            data.callerAlias || i18nService.t('helpdesk.voice_support_specialist'),
             userAdvancedPrefs?.remoteDesktopEnabled !== false
           );
           return;
@@ -112,7 +113,7 @@ export function useHelpDeskVoice({
         if (data?.type === 'remote_desktop_offer' || data?.callType === 'remote_desktop') {
           void remoteDesktopService.receiveIncomingInvite(
             data.ticketId,
-            data.callerAlias || 'Destek Uzmanı',
+            data.callerAlias || i18nService.t('helpdesk.voice_support_specialist'),
             userAdvancedPrefs?.remoteDesktopEnabled !== false
           );
           return;
@@ -151,7 +152,7 @@ export function useHelpDeskVoice({
     if (!selectedTicket) return;
 
     const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
-    const callerAlias = customAlias || (isAdmin ? 'WhiteDesk Admin' : 'Kullanıcı');
+    const callerAlias = customAlias || (isAdmin ? i18nService.t('helpdesk.titleAdmin') : i18nService.t('helpdesk.user'));
 
     let calleeWhiteId = isAdmin
       ? (selectedTicket.user_blind_id || selectedTicket.user_white_id || '')
@@ -178,8 +179,8 @@ export function useHelpDeskVoice({
     }
 
     const calleeAlias = isAdmin
-      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : 'Kullanıcı'))
-      : ((selectedTicket as any).assigned_admin_name || 'Destek Operatörü');
+      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : i18nService.t('helpdesk.user')))
+      : ((selectedTicket as any).assigned_admin_name || i18nService.t('helpdesk.voice_support_operator'));
 
     const elig = await voiceCallService.checkCallEligibility(
       callerWhiteId,
@@ -188,30 +189,26 @@ export function useHelpDeskVoice({
     );
     if (!elig.allowed) {
       Alert.alert(
-        language === 'tr' ? 'Sesli Çağrı' : 'Voice Call',
-        elig.reason || (language === 'tr' ? 'Kullanıcı çağrı kabul etmiyor.' : 'User does not accept voice calls.')
+        i18nService.t('helpdesk.voice_call_alert_title'),
+        elig.reason || i18nService.t('helpdesk.voice_call_not_accepted')
       );
       return;
     }
 
     setConfirmSheet({
       visible: true,
-      title: language === 'tr' ? 'Sesli Görüşme' : 'Voice Call',
+      title: i18nService.t('helpdesk.voice_call_confirm_title'),
       description: isAdmin
-        ? (language === 'tr'
-            ? `${calleeAlias} kullanıcısına bu bilet kapsamında uçtan uca şifreli sesli arama başlatılsın mı?`
-            : `Start an end-to-end encrypted voice call with ${calleeAlias}?`)
-        : (language === 'tr'
-            ? 'Destek uzmanımıza bu bilet kapsamında uçtan uca şifreli sesli arama başlatılsın mı?'
-            : 'Start an end-to-end encrypted voice call with support specialist?'),
-      actionText: language === 'tr' ? 'Ara' : 'Call',
+        ? i18nService.t('helpdesk.voice_call_confirm_admin_desc', { alias: calleeAlias })
+        : i18nService.t('helpdesk.voice_call_confirm_user_desc'),
+      actionText: i18nService.t('common.call'),
       actionColor: '#16A34A',
-      cancelText: language === 'tr' ? 'Vazgeç' : 'Cancel',
+      cancelText: i18nService.t('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
         const ticketOrg = orgsList.find(o => o.org_id === selectedTicket.org_id);
-        const targetOrgName = ticketOrg ? ticketOrg.name : (selectedTicket.category || (language === 'tr' ? 'Genel Destek' : 'General Support'));
+        const targetOrgName = ticketOrg ? ticketOrg.name : (selectedTicket.category || i18nService.t('helpdesk.catGeneral'));
         await voiceCallService.startDirectCall(
           selectedTicket.id,
           callerWhiteId,
@@ -241,7 +238,7 @@ export function useHelpDeskVoice({
     if (!selectedTicket) return;
 
     const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
-    const callerAlias = customAlias || (isAdmin ? 'WhiteDesk Admin' : 'Kullanıcı');
+    const callerAlias = customAlias || (isAdmin ? i18nService.t('helpdesk.titleAdmin') : i18nService.t('helpdesk.user'));
 
     let calleeWhiteId = isAdmin
       ? (selectedTicket.user_blind_id || selectedTicket.user_white_id || '')
@@ -268,8 +265,8 @@ export function useHelpDeskVoice({
     }
 
     const calleeAlias = isAdmin
-      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : 'Kullanıcı'))
-      : ((selectedTicket as any).assigned_admin_name || 'Destek Operatörü');
+      ? ((selectedTicket as any).user_name || (calleeWhiteId ? calleeWhiteId.slice(0, 12) : i18nService.t('helpdesk.user')))
+      : ((selectedTicket as any).assigned_admin_name || i18nService.t('helpdesk.voice_support_operator'));
 
     const elig = await voiceCallService.checkPttEligibility(
       callerWhiteId,
@@ -278,30 +275,26 @@ export function useHelpDeskVoice({
     );
     if (!elig.allowed) {
       Alert.alert(
-        language === 'tr' ? 'Bas-Konuş' : 'Push-to-Talk',
-        elig.reason || (language === 'tr' ? 'Kullanıcı bas-konuş çağrılarını kabul etmiyor.' : 'User does not accept PTT calls.')
+        i18nService.t('helpdesk.ptt_alert_title'),
+        elig.reason || i18nService.t('helpdesk.ptt_not_accepted')
       );
       return;
     }
 
     setConfirmSheet({
       visible: true,
-      title: language === 'tr' ? 'Bas-Konuş İsteği' : 'Push-to-Talk Request',
+      title: i18nService.t('helpdesk.ptt_confirm_title'),
       description: isAdmin
-        ? (language === 'tr'
-            ? `${calleeAlias} kullanıcısına bas-konuş oturumu başlatılsın mı?`
-            : `Start a push-to-talk session with ${calleeAlias}?`)
-        : (language === 'tr'
-            ? 'Destek uzmanımıza bas-konuş oturumu başlatılsın mı?'
-            : 'Start a push-to-talk session with support specialist?'),
-      actionText: language === 'tr' ? 'Gönder' : 'Send',
+        ? i18nService.t('helpdesk.ptt_confirm_admin_desc', { alias: calleeAlias })
+        : i18nService.t('helpdesk.ptt_confirm_user_desc'),
+      actionText: i18nService.t('helpdesk.reply'),
       actionColor: '#0F766E',
-      cancelText: language === 'tr' ? 'Vazgeç' : 'Cancel',
+      cancelText: i18nService.t('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
         const ticketOrg = orgsList.find(o => o.org_id === selectedTicket.org_id);
-        const targetOrgName = ticketOrg ? ticketOrg.name : (selectedTicket.category || (language === 'tr' ? 'Genel Destek' : 'General Support'));
+        const targetOrgName = ticketOrg ? ticketOrg.name : (selectedTicket.category || i18nService.t('helpdesk.catGeneral'));
         await voiceCallService.startDirectCall(
           selectedTicket.id,
           callerWhiteId,
@@ -350,7 +343,7 @@ export function useHelpDeskVoice({
     setPttTenantId(tId);
     setPttTenantName(tName);
     setActiveOrgChannelId('all');
-    voiceCallService.updateOrgPttTarget('global', language === 'tr' ? 'Genel' : 'General', tId);
+    voiceCallService.updateOrgPttTarget('global', i18nService.t('helpdesk.channel_general'), tId);
     void helpDeskService.getOrgsList('all').then((res) => {
       if (res) setAllSystemOrgs(res);
     }).catch(() => {});
@@ -372,13 +365,13 @@ export function useHelpDeskVoice({
       return entId === currentPttTenant;
     });
     const channels = [
-      { id: 'all', name: language === 'tr' ? 'Genel' : 'General' },
+      { id: 'all', name: i18nService.t('helpdesk.channel_general') },
       ...tenantOrgs.map((o) => ({ id: o.org_id, name: o.name })),
     ];
     if (isAdmin) {
       channels.push({
         id: 'admins_only',
-        name: language === 'tr' ? 'Yöneticiler' : 'Admins',
+        name: i18nService.t('helpdesk.channel_admins'),
       });
     }
     return channels;
@@ -462,10 +455,8 @@ export function useHelpDeskVoice({
       if (!tenantId || tenantId === 'all' || tenantId === 'unassigned') {
         console.warn('[useHelpDeskVoice] Telsiz başlatılamadı: Geçerli ve izole bir kurumsal firma seçilmelidir!');
         Alert.alert(
-          language === 'tr' ? 'Firma Belirlenemedi' : 'Enterprise Required',
-          language === 'tr'
-            ? 'Telsiz anonsu başlatabilmek için geçerli bir kurumsal firma seçilmelidir.'
-            : 'A valid enterprise tenant must be selected to start a radio broadcast.'
+          i18nService.t('helpdesk.err_enterprise_required_title'),
+          i18nService.t('helpdesk.err_enterprise_required_ptt_desc')
         );
         return;
       }
@@ -477,8 +468,8 @@ export function useHelpDeskVoice({
       const rawOrgId = targetOrgCandidate && targetOrgCandidate !== 'all' && targetOrgCandidate !== '*' ? targetOrgCandidate : 'global';
       const validOrgItem = availableOrgChannels.find(c => c.id !== 'all' && c.id === rawOrgId);
       const cleanOrgId = validOrgItem ? validOrgItem.id : (rawOrgId !== 'global' ? rawOrgId : 'global');
-      const orgName = validOrgItem?.name || (rawOrgId !== 'global' ? rawOrgId : (language === 'tr' ? 'Genel' : 'General'));
-      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : 'Yönetici') : 'Kullanıcı');
+      const orgName = validOrgItem?.name || (rawOrgId !== 'global' ? rawOrgId : i18nService.t('helpdesk.channel_general'));
+      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
       const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       if (!pttTenantId || pttTenantId !== tenantId) {
@@ -502,8 +493,8 @@ export function useHelpDeskVoice({
     } catch (e) {
       console.warn('[useHelpDeskVoice] handleOrgGroupPttPress error:', e);
       Alert.alert(
-        language === 'tr' ? 'Bas-Konuş' : 'Push-to-Talk',
-        language === 'tr' ? 'Telsiz konsolu açılamadı.' : 'Could not open walkie-talkie console.'
+        i18nService.t('helpdesk.ptt_alert_title'),
+        i18nService.t('helpdesk.err_ptt_console_open')
       );
     }
   }, [
@@ -540,10 +531,10 @@ export function useHelpDeskVoice({
 
       const validOrgItem = availableOrgChannels.find(c => c.id !== 'all' && c.id === targetOrgId);
       const cleanOrgId = validOrgItem ? validOrgItem.id : (targetOrgId && targetOrgId !== 'all' && targetOrgId !== '*' && targetOrgId !== 'global' ? targetOrgId : 'global');
-      const orgName = validOrgItem?.name || (cleanOrgId !== 'global' ? cleanOrgId : (language === 'tr' ? 'Genel' : 'General'));
+      const orgName = validOrgItem?.name || (cleanOrgId !== 'global' ? cleanOrgId : i18nService.t('helpdesk.channel_general'));
 
       const targetMembers = collectChannelTargetBlindIds(tenantId, cleanOrgId);
-      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : 'Yönetici') : 'Kullanıcı');
+      const callerAlias = customAlias || (isAdmin ? (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin')) : i18nService.t('helpdesk.user'));
       const callerBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId || 'default');
 
       await voiceCallService.startOrgGroupPttCall(
@@ -580,27 +571,19 @@ export function useHelpDeskVoice({
         callSession.failureReason === 'call_disabled_by_user' ||
         callSession.failureReason === 'ptt_disabled_by_user' ||
         callSession.failureReason?.toLowerCase().includes('reddet') ||
-        callSession.failureReason?.toLowerCase().includes('müsait'))
+        callSession.failureReason?.toLowerCase().includes(i18nService.t('helpdesk.call_unavailable_keyword').toLowerCase()))
     ) {
       let rejectMsg = '';
       if (callSession.failureReason === 'call_disabled_by_user') {
-        rejectMsg = language === 'tr'
-          ? 'Kullanıcının arama özelliği kapalı durumdadır.'
-          : 'User has disabled incoming calls in preferences.';
+        rejectMsg = i18nService.t('helpdesk.call_disabled_by_user_msg');
       } else if (callSession.failureReason === 'ptt_disabled_by_user') {
-        rejectMsg = language === 'tr'
-          ? 'Kullanıcının bas-konuş özelliği kapalı durumdadır.'
-          : 'User has disabled push-to-talk in preferences.';
+        rejectMsg = i18nService.t('helpdesk.ptt_disabled_by_user_msg');
       } else {
         rejectMsg = isAdmin
-          ? (language === 'tr'
-              ? 'Kullanıcı şu anda görüşme için müsait değil. Dilerseniz bilet üzerinden yazılı olarak iletişime devam edebilirsiniz.'
-              : 'The user is currently unavailable. You may continue the conversation via ticket messages.')
-          : (language === 'tr'
-              ? 'Destek uzmanımız şu anda başka bir görüşmede veya müsait değil. Dilerseniz bilet üzerinden mesajınızı iletebilirsiniz.'
-              : 'Support specialist is currently unavailable or in another session. You may leave your message here.');
+          ? i18nService.t('helpdesk.call_unavailable_user_msg')
+          : i18nService.t('helpdesk.call_unavailable_admin_msg');
       }
-      Alert.alert(language === 'tr' ? 'Çağrı Bildirimi' : 'Call Notice', rejectMsg);
+      Alert.alert(i18nService.t('helpdesk.call_notice_title'), rejectMsg);
     }
   }, [callSession?.state, callSession?.role, callSession?.failureReason, isAdmin, language]);
 

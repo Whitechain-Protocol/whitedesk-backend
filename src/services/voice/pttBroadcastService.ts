@@ -1,4 +1,5 @@
 import { apiClient } from '../apiClient';
+import { i18nService } from '../i18nService';
 import { VoiceCallSession } from './types';
 
 /**
@@ -45,26 +46,39 @@ export function formatPttBlindId(rawBlindId?: string | null): string {
   return cleanBlind;
 }
 
+const GENERIC_PTT_ALIAS_KEYS = [
+  'voice.ptt.alias_user',
+  'voice.ptt.alias_you',
+  'voice.ptt.alias_someone',
+  'voice.ptt.alias_unit_radio',
+  'voice.ptt.alias_corporate_radio',
+  'voice.ptt.alias_field_officer',
+  'voice.ptt.alias_operator',
+  'voice.ptt.alias_support_operator',
+  'voice.ptt.alias_support_specialist',
+  'voice.ptt.alias_authorized',
+  'voice.ptt.alias_general',
+  'voice.ptt.alias_admin',
+] as const;
+
 const GENERIC_PTT_ALIASES = new Set([
-  'kullanıcı',
   'user',
-  'siz',
   'you',
-  'birisi',
   'someone',
-  'birim telsizi',
-  'kurumsal telsiz',
-  'saha görevlisi',
-  'operatör',
-  'destek operatörü',
-  'destek uzmanı',
-  'yetkili',
-  'genel',
   'general',
-  'yönetici',
   'admin',
   'whitedesk admin',
 ]);
+
+function isGenericPttAlias(lowerAlias: string): boolean {
+  if (GENERIC_PTT_ALIASES.has(lowerAlias)) return true;
+  for (const key of GENERIC_PTT_ALIAS_KEYS) {
+    if (i18nService.t(key).toLowerCase() === lowerAlias) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * İsim girilmişse gerçek ismi, girilmemişse veya jenerik bir ifade ise `124495...77343` formatında Blind ID'yi döndürür.
@@ -73,7 +87,7 @@ export function resolvePttPeerDisplayName(alias?: string | null, blindId?: strin
   const trimmed = (alias || '').trim();
   if (
     trimmed &&
-    !GENERIC_PTT_ALIASES.has(trimmed.toLowerCase()) &&
+    !isGenericPttAlias(trimmed.toLowerCase()) &&
     !trimmed.toLowerCase().startsWith('blind_') &&
     !trimmed.toLowerCase().startsWith('wh_') &&
     !trimmed.toLowerCase().startsWith('usr_') &&
@@ -84,7 +98,7 @@ export function resolvePttPeerDisplayName(alias?: string | null, blindId?: strin
   if (blindId && blindId.trim()) {
     return formatPttBlindId(blindId.trim());
   }
-  return trimmed || 'Kullanıcı';
+  return trimmed || i18nService.t('voice.ptt.default_user');
 }
 
 /**

@@ -1,6 +1,7 @@
 import { executeSql, escapeSqlString, generateCosmoAlias, clearCategoryCache, _categoryCache } from './db';
 import { keystoreConfigVault } from '../keystoreConfigVault';
 import { keystoreTicketVault } from '../keystoreTicketVault';
+import { i18nService } from '../i18nService';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import {
   CURRENT_APP_ID,
@@ -45,15 +46,8 @@ export const helpDeskStationService = {
             catalog JSONB DEFAULT '[]'::jsonb,
             plan_id VARCHAR(32) DEFAULT 'trial',
             billing_cycle VARCHAR(16) DEFAULT 'monthly',
-            license_status VARCHAR(32) DEFAULT 'trial_active',
-            trial_start_at TEXT,
-            trial_end_at TEXT,
             subscription_start_at TEXT,
             subscription_end_at TEXT,
-            grace_period_days INTEGER DEFAULT 3,
-            warning_intervals INTEGER DEFAULT 12,
-            grace_ends_at TEXT,
-            license_hash TEXT,
             created_at BIGINT NOT NULL
         );`,
         `CREATE TABLE IF NOT EXISTS whitedesk_apps (
@@ -191,7 +185,7 @@ export const helpDeskStationService = {
         `ALTER TABLE whitedesk_admins ADD COLUMN IF NOT EXISTS assigned_tickets_count INTEGER DEFAULT 0;`,
         `ALTER TABLE whitedesk_admins ADD COLUMN IF NOT EXISTS last_assigned_at BIGINT DEFAULT 0;`,
         `INSERT INTO whitedesk_enterprises (enterprise_blind_id, name, is_founder_tenant, created_at)
-         VALUES ('default', 'WhiteChain Foundation', TRUE, ${Date.now()})
+         VALUES ('default', ${escapeSqlString(i18nService.t('station_service.default_foundation_name'))}, TRUE, ${Date.now()})
          ON CONFLICT (enterprise_blind_id) DO NOTHING;`
       ];
 
@@ -338,7 +332,7 @@ export const helpDeskStationService = {
         } else if (app.type === 'user') {
           await executeSql(`
             INSERT INTO whitedesk_user_bindings (user_blind_id, tenant_blind_id, org_id, app_id, alias, status, created_at)
-            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, ${escapeSqlString(app.target_org_id || 'default')}, ${escapeSqlString(app.target_app_id || CURRENT_APP_ID)}, ${escapeSqlString(app.candidate_alias || 'User')}, 'approved', ${now})
+            VALUES (${escapeSqlString(candidateBlind)}, ${escapeSqlString(tenantBlind)}, ${escapeSqlString(app.target_org_id || 'default')}, ${escapeSqlString(app.target_app_id || CURRENT_APP_ID)}, ${escapeSqlString(app.candidate_alias || i18nService.t('station_service.default_user_alias'))}, 'approved', ${now})
             ON CONFLICT (user_blind_id) DO UPDATE SET status = 'approved';
           `);
         } else if (app.type === 'delete_app') {
@@ -875,7 +869,7 @@ export const helpDeskStationService = {
         org_id: r.org_id ? String(r.org_id) : 'all',
         app_id: r.app_id ? String(r.app_id) : 'all',
         enterprise_name: r.enterprise_name ? String(r.enterprise_name) : undefined,
-        alias: String(r.alias || 'Admin'),
+        alias: String(r.alias || i18nService.t('helpdesk.admin_role_short')),
         role: String(r.role || 'operator'),
         pub_key: r.pub_key ? String(r.pub_key) : undefined,
         is_active: Boolean(r.is_active),
@@ -903,7 +897,15 @@ export const helpDeskStationService = {
     const cleanId = WhiteDeskCrypto.generateBlindId(whiteId.trim());
     if (!cleanId) return false;
 
-    const genericAliases = ['', 'admin', 'Admin', 'master admin', 'Master Admin', 'bu cihaz (master)', 'this device (master)'];
+    const genericAliases = [
+      '',
+      'admin',
+      'Admin',
+      'master admin',
+      'Master Admin',
+      i18nService.t('station_service.master_device_alias_tr'),
+      i18nService.t('station_service.master_device_alias_en'),
+    ];
     let resolvedAlias = alias.trim();
     if (!resolvedAlias || genericAliases.includes(resolvedAlias.toLowerCase())) {
       resolvedAlias = await generateCosmoAlias(role);
@@ -954,7 +956,7 @@ export const helpDeskStationService = {
         const tenantBlind = adm.enterprise_blind_id || 'default';
         const orgId = adm.org_id || 'default';
         const appId = adm.app_id || 'inwhite';
-        const alias = adm.alias || 'Kullanıcı';
+        const alias = adm.alias || i18nService.t('station_service.default_user_alias');
         await executeSql(`
           INSERT INTO whitedesk_user_bindings (user_blind_id, tenant_blind_id, org_id, app_id, alias, status, created_at)
           VALUES (
@@ -1284,7 +1286,7 @@ export const helpDeskStationService = {
     appName?: string
   ): Promise<{ success: boolean; bridgeKey: string; message?: string }> {
     try {
-      if (!enterpriseBlindId) throw new Error('Geçersiz kuruluş belirteci.');
+      if (!enterpriseBlindId) throw new Error(i18nService.t('station_service.invalid_enterprise_token'));
       
       let randHex = '';
       const chars = '0123456789abcdef';
@@ -1293,7 +1295,7 @@ export const helpDeskStationService = {
       }
       const bridgeKey = `wd_sdk_${randHex}`;
       const now = Date.now();
-      const safeAppName = appName?.trim() || 'Harici Uygulama';
+      const safeAppName = appName?.trim() || i18nService.t('station_service.default_external_app');
 
       const q = `
         INSERT INTO whitedesk_sdk_bridges (bridge_key, enterprise_blind_id, org_id, app_name, created_at, is_active)
@@ -1312,7 +1314,7 @@ export const helpDeskStationService = {
       return { success: true, bridgeKey };
     } catch (e: any) {
       console.warn('[HelpDeskStationService] createSdkBridge error:', e);
-      return { success: false, bridgeKey: '', message: e?.message || 'SDK köprü anahtarı üretilemedi.' };
+      return { success: false, bridgeKey: '', message: e?.message || i18nService.t('station_service.sdk_bridge_key_failed') };
     }
   },
 

@@ -24,6 +24,7 @@ import {
   RemoteDesktopSession,
   remoteDesktopService,
 } from '../../../services/remoteDesktopService';
+import { useTranslation } from '../../../services/i18nService';
 
 interface RemoteDesktopModalProps {
   session: RemoteDesktopSession | null;
@@ -35,13 +36,12 @@ interface RemoteDesktopModalProps {
 
 export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
   session,
-  language = 'tr',
   onAcceptOffer,
   onRejectOffer,
   onEndSession,
 }) => {
   const insets = useSafeAreaInsets();
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({
     width: 320,
     height: 480,
@@ -93,12 +93,12 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
           <View style={styles.userActiveBanner}>
             <View style={styles.liveDot} />
             <Text style={styles.userActiveTitle} numberOfLines={1}>
-              {isEn ? 'Remote desktop connected' : 'Uzak masaüstü bağlı'}
+              {t('helpdesk.remote_desktop.connected')}
             </Text>
             <View style={styles.bannerSeparator} />
             <TouchableOpacity onPress={onEndSession} activeOpacity={0.7}>
               <Text style={styles.stopTextBtn}>
-                {isEn ? 'Stop' : 'Durdur'}
+                {t('helpdesk.remote_desktop.stop')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -122,13 +122,13 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
         <View style={styles.bottomSheetOverlay}>
           <View style={styles.bottomSheetContainer}>
             <Text style={styles.bottomSheetTitle}>
-              {isEn ? 'Remote Desktop Request' : 'Uzak Masaüstü İsteği'}
+              {t('helpdesk.remote_desktop.request_title')}
             </Text>
 
             <Text style={styles.bottomSheetDesc}>
-              {isEn
-                ? `${session.peerAlias || 'Support Specialist'} wants to connect to your screen.`
-                : `${session.peerAlias || 'Destek Uzmanı'} ekranınıza bağlanmak istiyor.`}
+              {t('helpdesk.remote_desktop.request_desc', {
+                peer: session.peerAlias || t('helpdesk.remote_desktop.support_specialist'),
+              })}
             </Text>
 
             <View style={styles.bottomSheetBtnRow}>
@@ -138,7 +138,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.cancelText}>
-                  {isEn ? 'Decline' : 'Reddet'}
+                  {t('helpdesk.remote_desktop.decline')}
                 </Text>
               </TouchableOpacity>
 
@@ -150,7 +150,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.approveText}>
-                  {isEn ? 'Approve' : 'Onayla'}
+                  {t('helpdesk.remote_desktop.approve')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -210,7 +210,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 style={styles.headerActionBtn}
                 onPress={toggleScaleMode}
                 activeOpacity={0.7}
-                accessibilityLabel="Sığdır / Tam Ekran"
+                accessibilityLabel={t('helpdesk.remote_desktop.a11y_fit_fullscreen')}
               >
                 {scaleMode === 'fit' ? (
                   <Maximize2 size={18} color="#64748B" strokeWidth={2.2} />
@@ -224,7 +224,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 onPress={handleClosePress}
                 style={styles.headerCloseBtn}
                 activeOpacity={0.7}
-                accessibilityLabel="Kapat"
+                accessibilityLabel={t('helpdesk.remote_desktop.a11y_close')}
               >
                 <X size={18} color="#64748B" strokeWidth={2.2} />
               </TouchableOpacity>
@@ -236,12 +236,10 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             <View style={styles.centerStatusBox}>
               <ActivityIndicator size="large" color="#2563EB" />
               <Text style={styles.centerStatusTitle}>
-                {isEn ? 'Waiting for approval...' : 'Kullanıcı onayı bekleniyor...'}
+                {t('helpdesk.remote_desktop.waiting_approval')}
               </Text>
               <Text style={styles.centerStatusSub}>
-                {isEn
-                  ? 'The screen will open here once approved.'
-                  : 'Onay verildiğinde karşı ekran bu pencerede açılacaktır.'}
+                {t('helpdesk.remote_desktop.waiting_approval_sub')}
               </Text>
             </View>
           )}
@@ -251,21 +249,13 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             <View style={styles.centerStatusBox}>
               <Text style={styles.centerStatusTitle}>
                 {session.status === 'disabled_by_user'
-                  ? isEn
-                    ? 'Remote Desktop Disabled'
-                    : 'Uzak Masaüstü Kapalı'
-                  : isEn
-                    ? 'Request Declined'
-                    : 'İstek Reddedildi'}
+                  ? t('helpdesk.remote_desktop.disabled_title')
+                  : t('helpdesk.remote_desktop.declined_title')}
               </Text>
               <Text style={styles.centerStatusSub}>
                 {session.status === 'disabled_by_user'
-                  ? isEn
-                    ? 'The user has disabled remote desktop access in preferences.'
-                    : 'Kullanıcı ayarlarından uzak masaüstü iznini kapatmış.'
-                  : isEn
-                    ? 'The user declined the connection request.'
-                    : 'Kullanıcı bağlantı isteğini onaylamadı.'}
+                  ? t('helpdesk.remote_desktop.disabled_sub')
+                  : t('helpdesk.remote_desktop.declined_sub')}
               </Text>
             </View>
           )}
@@ -353,7 +343,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 style={styles.pastelNavBtn}
                 onPress={() => void remoteDesktopService.sendRemoteSystemKey('BACK')}
                 activeOpacity={0.7}
-                accessibilityLabel="Geri"
+                accessibilityLabel={t('helpdesk.remote_desktop.a11y_back')}
               >
                 <ArrowLeft size={18} color="#2563EB" strokeWidth={2.2} />
               </TouchableOpacity>
@@ -363,7 +353,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 style={styles.pastelNavBtn}
                 onPress={() => void remoteDesktopService.sendRemoteSystemKey('HOME')}
                 activeOpacity={0.7}
-                accessibilityLabel="Masaüstü"
+                accessibilityLabel={t('helpdesk.remote_desktop.a11y_home')}
               >
                 <Home size={18} color="#2563EB" strokeWidth={2.2} />
               </TouchableOpacity>
@@ -373,7 +363,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                 style={styles.pastelNavBtn}
                 onPress={() => void remoteDesktopService.sendRemoteSystemKey('RECENTS')}
                 activeOpacity={0.7}
-                accessibilityLabel="Arka Plan"
+                accessibilityLabel={t('helpdesk.remote_desktop.a11y_recents')}
               >
                 <LayoutGrid size={18} color="#2563EB" strokeWidth={2.2} />
               </TouchableOpacity>
@@ -385,12 +375,10 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
             <View style={styles.confirmOverlay}>
               <View style={styles.confirmBox}>
                 <Text style={styles.confirmTitle}>
-                  {isEn ? 'End Connection' : 'Bağlantıyı Kes'}
+                  {t('helpdesk.remote_desktop.end_conn_title')}
                 </Text>
                 <Text style={styles.confirmDesc}>
-                  {isEn
-                    ? 'Are you sure you want to end the remote session?'
-                    : 'Uzak masaüstü bağlantısını kesmek istediğinize emin misiniz?'}
+                  {t('helpdesk.remote_desktop.end_conn_desc')}
                 </Text>
 
                 <View style={styles.confirmBtnRow}>
@@ -400,7 +388,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                     activeOpacity={0.7}
                   >
                     <Text style={styles.confirmBtnCancelText}>
-                      {isEn ? 'Cancel' : 'Vazgeç'}
+                      {t('common.cancel')}
                     </Text>
                   </TouchableOpacity>
 
@@ -413,7 +401,7 @@ export const RemoteDesktopModal: React.FC<RemoteDesktopModalProps> = ({
                     activeOpacity={0.7}
                   >
                     <Text style={styles.confirmBtnDangerText}>
-                      {isEn ? 'Disconnect' : 'Bağlantıyı Kes'}
+                      {t('helpdesk.remote_desktop.end_conn_confirm')}
                     </Text>
                   </TouchableOpacity>
                 </View>

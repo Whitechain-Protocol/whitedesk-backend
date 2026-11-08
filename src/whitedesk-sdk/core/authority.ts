@@ -6,6 +6,7 @@
 import { AdminAllocationPayload, AdminAllocationRecord, WhiteDeskRole } from './types';
 import { WhiteDeskCrypto, DEFAULT_THEWHITE_PUBKEY } from './crypto';
 import { WhiteDeskDatabase, escapeSql } from './database';
+import { i18nService } from '../../services/i18nService';
 
 export class WhiteDeskAuthority {
   private db: WhiteDeskDatabase;
@@ -79,7 +80,7 @@ export class WhiteDeskAuthority {
         ${escapeSql(params.grantorBlindId)},
         'admin',
         'TheWhite',
-        ${escapeSql(`[Yetkilendirme Başarılı] WhiteDesk yetkiniz mühürlendi. Hoş geldiniz ${params.alias}.`)}
+        ${escapeSql(i18nService.t('sdk.authority.grant_success_message', { alias: params.alias }))}
       );
       UPDATE whitedesk_tickets SET status = 'resolved', updated_at = NOW() WHERE ticket_no = ${escapeSql(params.ticketNo)};
     `;

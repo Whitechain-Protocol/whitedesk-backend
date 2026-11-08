@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { Mic } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface TicketPttPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface TicketPttPolicyProps {
 export const TicketPttPolicy: React.FC<TicketPttPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const pttEnabled = Boolean(config.pushToTalk.enabled);
   const allowUserPtt = config.pushToTalk.allowUserPtt ?? true;
 
@@ -48,12 +48,10 @@ export const TicketPttPolicy: React.FC<TicketPttPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'In-Ticket Push-to-Talk' : 'Bilet İçi Bas-Konuş'}
+            {t('settings.advanced_features.ptt.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Instant voice messaging inside tickets.'
-              : 'Bilet mesajlaşması sırasında anlık bas-konuş ses iletişimi sağlar.'}
+            {t('settings.advanced_features.ptt.description')}
           </Text>
         </View>
         <Switch
@@ -69,12 +67,10 @@ export const TicketPttPolicy: React.FC<TicketPttPolicyProps> = ({
         <View style={styles.subRow}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.subRowTitle}>
-              {isEn ? 'User can initiate push-to-talk' : 'Kullanıcı bas konuş başlatabilir'}
+              {t('settings.advanced_features.ptt.user_initiate_title')}
             </Text>
             <Text style={styles.subRowDesc}>
-              {isEn
-                ? 'Allow ticket creators to send instant push-to-talk voice messages.'
-                : 'Kullanıcının bilet üzerinden operatöre bas-konuş mesajı göndermesine izin verir.'}
+              {t('settings.advanced_features.ptt.user_initiate_desc')}
             </Text>
           </View>
           <Switch

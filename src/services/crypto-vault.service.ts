@@ -14,6 +14,7 @@
 
 import { CryptoService, CryptoIdentity } from './cryptoService';
 import { WhiteDeskCrypto } from '../whitedesk-sdk';
+import { i18nService } from './i18nService';
 import { p256 } from '@noble/curves/nist.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex, utf8ToBytes, concatBytes } from '@noble/ciphers/utils.js';
@@ -149,29 +150,25 @@ export class CryptoVaultService {
    */
   static formatGenesisBundleText(bundle: GenesisBundle): string {
     return `=======================================================
-WHITEDESK KURUMSAL ERİŞİM ANAHTARLARI PAKETİ
+${i18nService.t('crypto_vault.export_header')}
 =======================================================
-Kuruluş Adı       : ${bundle.tenantName}
-Çalışma Alanı     : ${bundle.workspaceName}
-Oluşturulma Tarihi: ${new Date(bundle.createdAt).toLocaleString('tr-TR')}
-Kuruluş Kimliği   : ${bundle.founderBlindId}
+${i18nService.t('crypto_vault.export_field_tenant')} ${bundle.tenantName}
+${i18nService.t('crypto_vault.export_field_workspace')} ${bundle.workspaceName}
+${i18nService.t('crypto_vault.export_field_created_at')} ${new Date(bundle.createdAt).toLocaleString()}
+${i18nService.t('crypto_vault.export_field_tenant_id')} ${bundle.founderBlindId}
 
 -------------------------------------------------------
-14 GÜNLÜK ÜCRETSİZ DENEME SÜRÜMÜ ERİŞİM ANAHTARLARI
+${i18nService.t('crypto_vault.export_trial_header')}
 -------------------------------------------------------
-[1 ADET YÖNETİCİ ERİŞİM ANAHTARI]
+${i18nService.t('crypto_vault.export_admin_key_section')}
 ${bundle.adminRecoveryKey}
 
-[10 ADET KULLANICI ERİŞİM ANAHTARI]
+${i18nService.t('crypto_vault.export_user_keys_section')}
 ${bundle.userAccessKeys.map((k, idx) => `${String(idx + 1).padStart(2, '0')}. ${k}`).join('\n')}
 
 =======================================================
-ÖNEMLİ GÜVENLİK BİLGİSİ:
-Bu anahtarlar asimetrik anahtar kümelerinden (Key Set)
-türetilmiş tekil erişim anahtarlarıdır. Cihazınızda
-biletleri uçtan uca (E2EE) şifrelemek ve çözmek için
-kullanılır. Sunucularda açık kopyası tutulmaz.
-Lütfen güvenli bir yere kaydediniz.
+${i18nService.t('crypto_vault.export_security_notice_title')}
+${i18nService.t('crypto_vault.export_security_notice_body')}
 =======================================================`;
   }
 

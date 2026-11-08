@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App-Name (z. B. Support Desk)",
     "appDescPlaceholder": "Kurze Beschreibung (optional)",
     "newDiscussion": "Neue Diskussion starten",
-    "tierTenant": "Mandant"
+    "tierTenant": "Mandant",
+    "adminRevokeDesc": "Die Administratorrechte werden von diesem Gerät entfernt und die Konsole gesperrt.",
+    "removeAdminTitle": "Administrator entfernen",
+    "removeAdminConfirm": "Möchten Sie diesen Administrator und alle seine Zuweisungen wirklich entfernen?",
+    "selectAdminReq": "Administrator auswählen",
+    "selectAdminReqDesc": "Bitte wählen Sie einen Administrator für die Zuweisung aus.",
+    "created": "Erstellt",
+    "lastAction": "Letztes Update",
+    "attachment": "Anhang",
+    "tierAppOrg": "Anwendung / Organisation",
+    "default": "Standard",
+    "all": "Alle"
   },
   "license": {
     "title": "Lizenz & Abonnement",

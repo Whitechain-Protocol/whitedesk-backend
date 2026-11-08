@@ -21,6 +21,7 @@ import {
 import { X, Download, Share2 } from 'lucide-react-native';
 import * as Sharing from 'expo-sharing';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface ImagePreviewModalProps {
   visible: boolean;
@@ -35,6 +36,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
   fileName,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [windowDimensions, setWindowDimensions] = useState(Dimensions.get('window'));
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -160,14 +162,19 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(shareUri, {
           mimeType: mime,
-          dialogTitle: fileName || (isPdf ? 'Belgeyi Paylaş' : 'Görseli Paylaş'),
+          dialogTitle: fileName || (isPdf ? t('helpdesk.media_preview.share_document') : t('helpdesk.media_preview.share_image')),
         });
       } else {
-        Alert.alert('Bilgi', 'Paylaşım bu cihazda desteklenmiyor.');
+        Alert.alert(t('helpdesk.media_preview.info_title'), t('helpdesk.media_preview.share_unsupported'));
       }
     } catch (e: any) {
       console.warn('[ImagePreviewModal] Share failed:', e);
-      Alert.alert('Hata', 'Paylaşım gerçekleştirilemedi: ' + (e?.message || 'Bilinmeyen hata'));
+      Alert.alert(
+        t('common.error'),
+        t('helpdesk.media_preview.share_failed', {
+          error: e?.message || t('helpdesk.media_preview.unknown_error'),
+        })
+      );
     }
   };
 
@@ -183,7 +190,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
         : defaultName.toLowerCase().endsWith('.png')
         ? 'image/png'
         : 'image/jpeg';
-      const mediaType = isPdf ? 'Download' : 'Image';
+      const mediaType = (isPdf ? t('common.download') : t('common.image')) as any;
 
       let cleanPath = imageUri.replace(/^file:\/\//, '');
       if (isPdf && fileName) {
@@ -200,22 +207,22 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
           cleanPath
         );
         Alert.alert(
-          'Başarılı',
+          t('common.success'),
           isPdf
-            ? 'Belge İndirilenler (Downloads/WhiteDesk) klasörüne kaydedildi.'
-            : 'Görsel Galeriye (WhiteDesk albümü) başarıyla kaydedildi.'
+            ? t('helpdesk.media_preview.saved_pdf_android')
+            : t('helpdesk.media_preview.saved_image_android')
         );
       } else {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(cleanPath, {
             mimeType,
-            dialogTitle: 'Dosyayı Kaydet',
+            dialogTitle: t('helpdesk.media_preview.save_file_dialog'),
           });
         }
       }
     } catch (e: any) {
       console.warn('[ImagePreviewModal] Save media failed:', e);
-      Alert.alert('Hata', 'Dosya cihaza kaydedilemedi.');
+      Alert.alert(t('common.error'), t('helpdesk.media_preview.save_failed'));
     } finally {
       setIsSaving(false);
     }

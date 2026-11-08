@@ -13,6 +13,7 @@ import {
   Users,
   Check,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../services/i18nService';
 
 interface TenantLicenseSectionProps {
   isExpanded: boolean;
@@ -31,6 +32,8 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
   onGenerateUserAddon,
   copiedConsoleHash,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.geminiCard}>
       <TouchableOpacity
@@ -42,11 +45,11 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
           <Sparkles size={20} color="#059669" strokeWidth={2.2} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.geminiCardTitle}>Lisans & Kotalar</Text>
-          <Text style={styles.geminiCardSubtitle}>14 gün deneme, koltuklar ve paketler</Text>
+          <Text style={styles.geminiCardTitle}>{t('provisioning.tenant_station.license_title')}</Text>
+          <Text style={styles.geminiCardSubtitle}>{t('provisioning.tenant_station.license_subtitle')}</Text>
         </View>
         <View style={[styles.geminiStatusPill, { backgroundColor: '#DCFCE7' }]}>
-          <Text style={[styles.geminiStatusPillText, { color: '#15803D' }]}>14 Gün Deneme</Text>
+          <Text style={[styles.geminiStatusPillText, { color: '#15803D' }]}>{t('provisioning.tenant_station.trial_14_days_pill')}</Text>
         </View>
         {isExpanded ? (
           <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -61,16 +64,16 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
           <View style={styles.quotaCountersRow}>
             <View style={styles.quotaBox}>
               <Text style={styles.quotaBoxNumber}>{tenantStats.adminCount} / 3</Text>
-              <Text style={styles.quotaBoxLabel}>Operatör Koltuğu</Text>
+              <Text style={styles.quotaBoxLabel}>{t('provisioning.tenant_station.operator_seat_label')}</Text>
             </View>
             <View style={styles.quotaBox}>
               <Text style={styles.quotaBoxNumber}>{tenantStats.userCount} / 10</Text>
-              <Text style={styles.quotaBoxLabel}>Müşteri Kotası</Text>
+              <Text style={styles.quotaBoxLabel}>{t('provisioning.tenant_station.customer_quota_label')}</Text>
             </View>
           </View>
 
           {/* EK LİSANSLAR */}
-          <Text style={styles.subSectionHeader}>Ek Lisanslar</Text>
+          <Text style={styles.subSectionHeader}>{t('provisioning.tenant_station.extra_licenses_header')}</Text>
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
             <TouchableOpacity
               style={styles.addonActionBtn}
@@ -78,7 +81,7 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
               activeOpacity={0.7}
             >
               <UserPlus size={14} color="#2563EB" style={{ marginRight: 4 }} />
-              <Text style={styles.addonActionBtnText}>+1 Operatör ($9)</Text>
+              <Text style={styles.addonActionBtnText}>{t('provisioning.tenant_station.addon_operator_btn')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -87,7 +90,7 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
               activeOpacity={0.7}
             >
               <Users size={14} color="#2563EB" style={{ marginRight: 4 }} />
-              <Text style={styles.addonActionBtnText}>+25 Müşteri ($9)</Text>
+              <Text style={styles.addonActionBtnText}>{t('provisioning.tenant_station.addon_customer_btn')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -95,32 +98,32 @@ export const TenantLicenseSection: React.FC<TenantLicenseSectionProps> = ({
             <View style={styles.copiedBanner}>
               <Check size={14} color="#16A34A" style={{ marginRight: 6 }} />
               <Text style={styles.copiedBannerText} numberOfLines={1}>
-                Yeni Hash: {copiedConsoleHash}
+                {t('provisioning.tenant_station.new_hash_prefix', { hash: copiedConsoleHash })}
               </Text>
             </View>
           )}
 
           {/* LİSANS PAKETLERİ */}
-          <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>Lisans Paketleri</Text>
+          <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>{t('provisioning.tenant_station.license_packages_header')}</Text>
           <View style={styles.tierPlanBox}>
-            <Text style={styles.tierPlanName}>Starter Plan</Text>
-            <Text style={styles.tierPlanPrice}>$19 / ay</Text>
-            <Text style={styles.tierPlanDesc}>3 Operatör • 50 Müşteri</Text>
+            <Text style={styles.tierPlanName}>{t('provisioning.tenant_station.starter_title')}</Text>
+            <Text style={styles.tierPlanPrice}>{t('provisioning.tenant_station.starter_price')}</Text>
+            <Text style={styles.tierPlanDesc}>{t('provisioning.tenant_station.starter_desc')}</Text>
           </View>
 
           <View style={[styles.tierPlanBox, styles.tierPlanBoxPro]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.tierPlanName}>Pro Plan ⭐</Text>
-              <Text style={styles.popularBadge}>Önerilen</Text>
+              <Text style={styles.tierPlanName}>{t('provisioning.tenant_station.pro_title')}</Text>
+              <Text style={styles.popularBadge}>{t('provisioning.tenant_station.recommended_badge')}</Text>
             </View>
-            <Text style={styles.tierPlanPrice}>$49 / ay</Text>
-            <Text style={styles.tierPlanDesc}>10 Operatör • 250 Müşteri</Text>
+            <Text style={styles.tierPlanPrice}>{t('provisioning.tenant_station.pro_price')}</Text>
+            <Text style={styles.tierPlanDesc}>{t('provisioning.tenant_station.pro_desc')}</Text>
           </View>
 
           <View style={styles.tierPlanBox}>
-            <Text style={styles.tierPlanName}>Enterprise Plan</Text>
-            <Text style={styles.tierPlanPrice}>$149 / ay</Text>
-            <Text style={styles.tierPlanDesc}>Sınırsız Operatör • Sınırsız Müşteri</Text>
+            <Text style={styles.tierPlanName}>{t('provisioning.tenant_station.enterprise_title')}</Text>
+            <Text style={styles.tierPlanPrice}>{t('provisioning.tenant_station.enterprise_price')}</Text>
+            <Text style={styles.tierPlanDesc}>{t('provisioning.tenant_station.enterprise_desc')}</Text>
           </View>
         </View>
       )}

@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Sākt jaunu diskusiju",
-    "tierTenant": "Īrnieks"
+    "tierTenant": "Īrnieks",
+    "adminRevokeDesc": "Administratora tiesības tiks noņemtas no šīs ierīces, un konsole tiks bloķēta.",
+    "removeAdminTitle": "Noņemt administratoru",
+    "removeAdminConfirm": "Vai tiešām vēlaties noņemt šo administratoru un visus tā piešķīrumus?",
+    "selectAdminReq": "Izvēlēties administratoru",
+    "selectAdminReqDesc": "Lūdzu, izvēlieties administratoru, ko piešķirt.",
+    "created": "Izveidots",
+    "lastAction": "Pēdējais atjauninājums",
+    "attachment": "Pielikums",
+    "tierAppOrg": "Lietotne / Organizācija",
+    "default": "Noklusējums",
+    "all": "Visi"
   },
   "license": {
     "title": "Manas licences",

@@ -16,6 +16,7 @@ import {
   Check,
 } from 'lucide-react-native';
 import { HelpDeskTicket, helpDeskService } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface TicketOrgAssignModalProps {
   visible: boolean;
@@ -34,6 +35,7 @@ export function TicketOrgAssignModal({
   apps = [],
   onSave,
 }: TicketOrgAssignModalProps) {
+  const { t } = useTranslation();
   const [selectedOrgId, setSelectedOrgId] = useState<string>('default');
   const [selectedAppId, setSelectedAppId] = useState<string>('inwhite');
   const [saving, setSaving] = useState<boolean>(false);
@@ -102,7 +104,7 @@ export function TicketOrgAssignModal({
     }
   };
 
-  const userDisplayName = 'Kullanıcı';
+  const userDisplayName = t('helpdesk.user');
 
   return (
     <Modal
@@ -122,8 +124,8 @@ export function TicketOrgAssignModal({
           {/* Başlık Çubuğu */}
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.titleText}>Birim / Uygulama Düzenle</Text>
-              <Text style={styles.subtitleText}>Birim ve uygulama ataması</Text>
+              <Text style={styles.titleText}>{t('helpdesk.org_assign.title')}</Text>
+              <Text style={styles.subtitleText}>{t('helpdesk.org_assign.subtitle')}</Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
               <X size={18} color="#475569" strokeWidth={2.4} />
@@ -136,11 +138,11 @@ export function TicketOrgAssignModal({
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <Building2 size={16} color="#1B64DA" style={{ marginRight: 8 }} />
                 <Text style={styles.infoSubjectText} numberOfLines={1}>
-                  {ticket.subject || 'Destek Talebi'}
+                  {ticket.subject || t('helpdesk.org_assign.default_subject')}
                 </Text>
               </View>
               <Text style={styles.infoUserMeta}>
-                Bilet: <Text style={{ fontWeight: '700', color: '#0F172A' }}>#{ticket.id}</Text> • Kullanıcı:{' '}
+                {t('helpdesk.org_assign.ticket_label')}: <Text style={{ fontWeight: '700', color: '#0F172A' }}>#{ticket.id}</Text> • {t('helpdesk.user')}:{' '}
                 <Text style={{ fontWeight: '700', color: '#0F172A' }}>{userDisplayName}</Text>
               </Text>
             </View>
@@ -149,7 +151,7 @@ export function TicketOrgAssignModal({
             <View style={styles.sectionContainer}>
               <View style={styles.sectionLabelRow}>
                 <Layers size={15} color="#1B64DA" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionLabel}>Organizasyon</Text>
+                <Text style={styles.sectionLabel}>{t('helpdesk.org_assign.section_org')}</Text>
               </View>
 
               <ScrollView
@@ -164,7 +166,7 @@ export function TicketOrgAssignModal({
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.chipPillText, selectedOrgId === 'default' && styles.chipPillTextActive]}>
-                    Hepsi
+                    {t('helpdesk.org_assign.all')}
                   </Text>
                   {selectedOrgId === 'default' && <Check size={13} color="#FFFFFF" style={{ marginLeft: 5 }} />}
                 </TouchableOpacity>
@@ -193,7 +195,7 @@ export function TicketOrgAssignModal({
             <View style={styles.sectionContainer}>
               <View style={styles.sectionLabelRow}>
                 <Grid size={15} color="#1B64DA" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionLabel}>Uygulama</Text>
+                <Text style={styles.sectionLabel}>{t('helpdesk.org_assign.section_app')}</Text>
               </View>
 
               <ScrollView
@@ -208,7 +210,7 @@ export function TicketOrgAssignModal({
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.chipPillText, (selectedAppId === 'inwhite' || selectedAppId === 'all') && styles.chipPillTextActive]}>
-                    Hepsi
+                    {t('helpdesk.org_assign.all')}
                   </Text>
                   {(selectedAppId === 'inwhite' || selectedAppId === 'all') && <Check size={13} color="#FFFFFF" style={{ marginLeft: 5 }} />}
                 </TouchableOpacity>
@@ -237,7 +239,7 @@ export function TicketOrgAssignModal({
           {/* Alt Aksiyon Butonları */}
           <View style={styles.bottomBar}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.8} disabled={saving}>
-              <Text style={styles.cancelBtnText}>Vazgeç</Text>
+              <Text style={styles.cancelBtnText}>{t('helpdesk.cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8} disabled={saving}>
@@ -246,7 +248,7 @@ export function TicketOrgAssignModal({
               ) : (
                 <>
                   <Check size={17} color="#FFFFFF" strokeWidth={2.4} style={{ marginRight: 6 }} />
-                  <Text style={styles.saveBtnText}>Kaydet</Text>
+                  <Text style={styles.saveBtnText}>{t('helpdesk.save')}</Text>
                 </>
               )}
             </TouchableOpacity>

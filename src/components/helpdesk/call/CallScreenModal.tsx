@@ -23,6 +23,7 @@ import {
 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { VoiceCallSession } from '../../../services/voiceCallService';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface CallScreenModalProps {
   session: VoiceCallSession | null;
@@ -48,6 +49,7 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
   onAttachFile,
   visible = false,
 }) => {
+  const { t } = useTranslation();
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
 
   // Canlı ses spektrumu animasyonu (bağlantı kurulduğunda)
@@ -122,7 +124,7 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
 
     // Kullanıcı ekranında karşı taraf her zaman 'Admin'
     if (!isCurrentDeviceAdmin) {
-      return 'Admin';
+      return t('helpdesk.admin_role_short');
     }
 
     // Admin ekranında kullanıcı bilgisi:
@@ -131,11 +133,11 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
 
     if (
       otherAlias &&
-      otherAlias !== 'Kullanıcı' &&
+      otherAlias !== t('helpdesk.call.role_user') &&
       otherAlias !== 'User' &&
-      otherAlias !== 'Siz' &&
+      otherAlias !== t('helpdesk.call.you') &&
       !otherAlias.toLowerCase().includes('admin') &&
-      !otherAlias.toLowerCase().includes('operatör') &&
+      !otherAlias.toLowerCase().includes(t('helpdesk.call.operator_keyword')) &&
       !otherAlias.startsWith('wh_') &&
       !otherAlias.startsWith('usr_')
     ) {
@@ -166,7 +168,7 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
             {getDisplayName()}
           </Text>
           <Text style={styles.minimizedTimer}>
-            {isConnected ? formatDuration(session.durationSeconds) : 'Görüşme sürüyor'}
+            {isConnected ? formatDuration(session.durationSeconds) : t('helpdesk.call.call_in_progress')}
           </Text>
           <ChevronUp size={16} color="rgba(255, 255, 255, 0.7)" style={{ marginLeft: 4 }} />
         </TouchableOpacity>
@@ -208,7 +210,7 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
               <View style={styles.cryptoBadge}>
                 <Lock size={12} color="#6EE7B7" style={{ marginRight: 6 }} />
                 <Text style={styles.cryptoBadgeText}>
-                  {session.connectionMode === 'p2p_direct' ? 'Uçtan uca şifreli - P2P' : 'Uçtan uca şifreli - TURN Röle'}
+                  {session.connectionMode === 'p2p_direct' ? t('helpdesk.call.e2ee_p2p') : t('helpdesk.call.e2ee_turn')}
                 </Text>
               </View>
             </View>
@@ -222,13 +224,13 @@ export const CallScreenModal: React.FC<CallScreenModalProps> = ({
               {/* ALTINDA: GELEN ARAMA / GİDEN ARAMA / SÜRE */}
               <View style={styles.statusBox}>
                 {isOutgoing && (
-                  <Text style={styles.statusText}>Giden arama</Text>
+                  <Text style={styles.statusText}>{t('helpdesk.call.outgoing_call')}</Text>
                 )}
                 {isIncoming && (
-                  <Text style={styles.statusText}>Gelen arama</Text>
+                  <Text style={styles.statusText}>{t('helpdesk.call.incoming_call')}</Text>
                 )}
                 {isConnecting && (
-                  <Text style={styles.statusText}>Bağlanıyor...</Text>
+                  <Text style={styles.statusText}>{t('helpdesk.call.connecting')}</Text>
                 )}
                 {isConnected && (
                   <View style={styles.connectedBox}>

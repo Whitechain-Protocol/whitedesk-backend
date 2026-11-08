@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { i18nService } from './i18nService';
 
 /**
  * WhiteDesk Sovereign Push Client (Google FCM & Apple APNs)
@@ -113,6 +114,7 @@ export const pushClient = {
         },
         body: JSON.stringify({
           action: 'send_call',
+          type: callType === 'ptt' ? 'direct_ptt' : (callType === 'remote_desktop' ? 'remote_desktop_offer' : 'incoming_call'),
           targetWhiteId,
           callerAlias,
           callerWhiteId,
@@ -335,7 +337,8 @@ export const pushClient = {
   ): Promise<boolean> {
     try {
       const sanitizedUrl = backendUrl.replace(/\/$/, '');
-      let title = 'inWhite Destek';
+      const defaultSupportTitle = i18nService.t('ticket_service.push_support_title');
+      let title = defaultSupportTitle;
       let bodyText = '';
       let titleTr: string | undefined;
       let titleEn: string | undefined;
@@ -348,11 +351,11 @@ export const pushClient = {
         titleEn = payloadOrTitle.titleEn;
         bodyTr = payloadOrTitle.bodyTr;
         bodyEn = payloadOrTitle.bodyEn;
-        title = payloadOrTitle.title || titleTr || titleEn || 'inWhite Destek';
+        title = payloadOrTitle.title || titleTr || titleEn || defaultSupportTitle;
         bodyText = payloadOrTitle.body || bodyTr || bodyEn || '';
         finalTicketId = payloadOrTitle.ticketId;
       } else {
-        title = payloadOrTitle || 'inWhite Destek';
+        title = payloadOrTitle || defaultSupportTitle;
         bodyText = body || '';
         finalTicketId = ticketId;
       }
@@ -366,7 +369,7 @@ export const pushClient = {
         body: JSON.stringify({
           targetWhiteId,
           senderWhiteId,
-          senderName: 'inWhite Destek',
+          senderName: defaultSupportTitle,
           title,
           body: bodyText,
           title_tr: titleTr,

@@ -37,7 +37,6 @@ Böylece D1 üzerinde **3 geçici (buharlaşan) tablo** (`transient_messages`, `
 | **11** | `whitedesk_app_requests` | Yeni uygulama/organizasyon talepleri | `SERIAL` -> `INTEGER PRIMARY KEY AUTOINCREMENT` |
 | **12** | `whitedesk_ticket_ratings` | Temsilci memnuniyet puanları (`1-5` yıldız) | `CHECK (rating >= 1 AND rating <= 5)` SQLite'ta birebir desteklenir |
 | **13** | `whitedesk_system_config` | Küresel sistem yapılandırma anahtar-değer tablosu | `config_value TEXT`, `updated_at TEXT` |
-| **14** | `whitedesk_tenant_licenses` *(VIEW)* | `whitedesk_enterprises` ve `whitedesk_license_plans` tablolarını birleştiren lisans görünümü | SQLite `CREATE VIEW IF NOT EXISTS` ile birebir desteklenir |
 
 ---
 

@@ -16,7 +16,7 @@ export interface AddAppModalProps {
   onChangeAppId: (text: string) => void;
   onSubmit: () => void;
   language?: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string | Record<string, string | number>, en?: string) => string;
 }
 
 export const AddAppModal: React.FC<AddAppModalProps> = ({
@@ -45,12 +45,12 @@ export const AddAppModal: React.FC<AddAppModalProps> = ({
         >
           <View style={styles.container}>
             <Text style={styles.title}>
-              {getLabel('helpdesk.newAppModalTitle', 'Yeni Uygulama Kaydet', 'Register New Application')}
+              {getLabel('helpdesk.newAppModalTitle')}
             </Text>
 
             <TextInput
               style={styles.input}
-              placeholder={getLabel('helpdesk.newAppIdPlaceholder', 'Uygulama Kodu (Örn: crm_portal, mobil_app)', 'App Code (e.g. crm_portal)')}
+              placeholder={getLabel('helpdesk.newAppIdPlaceholder')}
               placeholderTextColor="#94a3b8"
               value={appIdInput}
               onChangeText={onChangeAppId}
@@ -61,7 +61,7 @@ export const AddAppModal: React.FC<AddAppModalProps> = ({
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                 <Text style={styles.cancelBtnText}>
-                  {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                  {getLabel('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -75,7 +75,7 @@ export const AddAppModal: React.FC<AddAppModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.submitBtnText}>
-                  {getLabel('helpdesk.addBtn', 'Ekle', 'Add')}
+                  {getLabel('helpdesk.addBtn')}
                 </Text>
               </TouchableOpacity>
             </View>

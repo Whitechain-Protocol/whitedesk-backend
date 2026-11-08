@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TextInput, Switch } from 'react-native';
 import { CheckCircle2 } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface TicketClosurePolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface TicketClosurePolicyProps {
 export const TicketClosurePolicy: React.FC<TicketClosurePolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const requireUserConfirmation = config.closure?.requireUserConfirmation ?? true;
   const autoCloseHours = config.closure?.autoCloseHours ?? 24;
 
@@ -47,12 +47,10 @@ export const TicketClosurePolicy: React.FC<TicketClosurePolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Ticket Closure & Resolution Confirmation' : 'Bilet Kapama & Çözüm Teyidi'}
+            {t('settings.advanced_features.closure.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Controls mandatory user resolution confirmation and automated ticket closing rules.'
-              : 'Operatör bileti çözüldü olarak işaretlediğinde, kullanıcının çözümü teyit etmesini ve otomatik kapanma sürelerini denetler.'}
+            {t('settings.advanced_features.closure.description')}
           </Text>
         </View>
       </View>
@@ -62,12 +60,10 @@ export const TicketClosurePolicy: React.FC<TicketClosurePolicyProps> = ({
         <View style={styles.rowBetween}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.optionTitle}>
-              {isEn ? 'Require User Resolution Confirmation' : 'Kullanıcı Çözüm Onayı Zorunlu'}
+              {t('settings.advanced_features.closure.require_user_title')}
             </Text>
             <Text style={styles.optionDesc}>
-              {isEn
-                ? 'Ticket remains pending confirmation until user explicitly verifies the issue is resolved.'
-                : 'Operatör çözüldü dese bile kullanıcı "Evet, çözüldü" diyene kadar bilet açık/teyit bekliyor durumunda kalır.'}
+              {t('settings.advanced_features.closure.require_user_desc')}
             </Text>
           </View>
           <Switch
@@ -82,12 +78,10 @@ export const TicketClosurePolicy: React.FC<TicketClosurePolicyProps> = ({
         <View style={[styles.rowBetween, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F1F5F9' }]}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.optionTitle}>
-              {isEn ? 'Auto-Close if User Does Not Respond' : 'Kullanıcı Yanıt Vermezse Otomatik Kapanma'}
+              {t('settings.advanced_features.closure.auto_close_title')}
             </Text>
             <Text style={styles.optionDesc}>
-              {isEn
-                ? 'Hours to wait after resolution notification before closing ticket automatically.'
-                : 'Çözüm bildirimi sonrası kullanıcı onay veya itiraz vermezse bilet bu sürede otomatik kapanır.'}
+              {t('settings.advanced_features.closure.auto_close_desc')}
             </Text>
           </View>
           <View style={styles.inputWrap}>
@@ -99,10 +93,10 @@ export const TicketClosurePolicy: React.FC<TicketClosurePolicyProps> = ({
                 const num = parseInt(txt.replace(/[^0-9]/g, ''), 10) || 0;
                 handleChangeAutoCloseHours(num);
               }}
-              placeholder="24"
+              placeholder={t('helpdesk.closure_hours_placeholder')}
               placeholderTextColor="#94A3B8"
             />
-            <Text style={styles.inputSuffix}>{isEn ? 'Hours' : 'Saat'}</Text>
+            <Text style={styles.inputSuffix}>{t('settings.advanced_features.closure.hours_suffix')}</Text>
           </View>
         </View>
       </View>

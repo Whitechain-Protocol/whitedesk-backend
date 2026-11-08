@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Switch } from 'react-native';
 import { FileCheck2, Check } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface ResolutionProofPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface ResolutionProofPolicyProps {
 export const ResolutionProofPolicy: React.FC<ResolutionProofPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
 
   const handleToggleProofOfIntegrity = (val: boolean) => {
     onChange(prev => ({
@@ -45,12 +45,10 @@ export const ResolutionProofPolicy: React.FC<ResolutionProofPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Proof of Integrity (Cryptographic Receipt)' : 'Değişmezlik İspatı (Kriptografik Makbuz)'}
+            {t('settings.advanced_features.proof_of_integrity.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Generate verifiable cryptographic closure receipt with Merkle root and dual signatures.'
-              : 'Kapanan her talep için iki tarafın cihazında karşılıklı doğrulanabilir matematiksel kapanış özeti üretir.'}
+            {t('settings.advanced_features.proof_of_integrity.description')}
           </Text>
         </View>
         <Switch
@@ -78,9 +76,7 @@ export const ResolutionProofPolicy: React.FC<ResolutionProofPolicyProps> = ({
             )}
           </View>
           <Text style={styles.checkboxText}>
-            {isEn
-              ? 'Auto-download receipt on ticket resolution (.json)'
-              : 'Talep kapandığında Değişmezlik Makbuzunu otomatik indir (.json)'}
+            {t('settings.advanced_features.proof_of_integrity.auto_download_label')}
           </Text>
         </TouchableOpacity>
       )}

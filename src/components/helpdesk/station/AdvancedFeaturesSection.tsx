@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../types';
+import { useTranslation } from '../../../services/i18nService';
 import {
   VoiceCallPolicy,
   TicketPttPolicy,
@@ -29,7 +30,7 @@ interface AdvancedFeaturesSectionProps {
   onSave: (newConfig: AdvancedFeaturesConfig) => Promise<void>;
   saving: boolean;
   language: string;
-  getLabel?: (key: string, tr: string, en: string) => string;
+  getLabel?: (key: string, tr?: string, en?: string) => string;
   availableOrgs?: Array<{ org_id: string; name: string }>;
 }
 
@@ -40,20 +41,20 @@ export const AdvancedFeaturesSection: React.FC<AdvancedFeaturesSectionProps> = (
   language = 'tr',
   availableOrgs = [],
 }) => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<AdvancedFeaturesConfig>(initialConfig);
   const [savedBanner, setSavedBanner] = useState(false);
-  const isEn = language === 'en';
 
   useEffect(() => {
     setConfig(initialConfig);
   }, [initialConfig]);
 
   const orgList = availableOrgs.length > 0 ? availableOrgs : [
-    { org_id: 'default', name: 'Genel Kurum / Merkez' },
-    { org_id: 'support', name: 'Müşteri Hizmetleri & Destek' },
-    { org_id: 'field', name: 'Saha & Operasyon' },
-    { org_id: 'logistics', name: 'Lojistik & Dağıtım' },
-    { org_id: 'it', name: 'Bilgi İşlem (IT)' },
+    { org_id: 'default', name: t('settings.advanced_features.default_orgs.general') },
+    { org_id: 'support', name: t('settings.advanced_features.default_orgs.support') },
+    { org_id: 'field', name: t('settings.advanced_features.default_orgs.field') },
+    { org_id: 'logistics', name: t('settings.advanced_features.default_orgs.logistics') },
+    { org_id: 'it', name: t('settings.advanced_features.default_orgs.it') },
   ];
 
   const handleSavePress = async () => {
@@ -69,16 +70,14 @@ export const AdvancedFeaturesSection: React.FC<AdvancedFeaturesSectionProps> = (
         <View style={styles.successBanner}>
           <CheckCircle2 size={16} color="#3B82F6" style={{ marginRight: 8 }} />
           <Text style={styles.successBannerText}>
-            {isEn ? 'Advanced settings updated successfully.' : 'Gelişmiş özellikler başarıyla güncellendi.'}
+            {t('settings.advanced_features.actions.saved_success')}
           </Text>
         </View>
       )}
 
       {/* SAYFA AÇIKLAMASI */}
       <Text style={styles.pageDescription}>
-        {isEn
-          ? 'Configure real-time communication channels, ticket security, SLA and cryptographic lifecycle policies for your organization.'
-          : 'Kuruluşunuz için gerçek zamanlı iletişim, talep güvenliği, SLA ve kriptografik yaşam döngüsü kurallarını yapılandırın.'}
+        {t('settings.advanced_features.page_description')}
       </Text>
 
       {/* ───────────────────────────────────────────────────────────── */}
@@ -86,7 +85,7 @@ export const AdvancedFeaturesSection: React.FC<AdvancedFeaturesSectionProps> = (
       {/* ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionHeaderRow}>
         <Text style={styles.sectionTitle}>
-          {isEn ? 'Communication Channels' : 'İletişim Kanalları'}
+          {t('settings.advanced_features.section_communication')}
         </Text>
       </View>
 
@@ -124,7 +123,7 @@ export const AdvancedFeaturesSection: React.FC<AdvancedFeaturesSectionProps> = (
       {/* ───────────────────────────────────────────────────────────── */}
       <View style={[styles.sectionHeaderRow, { marginTop: 16 }]}>
         <Text style={styles.sectionTitle}>
-          {isEn ? 'Ticket Security & Lifecycle' : 'Talep Güvenliği ve Yaşam Döngüsü'}
+          {t('settings.advanced_features.section_lifecycle')}
         </Text>
       </View>
 
@@ -183,7 +182,7 @@ export const AdvancedFeaturesSection: React.FC<AdvancedFeaturesSectionProps> = (
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <ShieldCheck size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
             <Text style={styles.saveButtonText}>
-              {isEn ? 'Save Settings' : 'Ayarları Kaydet'}
+              {t('settings.advanced_features.actions.save')}
             </Text>
           </View>
         )}

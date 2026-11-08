@@ -18,6 +18,7 @@ import {
 } from 'lucide-react-native';
 import { helpDeskService } from '../../../../services/helpDeskService';
 import { AdminSubStatus } from '../../../../services/helpdesk/adminRosterService';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface WorkStatusModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
   onClose,
   language = 'tr',
 }) => {
+  const { t } = useTranslation();
   // Working Status States (Aktif / Pasif)
   const [statusActive, setStatusActive] = useState<boolean>(true);
   const [subStatus, setSubStatus] = useState<AdminSubStatus>('molada');
@@ -41,14 +43,14 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
   const [remainingText, setRemainingText] = useState<string>('');
 
   const formatRemainingDuration = (totalMins: number, targetTimestamp?: number): string => {
-    if (totalMins <= 0) return language === 'tr' ? 'Süresiz (Elle açana kadar)' : 'Indefinite';
+    if (totalMins <= 0) return t('work_status.modal.indefinite_manual');
     const d = Math.floor(totalMins / 1440);
     const h = Math.floor((totalMins % 1440) / 60);
     const m = totalMins % 60;
     const parts: string[] = [];
-    if (d > 0) parts.push(`${d} gün`);
-    if (h > 0) parts.push(`${h} sa`);
-    if (m > 0 || parts.length === 0) parts.push(`${m} dk`);
+    if (d > 0) parts.push(t('work_status.modal.unit_day_short', { count: d }));
+    if (h > 0) parts.push(t('work_status.modal.unit_hour_short', { count: h }));
+    if (m > 0 || parts.length === 0) parts.push(t('work_status.modal.unit_min_short', { count: m }));
     const durationStr = parts.join(' ');
 
     if (targetTimestamp) {
@@ -58,9 +60,9 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
         ? `${targetDate.toLocaleDateString([], { day: 'numeric', month: 'short' })} `
         : '';
       const timeStr = targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      return `Otomatik Aktif: ${dateStr}${timeStr} (${durationStr} kaldı)`;
+      return t('work_status.modal.auto_active_at', { time: `${dateStr}${timeStr}`, duration: durationStr });
     }
-    return `${durationStr} kaldı`;
+    return t('work_status.modal.remaining_duration', { duration: durationStr });
   };
 
   useEffect(() => {
@@ -148,7 +150,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
         subStatus,
         subStatus === 'diger' ? customReasonText : undefined
       );
-      setRemainingText(language === 'tr' ? 'Süresiz (Elle açana kadar)' : 'Indefinite');
+      setRemainingText(t('work_status.modal.indefinite_manual'));
     }
   };
 
@@ -192,7 +194,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Clock size={20} color="#2563EB" strokeWidth={2.2} />
               <Text style={styles.headerTitle}>
-                {language === 'tr' ? 'Çalışma Durumu' : 'Working Status'}
+                {t('work_status.modal.title')}
               </Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
@@ -213,7 +215,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
               >
                 <CheckCircle2 size={20} color={statusActive ? '#10B981' : '#64748B'} style={{ marginRight: 10 }} />
                 <Text style={[styles.statusToggleText, statusActive && styles.statusToggleTextGreen]}>
-                  {language === 'tr' ? 'Aktif' : 'Active'}
+                  {t('work_status.modal.status_active')}
                 </Text>
               </TouchableOpacity>
 
@@ -227,7 +229,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
               >
                 <Coffee size={20} color={!statusActive ? '#F59E0B' : '#64748B'} style={{ marginRight: 10 }} />
                 <Text style={[styles.statusToggleText, !statusActive && styles.statusToggleTextOrange]}>
-                  {language === 'tr' ? 'Pasif' : 'Passive'}
+                  {t('work_status.modal.status_passive')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -236,7 +238,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
             {!statusActive && (
               <View style={styles.passiveDetailSection}>
                 <Text style={styles.subSectionTitle}>
-                  {language === 'tr' ? 'Pasiflik Nedeni:' : 'Reason:'}
+                  {t('work_status.modal.passive_reason_label')}
                 </Text>
                 <View style={styles.subStatusRow}>
                   <TouchableOpacity
@@ -249,7 +251,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                   >
                     <Palmtree size={14} color={subStatus === 'izinde' ? '#D97706' : '#64748B'} style={{ marginRight: 6 }} />
                     <Text style={[styles.subStatusChipText, subStatus === 'izinde' && styles.subStatusChipTextActive]}>
-                      {language === 'tr' ? 'İzinde' : 'On Leave'}
+                      {t('work_status.modal.reason_leave')}
                     </Text>
                   </TouchableOpacity>
 
@@ -263,7 +265,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                   >
                     <Coffee size={14} color={subStatus === 'molada' ? '#D97706' : '#64748B'} style={{ marginRight: 6 }} />
                     <Text style={[styles.subStatusChipText, subStatus === 'molada' && styles.subStatusChipTextActive]}>
-                      {language === 'tr' ? 'Molada' : 'On Break'}
+                      {t('work_status.modal.reason_break')}
                     </Text>
                   </TouchableOpacity>
 
@@ -277,7 +279,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                   >
                     <HelpCircle size={14} color={subStatus === 'diger' ? '#D97706' : '#64748B'} style={{ marginRight: 6 }} />
                     <Text style={[styles.subStatusChipText, subStatus === 'diger' && styles.subStatusChipTextActive]}>
-                      {language === 'tr' ? 'Diğer' : 'Other'}
+                      {t('work_status.modal.reason_other')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -286,11 +288,11 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                 {subStatus === 'diger' && (
                   <View style={styles.customReasonContainer}>
                     <Text style={styles.customReasonLabel}>
-                      {language === 'tr' ? 'Neden Açıklaması:' : 'Explanation:'}
+                      {t('work_status.modal.custom_reason_label')}
                     </Text>
                     <TextInput
                       style={styles.customReasonInput}
-                      placeholder={language === 'tr' ? 'Nedeninizi belirtin...' : 'Specify reason...'}
+                      placeholder={t('work_status.modal.custom_reason_placeholder')}
                       placeholderTextColor="#94A3B8"
                       value={customReasonText}
                       onChangeText={handleCustomReasonChange}
@@ -301,16 +303,16 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
 
                 {/* Süre Seçimi Presetleri */}
                 <Text style={[styles.subSectionTitle, { marginTop: 14 }]}>
-                  {language === 'tr' ? 'Pasiflik Süresi (Ön Tanımlı):' : 'Preset Duration:'}
+                  {t('work_status.modal.preset_durations_label')}
                 </Text>
                 <View style={styles.durationPresetRow}>
                   {[
-                    { label: '15 dk', mins: 15 },
-                    { label: '30 dk', mins: 30 },
-                    { label: '1 sa', mins: 60 },
-                    { label: '2 sa', mins: 120 },
-                    { label: '4 sa', mins: 240 },
-                    { label: 'Süresiz', mins: 0 },
+                    { label: t('work_status.modal.preset_15m'), mins: 15 },
+                    { label: t('work_status.modal.preset_30m'), mins: 30 },
+                    { label: t('work_status.modal.preset_1h'), mins: 60 },
+                    { label: t('work_status.modal.preset_2h'), mins: 120 },
+                    { label: t('work_status.modal.preset_4h'), mins: 240 },
+                    { label: t('work_status.modal.preset_indefinite'), mins: 0 },
                   ].map((preset) => {
                     const isSelected = snoozeMins === preset.mins;
                     return (
@@ -337,7 +339,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                 {/* Net Süre Girişi (Gün, Saat, Dakika) */}
                 <View style={styles.customDurationSection}>
                   <Text style={styles.customDurationSectionTitle}>
-                    {language === 'tr' ? 'Net Süre Girişi (Gün / Saat / Dakika):' : 'Custom Duration (Day / Hour / Min):'}
+                    {t('work_status.modal.exact_duration_label')}
                   </Text>
                   <View style={styles.timeInputsRow}>
                     {/* Gün */}
@@ -351,7 +353,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                         onChangeText={(val) => handleCustomTimeChange('day', val)}
                         maxLength={3}
                       />
-                      <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Gün' : 'Day'}</Text>
+                      <Text style={styles.timeUnitLabel}>{t('work_status.modal.unit_day')}</Text>
                     </View>
 
                     <Text style={styles.timeUnitColon}>:</Text>
@@ -367,7 +369,7 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                         onChangeText={(val) => handleCustomTimeChange('hour', val)}
                         maxLength={2}
                       />
-                      <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Saat' : 'Hour'}</Text>
+                      <Text style={styles.timeUnitLabel}>{t('work_status.modal.unit_hour')}</Text>
                     </View>
 
                     <Text style={styles.timeUnitColon}>:</Text>
@@ -383,13 +385,11 @@ export const WorkStatusModal: React.FC<WorkStatusModalProps> = ({
                         onChangeText={(val) => handleCustomTimeChange('min', val)}
                         maxLength={2}
                       />
-                      <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Dakika' : 'Min'}</Text>
+                      <Text style={styles.timeUnitLabel}>{t('work_status.modal.unit_minute')}</Text>
                     </View>
                   </View>
                   <Text style={styles.customDurationHelperText}>
-                    {language === 'tr'
-                      ? 'Belirlenen süre sonunda otomatik Aktif duruma geçilir.'
-                      : 'Auto restores to Active after the specified duration.'}
+                    {t('work_status.modal.auto_restore_hint')}
                   </Text>
                 </View>
 

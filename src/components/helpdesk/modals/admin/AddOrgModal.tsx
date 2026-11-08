@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { Building2 } from 'lucide-react-native';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface AddOrgModalProps {
   visible: boolean;
@@ -33,6 +34,7 @@ export const AddOrgModal: React.FC<AddOrgModalProps> = ({
   language = 'tr',
   getLabel,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -52,19 +54,17 @@ export const AddOrgModal: React.FC<AddOrgModalProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
               <Building2 size={20} color="#3B82F6" style={{ marginRight: 8 }} />
               <Text style={styles.title}>
-                {language === 'tr' ? 'Yeni Organizasyon Ekle' : 'Add New Organization'}
+                {t('admin.add_org.title')}
               </Text>
             </View>
 
             <Text style={styles.subtitle}>
-              {language === 'tr'
-                ? 'Cosmos Makamı: Yeni bir firma / holding organizasyonu tanımlayınız.'
-                : 'Cosmos Authority: Define a new company / holding organization.'}
+              {t('admin.add_org.subtitle')}
             </Text>
 
             <TextInput
               style={[styles.input, { marginBottom: 10 }]}
-              placeholder={language === 'tr' ? 'Organizasyon Kodu (Örn: elektroser, holding_a)' : 'Org Code (e.g. elektroser)'}
+              placeholder={t('admin.add_org.code_placeholder')}
               placeholderTextColor="#94a3b8"
               value={orgIdInput}
               onChangeText={onChangeOrgId}
@@ -74,7 +74,7 @@ export const AddOrgModal: React.FC<AddOrgModalProps> = ({
 
             <TextInput
               style={[styles.input, { marginBottom: 16 }]}
-              placeholder={language === 'tr' ? 'Firma / Kurum Adı (Örn: Elektroser A.Ş.)' : 'Org Name (e.g. Elektroser Corp)'}
+              placeholder={t('admin.add_org.name_placeholder')}
               placeholderTextColor="#94a3b8"
               value={orgNameInput}
               onChangeText={onChangeOrgName}
@@ -83,7 +83,7 @@ export const AddOrgModal: React.FC<AddOrgModalProps> = ({
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                 <Text style={styles.cancelBtnText}>
-                  {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -97,7 +97,7 @@ export const AddOrgModal: React.FC<AddOrgModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.submitBtnText}>
-                  {getLabel('helpdesk.addBtn', 'Ekle', 'Add')}
+                  {t('helpdesk.addBtn')}
                 </Text>
               </TouchableOpacity>
             </View>

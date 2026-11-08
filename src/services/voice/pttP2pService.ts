@@ -1,5 +1,6 @@
 import { apiClient } from '../apiClient';
 import { helpDeskService } from '../helpDeskService';
+import { i18nService } from '../i18nService';
 import { VoiceCallSession } from './types';
 
 /**
@@ -22,7 +23,7 @@ export class PttP2pService {
       if (config.pushToTalk?.enabled === false) {
         return {
           allowed: false,
-          reason: 'Kurum yöneticisi bu masada bas-konuş telsiz özelliğini devre dışı bırakmıştır.',
+          reason: i18nService.t('voice.ptt_p2p.disabled_by_enterprise'),
         };
       }
 
@@ -30,7 +31,7 @@ export class PttP2pService {
       if (callerPrefs.pushToTalkEnabled === false) {
         return {
           allowed: false,
-          reason: 'Kendi ayarlarınızda bas-konuş özelliği kapalıdır. Profil ayarlarınızdan aktif edebilirsiniz.',
+          reason: i18nService.t('voice.ptt_p2p.disabled_in_own_settings'),
         };
       }
 
@@ -39,7 +40,7 @@ export class PttP2pService {
         if (calleePrefs.pushToTalkEnabled === false) {
           return {
             allowed: false,
-            reason: 'Kullanıcı bas-konuş çağrılarını kabul etmiyor.',
+            reason: i18nService.t('voice.ptt_p2p.callee_not_accepting_ptt'),
           };
         }
       }

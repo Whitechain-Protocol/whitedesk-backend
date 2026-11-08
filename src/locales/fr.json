@@ -804,7 +804,18 @@
     "appNamePlaceholder": "Nom de l'application (ex. Support Desk)",
     "appDescPlaceholder": "Brève description (facultatif)",
     "newDiscussion": "Démarrer une nouvelle discussion",
-    "tierTenant": "Locataire"
+    "tierTenant": "Locataire",
+    "adminRevokeDesc": "Les privilèges d'administrateur seront retirés de cet appareil et la console sera verrouillée.",
+    "removeAdminTitle": "Supprimer l'administrateur",
+    "removeAdminConfirm": "Êtes-vous sûr de vouloir supprimer cet administrateur et toutes ses affectations ?",
+    "selectAdminReq": "Sélectionner un administrateur",
+    "selectAdminReqDesc": "Veuillez sélectionner un administrateur à allouer.",
+    "created": "Créé",
+    "lastAction": "Dernière mise à jour",
+    "attachment": "Pièce jointe",
+    "tierAppOrg": "Application / Organisation",
+    "default": "Par défaut",
+    "all": "Tous"
   },
   "license": {
     "title": "Licence & Abonnement",

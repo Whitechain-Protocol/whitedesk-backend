@@ -7,6 +7,7 @@ import {
   OrgEntry 
 } from '../../../services/helpDeskService';
 import { ephemeralAuthService } from '../../../services/ephemeralAuthService';
+import { i18nService } from '../../../services/i18nService';
 
 export interface UseHelpDeskConsoleDataProps {
   ownWhiteId: string;
@@ -52,11 +53,13 @@ export function useHelpDeskConsoleData({
   const [licensePlans, setLicensePlans] = useState<Array<{
     id: string;
     name: string;
-    price: string;
-    operators: string;
-    customers: string;
-    is_recommended: boolean;
-    sort_order: number;
+    tier_level: number;
+    monthly_price: number;
+    annual_price: number;
+    features: string[];
+    grace_period: string;
+    grace_period_warning_interval: string;
+    is_active: boolean;
   }>>([]);
 
   const loadConsoleData = useCallback(async (targetTenantBlindId?: string) => {
@@ -169,19 +172,18 @@ export function useHelpDeskConsoleData({
     const unsubscribe = ephemeralAuthService.addListener(async (action) => {
       if (action.action === 'REVOKE') {
         Alert.alert(
-          language === 'tr' ? 'Yetki Bildirimi' : 'Authority Notice',
-          language === 'tr'
-            ? 'Yöneticilik yetkiniz üst makam tarafından geri alındı. Yerel kasanız sıfırlandı.'
-            : 'Your admin authority was revoked by a superior. Local vault has been wiped.'
+          i18nService.t('helpdesk.authority_notice_title'),
+          i18nService.t('helpdesk.authority_revoked_desc')
         );
         await loadData();
         await loadConsoleData();
       } else if (action.action === 'PROMOTE') {
+        const roleLabel = action.targetRole === 'global_admin'
+          ? i18nService.t('helpdesk.role_global_admin')
+          : i18nService.t('helpdesk.role_admin');
         Alert.alert(
-          language === 'tr' ? 'Tebrikler' : 'Promotion Granted',
-          language === 'tr'
-            ? `Yetkiniz yükseltildi: ${action.targetRole === 'global_admin' ? 'WhiteCosmos (Global Admin *)' : 'Yönetici (Admin)'}`
-            : `Your authority has been elevated to: ${action.targetRole}`
+          i18nService.t('helpdesk.promotion_granted_title'),
+          i18nService.t('helpdesk.promotion_granted_desc', { role: roleLabel })
         );
         await loadData();
         await loadConsoleData();

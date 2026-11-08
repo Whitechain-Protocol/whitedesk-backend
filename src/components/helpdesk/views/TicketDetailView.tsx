@@ -54,6 +54,7 @@ import { AttachedFile, RemoteDesktopScope } from '../types';
 import { isImageFile, getFileMimeType } from '../utils/fileMimeUtils';
 import { remoteDesktopService, RemoteDesktopSession } from '../../../services/remoteDesktopService';
 import { RemoteDesktopModal } from '../modals/RemoteDesktopModal';
+import { i18nService } from '../../../services/i18nService';
 
 interface TicketDetailViewProps {
   safeTop: number;
@@ -79,7 +80,7 @@ interface TicketDetailViewProps {
   onSetAttachedFiles?: (files: AttachedFile[]) => void;
   sending: boolean;
   language: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, trOrParams?: string | Record<string, string | number>, en?: string, maybeParams?: Record<string, string | number>) => string;
   formatWhiteId: (id: string) => string;
   formatAppId: (id?: string) => string;
   formatTicketDate: (ts: number, showTime?: boolean) => string;
@@ -224,6 +225,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   setIsInspectMode,
   onTriggerWhisperAt,
 }) => {
+  const t = getLabel;
   const [rdSession, setRdSession] = React.useState<RemoteDesktopSession | null>(
     remoteDesktopService.getSession()
   );
@@ -308,7 +310,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
       return (
         <View style={styles.pillAnswered}>
           <Text style={styles.pillAnsweredText}>
-            {getLabel('helpdesk.filterAnswered', 'Yanıtlandı', 'Answered')}
+            {getLabel('helpdesk.filterAnswered')}
           </Text>
         </View>
       );
@@ -317,7 +319,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
       return (
         <View style={styles.pillClosed}>
           <Text style={styles.pillClosedText}>
-            {getLabel('helpdesk.filterClosed', 'Kapalı', 'Closed')}
+            {getLabel('helpdesk.filterClosed')}
           </Text>
         </View>
       );
@@ -325,7 +327,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
     return (
       <View style={styles.pillOpen}>
         <Text style={styles.pillOpenText}>
-          {getLabel('helpdesk.filterOpen', 'Açık', 'Open')}
+          {getLabel('helpdesk.filterOpen')}
         </Text>
       </View>
     );
@@ -386,7 +388,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           >
             <ChevronLeft size={20} color="#64748B" style={{ marginRight: 4 }} />
             <Text style={styles.sectionTitleText}>
-              {getLabel('menu.helpDesk', 'Destek', 'Support')}
+              {getLabel('menu.helpDesk')}
             </Text>
           </TouchableOpacity>
 
@@ -438,7 +440,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                   } else {
                     void remoteDesktopService.startAdminOffer(
                       selectedTicket.id,
-                      customAlias || 'Admin',
+                      customAlias || getLabel('helpdesk.admin_role_short'),
                       selectedTicket.user_white_id || selectedTicket.user_blind_id || (selectedTicket as any).created_by || '',
                       ownWhiteId || ''
                     );
@@ -484,9 +486,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
             <View style={styles.rootConfidentialBanner}>
               <Lock size={13} color="#059669" style={{ marginRight: 6 }} />
               <Text style={styles.rootConfidentialBannerText}>
-                {language === 'tr'
-                  ? 'Tam Gizli: Bu bilet TheWhite ve Global Admin arasında doğrudan uçtan uca şifrelidir.'
-                  : 'Strictly Confidential: This ticket is end-to-end encrypted between TheWhite and Global Admin.'}
+                {getLabel('helpdesk.root_confidential_banner')}
               </Text>
             </View>
           )}
@@ -506,7 +506,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           {/* Tarih-saatin altındaki Transfer Satırı & Admin Seçimi */}
           {(isTransferMode || selectedTicket.transfer_status === 'pending') && (
             <View style={styles.transferInfoRow}>
-              <Text style={styles.transferInfoLabel}>{language === 'tr' ? 'Transfer Et:' : 'Hand Over:'}</Text>
+              <Text style={styles.transferInfoLabel}>{getLabel('helpdesk.hand_over_label')}</Text>
               {isTransferMode ? (
                 <TouchableOpacity
                   style={styles.transferAdminSelectBtn}
@@ -514,7 +514,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                   activeOpacity={0.7}
                 >
                   <Text style={styles.transferAdminSelectBtnText}>
-                    {selectedTransferAdmin ? `@${selectedTransferAdmin.alias}` : (language === 'tr' ? 'Admin Seçin...' : 'Select Admin...')}
+                    {selectedTransferAdmin ? `@${selectedTransferAdmin.alias}` : getLabel('helpdesk.select_admin_placeholder')}
                   </Text>
                   <ChevronLeft size={14} color="#64748B" style={{ transform: [{ rotate: '-90deg' }] }} />
                 </TouchableOpacity>
@@ -522,7 +522,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                 <View style={styles.transferBadgeFixed}>
                   <Text style={styles.transferBadgeFixedText}>
                     {selectedTicket.transfer_sender_alias ? `@${selectedTicket.transfer_sender_alias} ➔ ` : ''}
-                    {selectedTicket.transfer_target_alias ? `@${selectedTicket.transfer_target_alias}` : 'Onay Bekliyor'}
+                    {selectedTicket.transfer_target_alias ? `@${selectedTicket.transfer_target_alias}` : getLabel('helpdesk.awaiting_approval')}
                   </Text>
                 </View>
               )}
@@ -563,36 +563,41 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
 
               let senderLabel = '';
               if (isMine) {
-                senderLabel = language === 'tr' ? 'Ben' : 'You';
-              } else if (isAdmin) {
-                // Admin tarafında: Karşı taraf kullanıcıdır.
+                senderLabel = getLabel('helpdesk.me_sender');
+              } else if (!msg.is_admin) {
+                // Karşı taraf kullanıcıdır (İsim yazmışsa ismi, yazmamışsa Kullanıcı / User).
                 const rawAlias = msg.sender_alias?.trim();
+                const lowerAlias = rawAlias ? rawAlias.toLowerCase() : '';
                 const isGeneric = !rawAlias ||
-                  rawAlias.toLowerCase() === 'kullanıcı' ||
-                  rawAlias.toLowerCase() === 'kullanici' ||
-                  rawAlias.toLowerCase() === 'user' ||
-                  rawAlias.toLowerCase() === 'destek' ||
+                  lowerAlias === getLabel('helpdesk.user').toLowerCase() ||
+                  lowerAlias === 'kullanici' ||
+                  lowerAlias === 'user' ||
+                  lowerAlias === getLabel('helpdesk.support_fallback').toLowerCase() ||
                   rawAlias.startsWith('blind_') ||
                   rawAlias.length >= 30;
-                senderLabel = isGeneric ? (language === 'tr' ? 'Kullanıcı' : 'User') : rawAlias;
+                senderLabel = isGeneric ? getLabel('helpdesk.user') : rawAlias;
               } else {
-                // Kullanıcı tarafında: Karşı taraf admindir.
+                // Karşı taraf admindir (İsim yazmışsa ismi, yazmamışsa Admin).
                 const rawAlias = msg.sender_alias?.trim();
+                const lowerAlias = rawAlias ? rawAlias.toLowerCase() : '';
                 const isGeneric = !rawAlias ||
-                  rawAlias.toLowerCase() === 'admin' ||
-                  rawAlias.toLowerCase() === 'operator' ||
-                  rawAlias.toLowerCase() === 'destek' ||
-                  rawAlias.toLowerCase().includes('thewhite') ||
-                  rawAlias.toLowerCase().includes('whitecosmos') ||
-                  rawAlias.toLowerCase().startsWith('planet-');
-                senderLabel = isGeneric ? 'Admin' : rawAlias;
+                  lowerAlias === 'admin' ||
+                  lowerAlias === 'operator' ||
+                  lowerAlias === getLabel('helpdesk.admin_role_short').toLowerCase() ||
+                  lowerAlias === getLabel('helpdesk.support_fallback').toLowerCase() ||
+                  lowerAlias.includes('thewhite') ||
+                  lowerAlias.includes('whitecosmos') ||
+                  lowerAlias.startsWith('planet-') ||
+                  rawAlias.startsWith('blind_') ||
+                  rawAlias.length >= 30;
+                senderLabel = isGeneric ? getLabel('helpdesk.admin_role_short') : rawAlias;
               }
 
               // Çoklu ek çözümleme (Single base64, msg.attachments veya JSON Array)
               let msgAttachments: AttachedFile[] = [];
               if (msg.attachments && Array.isArray(msg.attachments) && msg.attachments.length > 0) {
                 msgAttachments = msg.attachments.map((a: any, aIdx: number) => {
-                  const effectiveName = a.name || `ek_${aIdx + 1}`;
+                  const effectiveName = a.name || getLabel('helpdesk.attachment_numbered', { index: aIdx + 1 });
                   const effectiveMime = a.mimeType || getFileMimeType(effectiveName);
                   const isImg = isImageFile(effectiveName, effectiveMime, a.data);
                   return {
@@ -608,7 +613,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                     const parsed = JSON.parse(msg.attachment_data);
                     if (Array.isArray(parsed)) {
                       msgAttachments = parsed.map((a: any, aIdx: number) => {
-                        const effectiveName = a.name || `ek_${aIdx + 1}`;
+                        const effectiveName = a.name || getLabel('helpdesk.attachment_numbered', { index: aIdx + 1 });
                         const effectiveMime = a.mimeType || getFileMimeType(effectiveName);
                         const isImg = isImageFile(effectiveName, effectiveMime, a.data);
                         return {
@@ -619,7 +624,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                         };
                       });
                     } else if (parsed && typeof parsed === 'object') {
-                      const effectiveName = parsed.name || msg.attachment_name || 'ek_dosya';
+                      const effectiveName = parsed.name || msg.attachment_name || getLabel('helpdesk.attachment_file_default');
                       const effectiveMime = parsed.mimeType || getFileMimeType(effectiveName);
                       const isImg = isImageFile(effectiveName, effectiveMime, parsed.data);
                       msgAttachments = [{
@@ -630,7 +635,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                       }];
                     }
                   } catch {
-                    const effectiveName = msg.attachment_name || 'belge.pdf';
+                    const effectiveName = msg.attachment_name || t('helpdesk.attachment_file_default');
                     const effectiveMime = getFileMimeType(effectiveName);
                     const isImg = isImageFile(effectiveName, effectiveMime, msg.attachment_data);
                     msgAttachments = [{
@@ -641,7 +646,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                     }];
                   }
                 } else {
-                  const effectiveName = msg.attachment_name || (msg.attachment_type === 'image' ? 'photo.jpg' : 'belge.pdf');
+                  const effectiveName = msg.attachment_name || (msg.attachment_type === 'image' ? t('helpdesk.attachment_photo_default') : t('helpdesk.attachment_file_default'));
                   const effectiveMime = getFileMimeType(effectiveName);
                   const isImg = isImageFile(effectiveName, effectiveMime, msg.attachment_data);
                   msgAttachments = [{
@@ -694,7 +699,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                     <View style={styles.whisperBadgeRow}>
                       <Lock size={10} color="#7C3AED" style={{ marginRight: 3 }} />
                       <Text style={styles.whisperBadgeText}>
-                        {msg.whisper_target_alias ? `Fısıltı: @${msg.whisper_target_alias}` : 'Özel Fısıltı'}
+                        {msg.whisper_target_alias
+                          ? getLabel('helpdesk.whisper_to_alias', { alias: msg.whisper_target_alias })
+                          : getLabel('helpdesk.private_whisper')}
                       </Text>
                     </View>
                   )}
@@ -711,14 +718,17 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                       return (
                         <View style={{ paddingVertical: 4 }}>
                           <Text style={[styles.messageBodyText, { fontStyle: 'italic', color: '#6D28D9' }]}>
-                            🔒 [Özel Fısıltı: @{msg.whisper_target_alias || 'Yönetici'} için şifrelendi]
+                            {getLabel('helpdesk.whisper_encrypted_for', { alias: msg.whisper_target_alias || getLabel('provisioning.role_admin') })}
                           </Text>
                         </View>
                       );
                     }
 
                     if (!msg.message) return null;
-                    const delimiter = '--- 📋 [Kayıt Bilgileri] ---';
+                    const regHeader = getLabel('helpdesk.registration_info_header');
+                    const dynamicDelimiter = `--- 📋 [${regHeader}] ---`;
+                    const legacyDelimiter = i18nService.t('helpdesk.registration_info_delimiter_legacy');
+                    const delimiter = msg.message.includes(dynamicDelimiter) ? dynamicDelimiter : legacyDelimiter;
                     if (msg.message.includes(delimiter)) {
                       const parts = msg.message.split(delimiter);
                       const mainText = parts[0] || '';
@@ -754,7 +764,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                         ]}>
                           <View style={styles.customFieldsBubbleHeader}>
                             <Tag size={11} color="#2563EB" style={{ marginRight: 4 }} />
-                            <Text style={styles.customFieldsBubbleTitle}>Kayıt Bilgileri</Text>
+                            <Text style={styles.customFieldsBubbleTitle}>{getLabel('helpdesk.record_info_title')}</Text>
                           </View>
                           {detailLines.map((line, lIdx) => (
                             <Text key={`det_${lIdx}`} style={styles.customFieldsBubbleLine}>
@@ -824,7 +834,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                             <FileText size={14} color="#2563EB" style={{ marginRight: 6 }} />
                           )}
                           <Text style={styles.msgAttachmentPillText} numberOfLines={1}>
-                            {att.name || (isImg ? `Görsel ${attIdx + 1}` : `Belge ${attIdx + 1}`)}
+                            {att.name || (isImg ? getLabel('helpdesk.image_numbered', { index: attIdx + 1 }) : getLabel('helpdesk.document_numbered', { index: attIdx + 1 }))}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -856,9 +866,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <AlertCircle size={20} color="#D97706" style={{ marginRight: 10 }} />
             <Text style={{ flex: 1, fontSize: 13, color: '#92400E', fontWeight: '700', lineHeight: 18 }}>
-              {language === 'tr'
-                ? 'Bu bilet SLA yanıt süresi aşıldığı için yeni bir temsilciye aktarılmıştır. Bilet salt-okunur moddadır.'
-                : 'This ticket was escalated due to SLA timeout. It is now in read-only mode.'}
+              {getLabel('helpdesk.sla_revoked_readonly_banner')}
             </Text>
           </View>
         </View>
@@ -877,7 +885,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <Edit3 size={14} color="#3B82F6" style={{ marginRight: 6 }} />
               <Text style={styles.editIndicatorText}>
-                {getLabel('helpdesk.editingMessage', 'Mesajı Düzenle', 'Edit Message')}
+                {getLabel('helpdesk.editingMessage')}
               </Text>
             </View>
             <TouchableOpacity
@@ -943,7 +951,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
               activeOpacity={0.7}
             >
               <X size={15} color="#DC2626" style={{ marginRight: 4 }} />
-              <Text style={styles.transferRejectBtnText}>Reddet</Text>
+              <Text style={styles.transferRejectBtnText}>{getLabel('helpdesk.reject_btn')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -952,7 +960,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
               activeOpacity={0.7}
             >
               <Check size={15} color="#FFFFFF" style={{ marginRight: 4 }} />
-              <Text style={styles.transferAcceptBtnText}>Kabul Et</Text>
+              <Text style={styles.transferAcceptBtnText}>{getLabel('helpdesk.accept_btn')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -966,10 +974,10 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
               ]}
               placeholder={
                 isTransferMode
-                  ? 'Bilet devretme gerekçesi veya açıklama yazın...'
+                  ? getLabel('helpdesk.transfer_reason_placeholder')
                   : (isAdmin 
-                      ? getLabel('helpdesk.writeAdminReply', 'Yönetici olarak yanıtlayın...', 'Reply as Administrator...') 
-                      : getLabel('helpdesk.writeReply', 'Mesajınızı yazın...', 'Type your message...'))
+                      ? getLabel('helpdesk.writeAdminReply') 
+                      : getLabel('helpdesk.writeReply'))
               }
               placeholderTextColor="#94a3b8"
               value={replyText}
@@ -1061,8 +1069,8 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                       ]}
                     >
                       {isTransferMode
-                        ? (language === 'tr' ? 'Transfer Et' : 'Hand Over')
-                        : getLabel('helpdesk.reply', 'Gönder', 'Send')}
+                        ? getLabel('helpdesk.hand_over_btn')
+                        : getLabel('helpdesk.reply')}
                     </Text>
                   </View>
                 )}
@@ -1101,7 +1109,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
             <View style={styles.bsHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <ArrowRight size={18} color="#475569" style={{ marginRight: 8 }} />
-                <Text style={styles.bsTitle}>{language === 'tr' ? 'Bileti Devret' : 'Hand Over'}</Text>
+                <Text style={styles.bsTitle}>{getLabel('helpdesk.hand_over_ticket_title')}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setTransferBottomSheetVisible?.(false)}
@@ -1132,14 +1140,15 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                 if (filtered.length === 0) {
                   return (
                     <View style={styles.bsEmptyBox}>
-                      <Text style={styles.bsEmptyText}>Eşleşen yönetici bulunamadı.</Text>
+                      <Text style={styles.bsEmptyText}>{getLabel('helpdesk.no_matching_admin')}</Text>
                     </View>
                   );
                 }
 
                 return filtered.map((adm, idx) => {
                   const isSelected = selectedTransferAdmin?.blind_id === adm.blind_id;
-                  const isSelf = adm.alias.includes('(Kendim - Test)');
+                  const selfTestSuffix = getLabel('helpdesk.self_test_suffix');
+                  const isSelf = adm.alias.includes(`(${selfTestSuffix})`) || adm.alias.includes(i18nService.t('helpdesk.self_test_suffix_legacy'));
                   const shortBlind = adm.blind_id ? `#${adm.blind_id.substring(0, 6)}` : '';
                   return (
                     <TouchableOpacity
@@ -1159,12 +1168,12 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                           </Text>
                           {isSelf && (
                             <View style={styles.bsSelfBadge}>
-                              <Text style={styles.bsSelfBadgeText}>Test</Text>
+                              <Text style={styles.bsSelfBadgeText}>{getLabel('helpdesk.test_badge')}</Text>
                             </View>
                           )}
                         </View>
                         <Text style={styles.bsAdminMeta}>
-                          {shortBlind} • {adm.role || 'admin'} • {adm.assigned_tickets_count || 0} aktif bilet
+                          {shortBlind} • {adm.role === 'global_admin' ? getLabel('provisioning.role_global_admin') : getLabel('helpdesk.admin_role_short')} • {getLabel('helpdesk.active_tickets_count', { count: adm.assigned_tickets_count || 0 })}
                         </Text>
                       </View>
                       {isSelected ? (
@@ -1183,7 +1192,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
               <Search size={15} color="#94A3B8" style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.bsSearchInput}
-                placeholder="Admin adı veya rumuz ile ara..."
+                placeholder={getLabel('helpdesk.search_admin_placeholder')}
                 placeholderTextColor="#94A3B8"
                 value={transferSearchText}
                 onChangeText={setTransferSearchText}
@@ -1216,14 +1225,14 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           <View style={[styles.rejectCardContainer, { marginBottom: keyboardHeight > 0 ? keyboardHeight + 20 : 40 }]}>
             <View style={styles.rejectCardHeader}>
               <X size={18} color="#DC2626" style={{ marginRight: 6 }} />
-              <Text style={styles.rejectCardTitle}>Bilet Devrini Reddet</Text>
+              <Text style={styles.rejectCardTitle}>{getLabel('helpdesk.reject_transfer_title')}</Text>
             </View>
             <Text style={styles.rejectCardSub}>
-              Lütfen devir talebini reddetme gerekçenizi belirtin.
+              {getLabel('helpdesk.reject_transfer_subtitle')}
             </Text>
             <TextInput
               style={styles.rejectInput}
-              placeholder="Gerekçe (örn: Bu konu başka birim tarafından çözülmeli)..."
+              placeholder={getLabel('helpdesk.reject_reason_placeholder')}
               placeholderTextColor="#94A3B8"
               value={rejectReason}
               onChangeText={setRejectReason}
@@ -1237,14 +1246,14 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
                 onPress={() => setRejectModalVisible?.(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.rejectCancelBtnText}>Vazgeç</Text>
+                <Text style={styles.rejectCancelBtnText}>{getLabel('helpdesk.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.rejectConfirmBtn}
                 onPress={onConfirmReject}
                 activeOpacity={0.7}
               >
-                <Text style={styles.rejectConfirmBtnText}>Reddet ve Bildir</Text>
+                <Text style={styles.rejectConfirmBtnText}>{getLabel('helpdesk.reject_and_notify_btn')}</Text>
               </TouchableOpacity>
             </View>
           </View>

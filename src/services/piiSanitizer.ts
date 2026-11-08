@@ -11,6 +11,8 @@
  * 4. İletişim Bilgileri (E-posta, E.164 Uluslararası Telefon Numaraları - Opsiyonel)
  */
 
+import { i18nService } from './i18nService';
+
 export interface PiiRedactionOptions {
   maskCards?: boolean;
   maskIdentity?: boolean;
@@ -97,7 +99,7 @@ class PiiSanitizerService {
       /-----BEGIN (?:[A-Z0-9 ]+ )?PRIVATE KEY-----[\s\S]*?-----END (?:[A-Z0-9 ]+ )?PRIVATE KEY-----/g,
       () => {
         count++;
-        return '[GİZLİ_ANAHTAR_KORUNDU]';
+        return i18nService.t('pii.private_key_protected');
       }
     );
 
@@ -106,7 +108,7 @@ class PiiSanitizerService {
       /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g,
       () => {
         count++;
-        return 'eyJ****.****.**** [JWT_MASKE_EDİLDİ]';
+        return `eyJ****.****.**** ${i18nService.t('pii.jwt_masked')}`;
       }
     );
 
@@ -115,7 +117,7 @@ class PiiSanitizerService {
       /\bBearer\s+([A-Za-z0-9_\-\.]{16,})\b/gi,
       () => {
         count++;
-        return 'Bearer [TOKEN_MASKE_EDİLDİ]';
+        return `Bearer ${i18nService.t('pii.token_masked')}`;
       }
     );
 
@@ -133,7 +135,7 @@ class PiiSanitizerService {
       /\bsk-(?:proj-|none-)?[a-zA-Z0-9_-]{20,}\b/g,
       () => {
         count++;
-        return 'sk-**** [OPENAI_KEY]';
+        return i18nService.t('pii.openai_key_masked');
       }
     );
 
@@ -142,7 +144,7 @@ class PiiSanitizerService {
       /\b(?:sk|rk)_(?:live|test)_[a-zA-Z0-9]{20,}\b/g,
       () => {
         count++;
-        return 'sk_**** [STRIPE_KEY]';
+        return i18nService.t('pii.stripe_key_masked');
       }
     );
 
@@ -151,7 +153,7 @@ class PiiSanitizerService {
       /\bgh[pousr]_[a-zA-Z0-9]{36,}\b/g,
       () => {
         count++;
-        return 'ghp_**** [GITHUB_TOKEN]';
+        return i18nService.t('pii.github_token_masked');
       }
     );
 
@@ -160,7 +162,7 @@ class PiiSanitizerService {
       /\b(api[_-]?key|secret[_-]?key|private[_-]?key|access[_-]?token|app[_-]?secret|auth[_-]?token)[\s:=]+["']?([a-zA-Z0-9_\-]{16,})["']?/gi,
       (match, label) => {
         count++;
-        return `${label}: "******** [GİZLENDİ]"`;
+        return `${label}: "******** ${i18nService.t('pii.redacted')}"`;
       }
     );
 
@@ -194,7 +196,7 @@ class PiiSanitizerService {
       /\b(?:routing|routing number|aba routing)[\s:#]+(\d{9})\b/gi,
       () => {
         count++;
-        return 'Routing: *****[GİZLENDİ]';
+        return `${i18nService.t('pii.routing_prefix')}: *****${i18nService.t('pii.redacted')}`;
       }
     );
 
@@ -237,7 +239,7 @@ class PiiSanitizerService {
     });
     res = res.replace(/\b(?:ssn|social security)[\s:#]+(\d{3}[\s-]?\d{2}[\s-]?\d{4}|\d{9})\b/gi, () => {
       count++;
-      return 'SSN: ***-**-****';
+      return i18nService.t('pii.ssn_masked');
     });
 
     // İtalya Codice Fiscale: 16 alfanümerik (6 Harf + 2 Rakam + 1 Harf + 2 Rakam + 1 Harf + 3 Rakam + 1 Harf)

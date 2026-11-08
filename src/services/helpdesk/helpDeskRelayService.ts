@@ -5,6 +5,7 @@ import { remoteDesktopService } from '../remoteDesktopService';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { HelpDeskMessage, HelpDeskTicket } from './types';
 import { helpDeskAuthService } from './helpDeskAuthService';
+import { i18nService } from '../i18nService';
 
 export interface RelayAuthDelegate {
   getAdminRole: (ownWhiteId: string) => Promise<'founder' | 'global_admin' | 'admin' | 'none'>;
@@ -376,7 +377,7 @@ export const helpDeskRelayService = {
               if (ticketId) {
                 void remoteDesktopService.receiveIncomingInvite(
                   ticketId,
-                  payloadData.admin_alias || 'Destek Uzmanı',
+                  payloadData.admin_alias || i18nService.t('relay_service.default_support_specialist'),
                   true
                 );
               }
@@ -394,7 +395,7 @@ export const helpDeskRelayService = {
               const incomingTicket = payloadData.ticket;
               incomingTicket.transfer_status = 'pending';
               incomingTicket.transfer_sender_blind_id = payloadData.sender_blind_id;
-              incomingTicket.transfer_sender_alias = payloadData.sender_alias || 'Admin';
+              incomingTicket.transfer_sender_alias = payloadData.sender_alias || i18nService.t('helpdesk.admin_role_short');
               incomingTicket.transfer_target_blind_id = ownBlindId;
               incomingTicket.transfer_note = payloadData.transfer_note || null;
               await keystoreTicketVault.upsertTicket(incomingTicket);
@@ -435,12 +436,14 @@ export const helpDeskRelayService = {
                     ticket_id: ticketId,
                     app_id: target.app_id || 'inwhite',
                     sender_white_id: payloadData.accepted_by_blind_id || '',
-                    sender_alias: payloadData.accepted_by_alias || 'Admin',
+                    sender_alias: payloadData.accepted_by_alias || i18nService.t('helpdesk.admin_role_short'),
                     sender_blind_id: payloadData.accepted_by_blind_id,
                     is_admin: true,
                     is_internal: true,
                     visibility_level: 'internal',
-                    message: `✅ [Devir Tamamlandı] Bilet @${payloadData.accepted_by_alias || 'Admin'} tarafından devralındı.`,
+                    message: i18nService.t('relay_service.transfer_completed_note', {
+                      alias: payloadData.accepted_by_alias || i18nService.t('helpdesk.admin_role_short'),
+                    }),
                     created_at: Number(payloadData.created_at || Date.now()),
                   };
                   await keystoreTicketVault.appendMessage(ticketId, acceptNote);
@@ -463,12 +466,15 @@ export const helpDeskRelayService = {
                     ticket_id: ticketId,
                     app_id: target.app_id || 'inwhite',
                     sender_white_id: item.sender_blind_id || '',
-                    sender_alias: payloadData.rejected_by_alias || 'Admin',
+                    sender_alias: payloadData.rejected_by_alias || i18nService.t('helpdesk.admin_role_short'),
                     sender_blind_id: item.sender_blind_id,
                     is_admin: true,
                     is_internal: true,
                     visibility_level: 'internal',
-                    message: `❌ [Devir Reddedildi] @${payloadData.rejected_by_alias || 'Admin'}: ${payloadData.rejection_reason || 'Gerekçe belirtilmedi.'}`,
+                    message: i18nService.t('relay_service.transfer_rejected_note', {
+                      alias: payloadData.rejected_by_alias || i18nService.t('helpdesk.admin_role_short'),
+                      reason: payloadData.rejection_reason || i18nService.t('relay_service.no_reason_provided'),
+                    }),
                     created_at: Number(payloadData.created_at || Date.now()),
                   };
                   await keystoreTicketVault.appendMessage(ticketId, rejectNote);

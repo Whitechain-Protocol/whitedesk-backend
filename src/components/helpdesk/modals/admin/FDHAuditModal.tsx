@@ -40,6 +40,7 @@ import {
   FDHFilterCriteria,
   FDHPostgresConfig,
 } from '../../../../services/harvest/fdhQueryService';
+import { i18nService, useTranslation } from '../../../../services/i18nService';
 
 export interface FDHAuditModalProps {
   visible: boolean;
@@ -54,6 +55,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
   language = 'tr',
   defaultStoragePath,
 }) => {
+  const { t } = useTranslation();
   // Source Selection
   const [sourceType, setSourceType] = useState<'sqlite' | 'postgres'>('sqlite');
 
@@ -106,7 +108,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
       setRawTickets(res.tickets);
     } catch (err: any) {
       console.warn('[FDHAuditModal] Local load error:', err);
-      setErrorMessage(err?.message || 'Yerel hasat verileri okunamadı.');
+      setErrorMessage(err?.message || t('fdh.audit.local_load_error'));
       setRawTickets([]);
       setBatchInfo(null);
     } finally {
@@ -117,7 +119,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
   // Load from PostgreSQL
   const handleLoadPostgres = async () => {
     if (!pgEndpoint.trim()) {
-      Alert.alert('Eksik Bilgi', 'Lütfen geçerli bir PostgreSQL API / REST URL giriniz.');
+      Alert.alert(t('fdh.audit.missing_info_title'), t('fdh.audit.missing_pg_url_desc'));
       return;
     }
     setIsLoading(true);
@@ -135,7 +137,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
     } catch (err: any) {
       console.warn('[FDHAuditModal] Postgres query error:', err);
       setErrorMessage(
-        err?.message || 'PostgreSQL bağlantısı sağlanamadı. Kurumsal uç noktayı ve ağ erişiminizi kontrol edin.'
+        err?.message || t('fdh.audit.pg_connect_error')
       );
       setRawTickets([]);
       setBatchInfo(null);
@@ -158,19 +160,20 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
   const formatDate = (ts: number) => {
     if (!ts) return '-';
     const d = new Date(ts);
-    return `${d.toLocaleDateString('tr-TR')} ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
+    const locale = i18nService.getLanguage() || language;
+    return `${d.toLocaleDateString(locale)} ${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`;
   };
 
   const getStatusBadge = (status: string) => {
     const s = (status || '').toLowerCase();
     switch (s) {
       case 'open':
-        return { label: 'Açık', bg: '#DCFCE7', text: '#15803D' };
+        return { label: t('fdh.audit.status_open'), bg: '#DCFCE7', text: '#15803D' };
       case 'pending':
-        return { label: 'Beklemede', bg: '#FEF3C7', text: '#B45309' };
+        return { label: t('fdh.audit.status_pending'), bg: '#FEF3C7', text: '#B45309' };
       case 'resolved':
       case 'closed':
-        return { label: 'Çözüldü', bg: '#F1F5F9', text: '#475569' };
+        return { label: t('fdh.audit.status_resolved'), bg: '#F1F5F9', text: '#475569' };
       default:
         return { label: status, bg: '#E2E8F0', text: '#334155' };
     }
@@ -187,8 +190,8 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                 <Database size={20} color="#2563EB" />
               </View>
               <View>
-                <Text style={styles.title}>FDH Sorgulama</Text>
-                <Text style={styles.subtitle}>SQLite ve PostgreSQL</Text>
+                <Text style={styles.title}>{t('fdh.audit.title')}</Text>
+                <Text style={styles.subtitle}>{t('fdh.audit.subtitle')}</Text>
               </View>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -208,7 +211,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   activeOpacity={0.7}
                 >
                   <ArrowLeft size={18} color="#1E293B" />
-                  <Text style={styles.backBtnText}>Bilet Listesine Dön</Text>
+                  <Text style={styles.backBtnText}>{t('fdh.audit.back_to_list')}</Text>
                 </TouchableOpacity>
 
                 <View
@@ -251,7 +254,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
 
                 <View style={styles.metaPartiesRow}>
                   <View style={styles.partyItem}>
-                    <Text style={styles.partyLabel}>Açan Kişi:</Text>
+                    <Text style={styles.partyLabel}>{t('fdh.audit.creator_label')}</Text>
                     <View style={styles.partyBadge}>
                       <User size={12} color="#1E293B" />
                       <Text style={styles.partyName}>
@@ -262,7 +265,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
 
                   {inspectedTicket.assignedAdminAlias ? (
                     <View style={styles.partyItem}>
-                      <Text style={styles.partyLabel}>Atanan Yönetici:</Text>
+                      <Text style={styles.partyLabel}>{t('fdh.audit.assigned_admin_label')}</Text>
                       <View style={styles.partyBadge}>
                         <Shield size={12} color="#2563EB" />
                         <Text style={[styles.partyName, { color: '#2563EB' }]}>
@@ -276,7 +279,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
 
               {/* Messages Timeline */}
               <Text style={styles.timelineHeading}>
-                Mesajlar & Denetim Kayıtları ({inspectedTicket.messages?.length || 0})
+                {t('fdh.audit.messages_timeline_heading', { count: inspectedTicket.messages?.length || 0 })}
               </Text>
 
               <ScrollView style={styles.messagesScroll} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -299,11 +302,11 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                             ) : (
                               <User size={12} color="#64748B" />
                             )}
-                            <Text style={styles.msgSenderName}>{msg.senderAlias || (isAdmin ? 'Admin' : 'Kullanıcı')}</Text>
+                            <Text style={styles.msgSenderName}>{msg.senderAlias || (isAdmin ? t('fdh.audit.role_admin') : t('fdh.audit.role_user'))}</Text>
                             {msg.isInternal ? (
                               <View style={styles.internalBadge}>
                                 <Lock size={10} color="#B45309" />
-                                <Text style={styles.internalBadgeText}>Dahili Not</Text>
+                                <Text style={styles.internalBadgeText}>{t('fdh.audit.internal_note')}</Text>
                               </View>
                             ) : null}
                           </View>
@@ -333,7 +336,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   })
                 ) : (
                   <View style={styles.emptyMessages}>
-                    <Text style={styles.emptyMessagesText}>Bu bilet için kayıtlı mesaj bulunamadı.</Text>
+                    <Text style={styles.emptyMessagesText}>{t('fdh.audit.empty_messages')}</Text>
                   </View>
                 )}
               </ScrollView>
@@ -353,7 +356,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                 >
                   <HardDrive size={16} color={sourceType === 'sqlite' ? '#2563EB' : '#64748B'} />
                   <Text style={[styles.sourceTabText, sourceType === 'sqlite' && styles.sourceTabTextActive]}>
-                    SQLite
+                    {t('fdh.audit.source_sqlite')}
                   </Text>
                 </TouchableOpacity>
 
@@ -364,7 +367,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                 >
                   <Server size={16} color={sourceType === 'postgres' ? '#2563EB' : '#64748B'} />
                   <Text style={[styles.sourceTabText, sourceType === 'postgres' && styles.sourceTabTextActive]}>
-                    PostgreSQL
+                    {t('fdh.audit.source_postgres')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -377,7 +380,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                       style={styles.pathInput}
                       value={localPath}
                       onChangeText={setLocalPath}
-                      placeholder="Depolama klasör yolu..."
+                      placeholder={t('fdh.audit.storage_path_placeholder')}
                       placeholderTextColor="#94A3B8"
                     />
                     <TouchableOpacity
@@ -386,7 +389,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                       disabled={isLoading}
                     >
                       <RefreshCw size={14} color="#FFFFFF" />
-                      <Text style={styles.refreshBtnText}>Tara</Text>
+                      <Text style={styles.refreshBtnText}>{t('fdh.audit.btn_scan')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -396,14 +399,14 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                         style={[styles.pathInput, { flex: 2 }]}
                         value={pgEndpoint}
                         onChangeText={setPgEndpoint}
-                        placeholder="https://pg-api.kurum.com/v1"
+                        placeholder={t('fdh.audit.pg_url_placeholder')}
                         placeholderTextColor="#94A3B8"
                       />
                       <TextInput
                         style={[styles.pathInput, { flex: 1, marginLeft: 8 }]}
                         value={pgApiKey}
                         onChangeText={setPgApiKey}
-                        placeholder="API Key (opsiyonel)"
+                        placeholder={t('fdh.audit.pg_apikey_placeholder')}
                         placeholderTextColor="#94A3B8"
                         secureTextEntry
                       />
@@ -413,7 +416,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                         disabled={isLoading}
                       >
                         <RefreshCw size={14} color="#FFFFFF" />
-                        <Text style={styles.refreshBtnText}>Bağlan</Text>
+                        <Text style={styles.refreshBtnText}>{t('fdh.audit.btn_connect')}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -424,24 +427,24 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
               {batchInfo && (
                 <View style={styles.summaryBar}>
                   <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Kaynak</Text>
+                    <Text style={styles.summaryLabel}>{t('fdh.audit.summary_source')}</Text>
                     <Text style={styles.summaryValue}>
-                      {batchInfo.sourceType === 'sqlite' ? 'SQLite' : 'PostgreSQL'}
+                      {batchInfo.sourceType === 'sqlite' ? t('fdh.audit.source_sqlite') : t('fdh.audit.source_postgres')}
                     </Text>
                   </View>
                   <View style={styles.summaryDivider} />
                   <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Bilet</Text>
+                    <Text style={styles.summaryLabel}>{t('fdh.audit.summary_tickets')}</Text>
                     <Text style={styles.summaryValue}>{filteredTickets.length} / {batchInfo.totalTickets}</Text>
                   </View>
                   <View style={styles.summaryDivider} />
                   <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Mesaj</Text>
+                    <Text style={styles.summaryLabel}>{t('fdh.audit.summary_messages')}</Text>
                     <Text style={styles.summaryValue}>{batchInfo.totalMessages}</Text>
                   </View>
                   <View style={styles.summaryDivider} />
                   <View style={styles.summaryItem}>
-                    <Text style={styles.summaryLabel}>Ek Dosya</Text>
+                    <Text style={styles.summaryLabel}>{t('fdh.audit.summary_attachments')}</Text>
                     <Text style={styles.summaryValue}>{batchInfo.totalAttachments}</Text>
                   </View>
                 </View>
@@ -462,7 +465,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    placeholder="Bilet No, Başlık, İsim veya Mesaj Ara..."
+                    placeholder={t('fdh.audit.search_placeholder')}
                     placeholderTextColor="#94A3B8"
                   />
                   {searchQuery.length > 0 && (
@@ -480,7 +483,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                     onPress={() => setSelectedRole('all')}
                   >
                     <Text style={[styles.chipText, selectedRole === 'all' && styles.chipTextActive]}>
-                      Tüm Roller
+                      {t('fdh.audit.filter_all_roles')}
                     </Text>
                   </TouchableOpacity>
 
@@ -490,7 +493,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   >
                     <Shield size={12} color={selectedRole === 'admin' ? '#2563EB' : '#64748B'} style={{ marginRight: 4 }} />
                     <Text style={[styles.chipText, selectedRole === 'admin' && styles.chipTextActive]}>
-                      Yöneticiler
+                      {t('fdh.audit.filter_admins')}
                     </Text>
                   </TouchableOpacity>
 
@@ -500,7 +503,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   >
                     <User size={12} color={selectedRole === 'user' ? '#2563EB' : '#64748B'} style={{ marginRight: 4 }} />
                     <Text style={[styles.chipText, selectedRole === 'user' && styles.chipTextActive]}>
-                      Kullanıcılar
+                      {t('fdh.audit.filter_users')}
                     </Text>
                   </TouchableOpacity>
 
@@ -510,7 +513,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                     onPress={() => setSelectedStatus(selectedStatus === 'open' ? 'all' : 'open')}
                   >
                     <Text style={[styles.chipText, selectedStatus === 'open' && styles.chipTextActive]}>
-                      Açık Biletler
+                      {t('fdh.audit.filter_open_tickets')}
                     </Text>
                   </TouchableOpacity>
 
@@ -521,7 +524,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   >
                     <Paperclip size={12} color={onlyWithAttachments ? '#2563EB' : '#64748B'} style={{ marginRight: 4 }} />
                     <Text style={[styles.chipText, onlyWithAttachments && styles.chipTextActive]}>
-                      Ekli Olanlar
+                      {t('fdh.audit.filter_with_attachments')}
                     </Text>
                   </TouchableOpacity>
                 </ScrollView>
@@ -531,7 +534,7 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
               {isLoading ? (
                 <View style={styles.centerContainer}>
                   <ActivityIndicator size="large" color="#2563EB" />
-                  <Text style={styles.loadingText}>Veri havuzu sorgulanıyor...</Text>
+                  <Text style={styles.loadingText}>{t('fdh.audit.loading')}</Text>
                 </View>
               ) : (
                 <FlatList
@@ -541,9 +544,9 @@ export const FDHAuditModal: React.FC<FDHAuditModalProps> = ({
                   ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                       <FileText size={36} color="#CBD5E1" />
-                      <Text style={styles.emptyTitle}>Eşleşen Bilet Bulunamadı</Text>
+                      <Text style={styles.emptyTitle}>{t('fdh.audit.empty_title')}</Text>
                       <Text style={styles.emptySubtitle}>
-                        Arama filtrelerini değiştirin veya farklı bir depolama yolu/veritabanı deneyin.
+                        {t('fdh.audit.empty_subtitle')}
                       </Text>
                     </View>
                   }

@@ -31,6 +31,7 @@ import * as Sharing from 'expo-sharing';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { SafeSecureStore } from '../../../../services/storageService';
 import { helpDeskService } from '../../../../services/helpDeskService';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface ProfileModalProps {
   visible: boolean;
@@ -60,6 +61,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   currentEnterpriseName,
   language = 'tr',
 }) => {
+  const { t } = useTranslation();
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [identityCode, setIdentityCode] = useState<string>(ownWhiteId);
   const [isHashRevealed, setIsHashRevealed] = useState(false);
@@ -86,10 +88,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const trimmed = profileNameInput.trim();
     if (!isValidTwoWordName(trimmed)) {
       Alert.alert(
-        language === 'tr' ? 'Geçersiz İsim' : 'Invalid Name',
-        language === 'tr'
-          ? 'Lütfen en az iki kelimeden oluşan geçerli bir ad ve soyad giriniz (Örn: Ahmet Yılmaz).'
-          : 'Please enter at least two words.'
+        t('profile.modal.invalid_name_title'),
+        t('profile.modal.invalid_name_desc')
       );
       return;
     }
@@ -98,11 +98,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       await helpDeskService.setCustomAlias(ownWhiteId, trimmed, isAdmin);
       onSaveCustomAlias?.(trimmed);
       Alert.alert(
-        language === 'tr' ? 'Başarılı' : 'Success',
-        language === 'tr' ? 'Adınız ve soyadınız başarıyla kaydedildi.' : 'Your name has been updated.'
+        t('common.success'),
+        t('profile.modal.name_saved_desc')
       );
     } catch (err: any) {
-      Alert.alert(language === 'tr' ? 'Hata' : 'Error', err?.message || 'Kaydedilemedi');
+      Alert.alert(t('common.error'), err?.message || t('profile.modal.save_failed'));
     } finally {
       setIsSavingName(false);
     }
@@ -178,7 +178,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const getRoleInfo = () => {
     if (isFounder || adminRole === 'founder') {
       return {
-        title: language === 'tr' ? 'Kurucu' : 'Founder',
+        title: t('profile.modal.role_founder'),
         badgeBg: '#FEF3C7',
         badgeBorder: '#FDE68A',
         badgeColor: '#B45309',
@@ -187,7 +187,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     }
     if (isMasterAdmin || adminRole === 'global_admin') {
       return {
-        title: language === 'tr' ? 'Küresel Yönetici' : 'Global Admin',
+        title: t('profile.modal.role_global_admin'),
         badgeBg: '#EEF2FF',
         badgeBorder: '#C7D2FE',
         badgeColor: '#4338CA',
@@ -196,7 +196,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     }
     if (isAdmin || adminRole === 'admin') {
       return {
-        title: language === 'tr' ? 'Yönetici' : 'Admin',
+        title: t('profile.modal.role_admin'),
         badgeBg: '#EFF6FF',
         badgeBorder: '#BFDBFE',
         badgeColor: '#1D4ED8',
@@ -204,7 +204,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       };
     }
     return {
-      title: language === 'tr' ? 'Kullanıcı' : 'User',
+      title: t('profile.modal.role_user'),
       badgeBg: '#F1F5F9',
       badgeBorder: '#E2E8F0',
       badgeColor: '#475569',
@@ -228,22 +228,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
       if (hasHardware && isEnrolled) {
         const result = await LocalAuthentication.authenticateAsync({
-          promptMessage:
-            language === 'tr'
-              ? 'Bağlantı Hash Kodunu Görüntüleyin'
-              : 'Authenticate to View Connection Hash',
-          cancelLabel: language === 'tr' ? 'Vazgeç' : 'Cancel',
-          fallbackLabel: language === 'tr' ? 'PIN Kullan' : 'Use PIN',
+          promptMessage: t('profile.modal.biometric_prompt'),
+          cancelLabel: t('common.cancel'),
+          fallbackLabel: t('profile.modal.use_pin'),
         });
 
         if (result.success) {
           setIsHashRevealed(true);
         } else {
           Alert.alert(
-            language === 'tr' ? 'Doğrulama Başarısız' : 'Authentication Failed',
-            language === 'tr'
-              ? 'Kimlik doğrulanamadığı için hash kodu gizli tutuldu.'
-              : 'Identity could not be verified; hash remains hidden.'
+            t('profile.modal.auth_failed_title'),
+            t('profile.modal.auth_failed_desc')
           );
         }
       } else {
@@ -265,7 +260,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       if (shareQrRef.current && typeof shareQrRef.current.toDataURL === 'function') {
         shareQrRef.current.toDataURL(async (base64Data: string) => {
           try {
-            const cleanTenant = (currentEnterpriseName || 'Kurum').replace(/[^a-zA-Z0-9]/g, '_');
+            const cleanTenant = (currentEnterpriseName || t('profile.modal.default_org')).replace(/[^a-zA-Z0-9]/g, '_');
             const fileName = `WhiteDesk_${cleanTenant}_${effectiveRole}_QR.png`;
             const filePath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/${fileName}`;
 
@@ -276,7 +271,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             if (await Sharing.isAvailableAsync()) {
               await Sharing.shareAsync(filePath, {
                 mimeType: 'image/png',
-                dialogTitle: `WhiteDesk ${currentEnterpriseName || ''} QR Kimlik Kartı`,
+                dialogTitle: t('profile.modal.share_qr_dialog_title', { enterprise: currentEnterpriseName || '' }),
                 UTI: 'public.png',
               });
               return;
@@ -287,14 +282,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
           // Fallback if file share is unavailable
           await Share.share({
-            title: `WhiteDesk ${currentEnterpriseName || ''} Kimlik Kodu`,
+            title: t('profile.modal.share_code_title', { enterprise: currentEnterpriseName || '' }),
             message: `admin ${codeToExport}`,
           });
         });
       } else {
         // Fallback to text share
         await Share.share({
-          title: `WhiteDesk ${currentEnterpriseName || ''} Kimlik Kodu`,
+          title: t('profile.modal.share_code_title', { enterprise: currentEnterpriseName || '' }),
           message: `admin ${codeToExport}`,
         });
       }
@@ -332,7 +327,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           {/* Header */}
           <View style={styles.headerRow}>
             <Text style={styles.headerTitle}>
-              {language === 'tr' ? 'Profil' : 'Profile'}
+              {t('profile.modal.title')}
             </Text>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
               <X size={18} color="#64748B" />
@@ -361,7 +356,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
               {/* Kullanıcı İsmi / Rumuz */}
               <Text style={styles.displayNameText}>
-                {customAlias || (language === 'tr' ? 'Anonim Kullanıcı' : 'Anonymous User')}
+                {customAlias || t('profile.modal.anonymous_user')}
               </Text>
 
               {/* 2. ÜNVAN / ROL ROZETİ */}
@@ -388,7 +383,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     style={styles.nameInputField}
                     value={profileNameInput}
                     onChangeText={setProfileNameInput}
-                    placeholder={language === 'tr' ? 'Ad Soyad (En az 2 kelime)' : 'Full Name (Min 2 words)'}
+                    placeholder={t('profile.modal.fullname_placeholder')}
                     placeholderTextColor="#94A3B8"
                     autoCapitalize="words"
                   />
@@ -408,7 +403,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </View>
                 {!isValidTwoWordName(profileNameInput) && profileNameInput.trim().length > 0 && (
                   <Text style={styles.nameValidationHint}>
-                    {language === 'tr' ? 'En az iki kelime ad ve soyad giriniz.' : 'Please enter at least two words.'}
+                    {t('profile.modal.fullname_validation_hint')}
                   </Text>
                 )}
               </View>
@@ -470,7 +465,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               >
                 <Share2 size={14} color="#2563EB" strokeWidth={2} style={{ marginRight: 6 }} />
                 <Text style={styles.exportButtonText}>
-                  {language === 'tr' ? 'Kimliği dışarı aktar' : 'Export ID'}
+                  {t('profile.modal.export_id_btn')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -489,7 +484,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           <View style={styles.shareCard}>
             <View style={styles.shareHeader}>
               <Text style={styles.shareTitle}>
-                {language === 'tr' ? 'Giriş Kimliği QR Kodu' : 'Login Identity QR'}
+                {t('profile.modal.qr_modal_title')}
               </Text>
               <TouchableOpacity
                 style={styles.closeBtn}
@@ -514,7 +509,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             {/* Kod Metin Kutusu (QR Altında) */}
             <View style={styles.shareCodeBox}>
               <Text style={styles.shareCodeLabel}>
-                {effectiveRole === 'user' ? 'Kullanıcı Kodu:' : 'Bilet Kutusu Komutu:'}
+                {effectiveRole === 'user' ? t('profile.modal.user_code_label') : t('profile.modal.ticket_box_cmd_label')}
               </Text>
               <Text style={styles.shareCodeText} numberOfLines={2} selectable>
                 {effectiveRole === 'global_admin' || effectiveRole === 'admin' || effectiveRole === 'founder'
@@ -524,9 +519,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </View>
 
             <Text style={styles.shareNotice}>
-              {language === 'tr'
-                ? 'Bu QR görselini veya bilet komutunu diğer cihazınıza aktararak tek tıkla oturum açabilirsiniz.'
-                : 'Scan this QR code image or use the command string to quickly sign in on another device.'}
+              {t('profile.modal.qr_share_notice')}
             </Text>
 
             <View style={styles.shareActionRow}>
@@ -539,14 +532,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   <>
                     <Check size={16} color="#16A34A" strokeWidth={2.2} style={{ marginRight: 6 }} />
                     <Text style={[styles.shareCopyText, { color: '#16A34A' }]}>
-                      {language === 'tr' ? 'Kopyalandı' : 'Copied'}
+                      {t('common.copied')}
                     </Text>
                   </>
                 ) : (
                   <>
                     <Copy size={16} color="#2563EB" strokeWidth={2} style={{ marginRight: 6 }} />
                     <Text style={styles.shareCopyText}>
-                      {language === 'tr' ? 'Kopyala' : 'Copy'}
+                      {t('common.copy')}
                     </Text>
                   </>
                 )}
@@ -559,7 +552,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               >
                 <Share2 size={16} color="#FFFFFF" strokeWidth={2} style={{ marginRight: 6 }} />
                 <Text style={styles.shareExportText}>
-                  {language === 'tr' ? 'Paylaş' : 'Share'}
+                  {t('common.share')}
                 </Text>
               </TouchableOpacity>
             </View>

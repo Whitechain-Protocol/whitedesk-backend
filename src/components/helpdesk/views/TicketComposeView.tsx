@@ -34,6 +34,7 @@ import {
   Check,
 } from 'lucide-react-native';
 import { piiSanitizer } from '../../../services/piiSanitizer';
+import { useTranslation } from '../../../services/i18nService';
 import { HeadphoneChatIcon } from '../icons/HeadphoneChatIcon';
 import { HelpDeskCategory } from '../../../services/helpDeskService';
 import { AttachedFile, CustomFieldDef, CatalogItem } from '../types';
@@ -57,7 +58,7 @@ interface TicketComposeViewProps {
   isHelpCommand?: boolean;
   sending: boolean;
   language: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, trOrParams?: string | Record<string, string | number>, en?: string, maybeParams?: Record<string, string | number>) => string;
   onBack: () => void;
   onPickCamera: () => void;
   onPickGallery: () => void;
@@ -113,6 +114,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
   attachDiagnostics = false,
   setAttachDiagnostics,
 }) => {
+  const { t } = useTranslation();
   const [activeFieldKey, setActiveFieldKey] = React.useState<string | null>(null);
   const [isCustomFieldsExpanded, setIsCustomFieldsExpanded] = React.useState<boolean>(false);
   const [isMenuModalVisible, setIsMenuModalVisible] = React.useState<boolean>(false);
@@ -221,8 +223,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             <ChevronLeft size={22} color="#1E293B" strokeWidth={2.4} style={{ marginRight: 4 }} />
             <Text style={styles.samsungBackText}>
               {isCreatingDiscussion
-                ? (language === 'en' ? 'Start a new discussion' : 'Yeni bir tartışma başlat')
-                : (language === 'en' ? 'Create a new ticket' : 'Yeni bir bilet oluştur')}
+                ? getLabel('helpdesk.start_new_discussion_header')
+                : getLabel('helpdesk.create_new_ticket_btn')}
             </Text>
           </TouchableOpacity>
 
@@ -235,12 +237,12 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.sectionTitleText} numberOfLines={1}>
-                    {isAdmin ? 'WhiteDesk Admin' : 'WhiteDesk'}
+                    {isAdmin ? t('helpdesk.titleAdmin') : t('helpdesk.titleUser')}
                   </Text>
                   <Text style={styles.sectionSubtitleText} numberOfLines={1}>
                     {isAdmin 
-                      ? (isFounder ? 'TheWhite Root Licensing & Multi-Tenant' : (enterpriseName || 'Kurumsal Destek Masası'))
-                      : (enterpriseName || 'Destek ve Operasyon Merkezi')}
+                      ? (isFounder ? getLabel('helpdesk.founder_root_subtitle') : (enterpriseName || getLabel('helpdesk.enterprise_support_desk')))
+                      : (enterpriseName || getLabel('helpdesk.support_and_ops_center'))}
                   </Text>
                 </View>
               </View>
@@ -258,18 +260,18 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Category Selector (Horizontal Scroll) */}
             <View style={styles.composeFieldGroup}>
               <Text style={styles.composeFieldLabel}>
-                {getLabel('helpdesk.category', 'KATEGORİ', 'CATEGORY')}
+                {getLabel('helpdesk.category')}
               </Text>
               {supportTicketTarget === 'thewhite' ? (
                 <View style={[styles.categoryPill, styles.categoryPillActive, { alignSelf: 'flex-start', backgroundColor: '#ECFDF5', borderColor: '#10B981' }]}>
                   <Text style={[styles.categoryPillText, { color: '#047857', fontWeight: '700' }]}>
-                    {language === 'tr' ? 'TheWhite Uygulama & Mimari Desteği' : 'TheWhite App & Architecture Support'}
+                    {getLabel('helpdesk.thewhite_app_arch_support')}
                   </Text>
                 </View>
               ) : supportTicketTarget === 'global_admin' ? (
                 <View style={[styles.categoryPill, styles.categoryPillActive, { alignSelf: 'flex-start', backgroundColor: '#ECFDF5', borderColor: '#10B981' }]}>
                   <Text style={[styles.categoryPillText, { color: '#047857', fontWeight: '700' }]}>
-                    {language === 'tr' ? 'Kurum Yöneticisi Desteği (Global Admin)' : 'Global Admin Internal Support'}
+                    {getLabel('helpdesk.global_admin_internal_support')}
                   </Text>
                 </View>
               ) : (
@@ -280,7 +282,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                 >
                   {availableCategories.map((cat) => {
                     const isSelected = composeCategory === cat.id;
-                    const catLabel = language === 'tr' ? cat.labelTr : cat.labelEn;
+                    const i18nCat = t(`helpdesk.cat_${cat.id}`);
+                    const catLabel = i18nCat !== `helpdesk.cat_${cat.id}` ? i18nCat : (language === 'tr' ? cat.labelTr : (cat.labelEn || cat.labelTr));
                     return (
                       <TouchableOpacity
                         key={cat.id}
@@ -309,16 +312,16 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Subject Input */}
             <View style={styles.composeFieldGroup}>
               <Text style={styles.composeFieldLabel}>
-                {getLabel('helpdesk.subject', 'KONU', 'SUBJECT')}
+                {getLabel('helpdesk.subject')}
               </Text>
               <TextInput
                 style={styles.composeInputField}
                 placeholder={
                   supportTicketTarget === 'thewhite'
-                    ? getLabel('helpdesk.theWhiteSubjectPlaceholder', 'Örn: Lisans artırımı, sunucusuz mimari veya entegrasyon desteği', 'e.g., License upgrade, serverless architecture, or integration support')
+                    ? getLabel('helpdesk.theWhiteSubjectPlaceholder')
                     : supportTicketTarget === 'global_admin'
-                    ? getLabel('helpdesk.globalAdminSubjectPlaceholder', 'Örn: Operasyonel yetki artırımı, donanım veya masa talebi', 'e.g., Desk permission upgrade, hardware, or access request')
-                    : getLabel('helpdesk.subjectPlaceholder', 'Örn: Sesli arama bağlantı gecikmesi', 'e.g., Voice call connection latency')
+                    ? getLabel('helpdesk.globalAdminSubjectPlaceholder')
+                    : getLabel('helpdesk.subjectPlaceholder')
                 }
                 placeholderTextColor="#94a3b8"
                 value={composeSubject}
@@ -347,7 +350,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                     <Tag size={13} color="#2563EB" style={{ marginRight: 6 }} />
                     <Text style={styles.customFieldsSectionTitle}>
-                      {getLabel('helpdesk.customFieldsTitle', 'Ek Bilgi', 'Additional Info')}
+                      {getLabel('helpdesk.customFieldsTitle')}
                     </Text>
                   </View>
                   {isCustomFieldsExpanded ? (
@@ -374,7 +377,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                         {catalog && catalog.length > 0 && (
                           <View style={styles.catalogSearchBadge}>
                             <Search size={10} color="#2563EB" style={{ marginRight: 3 }} />
-                            <Text style={styles.catalogSearchBadgeText}>Katalogdan Ara</Text>
+                            <Text style={styles.catalogSearchBadgeText}>{getLabel('helpdesk.search_from_catalog')}</Text>
                           </View>
                         )}
                       </View>
@@ -384,8 +387,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                           style={styles.customFieldInput}
                           placeholder={
                             catalog && catalog.length > 0
-                              ? `${field.label} ara veya yazın...`
-                              : `${field.label} girin...`
+                              ? getLabel('helpdesk.search_or_type_field', { label: field.label })
+                              : getLabel('helpdesk.enter_field', { label: field.label })
                           }
                           placeholderTextColor="#94a3b8"
                           value={currentValue}
@@ -420,7 +423,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                         <View style={styles.suggestionsDropdown}>
                           <View style={styles.suggestionsHeader}>
                             <Text style={styles.suggestionsHeaderText}>
-                              Katalog Eşleşmeleri ({suggestions.length})
+                              {getLabel('helpdesk.catalog_matches_count', { count: suggestions.length })}
                             </Text>
                             <TouchableOpacity onPress={() => setActiveFieldKey(null)}>
                               <X size={13} color="#94A3B8" />
@@ -461,16 +464,16 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Message Body Input — OR /help command card when isHelpCommand */}
             <View style={styles.composeFieldGroup}>
               <Text style={styles.composeFieldLabel}>
-                {getLabel('helpdesk.message', 'MESAJ', 'MESSAGE')}
+                {getLabel('helpdesk.message')}
               </Text>
               <TextInput
                 style={styles.composeMessageField}
                 placeholder={
                   supportTicketTarget === 'thewhite'
-                    ? getLabel('helpdesk.theWhiteMessagePlaceholder', 'TheWhite ekibine iletmek istediğiniz sistem ve uygulama destek talebini detaylandırın...', 'Describe the platform and app support inquiry you need from TheWhite...')
+                    ? getLabel('helpdesk.theWhiteMessagePlaceholder')
                     : supportTicketTarget === 'global_admin'
-                    ? getLabel('helpdesk.globalAdminMessagePlaceholder', 'Kurum yöneticinize iletmek istediğiniz talep veya operasyon konusunu detaylandırın...', 'Describe the internal request for your Global Admin...')
-                    : getLabel('helpdesk.messagePlaceholder', 'Talebinizi ayrıntılı olarak yazın...', 'Describe your inquiry or issue in detail...')
+                    ? getLabel('helpdesk.globalAdminMessagePlaceholder')
+                    : getLabel('helpdesk.messagePlaceholder')
                 }
                 placeholderTextColor="#94a3b8"
                 value={composeMessage}
@@ -490,29 +493,29 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                   <View style={styles.helpCommandCardHeader}>
                     <HelpCircle size={13} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 5 }} />
                     <Text style={styles.helpCommandCardTitle}>
-                      {language === 'tr' ? 'Tartışma Yönlendirme Komutları' : 'Discussion Routing Commands'}
+                      {getLabel('helpdesk.discussion_routing_commands_title')}
                     </Text>
                   </View>
                   {[
                     {
                       cmd: '/help',
-                      desc: language === 'tr' ? 'Bu komut listesini göster' : 'Show this command list',
+                      desc: getLabel('helpdesk.cmd_help_desc'),
                     },
                     {
-                      cmd: '/admin  Konu',
-                      desc: language === 'tr' ? 'Tüm global admin ve operatör adminlere broadcast' : 'Broadcast to ALL global admins & operator admins',
+                      cmd: getLabel('helpdesk.cmd_admin_syntax'),
+                      desc: getLabel('helpdesk.cmd_admin_desc'),
                     },
                     {
-                      cmd: '@tenantId  Konu',
-                      desc: language === 'tr' ? 'Belirli bir kiracının global adminlerine yaz' : 'Write to a specific tenant\'s global admins',
+                      cmd: getLabel('helpdesk.cmd_tenant_syntax'),
+                      desc: getLabel('helpdesk.cmd_tenant_desc'),
                     },
                     {
-                      cmd: '@tanımlananİsim  Konu',
-                      desc: language === 'tr' ? 'Belirli bir admine doğrudan yaz' : 'Write directly to a specific admin by alias',
+                      cmd: getLabel('helpdesk.cmd_alias_syntax'),
+                      desc: getLabel('helpdesk.cmd_alias_desc'),
                     },
                     {
-                      cmd: '(prefix yok)',
-                      desc: language === 'tr' ? 'Tüm global adminlere yayın (varsayılan)' : 'Broadcast to all global admins (default)',
+                      cmd: getLabel('helpdesk.cmd_default_syntax'),
+                      desc: getLabel('helpdesk.cmd_default_desc'),
                     },
                   ].map((item, idx) => (
                     <View key={idx} style={styles.helpCommandRow}>
@@ -571,7 +574,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Attachment Selection Row */}
             <View style={styles.composeAttachRowFluid}>
               <Text style={styles.composeAttachLabel}>
-                {getLabel('helpdesk.attachment', 'Ek (isteğe bağlı)', 'Attachment (optional)')}
+                {getLabel('helpdesk.attachment')}
               </Text>
               <View style={styles.composeAttachBtnsRow}>
                 <TouchableOpacity
@@ -616,9 +619,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               <View style={styles.diagNoticeBox}>
                 <Activity size={13} color="#15803D" style={{ marginRight: 6 }} />
                 <Text style={styles.diagNoticeText}>
-                  {language === 'tr'
-                    ? '⚡ Sistem tanısı şifreli olarak bu bilete eklenecek.'
-                    : '⚡ System diagnostic will be encrypted into this ticket.'}
+                  {getLabel('helpdesk.diag_encrypted_notice')}
                 </Text>
               </View>
             )}
@@ -628,9 +629,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               <View style={styles.piiShieldBadge}>
                 <ShieldCheck size={14} color="#059669" strokeWidth={2.5} style={{ marginRight: 6 }} />
                 <Text style={styles.piiShieldText}>
-                  {language === 'tr'
-                    ? '🛡️ Hassas bilgileriniz (kart/kimlik/IBAN) cihazınızda otomatik olarak koruma altına alındı.'
-                    : '🛡️ Sensitive data (cards/IDs/IBANs) protected on-device.'}
+                  {getLabel('helpdesk.pii_protected_notice')}
                 </Text>
               </View>
             )}
@@ -651,7 +650,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Send size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                   <Text style={styles.fluidSubmitBtnText}>
-                    {getLabel('helpdesk.send', 'Bileti Gönder', 'Submit Ticket')}
+                    {getLabel('helpdesk.send')}
                   </Text>
                 </View>
               )}
@@ -688,8 +687,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               <Cpu size={16} color={attachDiagnostics ? '#15803D' : '#4A5568'} strokeWidth={2} style={styles.dropdownMenuIcon} />
               <Text style={[styles.dropdownMenuText, attachDiagnostics && { color: '#15803D', fontWeight: '600' }]}>
                 {attachDiagnostics
-                  ? (language === 'tr' ? 'Sistem Tanısını Kaldır' : 'Remove System Diag')
-                  : (language === 'tr' ? 'Sistem Tanısı Ekle' : 'Add System Diag')}
+                  ? getLabel('helpdesk.remove_system_diag')
+                  : getLabel('helpdesk.add_system_diag')}
               </Text>
               {attachDiagnostics && <Check size={15} color="#15803D" strokeWidth={2.5} style={{ marginLeft: 'auto' }} />}
             </TouchableOpacity>
@@ -707,7 +706,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             >
               <ImageIcon size={16} color="#4A5568" strokeWidth={2} style={styles.dropdownMenuIcon} />
               <Text style={styles.dropdownMenuText}>
-                {language === 'tr' ? 'Resim Ekle' : 'Add Image'}
+                {getLabel('helpdesk.add_image')}
               </Text>
             </TouchableOpacity>
 
@@ -722,7 +721,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             >
               <FileText size={16} color="#4A5568" strokeWidth={2} style={styles.dropdownMenuIcon} />
               <Text style={styles.dropdownMenuText}>
-                {language === 'tr' ? 'Belge Ekle' : 'Add Document'}
+                {getLabel('helpdesk.add_document')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -751,10 +750,10 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                 </View>
                 <View>
                   <Text style={styles.modalTitle}>
-                    {language === 'tr' ? 'Sistem Tanısı' : 'System Diagnostics'}
+                    {getLabel('helpdesk.system_diag_title')}
                   </Text>
                   <Text style={styles.modalSubtitle}>
-                    {language === 'tr' ? 'Tanı Verisi ve Güvenlik Bilgilendirmesi' : 'Diagnostic Data & Privacy Notice'}
+                    {getLabel('helpdesk.system_diag_subtitle')}
                   </Text>
                 </View>
               </View>
@@ -769,20 +768,14 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             {/* Bilgilendirme Kutusu */}
             <View style={styles.diagConsentInfoBox}>
               <Text style={styles.diagConsentText}>
-                {language === 'tr'
-                  ? 'Sistem tanısı; uygulamanın son ekran geçişlerini, ağ istek durumlarını ve cihaz model parametrelerini biletinize şifreli olarak ekler.'
-                  : 'System diagnostics attaches encrypted screen transitions, network status, and device model telemetry to your ticket.'}
+                {getLabel('helpdesk.system_diag_info_text')}
               </Text>
               <View style={{ marginTop: 8, gap: 4 }}>
                 <Text style={styles.diagConsentBullet}>
-                  {language === 'tr'
-                    ? '🛡️ Sıfır Kişisel Veri: Şifreler, kimlik numaraları ve kart bilgileri cihazınızda otomatik olarak maskelenir.'
-                    : '🛡️ Zero Personal Data: Passwords, ID numbers, and card numbers are masked on-device.'}
+                  {getLabel('helpdesk.system_diag_bullet_zero_pii')}
                 </Text>
                 <Text style={styles.diagConsentBullet}>
-                  {language === 'tr'
-                    ? '🔒 Uçtan Uca Şifreli: Yalnızca yetkili destek yöneticisi tarafından incelenebilir.'
-                    : '🔒 End-to-End Encrypted: Inspectable only by authorized support.'}
+                  {getLabel('helpdesk.system_diag_bullet_e2ee')}
                 </Text>
               </View>
             </View>
@@ -791,8 +784,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             <View style={[styles.diagStatusBanner, attachDiagnostics ? styles.diagStatusBannerActive : styles.diagStatusBannerInactive]}>
               <Text style={[styles.diagStatusBannerText, attachDiagnostics ? styles.diagStatusBannerTextActive : styles.diagStatusBannerTextInactive]}>
                 {attachDiagnostics
-                  ? (language === 'tr' ? '✓ Sistem tanısı şu anda biletinize iliştirilmiş durumda.' : '✓ System diagnostics is currently attached to ticket.')
-                  : (language === 'tr' ? '○ Sistem tanısı henüz iliştirilmedi.' : '○ System diagnostics is not attached.')}
+                  ? getLabel('helpdesk.system_diag_status_attached')
+                  : getLabel('helpdesk.system_diag_status_not_attached')}
               </Text>
             </View>
 
@@ -809,8 +802,8 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
             >
               <Text style={styles.modalPrimaryBtnText}>
                 {attachDiagnostics
-                  ? (language === 'tr' ? 'Sistem Tanısını Kaldır' : 'Remove Diagnostics')
-                  : (language === 'tr' ? 'Onayla ve Ekle' : 'Confirm & Add')}
+                  ? getLabel('helpdesk.remove_system_diag')
+                  : getLabel('helpdesk.confirm_and_add')}
               </Text>
             </TouchableOpacity>
 
@@ -820,7 +813,7 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               activeOpacity={0.7}
             >
               <Text style={styles.modalCancelBtnText}>
-                {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+                {getLabel('helpdesk.cancel')}
               </Text>
             </TouchableOpacity>
           </View>

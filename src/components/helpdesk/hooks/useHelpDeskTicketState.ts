@@ -24,6 +24,7 @@ import { diagnosticRecorder, DiagnosticPackage } from '../../../services/diagnos
 import { apiClient } from '../../../services/apiClient';
 import { keystoreTicketVault } from '../../../services/keystoreTicketVault';
 import { voiceCallService } from '../../../services/voiceCallService';
+import { i18nService } from '../../../services/i18nService';
 import {
   AttachedFile,
   AdvancedFeaturesConfig,
@@ -201,7 +202,7 @@ export function useHelpDeskTicketState({
   // Return to ticket list
   const handleBackToList = useCallback(() => {
     Keyboard.dismiss();
-    diagnosticRecorder.recordNavigation('Ana Ekran (Bilet Listesi)');
+    diagnosticRecorder.recordNavigation(i18nService.t('helpdesk.diag_nav_list'));
     setSelectedTicket(null);
     setIsCreatingDiscussion(false);
     setEscalationTarget('none');
@@ -216,11 +217,11 @@ export function useHelpDeskTicketState({
   // Record view changes (compose / detail / list)
   useEffect(() => {
     if (currentView === 'compose') {
-      diagnosticRecorder.recordNavigation('Yeni Bilet Oluşturma Ekranı', {
-        mod: isCreatingDiscussion ? 'Yönetici Tartışması' : 'Destek Talebi',
+      diagnosticRecorder.recordNavigation(i18nService.t('helpdesk.diag_nav_compose'), {
+        mod: isCreatingDiscussion ? i18nService.t('helpdesk.diag_mode_discussion') : i18nService.t('helpdesk.diag_mode_support'),
       });
     } else if (currentView === 'list') {
-      diagnosticRecorder.recordNavigation('Ana Ekran (Bilet Listesi)');
+      diagnosticRecorder.recordNavigation(i18nService.t('helpdesk.diag_nav_list'));
     }
   }, [currentView, isCreatingDiscussion]);
 
@@ -301,7 +302,7 @@ export function useHelpDeskTicketState({
         }
       }
 
-      const resolvedEntName = opts?.overrideTenantName || paramEntName || resolvedLocalEntName || resolvedUserEntName || (isFounderUser ? 'TheWhite Enterprises' : 'Whitechain');
+      const resolvedEntName = opts?.overrideTenantName || paramEntName || resolvedLocalEntName || resolvedUserEntName || (isFounderUser ? i18nService.t('helpdesk.founder_enterprise_default') : i18nService.t('helpdesk.tenant_enterprise_default'));
       setCurrentEnterpriseName(resolvedEntName);
       setPttTenantName(resolvedEntName);
 
@@ -493,7 +494,7 @@ export function useHelpDeskTicketState({
 
   // Open ticket detail and fetch messages
   const openTicketDetail = useCallback(async (ticket: HelpDeskTicket) => {
-    diagnosticRecorder.recordNavigation(`Bilet Detayı (#${ticket.id})`, {
+    diagnosticRecorder.recordNavigation(i18nService.t('helpdesk.diag_nav_detail', { id: ticket.id }), {
       biletNo: `#${ticket.id}`,
       durum: ticket.status,
       uygulama: ticket.app_id || 'whitedesk',
@@ -572,18 +573,13 @@ export function useHelpDeskTicketState({
       const ticketRef = anyTicket.ticket_code 
         ? `#${anyTicket.ticket_code}` 
         : (ticket.subject ? `«${ticket.subject}»` : `#${ticket.id.slice(0, 8)}`);
-      const isTr = language === 'tr';
 
       setConfirmSheet({
         visible: true,
-        title: isTr 
-          ? `${ticketRef} Çözüldü mü?`
-          : `Has ${ticketRef} Been Resolved?`,
-        description: isTr
-          ? 'Destek uzmanımızın yanıtı sorununuzu çözdüyse bileti kapatabilir, ek sorunuz varsa görüşmeye devam edebilirsiniz.'
-          : 'If our support specialist resolved your issue, you can close this ticket; if you have further questions, you can continue.',
-        actionText: isTr ? 'Çözüldü, Kapat' : 'Resolved, Close',
-        cancelText: isTr ? 'Devam Et' : 'Continue',
+        title: i18nService.t('helpdesk.resolution_sheet_title', { ref: ticketRef }),
+        description: i18nService.t('helpdesk.resolution_sheet_desc'),
+        actionText: i18nService.t('helpdesk.resolution_sheet_confirm'),
+        cancelText: i18nService.t('helpdesk.resolution_sheet_continue'),
         actionColor: '#10B981',
         onAction: async () => {
           setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -651,7 +647,7 @@ export function useHelpDeskTicketState({
           if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(filePath, {
               mimeType: 'application/json',
-              dialogTitle: language === 'tr' ? 'Değişmezlik Makbuzu (.json)' : 'Proof of Integrity Receipt (.json)',
+              dialogTitle: i18nService.t('helpdesk.integrity_receipt_dialog_title'),
               UTI: 'public.json',
             });
           }
@@ -677,7 +673,9 @@ export function useHelpDeskTicketState({
     if (!selectedTicket) return;
     const nextStatus: TicketStatus = selectedTicket.status === 'closed' ? 'open' : 'closed';
     diagnosticRecorder.recordAction(
-      nextStatus === 'closed' ? `Bilet Kapatıldı (#${selectedTicket.id})` : `Bilet Yeniden Açıldı (#${selectedTicket.id})`,
+      nextStatus === 'closed'
+        ? i18nService.t('helpdesk.diag_ticket_closed', { id: selectedTicket.id })
+        : i18nService.t('helpdesk.diag_ticket_reopened', { id: selectedTicket.id }),
       { biletNo: `#${selectedTicket.id}`, yeniDurum: nextStatus }
     );
     await helpDeskService.setTicketStatus(selectedTicket.id, nextStatus);
@@ -693,10 +691,10 @@ export function useHelpDeskTicketState({
     if (!composeSubject.trim() || !composeMessage.trim() || sending) return;
     setSending(true);
     try {
-      diagnosticRecorder.recordAction('Yeni Bilet Gönderimi Başlatıldı', {
+      diagnosticRecorder.recordAction(i18nService.t('helpdesk.diag_create_ticket_started'), {
         kategori: composeCategory || 'genel',
         ekSayisi: attachedFiles.length + (attachDiagnostics ? 1 : 0),
-        sistemTanisi: attachDiagnostics ? 'Eklendi' : 'Yok',
+        sistemTanisi: attachDiagnostics ? i18nService.t('helpdesk.diag_added') : i18nService.t('helpdesk.diag_none'),
       });
       const msgText = composeMessage.trim();
 
@@ -734,7 +732,7 @@ export function useHelpDeskTicketState({
         }
 
         await helpDeskService.createTicket(
-          composeSubject.trim() || `[İşlem] ${claimResult.enterpriseName || 'WhiteDesk'}`,
+          composeSubject.trim() || i18nService.t('helpdesk.subject_admin_action', { name: claimResult.enterpriseName || 'WhiteDesk' }),
           claimResult.message,
           null,
           claimResult.appName?.toLowerCase() || helpDeskService.appId,
@@ -764,7 +762,7 @@ export function useHelpDeskTicketState({
           } catch {}
         }
         await helpDeskService.createTicket(
-          composeSubject.trim() || `[Bağlantı] ${joinResult.enterpriseName || 'Kurumsal'}`,
+          composeSubject.trim() || i18nService.t('helpdesk.subject_user_join', { name: joinResult.enterpriseName || i18nService.t('helpdesk.enterprise_default') }),
           joinResult.message,
           null,
           joinResult.appId || helpDeskService.appId,
@@ -789,7 +787,7 @@ export function useHelpDeskTicketState({
           const label = fieldDef?.label || k;
           return `• ${label}: ${customFieldValues[k].trim()}`;
         });
-        finalMessage += `\n\n--- 📋 [Kayıt Bilgileri] ---\n${detailsLines.join('\n')}`;
+        finalMessage += `\n\n--- 📋 [${i18nService.t('helpdesk.registration_info_header')}] ---\n${detailsLines.join('\n')}`;
       }
 
       // Cihazda Otomatik Hassas Veri Maskeleme (Client-Side PII Redaction)
@@ -897,10 +895,10 @@ export function useHelpDeskTicketState({
       ? piiSanitizer.sanitize(rawText).sanitizedText
       : rawText;
     let filesToProcess = [...attachedFiles];
-    diagnosticRecorder.recordAction(`Bilet Yanıtı Gönderildi (#${selectedTicket.id})`, {
+    diagnosticRecorder.recordAction(i18nService.t('helpdesk.diag_reply_sent', { id: selectedTicket.id }), {
       biletNo: `#${selectedTicket.id}`,
       ekSayisi: attachedFiles.length + (attachDiagnostics ? 1 : 0),
-      sistemTanisi: attachDiagnostics ? 'Eklendi' : 'Yok',
+      sistemTanisi: attachDiagnostics ? i18nService.t('helpdesk.diag_added') : i18nService.t('helpdesk.diag_none'),
     });
     if (attachDiagnostics) {
       const diagPackage = diagnosticRecorder.exportPackage();
@@ -1042,12 +1040,13 @@ export function useHelpDeskTicketState({
   const handleUserCloseTicket = useCallback(async () => {
     if (!selectedTicket) return;
     try {
+      const noteText = i18nService.t('helpdesk.user_resolution_approval_note');
       await helpDeskService.resolveTicketByUser(
         selectedTicket.id,
-        'Kullanıcı Çözüm Onayı'
+        noteText
       );
-      setSelectedTicket(prev => prev ? { ...prev, status: 'closed', resolution_note: 'Kullanıcı Çözüm Onayı' } : null);
-      setTickets(prev => prev.map(t => t.id === selectedTicket.id ? { ...t, status: 'closed', resolution_note: 'Kullanıcı Çözüm Onayı' } : t));
+      setSelectedTicket(prev => prev ? { ...prev, status: 'closed', resolution_note: noteText } : null);
+      setTickets(prev => prev.map(t => t.id === selectedTicket.id ? { ...t, status: 'closed', resolution_note: noteText } : t));
       handleOpenRating(selectedTicket);
     } catch (e) {
       console.warn('[useHelpDeskTicketState] handleUserCloseTicket error:', e);
@@ -1065,7 +1064,7 @@ export function useHelpDeskTicketState({
 
   const isTicketAutoClosed = useMemo(() => {
     if (!selectedTicket) return false;
-    if (selectedTicket.resolution_note && selectedTicket.resolution_note.includes('Otomatik')) return true;
+    if (selectedTicket.resolution_note && (selectedTicket.resolution_note.includes(i18nService.t('helpdesk.auto_close_keyword')) || selectedTicket.resolution_note.includes(i18nService.t('helpdesk.auto_close_timeout_note')))) return true;
     if (selectedTicket.status !== 'closed' && selectedTicket.last_admin_reply_at) {
       const elapsed = Date.now() - selectedTicket.last_admin_reply_at;
       return elapsed >= 48 * 3600 * 1000;
@@ -1094,12 +1093,13 @@ export function useHelpDeskTicketState({
       const elapsed = Date.now() - selectedTicket.last_admin_reply_at;
       if (elapsed >= 48 * 3600 * 1000) {
         void (async () => {
+          const autoNote = i18nService.t('helpdesk.auto_close_timeout_note');
           await helpDeskService.resolveTicketByUser(
             selectedTicket.id,
-            'Otomatik Kapanış (Zaman Aşımı)'
+            autoNote
           );
-          setSelectedTicket(prev => prev ? { ...prev, status: 'closed', resolution_note: 'Otomatik Kapanış (Zaman Aşımı)' } : null);
-          setTickets(prev => prev.map(t => t.id === selectedTicket.id ? { ...t, status: 'closed', resolution_note: 'Otomatik Kapanış (Zaman Aşımı)' } : t));
+          setSelectedTicket(prev => prev ? { ...prev, status: 'closed', resolution_note: autoNote } : null);
+          setTickets(prev => prev.map(t => t.id === selectedTicket.id ? { ...t, status: 'closed', resolution_note: autoNote } : t));
         })();
       }
     }
@@ -1226,9 +1226,9 @@ export function useHelpDeskTicketState({
 
   const handleAttachDiagnostics = useCallback(async (ticket: HelpDeskTicket) => {
     try {
-      diagnosticRecorder.recordAction(`Sistem Tanısı Mühürlendi (#${ticket.id})`, {
+      diagnosticRecorder.recordAction(i18nService.t('helpdesk.diag_sealed', { id: ticket.id }), {
         biletNo: `#${ticket.id}`,
-        iletim: 'Cloudflare R2 + D1 Relay',
+        iletim: i18nService.t('helpdesk.receipt_relay_channel'),
       });
       const diagPackage = diagnosticRecorder.exportPackage();
       await helpDeskService.attachDiagnosticToTicket(ticket.id, diagPackage);
@@ -1285,7 +1285,7 @@ export function useHelpDeskTicketState({
         list.unshift({
           white_id: ownWhiteId,
           blind_id: ownBlindId,
-          alias: (customAlias || 'Admin') + ' (Kendim - Test)',
+          alias: `${customAlias || i18nService.t('helpdesk.admin_role_short')} (${i18nService.t('helpdesk.self_test_suffix')})`,
           role: adminRole || 'admin',
           assigned_tickets_count: 0,
         });
@@ -1308,7 +1308,7 @@ export function useHelpDeskTicketState({
         list.unshift({
           white_id: ownWhiteId,
           blind_id: ownBlindId,
-          alias: (customAlias || 'Admin') + ' (Kendim - Test)',
+          alias: `${customAlias || i18nService.t('helpdesk.admin_role_short')} (${i18nService.t('helpdesk.self_test_suffix')})`,
           role: adminRole || 'admin',
           assigned_tickets_count: 0,
         });
@@ -1356,7 +1356,7 @@ export function useHelpDeskTicketState({
         const tenantId = selectedTicket?.enterprise_blind_id || activeEnterpriseBlindId;
         const loginSettings = await helpDeskService.getTenantLoginSettings(tenantId);
         if (!loginSettings.allowNameEntry) {
-          Alert.alert('Transfer Yapılamaz', 'Ad soyad girişi kapalı olduğunda bilet transferi yapılamaz.');
+          Alert.alert(i18nService.t('helpdesk.err_transfer_disabled_title'), i18nService.t('helpdesk.err_transfer_disabled_desc'));
           setTransferBottomSheetVisible(false);
           return;
         }
@@ -1372,7 +1372,7 @@ export function useHelpDeskTicketState({
       const tenantId = selectedTicket.enterprise_blind_id || activeEnterpriseBlindId;
       const loginSettings = await helpDeskService.getTenantLoginSettings(tenantId);
       if (!loginSettings.allowNameEntry) {
-        Alert.alert('Transfer Yapılamaz', 'Ad soyad girişi kapalı olduğunda bilet transferi yapılamaz.');
+        Alert.alert(i18nService.t('helpdesk.err_transfer_disabled_title'), i18nService.t('helpdesk.err_transfer_disabled_desc'));
         return;
       }
     } catch {}
@@ -1459,7 +1459,7 @@ export function useHelpDeskTicketState({
         await apiClient.confirmRelayAck(ticket.relay_item_id, ticket.relay_attachment_r2_key || undefined);
       }
       const myBlindId = ownWhiteId ? WhiteDeskCrypto.generateBlindId(ownWhiteId) : 'admin_node';
-      const myAlias = customAlias || (isFounder ? 'TheWhite' : 'Yönetici');
+      const myAlias = customAlias || (isFounder ? 'TheWhite' : i18nService.t('helpdesk.tierAdmin'));
       ticket.is_relay_pending = false;
       ticket.assigned_admin_blind_id = myBlindId;
       ticket.assigned_admin_name = myAlias;
@@ -1480,7 +1480,7 @@ export function useHelpDeskTicketState({
         is_admin: true,
         is_internal: true,
         visibility_level: 'internal',
-        message: `⚡ [Devralındı] Bilet sunucudan (D1/R2) buharlaştırılarak @${myAlias} tarafından devralındı.`,
+        message: i18nService.t('helpdesk.ticket_taken_over_sys_msg', { alias: myAlias }),
         created_at: Date.now(),
       };
       await keystoreTicketVault.appendMessage(ticket.id, takeOverMsg);
@@ -1489,16 +1489,14 @@ export function useHelpDeskTicketState({
       setTicketMessages(msgs);
       await loadData();
       Alert.alert(
-        language === 'tr' ? 'Bilet Devralındı' : 'Ticket Taken Over',
-        language === 'tr'
-          ? 'Bilet başarıyla devralındı ve size zimmetlendi.'
-          : 'Ticket successfully claimed and assigned to you.'
+        i18nService.t('helpdesk.ticket_taken_over_title'),
+        i18nService.t('helpdesk.ticket_taken_over_desc')
       );
     } catch (err) {
       console.warn('[useHelpDeskTicketState] handleTakeOverTicket error:', err);
       Alert.alert(
-        language === 'tr' ? 'Hata' : 'Error',
-        language === 'tr' ? 'Bilet devralınırken bir sorun oluştu.' : 'Failed to take over ticket.'
+        i18nService.t('common.error'),
+        i18nService.t('helpdesk.err_ticket_take_over')
       );
     }
   }, [ownWhiteId, customAlias, isFounder, language, loadData]);

@@ -14,7 +14,7 @@ import {
 import { RotateCw, X, Keyboard, ScanLine, ShieldCheck } from 'lucide-react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { BottomConfirmationSheet } from '../components/BottomConfirmationSheet';
-import { useTranslation } from '../services/i18nService';
+import { useTranslation, i18nService } from '../services/i18nService';
 import { helpDeskService } from '../services/helpDeskService';
 
 export default function WhiteDeskScannerScreen({ navigation }: any) {
@@ -51,7 +51,7 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
   const showAlert = (
     title: string, 
     description: string, 
-    actionText: string = 'Tamam', 
+    actionText: string = t('common.ok'), 
     actionColor: string = '#2563EB',
     onDismiss?: () => void
   ) => {
@@ -76,50 +76,50 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
       if (res.success) {
         if (res.type === 'founder') {
           showAlert(
-            '👑 Kurucu Kimliği Doğrulandı',
-            res.message || 'TheWhite the Founder (**) olarak sistem ve tüm kiracı denetim yetkileriniz anında aktif edildi.',
-            'Destek Masasına Geç',
+            t('scanner.founder_verified_title'),
+            res.message || t('scanner.founder_verified_desc'),
+            t('scanner.go_to_helpdesk'),
             '#2563EB',
             () => navigation.goBack()
           );
         } else if (res.type === 'global_admin') {
-          const isActive = (res.message || '').includes('aktif') || (res.message || '').includes('hazır') || (res.message || '').includes('yüklendi');
+          const isActive = (res.message || '').includes('aktif') || (res.message || '').includes(i18nService.t('helpdesk.qr_ready_keyword_1')) || (res.message || '').includes(i18nService.t('helpdesk.qr_ready_keyword_2'));
           showAlert(
-            isActive ? '⭐ Global Admin Yetkisi Aktif' : '⭐ Global Admin Talebi Alındı',
-            res.message || 'Global Admin adaylığınız kurucu TheWhite onayına iletildi. Onaylandıktan sonra WhiteCosmos yetkiniz aktifleşecektir.',
-            isActive ? 'Destek Masasına Geç' : 'Anladım',
+            isActive ? t('scanner.global_admin_active_title') : t('scanner.global_admin_pending_title'),
+            res.message || t('scanner.global_admin_pending_desc'),
+            isActive ? t('scanner.go_to_helpdesk') : t('scanner.understood'),
             isActive ? '#2563EB' : '#D97706',
             () => navigation.goBack()
           );
         } else if (res.type === 'admin') {
           showAlert(
-            '🛡️ Yönetici Yetkisi Aktif',
-            res.message || 'Yönetici yetkiniz başarıyla etkinleştirildi.',
-            'Destek Masasına Geç',
+            t('scanner.admin_active_title'),
+            res.message || t('scanner.admin_active_desc'),
+            t('scanner.go_to_helpdesk'),
             '#2563EB',
             () => navigation.goBack()
           );
         } else if (res.type === 'desktop_pair') {
           showAlert(
-            '🖥️ Masaüstü Yetkilendirildi',
-            res.message || 'Yıllık lisansınız doğrulandı. WhiteDesk Masaüstü uygulaması aktif hale getirildi.',
-            'Masaüstüne Geç',
+            t('scanner.desktop_authorized_title'),
+            res.message || t('scanner.desktop_authorized_desc'),
+            t('scanner.go_to_desktop'),
             '#16A34A',
             () => navigation.goBack()
           );
         } else if (res.type === 'user') {
           showAlert(
-            '✓ Destek Masasına Bağlandınız',
-            res.message || 'Kurumsal destek masasına başarıyla bağlandınız. Biletlerinizi anında oluşturabilirsiniz.',
-            'Destek Masasını Aç',
+            t('scanner.user_connected_title'),
+            res.message || t('scanner.user_connected_desc'),
+            t('scanner.open_helpdesk'),
             '#10B981',
             () => navigation.goBack()
           );
         } else {
           showAlert(
-            'İşlem Başarılı',
+            t('scanner.operation_success_title'),
             res.message,
-            'Tamam',
+            t('common.ok'),
             '#2563EB',
             () => navigation.goBack()
           );
@@ -127,17 +127,17 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
       } else {
         if (res.type === 'desktop_pair') {
           showAlert(
-            'Masaüstü Eşleştirme Hatası',
-            res.message || 'Masaüstü uygulaması eşleştirilemedi.',
-            'Tekrar Dene',
+            t('scanner.desktop_pair_error_title'),
+            res.message || t('scanner.desktop_pair_error_desc'),
+            t('scanner.try_again'),
             '#EF4444',
             () => setIsScanning(true)
           );
         } else {
           showAlert(
-            'Geçersiz WhiteDesk Kodu',
-            res.message || 'Taratılan QR kod geçerli bir WhiteDesk yetkilendirme veya katılım anahtarı içermiyor.',
-            'Tekrar Dene',
+            t('scanner.invalid_qr_title'),
+            res.message || t('scanner.invalid_qr_desc'),
+            t('scanner.try_again'),
             '#EF4444',
             () => setIsScanning(true)
           );
@@ -145,9 +145,9 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
       }
     } catch (err: any) {
       showAlert(
-        'Bağlantı Hatası',
-        err?.message || 'QR kod doğrulanırken beklenmeyen bir hata oluştu.',
-        'Kapat',
+        t('scanner.connection_error_title'),
+        err?.message || t('scanner.connection_error_desc'),
+        t('common.close'),
         '#EF4444',
         () => setIsScanning(true)
       );
@@ -185,15 +185,15 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
           <View style={[styles.iconCircle, { backgroundColor: '#F0F7FF' }]}>
             <ScanLine size={48} color="#2563EB" />
           </View>
-          <Text style={styles.permissionTitle}>Kamera İzni Gerekli</Text>
+          <Text style={styles.permissionTitle}>{t('scanner.permission_required_title')}</Text>
           <Text style={styles.permissionDesc}>
-            WhiteDesk Kurucu, Global Admin veya Personel katılım QR kodlarını taramak için kamera erişimine izin vermeniz gerekmektedir.
+            {t('scanner.permission_required_desc')}
           </Text>
           <TouchableOpacity onPress={requestPermission} style={styles.primaryAuthButton}>
-            <Text style={styles.primaryAuthButtonText}>İzin Ver</Text>
+            <Text style={styles.primaryAuthButtonText}>{t('scanner.allow_permission')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
-            <Text style={{ color: '#2563EB', fontWeight: '600' }}>Vazgeç</Text>
+            <Text style={{ color: '#2563EB', fontWeight: '600' }}>{t('helpdesk.cancel')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -219,7 +219,7 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
             <View style={styles.centerContainer}>
               <ActivityIndicator size="large" color="#2563EB" />
               <Text style={{ color: '#FFFFFF', marginTop: 12, fontSize: 13, fontWeight: '600' }}>
-                Yetkilendirme anahtarı doğrulanıyor...
+                {t('scanner.verifying_key')}
               </Text>
             </View>
           )}
@@ -233,8 +233,8 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
             <X size={20} color="#FFFFFF" />
           </TouchableOpacity>
           <View style={{ alignItems: 'center' }}>
-            <Text style={styles.hudHeaderTitle}>WHITEDESK QR TARAYICI</Text>
-            <Text style={styles.hudHeaderSubtitle}>Sovereign Access & Onboarding</Text>
+            <Text style={styles.hudHeaderTitle}>{t('scanner.hud_title')}</Text>
+            <Text style={styles.hudHeaderSubtitle}>{t('scanner.hud_subtitle')}</Text>
           </View>
           <TouchableOpacity 
             onPress={() => setFacing(prev => prev === 'back' ? 'front' : 'back')} 
@@ -253,7 +253,7 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
             <View style={styles.laserLine} />
           </View>
           <Text style={styles.hudHelperText}>
-            Kurucu (Founder), Global Admin veya Personel katılım QR kodunu kareye hizalayın
+            {t('scanner.hud_helper_text')}
           </Text>
         </View>
 
@@ -263,7 +263,7 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
           activeOpacity={0.8}
         >
           <Keyboard size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.manualEntryBtnText}>Anahtarı Manuel Gir</Text>
+          <Text style={styles.manualEntryBtnText}>{t('scanner.enter_key_manually')}</Text>
         </TouchableOpacity>
       </SafeAreaView>
 
@@ -277,15 +277,15 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>WhiteDesk Anahtarı Girin</Text>
+            <Text style={styles.modalTitle}>{t('scanner.manual_modal_title')}</Text>
             <Text style={styles.modalDesc}>
-              Kurucu hash'i (tw_founder_...), Global Admin hash'i (ga_cosmos_...) veya Personel hash'i (usr_div_...) yapıştırın:
+              {t('scanner.manual_modal_desc')}
             </Text>
             <TextInput
               style={styles.modalInput}
               value={manualInput}
               onChangeText={setManualInput}
-              placeholder="Hash kodunu buraya yapıştırın"
+              placeholder={t('scanner.manual_input_placeholder')}
               placeholderTextColor="#94A3B8"
               autoCapitalize="none"
               autoCorrect={false}
@@ -295,13 +295,13 @@ export default function WhiteDeskScannerScreen({ navigation }: any) {
                 style={[styles.modalBtn, { backgroundColor: '#F1F5F9' }]} 
                 onPress={() => { setManualModalVisible(false); setManualInput(''); }}
               >
-                <Text style={{ color: '#475569', fontWeight: '600', fontSize: 13 }}>İptal</Text>
+                <Text style={{ color: '#475569', fontWeight: '600', fontSize: 13 }}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.modalBtn, { backgroundColor: '#2563EB', flex: 1 }]} 
                 onPress={handleManualSubmit}
               >
-                <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 13 }}>Onayla & Aktif Et</Text>
+                <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 13 }}>{t('scanner.confirm_and_activate')}</Text>
               </TouchableOpacity>
             </View>
           </View>

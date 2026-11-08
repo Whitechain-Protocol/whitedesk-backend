@@ -2,6 +2,7 @@ import { SafeSecureStore } from '../storageService';
 import { keystoreTicketVault } from '../keystoreTicketVault';
 import { apiClient } from '../apiClient';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
+import { i18nService } from '../i18nService';
 import { executeSql, escapeSqlString, generateTicketId } from './db';
 import {
   CURRENT_APP_ID,
@@ -133,7 +134,7 @@ export const helpDeskTicketService = {
                 if (payloadData.type === 'rd_invite_signal') {
                   void remoteDesktopService.receiveIncomingInvite(
                     rdTicketId,
-                    payloadData.admin_alias || 'Destek Uzmanı',
+                    payloadData.admin_alias || i18nService.t('ticket_service.default_support_specialist'),
                     true
                   );
                 } else {
@@ -448,10 +449,10 @@ export const helpDeskTicketService = {
                 pushTargetBlindId,
                 blindId,
                 {
-                  titleTr: 'Yeni Destek Bileti',
-                  titleEn: 'New Support Ticket',
-                  bodyTr: `${senderAlias || 'Kullanıcı'}: ${subject}`,
-                  bodyEn: `${senderAlias || 'User'}: ${subject}`,
+                  titleTr: i18nService.t('ticket_service.push_new_ticket_title'),
+                  titleEn: i18nService.t('ticket_service.push_new_ticket_title_en'),
+                  bodyTr: `${senderAlias || i18nService.t('ticket_service.default_user_alias')}: ${subject}`,
+                  bodyEn: `${senderAlias || i18nService.t('ticket_service.default_user_alias_en')}: ${subject}`,
                   ticketId,
                 }
               );
@@ -728,17 +729,23 @@ export const helpDeskTicketService = {
 
         try {
           let targetWhiteId: string | null = null;
-          let titleTr = 'inWhite Destek';
-          let titleEn = 'inWhite Support';
-          let bodyTr = "inWhite Destek'ten mesajınız var";
-          let bodyEn = 'You have a message from inWhite Support';
+          let titleTr = i18nService.t('ticket_service.push_support_title');
+          let titleEn = i18nService.t('ticket_service.push_support_title_en');
+          let bodyTr = i18nService.t('ticket_service.push_support_message_body');
+          let bodyEn = i18nService.t('ticket_service.push_support_message_body_en');
 
           if (isWhisper && whisperTargetBlindId) {
             targetWhiteId = WhiteDeskCrypto.generateBlindId(whisperTargetBlindId);
-            titleTr = '🔒 Özel Fısıltı';
-            titleEn = '🔒 Confidential Whisper';
-            bodyTr = `${senderAlias || 'Bir yönetici'} size özel fısıltı gönderdi (#${ticketId})`;
-            bodyEn = `${senderAlias || 'An admin'} sent you a whisper (#${ticketId})`;
+            titleTr = i18nService.t('ticket_service.push_whisper_title');
+            titleEn = i18nService.t('ticket_service.push_whisper_title_en');
+            bodyTr = i18nService.t('ticket_service.push_whisper_body', {
+              sender: senderAlias || i18nService.t('ticket_service.push_whisper_default_admin'),
+              ticketId,
+            });
+            bodyEn = i18nService.t('ticket_service.push_whisper_body_en', {
+              sender: senderAlias || i18nService.t('ticket_service.push_whisper_default_admin_en'),
+              ticketId,
+            });
           } else if (isInternal) {
             targetWhiteId = null; // Dahili not müşteriye push bildirimi olarak ASLA gitmez
           } else if (isAdmin) {
@@ -751,8 +758,8 @@ export const helpDeskTicketService = {
             targetWhiteId = (assignedAdmin && assignedAdmin !== 'unassigned')
               ? WhiteDeskCrypto.generateBlindId(assignedAdmin)
               : await helpDeskAuthService.getAdminWhiteId();
-            bodyTr = 'inWhite Kullanıcı Mesajı';
-            bodyEn = 'inWhite User Message';
+            bodyTr = i18nService.t('ticket_service.push_user_message_body');
+            bodyEn = i18nService.t('ticket_service.push_user_message_body_en');
           }
 
           if (targetWhiteId && targetWhiteId.toLowerCase() !== blindId.toLowerCase()) {
@@ -1182,7 +1189,10 @@ export const helpDeskTicketService = {
       const remainingMs = Math.max(0, expiryMs - Date.now());
       const remainingHours = Math.ceil(remainingMs / (3600 * 1000));
       const remainingDays = Math.max(1, Math.ceil(remainingHours / 24));
-      const remainingText = remainingHours <= 48 ? `${remainingHours} s` : `${remainingDays} g`;
+      const remainingText =
+        remainingHours <= 48
+          ? i18nService.t('ticket_service.remaining_hours_short', { hours: remainingHours })
+          : i18nService.t('ticket_service.remaining_days_short', { days: remainingDays });
       return { remainingDays, remainingText };
     };
 
@@ -1445,7 +1455,7 @@ export const helpDeskTicketService = {
       }
 
       for (const row of effectiveRatings) {
-        const aId = String(row.admin_blind_id || 'admin_genel');
+        const aId = String(row.admin_blind_id || 'admin_default');
         const sc = Number(row.score) || 5;
         totalScore += sc;
         if (sc >= 4) highCount++;
@@ -1453,7 +1463,11 @@ export const helpDeskTicketService = {
         else lowCount++;
 
         if (!adminMap[aId]) {
-          adminMap[aId] = { scores: [], notes: [], orgId: row.org_id ? String(row.org_id) : 'Genel Destek' };
+          adminMap[aId] = {
+            scores: [],
+            notes: [],
+            orgId: row.org_id ? String(row.org_id) : i18nService.t('ticket_service.general_support_org'),
+          };
         }
         adminMap[aId].scores.push(sc);
         if (row.feedback_note && row.feedback_note.trim()) {
@@ -1466,7 +1480,11 @@ export const helpDeskTicketService = {
 
       const adminList = admins.map((adm: any) => {
         const aId = String(adm.white_id);
-        const data = adminMap[aId] || { scores: [], notes: [], orgId: 'Genel Destek' };
+        const data = adminMap[aId] || {
+          scores: [],
+          notes: [],
+          orgId: i18nService.t('ticket_service.general_support_org'),
+        };
         const highSc = data.scores.filter(s => s >= 4).length;
         const aAvg = data.scores.length > 0
           ? Number((data.scores.reduce((a, b) => a + b, 0) / data.scores.length).toFixed(1))
@@ -1525,7 +1543,10 @@ export const helpDeskTicketService = {
           highRatingCount: highSc,
           successRate: sRate,
           latestNotes: data.notes.slice(0, 3),
-          status: adm.is_active !== false ? 'Aktif' : 'Pasif',
+          status:
+            adm.is_active !== false
+              ? i18nService.t('ticket_service.status_active')
+              : i18nService.t('ticket_service.status_inactive'),
           avgResponseMinutes: admAvgResponse,
           slaComplianceRate: admCompliance,
           slaBreachCount: admBreaches,
@@ -1647,7 +1668,7 @@ export const helpDeskTicketService = {
         sender_blind_id: blindId,
         is_admin: isAdmin,
         sender_role: isAdmin ? ((role => (role === 'none' ? null : role))(await helpDeskAuthService.getAdminRole(blindId))) : null,
-        message: '🛠️ Sistem tanısı eklendi (diagnostics.whitedesk)',
+        message: i18nService.t('ticket_service.diagnostic_attached_message'),
         attachment_data: diagFile.data,
         attachment_name: diagFile.name,
         attachment_type: diagFile.type,
@@ -1819,12 +1840,12 @@ export const helpDeskTicketService = {
     try {
       const tickets = await keystoreTicketVault.getTickets();
       const target = tickets.find(t => t.id === cleanId);
-      if (!target) return { success: false, error: 'Bilet bulunamadı.' };
+      if (!target) return { success: false, error: i18nService.t('ticket_service.ticket_not_found') };
 
       const ownWhiteId = await helpDeskAuthService.getOwnWhiteId();
       const ownBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
       const customAlias = await helpDeskAuthService.getCustomAlias();
-      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || 'Admin';
+      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || i18nService.t('helpdesk.admin_role_short');
 
       const now = Date.now();
       target.transfer_status = 'pending';
@@ -1846,7 +1867,10 @@ export const helpDeskTicketService = {
         is_admin: true,
         is_internal: true,
         visibility_level: 'internal',
-        message: `📋 [Bilet Devri Başlatıldı] -> @${targetAdminAlias}${transferNote ? ': ' + transferNote : ''}`,
+        message: i18nService.t('ticket_service.transfer_initiated_message', {
+          alias: targetAdminAlias,
+          note: transferNote ? ': ' + transferNote : '',
+        }),
         created_at: now,
       };
       await keystoreTicketVault.appendMessage(cleanId, noteMsg);
@@ -1896,7 +1920,7 @@ export const helpDeskTicketService = {
       return { success: true };
     } catch (e: any) {
       console.warn('[HelpDeskTicketService] requestTicketTransfer error:', e);
-      return { success: false, error: e?.message || 'İletme başlatılamadı.' };
+      return { success: false, error: e?.message || i18nService.t('ticket_service.transfer_initiate_failed') };
     }
   },
 
@@ -1908,12 +1932,12 @@ export const helpDeskTicketService = {
     try {
       const tickets = await keystoreTicketVault.getTickets();
       const target = tickets.find(t => t.id === cleanId);
-      if (!target) return { success: false, error: 'Bilet bulunamadı.' };
+      if (!target) return { success: false, error: i18nService.t('ticket_service.ticket_not_found') };
 
       const ownWhiteId = await helpDeskAuthService.getOwnWhiteId();
       const ownBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
       const customAlias = await helpDeskAuthService.getCustomAlias();
-      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || 'Admin';
+      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || i18nService.t('helpdesk.admin_role_short');
 
       const prevTargetBlindId = target.transfer_target_blind_id;
       const now = Date.now();
@@ -1935,7 +1959,7 @@ export const helpDeskTicketService = {
         is_admin: true,
         is_internal: true,
         visibility_level: 'internal',
-        message: '❌ [Bilet Devri İptal Edildi]',
+        message: i18nService.t('ticket_service.transfer_cancelled_message'),
         created_at: now,
       };
       await keystoreTicketVault.appendMessage(cleanId, cancelMsg);
@@ -1961,7 +1985,7 @@ export const helpDeskTicketService = {
       return { success: true };
     } catch (e: any) {
       console.warn('[HelpDeskTicketService] cancelTicketTransfer error:', e);
-      return { success: false, error: e?.message || 'İletme iptal edilemedi.' };
+      return { success: false, error: e?.message || i18nService.t('ticket_service.transfer_cancel_failed') };
     }
   },
 
@@ -1973,12 +1997,12 @@ export const helpDeskTicketService = {
     try {
       const tickets = await keystoreTicketVault.getTickets();
       const target = tickets.find(t => t.id === cleanId);
-      if (!target) return { success: false, error: 'Bilet bulunamadı.' };
+      if (!target) return { success: false, error: i18nService.t('ticket_service.ticket_not_found') };
 
       const ownWhiteId = await helpDeskAuthService.getOwnWhiteId();
       const ownBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
       const customAlias = await helpDeskAuthService.getCustomAlias();
-      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || 'Admin';
+      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || i18nService.t('helpdesk.admin_role_short');
 
       const prevSenderAlias = target.transfer_sender_alias;
       const prevSenderBlindId = target.transfer_sender_blind_id;
@@ -1986,7 +2010,7 @@ export const helpDeskTicketService = {
 
       target.assigned_admin_blind_id = ownBlindId;
       target.transfer_status = 'accepted';
-      target.transferred_from_alias = prevSenderAlias || 'Admin';
+      target.transferred_from_alias = prevSenderAlias || i18nService.t('helpdesk.admin_role_short');
       target.transferred_from_blind_id = prevSenderBlindId;
       target.transfer_target_blind_id = null;
       target.transfer_target_alias = null;
@@ -2008,7 +2032,7 @@ export const helpDeskTicketService = {
         is_admin: true,
         is_internal: true,
         visibility_level: 'internal',
-        message: `✅ [Bilet Devri Kabul Edildi] Yeni Sorumlu: @${ownAlias}`,
+        message: i18nService.t('ticket_service.transfer_accepted_message', { alias: ownAlias }),
         created_at: now,
       };
       await keystoreTicketVault.appendMessage(cleanId, acceptMsg);
@@ -2038,7 +2062,7 @@ export const helpDeskTicketService = {
       return { success: true };
     } catch (e: any) {
       console.warn('[HelpDeskTicketService] acceptTicketTransfer error:', e);
-      return { success: false, error: e?.message || 'Bilet kabul edilemedi.' };
+      return { success: false, error: e?.message || i18nService.t('ticket_service.transfer_accept_failed') };
     }
   },
 
@@ -2053,12 +2077,12 @@ export const helpDeskTicketService = {
     try {
       const tickets = await keystoreTicketVault.getTickets();
       const target = tickets.find(t => t.id === cleanId);
-      if (!target) return { success: false, error: 'Bilet bulunamadı.' };
+      if (!target) return { success: false, error: i18nService.t('ticket_service.ticket_not_found') };
 
       const ownWhiteId = await helpDeskAuthService.getOwnWhiteId();
       const ownBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
       const customAlias = await helpDeskAuthService.getCustomAlias();
-      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || 'Admin';
+      const ownAlias = customAlias || (await helpDeskAuthService.getAdminAlias(ownWhiteId)) || i18nService.t('helpdesk.admin_role_short');
 
       const prevSenderBlindId = target.transfer_sender_blind_id;
       const now = Date.now();
@@ -2083,7 +2107,7 @@ export const helpDeskTicketService = {
                 type: 'ticket_transfer_rejected',
                 ticket_id: cleanId,
                 rejected_by_alias: ownAlias,
-                rejection_reason: rejectionReason || 'Gerekçe belirtilmedi.',
+                rejection_reason: rejectionReason || i18nService.t('ticket_service.no_reason_provided'),
                 created_at: now,
               }),
             });
@@ -2094,7 +2118,7 @@ export const helpDeskTicketService = {
       return { success: true };
     } catch (e: any) {
       console.warn('[HelpDeskTicketService] rejectTicketTransfer error:', e);
-      return { success: false, error: e?.message || 'Bilet reddedilemedi.' };
+      return { success: false, error: e?.message || i18nService.t('ticket_service.transfer_reject_failed') };
     }
   },
 
@@ -2129,12 +2153,14 @@ export const helpDeskTicketService = {
         ticket_id: cleanId,
         app_id: target.app_id || 'whitedesk',
         sender_white_id: claimingBlindId,
-        sender_alias: claimingAlias || 'Admin',
+        sender_alias: claimingAlias || i18nService.t('helpdesk.admin_role_short'),
         sender_blind_id: claimingBlindId,
         is_admin: true,
         is_internal: true,
         visibility_level: 'internal',
-        message: `📌 [Bilet Devralındı] @${claimingAlias || 'Admin'} bileti havuzdan devraldı.`,
+        message: i18nService.t('ticket_service.ticket_claimed_from_pool_message', {
+          alias: claimingAlias || i18nService.t('helpdesk.admin_role_short'),
+        }),
         created_at: now,
       };
       await keystoreTicketVault.appendMessage(cleanId, claimMsg);

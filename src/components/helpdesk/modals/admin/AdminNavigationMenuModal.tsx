@@ -22,6 +22,7 @@ import {
   CreditCard,
   Clock,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface AdminNavigationMenuModalProps {
   visible: boolean;
@@ -76,6 +77,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
   onOpenIdentityModal,
   onSignOut,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -101,7 +103,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
             activeOpacity={0.65}
           >
             <User size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-            <Text style={styles.menuText}>{language === 'tr' ? 'Profil' : 'Profile'}</Text>
+            <Text style={styles.menuText}>{t('admin.nav_menu.profile')}</Text>
           </TouchableOpacity>
 
           {/* 1.1 Çalışma Durumu (Profil adımının hemen altında yeni bir modal) */}
@@ -116,7 +118,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
             >
               <Clock size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Çalışma Durumu' : 'Working Status'}
+                {t('admin.nav_menu.work_status')}
               </Text>
             </TouchableOpacity>
           )}
@@ -133,7 +135,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
             >
               <CreditCard size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Lisans & Abonelik' : 'License & Subscription'}
+                {t('admin.nav_menu.license')}
               </Text>
             </TouchableOpacity>
           )}
@@ -153,7 +155,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                 activeOpacity={0.65}
               >
                 <ShieldCheck size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-                <Text style={styles.menuText}>Provizyon Masası</Text>
+                <Text style={styles.menuText}>{t('admin.nav_menu.provisioning')}</Text>
               </TouchableOpacity>
 
               {/* 3. Kuruluş Ayarları */}
@@ -166,7 +168,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                 activeOpacity={0.65}
               >
                 <Settings size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-                <Text style={styles.menuText}>Kuruluş Ayarları</Text>
+                <Text style={styles.menuText}>{t('admin.nav_menu.org_settings')}</Text>
               </TouchableOpacity>
 
               {/* 4. Gelişmiş Özellikler */}
@@ -180,7 +182,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <Sliders size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Gelişmiş Özellikler' : 'Advanced Features'}
+                  {t('admin.nav_menu.advanced_features')}
                 </Text>
               </TouchableOpacity>
 
@@ -194,7 +196,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                 activeOpacity={0.65}
               >
                 <Layers size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-                <Text style={styles.menuText}>SDK Entegrasyonları</Text>
+                <Text style={styles.menuText}>{t('admin.nav_menu.sdk_integrations')}</Text>
               </TouchableOpacity>
 
               {/* 5.1 Federal Veri Hasadı (Global Admin & Kurucu) */}
@@ -209,7 +211,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                 >
                   <Database size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                   <Text style={styles.menuText}>
-                    {language === 'tr' ? 'Federal Veri Hasadı' : 'Federal Data Harvesting'}
+                    {t('admin.nav_menu.federal_harvest')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -225,7 +227,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                   activeOpacity={0.65}
                 >
                   <SearchCheck size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-                  <Text style={styles.menuText}>FDH Sorgulama</Text>
+                  <Text style={styles.menuText}>{t('admin.nav_menu.fdh_audit')}</Text>
                 </TouchableOpacity>
               )}
 
@@ -240,7 +242,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
                   activeOpacity={0.65}
                 >
                   <Sparkles size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
-                  <Text style={styles.menuText}>Yönetici Değerlendirmeleri</Text>
+                  <Text style={styles.menuText}>{t('admin.nav_menu.admin_ratings')}</Text>
                 </TouchableOpacity>
               )}
 
@@ -256,7 +258,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <ShieldCheck size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Gizlilik & Güvenlik' : 'Security & Privacy'}
+                  {t('admin.nav_menu.security_privacy')}
                 </Text>
               </TouchableOpacity>
 
@@ -271,7 +273,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <BookOpen size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Yönetici Kılavuzu' : 'Admin Guide'}
+                  {t('admin.nav_menu.admin_guide')}
                 </Text>
               </TouchableOpacity>
 
@@ -286,7 +288,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <BookOpen size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Kullanım Kılavuzu' : 'User Manual'}
+                  {t('admin.nav_menu.user_guide')}
                 </Text>
               </TouchableOpacity>
             </>
@@ -303,7 +305,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <Sliders size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Gelişmiş Tercihler' : 'Advanced Preferences'}
+                  {t('admin.nav_menu.user_prefs')}
                 </Text>
               </TouchableOpacity>
 
@@ -318,7 +320,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <UserCheck size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Kendinizi Tanımlayın' : 'Identity & Alias'}
+                  {t('admin.nav_menu.identify_self')}
                 </Text>
               </TouchableOpacity>
 
@@ -333,7 +335,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <ShieldCheck size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Gizlilik & Güvenlik' : 'Security & Privacy'}
+                  {t('admin.nav_menu.security_privacy')}
                 </Text>
               </TouchableOpacity>
 
@@ -348,7 +350,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
               >
                 <BookOpen size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Kullanım Kılavuzu' : 'User Manual'}
+                  {t('admin.nav_menu.user_guide')}
                 </Text>
               </TouchableOpacity>
             </>
@@ -368,7 +370,7 @@ export const AdminNavigationMenuModal: React.FC<AdminNavigationMenuModalProps> =
           >
             <LogOut size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
             <Text style={[styles.menuText, styles.menuTextWipe]}>
-              {language === 'tr' ? 'Oturumu Kapat' : 'Sign Out'}
+              {t('admin.nav_menu.sign_out')}
             </Text>
           </TouchableOpacity>
         </View>

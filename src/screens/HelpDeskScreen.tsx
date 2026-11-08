@@ -229,7 +229,7 @@ export default function HelpDeskScreen() {
   const handleShowDigitalCleanProposal = useCallback((ticket: any) => { showDigitalCleanProposalRef.current?.(ticket); }, []);
 
   const ticketState = useHelpDeskTicketState({
-    language: (language === 'en' ? 'en' : 'tr'),
+    language: (language === 'tr' ? 'tr' : 'en'),
     ownWhiteId, setOwnWhiteId,
     isAdmin, setIsAdmin,
     adminRole, setAdminRole,
@@ -566,7 +566,7 @@ export default function HelpDeskScreen() {
     }
 
     const callerWhiteId = WhiteDeskCrypto.generateBlindId(ownWhiteId || '');
-    const callerAlias = customAlias || (isAdmin ? 'Destek Uzmanı' : 'Kullanıcı');
+    const callerAlias = customAlias || (isAdmin ? t('helpdesk.support_specialist') : t('helpdesk.user'));
 
     let targetWhiteId = selectedTicket.user_blind_id || selectedTicket.user_white_id || '';
     const ownBlind = callerWhiteId.toLowerCase();
@@ -597,13 +597,11 @@ export default function HelpDeskScreen() {
 
     setConfirmSheet({
       visible: true,
-      title: currentLanguage === 'tr' ? 'Uzak Masaüstü' : 'Remote Desktop',
-      description: currentLanguage === 'tr'
-        ? `Bu bilet (#${selectedTicket.id}) kapsamında kullanıcıya ekran izleme ve uzaktan kontrol isteği gönderilsin mi?`
-        : `Send remote desktop screen sharing and control request for ticket #${selectedTicket.id}?`,
-      actionText: currentLanguage === 'tr' ? 'İsteği Gönder' : 'Send Request',
+      title: t('helpdesk.remote_desktop_title'),
+      description: t('helpdesk.remote_desktop_request_confirm', { ticketId: selectedTicket.id }),
+      actionText: t('helpdesk.send_request_btn'),
       actionColor: '#2563EB',
-      cancelText: currentLanguage === 'tr' ? 'Vazgeç' : 'Cancel',
+      cancelText: t('helpdesk.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -616,10 +614,10 @@ export default function HelpDeskScreen() {
         );
       },
     });
-  }, [selectedTicket, ownWhiteId, customAlias, isAdmin, currentLanguage, setConfirmSheet, ticketMessages]);
+  }, [selectedTicket, ownWhiteId, customAlias, isAdmin, t, setConfirmSheet, ticketMessages]);
 
   const modalsContainerProps = useHelpDeskModalsProps({
-    language: (language === 'en' ? 'en' : 'tr'),
+    language: (language === 'tr' ? 'tr' : 'en'),
     getLabel,
     t,
     safeTop,
@@ -766,7 +764,7 @@ export default function HelpDeskScreen() {
           <View style={styles.slaToastContainer}>
             <View style={styles.slaToastDot} />
             <Text style={styles.slaToastText} numberOfLines={2}>
-              Cevaplanması geciken [{slaToast.ticketId}] biletiniz yeni bir temsilciye aktarılmıştır.
+              {t('helpdesk.sla_delayed_transferred_toast', { ticketId: slaToast.ticketId })}
             </Text>
           </View>
         )}
@@ -866,7 +864,7 @@ export default function HelpDeskScreen() {
           <View style={styles.slaToastContainer}>
             <View style={styles.slaToastDot} />
             <Text style={styles.slaToastText} numberOfLines={2}>
-              Cevaplanması geciken [{slaToast.ticketId}] biletiniz yeni bir temsilciye aktarılmıştır.
+              {t('helpdesk.sla_delayed_transferred_toast', { ticketId: slaToast.ticketId })}
             </Text>
           </View>
         )}
@@ -1094,7 +1092,7 @@ export default function HelpDeskScreen() {
         <View style={styles.slaToastContainer}>
           <View style={styles.slaToastDot} />
           <Text style={styles.slaToastText} numberOfLines={2}>
-            Cevaplanması geciken [{slaToast.ticketId}] biletiniz yeni bir temsilciye aktarılmıştır.
+            {t('helpdesk.sla_delayed_transferred_toast', { ticketId: slaToast.ticketId })}
           </Text>
         </View>
       )}

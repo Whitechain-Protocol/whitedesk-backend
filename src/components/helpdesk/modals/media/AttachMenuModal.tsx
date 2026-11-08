@@ -14,7 +14,7 @@ export interface AttachMenuModalProps {
   onPickCamera: () => void;
   onPickGallery: () => void;
   onPickDocument: () => void;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string, en?: string) => string;
 }
 
 export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
@@ -40,14 +40,10 @@ export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
       >
         <View style={styles.container}>
           <Text style={styles.title}>
-            {getLabel('helpdesk.attachTitle', 'Dosya Ekle', 'Attach File')}
+            {getLabel('helpdesk.attachTitle')}
           </Text>
           <Text style={styles.subtitle}>
-            {getLabel(
-              'helpdesk.attachSubtitle',
-              'Talebinize görsel veya belge ekleyin',
-              'Attach image or document to your ticket'
-            )}
+            {getLabel('helpdesk.attachSubtitle')}
           </Text>
 
           <View style={styles.optionsRow}>
@@ -56,7 +52,7 @@ export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
                 <Camera size={22} color="#3B82F6" />
               </View>
               <Text style={styles.optionLabel}>
-                {getLabel('helpdesk.camera', 'Kamera', 'Camera')}
+                {getLabel('helpdesk.camera')}
               </Text>
             </TouchableOpacity>
 
@@ -65,7 +61,7 @@ export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
                 <ImageIcon size={22} color="#10B981" />
               </View>
               <Text style={styles.optionLabel}>
-                {getLabel('helpdesk.gallery', 'Galeri', 'Gallery')}
+                {getLabel('helpdesk.gallery')}
               </Text>
             </TouchableOpacity>
 
@@ -74,7 +70,7 @@ export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
                 <FileText size={22} color="#D97706" />
               </View>
               <Text style={styles.optionLabel}>
-                {getLabel('helpdesk.document', 'Belge', 'Document')}
+                {getLabel('helpdesk.document')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -85,7 +81,7 @@ export const AttachMenuModal: React.FC<AttachMenuModalProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.cancelBtnText}>
-              {getLabel('helpdesk.cancel', 'Vazgeç', 'Cancel')}
+              {getLabel('helpdesk.cancel')}
             </Text>
           </TouchableOpacity>
         </View>

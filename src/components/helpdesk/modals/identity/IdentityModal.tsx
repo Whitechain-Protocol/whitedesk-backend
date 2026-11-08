@@ -11,6 +11,7 @@ import {
 import { Edit3, Coffee, CheckCircle2, Palmtree, HelpCircle, Clock } from 'lucide-react-native';
 import { helpDeskService } from '../../../../services/helpDeskService';
 import { AdminSubStatus } from '../../../../services/helpdesk/adminRosterService';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface IdentityModalProps {
   visible: boolean;
@@ -26,12 +27,12 @@ export interface IdentityModalProps {
 }
 
 const DURATION_PRESETS = [
-  { label: '15 dk', mins: 15 },
-  { label: '30 dk', mins: 30 },
-  { label: '1 sa', mins: 60 },
-  { label: '2 sa', mins: 120 },
-  { label: '1 gün', mins: 1440 },
-  { label: 'Süresiz', mins: 0 },
+  { labelKey: 'identity.modal.preset_15m', mins: 15 },
+  { labelKey: 'identity.modal.preset_30m', mins: 30 },
+  { labelKey: 'identity.modal.preset_1h', mins: 60 },
+  { labelKey: 'identity.modal.preset_2h', mins: 120 },
+  { labelKey: 'identity.modal.preset_1d', mins: 1440 },
+  { labelKey: 'identity.modal.preset_indefinite', mins: 0 },
 ];
 
 export const IdentityModal: React.FC<IdentityModalProps> = ({
@@ -46,6 +47,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
   getLabel,
   allowNameEntry: allowNameEntryProp,
 }) => {
+  const { t } = useTranslation();
   const [isActive, setIsActive] = useState<boolean>(true);
   const [subStatus, setSubStatus] = useState<AdminSubStatus>('molada');
   const [customReasonText, setCustomReasonText] = useState<string>('');
@@ -57,14 +59,14 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
   const [localAllowNameEntry, setLocalAllowNameEntry] = useState<boolean>(true);
 
   const formatRemainingDuration = (totalMins: number, targetTimestamp?: number): string => {
-    if (totalMins <= 0) return language === 'tr' ? 'Süresiz (Elle açana kadar)' : 'Indefinite';
+    if (totalMins <= 0) return t('identity.modal.indefinite_manual');
     const d = Math.floor(totalMins / 1440);
     const h = Math.floor((totalMins % 1440) / 60);
     const m = totalMins % 60;
     const parts: string[] = [];
-    if (d > 0) parts.push(`${d} gün`);
-    if (h > 0) parts.push(`${h} sa`);
-    if (m > 0 || parts.length === 0) parts.push(`${m} dk`);
+    if (d > 0) parts.push(t('identity.modal.unit_day_short', { count: d }));
+    if (h > 0) parts.push(t('identity.modal.unit_hour_short', { count: h }));
+    if (m > 0 || parts.length === 0) parts.push(t('identity.modal.unit_min_short', { count: m }));
     const durationStr = parts.join(' ');
 
     if (targetTimestamp) {
@@ -74,9 +76,9 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
         ? `${targetDate.toLocaleDateString([], { day: 'numeric', month: 'short' })} `
         : '';
       const timeStr = targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      return `Otomatik Aktif: ${dateStr}${timeStr} (${durationStr} kaldı)`;
+      return t('identity.modal.auto_active_at', { time: `${dateStr}${timeStr}`, duration: durationStr });
     }
-    return `${durationStr} kaldı`;
+    return t('identity.modal.remaining_duration', { duration: durationStr });
   };
 
   // If allowNameEntry is not explicitly passed, query current tenant login settings
@@ -147,7 +149,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
       setCustomDaysInput('0');
       setCustomHoursInput('0');
       setCustomMinsInput('0');
-      setRemainingText(language === 'tr' ? 'Süresiz (Elle açana kadar)' : 'Indefinite');
+      setRemainingText(t('identity.modal.indefinite_manual'));
     }
   };
 
@@ -197,32 +199,26 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <Edit3 size={18} color="#3B82F6" style={{ marginRight: 8 }} />
               <Text style={styles.title}>
-                {language === 'tr' ? 'Kendinizi Tanımlayın' : 'Identify Yourself'}
+                {t('identity.modal.title')}
               </Text>
             </View>
             <Text style={styles.subtitle}>
-              {language === 'tr'
-                ? (effectiveAllowNameEntry
-                    ? 'Destek biletlerinde ve admin panellerinde görünecek adınızı, rumuzunuzu veya unvanınızı belirleyin.'
-                    : (isAdmin
-                        ? 'Çalışma durumunuzu ve mola tercihlerinizi belirleyin.'
-                        : 'Kuruluş ayarlarında ad soyad girişi devre dışı bırakılmıştır.'))
-                : (effectiveAllowNameEntry
-                    ? 'Set your name, nickname, or operational title visible in support tickets and admin panels.'
-                    : (isAdmin
-                        ? 'Manage your working status and break preferences.'
-                        : 'Name entry has been disabled by organization settings.'))}
+              {effectiveAllowNameEntry
+                ? t('identity.modal.subtitle_name_allowed')
+                : (isAdmin
+                    ? t('identity.modal.subtitle_admin_status')
+                    : t('identity.modal.subtitle_name_disabled'))}
             </Text>
 
             {/* Kuruluş ayarlarında ad soyad girişi açık ise isim giriş alanı görünür */}
             {effectiveAllowNameEntry && (
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>
-                  {language === 'tr' ? 'Ad ve Soyad (Zorunlu)' : 'Full Name (Required)'}
+                  {t('identity.modal.fullname_label')}
                 </Text>
                 <TextInput
                   style={[styles.input, { marginBottom: 4 }]}
-                  placeholder={language === 'tr' ? 'Örn: Mustafa ERYILMAZ' : 'e.g. John Doe'}
+                  placeholder={t('identity.modal.fullname_placeholder')}
                   placeholderTextColor="#94a3b8"
                   value={identityInput}
                   onChangeText={onChangeIdentityInput}
@@ -231,7 +227,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                 />
                 {!isValidTwoWordName(identityInput) && identityInput.trim().length > 0 ? (
                   <Text style={{ fontSize: 11, color: '#DC2626', marginBottom: 12, fontWeight: '500' }}>
-                    {language === 'tr' ? 'En az iki kelime ad ve soyad giriniz (nokta vb. kabul edilmez).' : 'Please enter at least two words (dots not allowed).'}
+                    {t('identity.modal.fullname_validation_error')}
                   </Text>
                 ) : (
                   <View style={{ marginBottom: 12 }} />
@@ -243,7 +239,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
             {isAdmin && (
               <View style={styles.adminStatusBox}>
                 <Text style={styles.sectionTitle}>
-                  {language === 'tr' ? 'Çalışma Durumu' : 'Working Status'}
+                  {t('identity.modal.work_status_title')}
                 </Text>
                 
                 {/* Ana Butonlar: Aktif / Pasif */}
@@ -258,7 +254,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                   >
                     <CheckCircle2 size={18} color={isActive ? '#10B981' : '#64748B'} style={{ marginRight: 8 }} />
                     <Text style={[styles.statusToggleText, isActive && styles.statusToggleTextGreen]}>
-                      {language === 'tr' ? 'Aktif' : 'Active'}
+                      {t('identity.modal.status_active')}
                     </Text>
                   </TouchableOpacity>
 
@@ -272,7 +268,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                   >
                     <Coffee size={18} color={!isActive ? '#F59E0B' : '#64748B'} style={{ marginRight: 8 }} />
                     <Text style={[styles.statusToggleText, !isActive && styles.statusToggleTextOrange]}>
-                      {language === 'tr' ? 'Pasif' : 'Passive'}
+                      {t('identity.modal.status_passive')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -281,7 +277,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                 {!isActive && (
                   <View style={styles.passiveDetailSection}>
                     <Text style={styles.subSectionTitle}>
-                      {language === 'tr' ? 'Pasiflik Nedeni:' : 'Reason:'}
+                      {t('identity.modal.passive_reason_label')}
                     </Text>
                     <View style={styles.subStatusRow}>
                       <TouchableOpacity
@@ -294,7 +290,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                       >
                         <Palmtree size={13} color={subStatus === 'izinde' ? '#D97706' : '#64748B'} style={{ marginRight: 4 }} />
                         <Text style={[styles.subStatusChipText, subStatus === 'izinde' && styles.subStatusChipTextActive]}>
-                          {language === 'tr' ? 'İzinde' : 'On Leave'}
+                          {t('identity.modal.reason_leave')}
                         </Text>
                       </TouchableOpacity>
 
@@ -308,7 +304,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                       >
                         <Coffee size={13} color={subStatus === 'molada' ? '#D97706' : '#64748B'} style={{ marginRight: 4 }} />
                         <Text style={[styles.subStatusChipText, subStatus === 'molada' && styles.subStatusChipTextActive]}>
-                          {language === 'tr' ? 'Molada' : 'On Break'}
+                          {t('identity.modal.reason_break')}
                         </Text>
                       </TouchableOpacity>
 
@@ -322,7 +318,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                       >
                         <HelpCircle size={13} color={subStatus === 'diger' ? '#D97706' : '#64748B'} style={{ marginRight: 4 }} />
                         <Text style={[styles.subStatusChipText, subStatus === 'diger' && styles.subStatusChipTextActive]}>
-                          {language === 'tr' ? 'Diğer' : 'Other'}
+                          {t('identity.modal.reason_other')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -331,11 +327,11 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                     {subStatus === 'diger' && (
                       <View style={styles.customReasonBox}>
                         <Text style={styles.customReasonLabel}>
-                          {language === 'tr' ? 'Diğer Pasiflik Nedeni / Açıklaması:' : 'Custom Reason Note:'}
+                          {t('identity.modal.custom_reason_label')}
                         </Text>
                         <TextInput
                           style={styles.customReasonTextInput}
-                          placeholder={language === 'tr' ? 'Örn: Hastane randevusu, müşteri ziyareti vb.' : 'e.g. Doctor appointment, client visit...'}
+                          placeholder={t('identity.modal.custom_reason_placeholder')}
                           placeholderTextColor="#94A3B8"
                           value={customReasonText}
                           onChangeText={setCustomReasonText}
@@ -345,7 +341,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
 
                     {/* Süre Seçenekleri */}
                     <Text style={[styles.subSectionTitle, { marginTop: 12 }]}>
-                      {language === 'tr' ? 'Hızlı Süre Seçenekleri:' : 'Preset Durations:'}
+                      {t('identity.modal.preset_durations_label')}
                     </Text>
                     <View style={styles.snoozeRow}>
                       {DURATION_PRESETS.map(opt => (
@@ -359,7 +355,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                           activeOpacity={0.7}
                         >
                           <Text style={[styles.snoozeChipText, snoozeMins === opt.mins && styles.snoozeChipTextActive]}>
-                            {opt.label}
+                            {t(opt.labelKey)}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -368,7 +364,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                     {/* Net Süre Giriş Alanı (Presetler Haricinde) */}
                     <View style={styles.customDurationSection}>
                       <Text style={styles.customDurationSectionTitle}>
-                        {language === 'tr' ? 'Veya Net Süre Belirleyin (Gün / Saat / Dakika):' : 'Or Enter Exact Duration (Day / Hour / Min):'}
+                        {t('identity.modal.exact_duration_label')}
                       </Text>
                       <View style={styles.customDurationTripleRow}>
                         {/* Gün */}
@@ -382,7 +378,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                             onChangeText={(val) => handleCustomTimeChange('day', val)}
                             maxLength={3}
                           />
-                          <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Gün' : 'Day'}</Text>
+                          <Text style={styles.timeUnitLabel}>{t('identity.modal.unit_day')}</Text>
                         </View>
 
                         <Text style={styles.timeUnitColon}>:</Text>
@@ -398,7 +394,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                             onChangeText={(val) => handleCustomTimeChange('hour', val)}
                             maxLength={2}
                           />
-                          <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Saat' : 'Hour'}</Text>
+                          <Text style={styles.timeUnitLabel}>{t('identity.modal.unit_hour')}</Text>
                         </View>
 
                         <Text style={styles.timeUnitColon}>:</Text>
@@ -414,13 +410,11 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                             onChangeText={(val) => handleCustomTimeChange('min', val)}
                             maxLength={2}
                           />
-                          <Text style={styles.timeUnitLabel}>{language === 'tr' ? 'Dakika' : 'Min'}</Text>
+                          <Text style={styles.timeUnitLabel}>{t('identity.modal.unit_minute')}</Text>
                         </View>
                       </View>
                       <Text style={styles.customDurationHelperText}>
-                        {language === 'tr'
-                          ? 'Belirlenen süre sonunda otomatik Aktif duruma geçilir.'
-                          : 'Auto restores to Active after the specified duration.'}
+                        {t('identity.modal.auto_restore_hint')}
                       </Text>
                     </View>
 
@@ -438,7 +432,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                 <Text style={styles.cancelBtnText}>
-                  {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -452,7 +446,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.submitBtnText}>
-                  {getLabel('common.save', 'Kaydet', 'Save')}
+                  {t('common.save')}
                 </Text>
               </TouchableOpacity>
             </View>

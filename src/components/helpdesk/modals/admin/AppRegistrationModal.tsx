@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { ShieldCheck, Clock, X } from 'lucide-react-native';
 import { AppRegStatus } from '../../../../services/helpDeskService';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface AppRegistrationModalProps {
   visible: boolean;
@@ -36,8 +37,11 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
   onChangeAppRegDesc,
   onSubmit,
   language = 'tr',
-  t = (key, opts) => (key === 'helpdesk.appNotRegisteredDesc' ? `"${opts?.appId}" uygulaması henüz kayıtlı değil.` : key),
+  t: tProp,
 }) => {
+  const { t: i18nT } = useTranslation();
+  const t = tProp || i18nT;
+
   return (
     <Modal
       visible={visible}
@@ -53,7 +57,7 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
               <ShieldCheck size={20} color="#3B82F6" style={{ marginRight: 8 }} />
               <Text style={styles.title}>
-                {language === 'tr' ? 'Uygulama Kaydı' : 'App Registration'}
+                {t('admin.app_reg.title')}
               </Text>
             </View>
 
@@ -65,9 +69,7 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                 </Text>
                 <TextInput
                   style={[styles.input, { marginBottom: 10 }]}
-                  placeholder={
-                    language === 'tr' ? 'Uygulama Adı (Örn: WhiteDesk)' : 'App Name (e.g. WhiteDesk)'
-                  }
+                  placeholder={t('admin.app_reg.name_placeholder')}
                   placeholderTextColor="#94a3b8"
                   value={appRegNameInput}
                   onChangeText={onChangeAppRegName}
@@ -75,9 +77,7 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                 />
                 <TextInput
                   style={[styles.input, { marginBottom: 16 }]}
-                  placeholder={
-                    language === 'tr' ? 'Uygulama Açıklaması' : 'App Description'
-                  }
+                  placeholder={t('admin.app_reg.desc_placeholder')}
                   placeholderTextColor="#94a3b8"
                   value={appRegDescInput}
                   onChangeText={onChangeAppRegDesc}
@@ -85,7 +85,7 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                 <View style={{ flexDirection: 'row', gap: 10 }}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                     <Text style={styles.cancelBtnText}>
-                      {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+                      {t('common.cancel')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -94,7 +94,7 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <Text style={styles.submitBtnText}>
-                      {language === 'tr' ? 'Talep Gönder' : 'Send Request'}
+                      {t('admin.app_reg.send_request')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -109,16 +109,14 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                     <Clock size={26} color="#F59E0B" />
                   </View>
                   <Text style={[styles.title, { textAlign: 'center', marginBottom: 8 }]}>
-                    {language === 'tr' ? 'Talebiniz İnceleniyor' : 'Request Under Review'}
+                    {t('admin.app_reg.pending_title')}
                   </Text>
                   <Text style={[styles.desc, { textAlign: 'center' }]}>
-                    {language === 'tr'
-                      ? 'TheWhite veya WhiteCosmos talebinizi inceleyecek. Onaylandıktan sonra konsol aktif olacak.'
-                      : 'TheWhite or WhiteCosmos will review your request. Console will be activated upon approval.'}
+                    {t('admin.app_reg.pending_desc')}
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.fullCloseBtn} onPress={onClose} activeOpacity={0.7}>
-                  <Text style={styles.cancelBtnText}>{language === 'tr' ? 'Kapat' : 'Close'}</Text>
+                  <Text style={styles.cancelBtnText}>{t('common.close')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -131,16 +129,14 @@ export const AppRegistrationModal: React.FC<AppRegistrationModalProps> = ({
                     <X size={26} color="#DC2626" />
                   </View>
                   <Text style={[styles.title, { textAlign: 'center', marginBottom: 8, color: '#DC2626' }]}>
-                    {language === 'tr' ? 'Talep Reddedildi' : 'Request Rejected'}
+                    {t('admin.app_reg.rejected_title')}
                   </Text>
                   <Text style={[styles.desc, { textAlign: 'center' }]}>
-                    {language === 'tr'
-                      ? 'Talebiniz reddedildi. Detay için TheWhite ile iletişime geçin.'
-                      : 'Your request was rejected. Please contact TheWhite for details.'}
+                    {t('admin.app_reg.rejected_desc')}
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.fullCloseBtn} onPress={onClose} activeOpacity={0.7}>
-                  <Text style={styles.cancelBtnText}>{language === 'tr' ? 'Kapat' : 'Close'}</Text>
+                  <Text style={styles.cancelBtnText}>{t('common.close')}</Text>
                 </TouchableOpacity>
               </>
             )}

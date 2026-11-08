@@ -2,6 +2,7 @@ import { SafeSecureStore } from '../storageService';
 import { keystoreConfigVault } from '../keystoreConfigVault';
 import { CryptoVaultService } from '../crypto-vault.service';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
+import { i18nService } from '../i18nService';
 import { executeSql, escapeSqlString, generateCosmoAlias, invalidateHelpDeskRoleCache } from './db';
 import { STORAGE_KEYS, TenantEntry, TenantLicenseData } from './types';
 import {
@@ -25,59 +26,70 @@ function parseDateTimestamp(val: any): number | undefined {
 export function resolveGracePeriodDays(
   planId: string,
   billingCycle: string,
-  dbEnterpriseGraceDays?: any,
-  dbPlanGraceDays?: any,
-  dbPlanAnnualGraceDays?: any
+  dbPlanGrace?: any
 ): number {
   const cleanPlan = (planId || 'trial').toLowerCase();
   const cleanCycle = (billingCycle || 'monthly').toLowerCase();
 
+  if (dbPlanGrace !== undefined && dbPlanGrace !== null) {
+    if (typeof dbPlanGrace === 'string' && dbPlanGrace.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(dbPlanGrace);
+        if (cleanPlan === 'trial' && Number(parsed.trial) > 0) return Number(parsed.trial);
+        if (cleanCycle === 'annual' && Number(parsed.annual) > 0) return Number(parsed.annual);
+        if (Number(parsed.monthly) > 0) return Number(parsed.monthly);
+      } catch {}
+    } else if (typeof dbPlanGrace === 'object') {
+      if (cleanPlan === 'trial' && Number(dbPlanGrace.trial) > 0) return Number(dbPlanGrace.trial);
+      if (cleanCycle === 'annual' && Number(dbPlanGrace.annual) > 0) return Number(dbPlanGrace.annual);
+      if (Number(dbPlanGrace.monthly) > 0) return Number(dbPlanGrace.monthly);
+    }
+  }
+
   if (cleanPlan === 'trial') {
-    const n = Number(dbEnterpriseGraceDays ?? dbPlanGraceDays);
+    const n = Number(dbPlanGrace);
     return !isNaN(n) && n > 0 ? n : 3;
   }
   if (cleanCycle === 'annual') {
-    const n = Number(dbPlanAnnualGraceDays ?? dbEnterpriseGraceDays);
+    const n = Number(dbPlanGrace);
     return !isNaN(n) && n >= 15 ? n : 15;
   }
-  const n = Number(dbPlanGraceDays ?? dbEnterpriseGraceDays);
+  const n = Number(dbPlanGrace);
   return !isNaN(n) && n > 0 && n !== 3 && n !== 15 ? n : 5;
 }
 
 export function resolveWarningIntervals(
   planId: string,
   billingCycle: string,
-  dbEnterpriseWarn?: any,
-  dbPlanWarn?: any,
-  dbPlanAnnualWarn?: any
+  dbPlanWarn?: any
 ): number {
   const cleanPlan = (planId || 'trial').toLowerCase();
   const cleanCycle = (billingCycle || 'monthly').toLowerCase();
 
-  for (const candidate of [dbEnterpriseWarn, dbPlanWarn]) {
-    if (candidate && typeof candidate === 'string' && candidate.trim().startsWith('{')) {
+  if (dbPlanWarn !== undefined && dbPlanWarn !== null) {
+    if (typeof dbPlanWarn === 'string' && dbPlanWarn.trim().startsWith('{')) {
       try {
-        const parsed = JSON.parse(candidate);
+        const parsed = JSON.parse(dbPlanWarn);
         if (cleanPlan === 'trial' && Number(parsed.trial) > 0) return Number(parsed.trial);
         if (cleanCycle === 'annual' && Number(parsed.annual) > 0) return Number(parsed.annual);
         if (Number(parsed.monthly) > 0) return Number(parsed.monthly);
       } catch {}
-    } else if (candidate && typeof candidate === 'object') {
-      if (cleanPlan === 'trial' && Number(candidate.trial) > 0) return Number(candidate.trial);
-      if (cleanCycle === 'annual' && Number(candidate.annual) > 0) return Number(candidate.annual);
-      if (Number(candidate.monthly) > 0) return Number(candidate.monthly);
+    } else if (typeof dbPlanWarn === 'object') {
+      if (cleanPlan === 'trial' && Number(dbPlanWarn.trial) > 0) return Number(dbPlanWarn.trial);
+      if (cleanCycle === 'annual' && Number(dbPlanWarn.annual) > 0) return Number(dbPlanWarn.annual);
+      if (Number(dbPlanWarn.monthly) > 0) return Number(dbPlanWarn.monthly);
     }
   }
 
   if (cleanPlan === 'trial') {
-    const n = Number(dbEnterpriseWarn ?? dbPlanWarn);
+    const n = Number(dbPlanWarn);
     return !isNaN(n) && n > 0 ? n : 12;
   }
   if (cleanCycle === 'annual') {
-    const n = Number(dbPlanAnnualWarn ?? dbEnterpriseWarn);
+    const n = Number(dbPlanWarn);
     return !isNaN(n) && n >= 48 ? n : 48;
   }
-  const n = Number(dbPlanWarn ?? dbEnterpriseWarn);
+  const n = Number(dbPlanWarn);
   return !isNaN(n) && n > 0 && n !== 12 && n !== 48 ? n : 24;
 }
 
@@ -87,17 +99,16 @@ export function computeDynamicLicenseState(lic: TenantLicenseData): TenantLicens
   const gracePeriodDays = resolveGracePeriodDays(lic.planId, lic.billingCycle, lic.gracePeriodDays);
   const warningIntervals = resolveWarningIntervals(lic.planId, lic.billingCycle, lic.warningIntervals);
 
-  const baseEndAt = isTrialPlan
-    ? lic.trialEndAt
-    : (lic.subscriptionEndAt || lic.trialEndAt);
+  const baseEndAt = lic.subscriptionEndAt || lic.trialEndAt;
 
   const graceEndsAt = lic.graceEndsAt
     || (baseEndAt ? baseEndAt + gracePeriodDays * 24 * 60 * 60 * 1000 : undefined);
 
   let trialDaysRemaining = lic.trialDaysRemaining ?? 14;
-  if (lic.trialEndAt) {
-    if (lic.trialEndAt > now) {
-      trialDaysRemaining = Math.max(1, Math.ceil((lic.trialEndAt - now) / (1000 * 60 * 60 * 24)));
+  const trialRefEnd = lic.trialEndAt || (isTrialPlan ? lic.subscriptionEndAt : undefined);
+  if (trialRefEnd) {
+    if (trialRefEnd > now) {
+      trialDaysRemaining = Math.max(1, Math.ceil((trialRefEnd - now) / (1000 * 60 * 60 * 24)));
     } else {
       trialDaysRemaining = 0;
     }
@@ -116,7 +127,7 @@ export function computeDynamicLicenseState(lic: TenantLicenseData): TenantLicens
     }
   }
 
-  let status: 'trialing' | 'active' | 'grace_period' | 'expired' = lic.status || (isTrialPlan ? 'trialing' : 'active');
+  let status: 'trialing' | 'active' | 'grace_period' | 'expired' = isTrialPlan ? 'trialing' : 'active';
   if (isGraceExpired) {
     status = 'expired';
   } else if (isInGracePeriod) {
@@ -216,7 +227,7 @@ export const helpDeskLicenseService = {
   }> {
     const cleanName = (tenantName || '').trim();
     if (!cleanName) {
-      return { success: false, message: 'Lütfen geçerli bir kurum / şirket adı belirtin.' };
+      return { success: false, message: i18nService.t('license_service.provide_valid_company_name') };
     }
 
     try {
@@ -245,12 +256,12 @@ export const helpDeskLicenseService = {
       const fieldsJson = customFields && customFields.length > 0 ? JSON.stringify(customFields) : '[]';
       const catalogJson = catalog && catalog.length > 0 ? JSON.stringify(catalog) : '[]';
 
-      // 1. whitedesk_enterprises record (Consolidated Tenant + License + Grace Period)
+      // 1. whitedesk_enterprises record (Consolidated Tenant + License)
       await executeSql(`
         INSERT INTO whitedesk_enterprises (
           enterprise_blind_id, name, org_pub, created_at, is_founder_tenant,
-          custom_fields, catalog, plan_id, billing_cycle, license_status,
-          trial_start_at, trial_end_at, grace_period_days, warning_intervals, grace_ends_at
+          custom_fields, catalog, plan_id, billing_cycle,
+          subscription_start_at, subscription_end_at
         )
         VALUES (
           ${escapeSqlString(enterpriseBlindId)}, 
@@ -262,12 +273,8 @@ export const helpDeskLicenseService = {
           ${escapeSqlString(catalogJson)}::jsonb,
           'trial',
           'monthly',
-          'trialing',
           ${escapeSqlString(trialStartIso)},
-          ${escapeSqlString(trialEndIso)},
-          ${trialGraceDays},
-          ${trialWarningIntervals},
-          ${escapeSqlString(graceEndsIso)}
+          ${escapeSqlString(trialEndIso)}
         )
         ON CONFLICT (enterprise_blind_id) DO NOTHING;
       `);
@@ -276,21 +283,23 @@ export const helpDeskLicenseService = {
       await keystoreConfigVault.setTenantLicense(enterpriseBlindId, {
         enterpriseBlindId,
         planId: 'trial',
-        planName: '14 Günlük Deneme',
+        planName: i18nService.t('license_service.plan_trial_14_days'),
         tierLevel: 0,
         status: 'trialing',
         monthlyPrice: 0,
         annualMonthlyPrice: 0,
         billingCycle: 'monthly',
         features: [
-          '14 Günlük Değerlendirme Süresi',
-          '1 Yönetici Kurtarma İmi',
-          '10 Kör Erişim İmi',
-          'Sovereign WhiteChain Altyapısı',
+          i18nService.t('license_service.feature_trial_14_days'),
+          i18nService.t('license_service.feature_1_admin_recovery'),
+          i18nService.t('license_service.feature_10_blind_access'),
+          i18nService.t('license_service.feature_sovereign_whitechain'),
         ],
         trialDaysRemaining: 14,
         trialStartAt: now,
         trialEndAt: trialExpiresAt,
+        subscriptionStartAt: now,
+        subscriptionEndAt: trialExpiresAt,
         gracePeriodDays: trialGraceDays,
         warningIntervals: trialWarningIntervals,
         graceEndsAt: trialGraceEndsAt,
@@ -322,11 +331,14 @@ export const helpDeskLicenseService = {
         globalAdminHash,
         adminHash,
         userHash,
-        message: `'${cleanName}' kurumsal destek masası ve 14 günlük deneme anahtarlarınız başarıyla oluşturuldu.`,
+        message: i18nService.t('license_service.tenant_created_success', { tenantName: cleanName }),
       };
     } catch (e: any) {
       console.warn('[HelpDeskLicenseService] createSelfServiceTenant error:', e);
-      return { success: false, message: 'Kurum masası oluşturulurken bir hata oluştu: ' + (e?.message || e) };
+      return {
+        success: false,
+        message: i18nService.t('license_service.tenant_create_error', { error: String(e?.message || e) }),
+      };
     }
   },
 
@@ -656,7 +668,7 @@ export const helpDeskLicenseService = {
       `);
       return { success: true, hash };
     } catch (e: any) {
-      return { success: false, message: e?.message || 'Hash üretilemedi.' };
+      return { success: false, message: e?.message || i18nService.t('license_service.hash_generation_failed') };
     }
   },
 
@@ -680,7 +692,7 @@ export const helpDeskLicenseService = {
       `);
       return { success: true, hash };
     } catch (e: any) {
-      return { success: false, message: e?.message || 'Hash üretilemedi.' };
+      return { success: false, message: e?.message || i18nService.t('license_service.hash_generation_failed') };
     }
   },
 
@@ -703,7 +715,7 @@ export const helpDeskLicenseService = {
       `);
       return { success: true, hash };
     } catch (e: any) {
-      return { success: false, message: e?.message || 'Global Admin hash üretilemedi.' };
+      return { success: false, message: e?.message || i18nService.t('license_service.global_admin_hash_failed') };
     }
   },
 
@@ -810,7 +822,7 @@ export const helpDeskLicenseService = {
         role: 'user',
         enterpriseName: '',
         enterpriseBlindId: '',
-        message: 'Lütfen geçerli bir erişim anahtarı belirtin.',
+        message: i18nService.t('license_service.provide_valid_access_key'),
       };
     }
 
@@ -854,7 +866,7 @@ export const helpDeskLicenseService = {
             role: detectedType,
             enterpriseName: '',
             enterpriseBlindId: targetTenantBlind,
-            message: 'Bu erişim anahtarının 14 günlük kullanım süresi dolmuştur.',
+            message: i18nService.t('license_service.access_key_trial_expired'),
           };
         }
         if (record.used) {
@@ -863,7 +875,7 @@ export const helpDeskLicenseService = {
             role: detectedType,
             enterpriseName: '',
             enterpriseBlindId: targetTenantBlind,
-            message: 'Bu tekil erişim anahtarı daha önce kullanılmıştır ve geçersizdir.',
+            message: i18nService.t('license_service.access_key_already_used'),
           };
         }
         if (record.max_uses && Number(record.uses_count || 0) >= Number(record.max_uses)) {
@@ -872,7 +884,7 @@ export const helpDeskLicenseService = {
             role: detectedType,
             enterpriseName: '',
             enterpriseBlindId: targetTenantBlind,
-            message: 'Bu erişim anahtarının kullanım kotası tükenmiştir.',
+            message: i18nService.t('license_service.access_key_quota_exhausted'),
           };
         }
       } else {
@@ -917,7 +929,7 @@ export const helpDeskLicenseService = {
                   role: 'user',
                   enterpriseName: '',
                   enterpriseBlindId: '',
-                  message: 'Belirtilen giriş kimlik kodu sistemde bulunamadı. Lütfen kontrol edip tekrar deneyin.',
+                  message: i18nService.t('license_service.identity_code_not_found'),
                 };
               }
             }
@@ -975,7 +987,7 @@ export const helpDeskLicenseService = {
           role: 'founder',
           enterpriseName: 'TheWhite Enterprises',
           enterpriseBlindId: 'blind_thewhite_root',
-          message: 'TheWhite Kurucu (**) kimliğiniz başarıyla doğrulandı. Tam kurucu yetkileri aktif.',
+          message: i18nService.t('license_service.founder_verified_success'),
         };
       }
 
@@ -1010,7 +1022,7 @@ export const helpDeskLicenseService = {
           role: 'global_admin',
           enterpriseName: tenantName,
           enterpriseBlindId: targetTenantBlind,
-          message: `'${tenantName}' Global Yönetici (WhiteCosmos) yetkiniz aktifleşti. Yönetim konsoluna yönlendiriliyorsunuz.`,
+          message: i18nService.t('license_service.global_admin_verified_success', { tenantName }),
         };
       }
 
@@ -1056,7 +1068,7 @@ export const helpDeskLicenseService = {
           role: 'admin',
           enterpriseName: tenantName,
           enterpriseBlindId: targetTenantBlind,
-          message: `'${tenantName}' destek operasyon ekibine dahil oldunuz. Operatör kimliğiniz (${opAlias}) aktif edildi.`,
+          message: i18nService.t('license_service.admin_verified_success', { tenantName, alias: opAlias }),
         };
       }
 
@@ -1109,7 +1121,7 @@ export const helpDeskLicenseService = {
         role: 'user',
         enterpriseName: tenantName,
         enterpriseBlindId: targetTenantBlind,
-        message: `'${tenantName}' kurumsal destek masasına kullanıcı olarak bağlandınız.`,
+        message: i18nService.t('license_service.user_verified_success', { tenantName }),
       };
     } catch (err: any) {
       console.warn('[HelpDeskLicenseService] claimUnifiedHash error:', err);
@@ -1118,9 +1130,38 @@ export const helpDeskLicenseService = {
         role: 'user',
         enterpriseName: '',
         enterpriseBlindId: '',
-        message: `Anahtar doğrulanırken hata oluştu: ${err?.message || err}`,
+        message: i18nService.t('license_service.key_verification_error', { error: String(err?.message || err) }),
       };
     }
+  },
+
+  /**
+   * Resolves canonical enterprise_blind_id for whitedesk_enterprises license operations.
+   */
+  async resolveEnterpriseBlindIdForLicense(enterpriseBlindId?: string): Promise<string> {
+    let cleanId = (enterpriseBlindId || '').trim();
+    if (!cleanId || cleanId === 'all' || cleanId === 'default') {
+      try {
+        const [activeId, adminEntId, userEntId] = await Promise.all([
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.ACTIVE_TENANT_BLIND_ID),
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_BLIND_ID),
+          SafeSecureStore.getItemAsync(STORAGE_KEYS.USER_ORG_BLIND_ID),
+        ]);
+        const candidate = [activeId, adminEntId, userEntId].find(
+          (v) => v && v.trim() && v.trim() !== 'all' && v.trim() !== 'default'
+        );
+        if (candidate) {
+          cleanId = candidate.trim();
+        }
+      } catch {}
+    }
+    if (!cleanId || cleanId === 'all') {
+      cleanId = 'default';
+    }
+    if (cleanId === 'blind_thewhite_root' || cleanId === 'thewhite') {
+      cleanId = 'blind_11fcac28453c3eaa3a06a5db6caf4ca1';
+    }
+    return cleanId;
   },
 
   /**
@@ -1128,19 +1169,16 @@ export const helpDeskLicenseService = {
    * and persists it into the local encrypted Keystore vault (`keystoreConfigVault`) for 0ms startup.
    */
   async fetchAndCacheTenantLicenseFromD1(enterpriseBlindId: string): Promise<TenantLicenseData | null> {
-    const cleanId = (enterpriseBlindId || 'default').trim();
+    const rawId = (enterpriseBlindId || 'default').trim();
+    const cleanId = await this.resolveEnterpriseBlindIdForLicense(rawId);
     try {
       const q = `
-        SELECT e.enterprise_blind_id, 
-               COALESCE(e.plan_id, 'trial') as plan_id, 
-               COALESCE(e.billing_cycle, 'monthly') as billing_cycle, 
-               COALESCE(e.license_status, 'trialing') as status, 
-               e.trial_start_at, e.trial_end_at, e.subscription_start_at, e.subscription_end_at,
-               e.grace_period_days as ent_grace_days, e.warning_intervals as ent_warning_intervals, e.grace_ends_at,
-               p.name as plan_name, p.tier_level, p.monthly_price, p.annual_monthly_price,
-               p.grace_period_days as plan_grace_days, p.annual_grace_period_days as plan_annual_grace_days,
-               p.warning_intervals as plan_warning_intervals, p.annual_warning_intervals as plan_annual_warning_intervals,
-               p.features, p.has_remote_desktop, p.has_audit_logs
+        SELECT e.enterprise_blind_id,
+               COALESCE(e.plan_id, 'trial') as resolved_plan_id,
+               COALESCE(e.billing_cycle, 'monthly') as resolved_billing_cycle,
+               e.subscription_start_at, e.subscription_end_at,
+               p.name as plan_name, p.tier_level, p.monthly_price, p.annual_price,
+               p.features, p.grace_period, p.grace_period_warning_interval
         FROM whitedesk_enterprises e
         LEFT JOIN whitedesk_license_plans p ON COALESCE(e.plan_id, 'trial') = p.id
         WHERE e.enterprise_blind_id = ${escapeSqlString(cleanId)}
@@ -1148,21 +1186,16 @@ export const helpDeskLicenseService = {
       `;
       let rows = await executeSql(q);
 
-      // If enterprise has no trial dates set yet, auto-initialize 14-day trial + 3-day grace period
-      if (rows && rows.length > 0 && !rows[0].trial_start_at && (rows[0].status === 'trialing' || rows[0].status === 'trial_active')) {
+      // If enterprise has no subscription dates set yet, auto-initialize 14-day trial
+      if (rows && rows.length > 0 && !rows[0].subscription_end_at && (rows[0].resolved_plan_id === 'trial' || !rows[0].resolved_plan_id)) {
         const now = Date.now();
         const trialEnd = now + 14 * 24 * 60 * 60 * 1000;
-        const graceEnd = trialEnd + 3 * 24 * 60 * 60 * 1000;
         await executeSql(`
           UPDATE whitedesk_enterprises SET
             plan_id = 'trial',
             billing_cycle = 'monthly',
-            license_status = 'trialing',
-            trial_start_at = ${escapeSqlString(new Date(now).toISOString())},
-            trial_end_at = ${escapeSqlString(new Date(trialEnd).toISOString())},
-            grace_period_days = 3,
-            warning_intervals = 12,
-            grace_ends_at = ${escapeSqlString(new Date(graceEnd).toISOString())}
+            subscription_start_at = ${escapeSqlString(new Date(now).toISOString())},
+            subscription_end_at = ${escapeSqlString(new Date(trialEnd).toISOString())}
           WHERE enterprise_blind_id = ${escapeSqlString(cleanId)};
         `);
         rows = await executeSql(q);
@@ -1178,39 +1211,40 @@ export const helpDeskLicenseService = {
           features = [];
         }
 
-        const planId = (String(r.plan_id || 'trial').toLowerCase() as 'trial' | 'core' | 'live');
-        const billingCycle = (String(r.billing_cycle || 'monthly').toLowerCase() as 'monthly' | 'annual');
+        const planId = (String(r.resolved_plan_id || 'trial').toLowerCase() as 'trial' | 'core' | 'live');
+        const billingCycle = (String(r.resolved_billing_cycle || 'monthly').toLowerCase() as 'monthly' | 'annual');
         const gracePeriodDays = resolveGracePeriodDays(
           planId,
           billingCycle,
-          r.ent_grace_days,
-          r.plan_grace_days,
-          r.plan_annual_grace_days
+          r.grace_period
         );
         const warningIntervals = resolveWarningIntervals(
           planId,
           billingCycle,
-          r.ent_warning_intervals,
-          r.plan_warning_intervals,
-          r.plan_annual_warning_intervals
+          r.grace_period_warning_interval
         );
 
-        const trialStartAt = parseDateTimestamp(r.trial_start_at);
-        const trialEndAt = parseDateTimestamp(r.trial_end_at);
         const subscriptionStartAt = parseDateTimestamp(r.subscription_start_at);
         const subscriptionEndAt = parseDateTimestamp(r.subscription_end_at);
-        const baseEndAt = planId === 'trial' ? trialEndAt : (subscriptionEndAt || trialEndAt);
-        const parsedGraceEnd = parseDateTimestamp(r.grace_ends_at);
-        const graceEndsAt = parsedGraceEnd || (baseEndAt ? baseEndAt + gracePeriodDays * 24 * 60 * 60 * 1000 : undefined);
+        const trialStartAt = planId === 'trial' ? subscriptionStartAt : undefined;
+        const trialEndAt = planId === 'trial' ? subscriptionEndAt : undefined;
+        const graceEndsAt = subscriptionEndAt ? subscriptionEndAt + gracePeriodDays * 24 * 60 * 60 * 1000 : undefined;
 
         const computed = computeDynamicLicenseState({
-          enterpriseBlindId: String(r.enterprise_blind_id),
+          enterpriseBlindId: String(r.enterprise_blind_id || cleanId),
           planId,
-          planName: String(r.plan_name || (planId === 'live' ? 'LIVE Paketi' : planId === 'core' ? 'CORE Paketi' : '14 Günlük Deneme')),
+          planName: String(
+            r.plan_name ||
+              (planId === 'live'
+                ? i18nService.t('license_service.plan_live_package')
+                : planId === 'core'
+                ? i18nService.t('license_service.plan_core_package')
+                : i18nService.t('license_service.plan_trial_14_days'))
+          ),
           tierLevel: Number(r.tier_level ?? (planId === 'live' ? 2 : planId === 'core' ? 1 : 0)),
-          status: (String(r.status || 'trialing') as any),
+          status: planId === 'trial' ? 'trialing' : 'active',
           monthlyPrice: Number(r.monthly_price || (planId === 'live' ? 129 : planId === 'core' ? 49 : 0)),
-          annualMonthlyPrice: Number(r.annual_monthly_price || (planId === 'live' ? 99 : planId === 'core' ? 39 : 0)),
+          annualMonthlyPrice: Number(r.annual_price ?? (planId === 'live' ? 99 : planId === 'core' ? 39 : 0)),
           billingCycle,
           features,
           trialStartAt,
@@ -1220,11 +1254,14 @@ export const helpDeskLicenseService = {
           gracePeriodDays,
           warningIntervals,
           graceEndsAt,
-          hasRemoteDesktop: Boolean(r.has_remote_desktop ?? (planId !== 'core')),
-          hasAuditLogs: Boolean(r.has_audit_logs ?? (planId !== 'core')),
+          hasRemoteDesktop: planId !== 'core',
+          hasAuditLogs: planId !== 'core',
         });
 
         await keystoreConfigVault.setTenantLicense(cleanId, computed);
+        if (rawId && rawId !== cleanId) {
+          await keystoreConfigVault.setTenantLicense(rawId, computed);
+        }
         return computed;
       }
     } catch (e) {
@@ -1237,10 +1274,11 @@ export const helpDeskLicenseService = {
    * License Plans & Addons (0ms Instant Read from Device Vault + Background D1 Sync)
    */
   async getTenantActiveLicense(enterpriseBlindId: string, forceRemote: boolean = false): Promise<TenantLicenseData> {
-    const cleanId = (enterpriseBlindId || 'default').trim();
+    const rawId = (enterpriseBlindId || 'default').trim();
+    const cleanId = await this.resolveEnterpriseBlindIdForLicense(rawId);
     try {
       if (!forceRemote) {
-        const cached = await keystoreConfigVault.getTenantLicense(cleanId);
+        const cached = (await keystoreConfigVault.getTenantLicense(cleanId)) || (await keystoreConfigVault.getTenantLicense(rawId));
         if (cached) {
           // Non-blocking background sync with D1
           void this.fetchAndCacheTenantLicenseFromD1(cleanId);
@@ -1254,7 +1292,7 @@ export const helpDeskLicenseService = {
       }
 
       // Fallback to cached if offline
-      const offlineCached = await keystoreConfigVault.getTenantLicense(cleanId);
+      const offlineCached = (await keystoreConfigVault.getTenantLicense(cleanId)) || (await keystoreConfigVault.getTenantLicense(rawId));
       if (offlineCached) {
         return computeDynamicLicenseState(offlineCached);
       }
@@ -1266,17 +1304,17 @@ export const helpDeskLicenseService = {
     return computeDynamicLicenseState({
       enterpriseBlindId: cleanId,
       planId: 'trial',
-      planName: '14 Günlük Deneme',
+      planName: i18nService.t('license_service.plan_trial_14_days'),
       tierLevel: 0,
       status: 'trialing',
       monthlyPrice: 0,
       annualMonthlyPrice: 0,
       billingCycle: 'monthly',
       features: [
-        '14 Günlük Değerlendirme Süresi',
-        '1 Yönetici Kurtarma İmi',
-        '10 Kör Erişim İmi',
-        'Sovereign WhiteChain Altyapısı',
+        i18nService.t('license_service.feature_trial_14_days'),
+        i18nService.t('license_service.feature_1_admin_recovery'),
+        i18nService.t('license_service.feature_10_blind_access'),
+        i18nService.t('license_service.feature_sovereign_whitechain'),
       ],
       trialDaysRemaining: 14,
       gracePeriodDays: 3,
@@ -1336,38 +1374,8 @@ export const helpDeskLicenseService = {
     hasAuditLogs: boolean;
   }>> {
     try {
-      const q = `
-        SELECT id, name, tier_level, monthly_price, annual_monthly_price,
-               grace_period_days, annual_grace_period_days, warning_intervals, annual_warning_intervals,
-               features, has_remote_desktop, has_audit_logs
-        FROM whitedesk_license_plans
-        WHERE tier_level > ${Number(currentTierLevel)} AND is_active = TRUE
-        ORDER BY tier_level ASC;
-      `;
-      const rows = await executeSql(q);
-      return (rows || []).map(r => {
-        let features: string[] = [];
-        try {
-          const parsed = typeof r.features === 'string' ? JSON.parse(r.features) : (r.features || []);
-          features = Array.isArray(parsed) ? parsed : [];
-        } catch {
-          features = [];
-        }
-        return {
-          id: String(r.id) as any,
-          name: String(r.name),
-          tierLevel: Number(r.tier_level),
-          monthlyPrice: Number(r.monthly_price),
-          annualMonthlyPrice: Number(r.annual_monthly_price),
-          gracePeriodDays: Number(r.grace_period_days || 5),
-          annualGracePeriodDays: Number(r.annual_grace_period_days || 15),
-          warningIntervals: Number(r.warning_intervals || 24),
-          annualWarningIntervals: Number(r.annual_warning_intervals || 48),
-          features,
-          hasRemoteDesktop: Boolean(r.has_remote_desktop),
-          hasAuditLogs: Boolean(r.has_audit_logs),
-        };
-      });
+      const all = await this.getAllPlans();
+      return all.filter((p) => p.tierLevel > Number(currentTierLevel));
     } catch (e) {
       console.warn('[HelpDeskLicenseService] getUpgradePlans error:', e);
       return [];
@@ -1388,15 +1396,44 @@ export const helpDeskLicenseService = {
     hasRemoteDesktop: boolean;
     hasAuditLogs: boolean;
   }>> {
+    const defaultPlans = [
+      {
+        id: 'core' as const,
+        name: i18nService.t('license_service.plan_core_package'),
+        tierLevel: 1,
+        monthlyPrice: 49,
+        annualMonthlyPrice: 39,
+        gracePeriodDays: 5,
+        annualGracePeriodDays: 15,
+        warningIntervals: 24,
+        annualWarningIntervals: 48,
+        features: [],
+        hasRemoteDesktop: false,
+        hasAuditLogs: false,
+      },
+      {
+        id: 'live' as const,
+        name: i18nService.t('license_service.plan_live_package'),
+        tierLevel: 2,
+        monthlyPrice: 129,
+        annualMonthlyPrice: 99,
+        gracePeriodDays: 5,
+        annualGracePeriodDays: 15,
+        warningIntervals: 24,
+        annualWarningIntervals: 48,
+        features: [],
+        hasRemoteDesktop: true,
+        hasAuditLogs: true,
+      },
+    ];
+
     try {
       const cachedPlans = await keystoreConfigVault.getLicensePlans();
       const fetchRemotePlans = async () => {
         const q = `
-          SELECT id, name, tier_level, monthly_price, annual_monthly_price,
-                 grace_period_days, annual_grace_period_days, warning_intervals, annual_warning_intervals,
-                 features, has_remote_desktop, has_audit_logs
+          SELECT id, name, tier_level, monthly_price, annual_price, features, grace_period, grace_period_warning_interval, is_active, created_at
           FROM whitedesk_license_plans
-          WHERE tier_level > 0 AND is_active = TRUE
+          WHERE tier_level > 0 AND is_active = 1
           ORDER BY tier_level ASC;
         `;
         const rows = await executeSql(q);
@@ -1408,25 +1445,27 @@ export const helpDeskLicenseService = {
           } catch {
             features = [];
           }
+          const planId = String(r.id);
           return {
-            id: String(r.id) as any,
+            id: planId as any,
             name: String(r.name),
             tierLevel: Number(r.tier_level),
             monthlyPrice: Number(r.monthly_price),
-            annualMonthlyPrice: Number(r.annual_monthly_price),
-            gracePeriodDays: Number(r.grace_period_days || 5),
-            annualGracePeriodDays: Number(r.annual_grace_period_days || 15),
-            warningIntervals: Number(r.warning_intervals || 24),
-            annualWarningIntervals: Number(r.annual_warning_intervals || 48),
+            annualMonthlyPrice: Number(r.annual_price ?? r.annual_monthly_price),
+            gracePeriodDays: resolveGracePeriodDays(planId, 'monthly', r.grace_period),
+            annualGracePeriodDays: resolveGracePeriodDays(planId, 'annual', r.grace_period),
+            warningIntervals: resolveWarningIntervals(planId, 'monthly', r.grace_period_warning_interval),
+            annualWarningIntervals: resolveWarningIntervals(planId, 'annual', r.grace_period_warning_interval),
             features,
-            hasRemoteDesktop: Boolean(r.has_remote_desktop),
-            hasAuditLogs: Boolean(r.has_audit_logs),
+            hasRemoteDesktop: planId === 'live',
+            hasAuditLogs: planId === 'live',
           };
         });
         if (mapped.length > 0) {
           await keystoreConfigVault.setLicensePlans(mapped);
+          return mapped;
         }
-        return mapped;
+        return defaultPlans;
       };
 
       if (cachedPlans && cachedPlans.length > 0) {
@@ -1437,7 +1476,7 @@ export const helpDeskLicenseService = {
       return await fetchRemotePlans();
     } catch (e) {
       console.warn('[HelpDeskLicenseService] getAllPlans error:', e);
-      return [];
+      return defaultPlans;
     }
   },
 
@@ -1447,7 +1486,8 @@ export const helpDeskLicenseService = {
     billingCycle: 'monthly' | 'annual' = 'monthly',
     licenseHash?: string
   ): Promise<{ success: boolean; license?: TenantLicenseData; message?: string }> {
-    const cleanId = (enterpriseBlindId || 'default').trim();
+    const rawId = (enterpriseBlindId || 'default').trim();
+    const cleanId = await this.resolveEnterpriseBlindIdForLicense(rawId);
     try {
       const now = Date.now();
       const durationDays = billingCycle === 'annual' ? 365 : 30;
@@ -1458,39 +1498,84 @@ export const helpDeskLicenseService = {
 
       const subStartIso = new Date(now).toISOString();
       const subEndIso = new Date(subEnd).toISOString();
-      const graceEndIso = new Date(graceEnd).toISOString();
+      const defaultEntName = cleanId === 'blind_11fcac28453c3eaa3a06a5db6caf4ca1'
+        ? 'TheWhite Enterprises'
+        : 'Whitechain';
+      const isFounderTenant = cleanId === 'blind_11fcac28453c3eaa3a06a5db6caf4ca1' ? 1 : 0;
 
-      // Update consolidated whitedesk_enterprises table directly (whitedesk_tenant_licenses decommissioned)
+      // Upsert directly into consolidated whitedesk_enterprises table (grace_period lives in whitedesk_license_plans)
       await executeSql(`
-        UPDATE whitedesk_enterprises SET
-          plan_id = ${escapeSqlString(targetPlanId)},
-          billing_cycle = ${escapeSqlString(billingCycle)},
-          license_status = 'active',
-          subscription_start_at = ${escapeSqlString(subStartIso)},
-          subscription_end_at = ${escapeSqlString(subEndIso)},
-          grace_period_days = ${graceDays},
-          warning_intervals = ${warnIntervals},
-          grace_ends_at = ${escapeSqlString(graceEndIso)},
-          license_hash = COALESCE(${escapeSqlString(licenseHash, true)}, license_hash)
-        WHERE enterprise_blind_id = ${escapeSqlString(cleanId)};
+        INSERT INTO whitedesk_enterprises (
+          enterprise_blind_id, name, org_pub, is_founder_tenant,
+          plan_id, billing_cycle,
+          subscription_start_at, subscription_end_at,
+          created_at
+        ) VALUES (
+          ${escapeSqlString(cleanId)},
+          ${escapeSqlString(defaultEntName)},
+          '',
+          ${isFounderTenant},
+          ${escapeSqlString(targetPlanId)},
+          ${escapeSqlString(billingCycle)},
+          ${escapeSqlString(subStartIso)},
+          ${escapeSqlString(subEndIso)},
+          ${now}
+        )
+        ON CONFLICT (enterprise_blind_id) DO UPDATE SET
+          plan_id = EXCLUDED.plan_id,
+          billing_cycle = EXCLUDED.billing_cycle,
+          subscription_start_at = EXCLUDED.subscription_start_at,
+          subscription_end_at = EXCLUDED.subscription_end_at;
       `);
+
+      // Immediately construct and persist the upgraded license into local device vault
+      const isLive = targetPlanId === 'live';
+      const optimisticLicense = computeDynamicLicenseState({
+        enterpriseBlindId: cleanId,
+        planId: targetPlanId,
+        planName: isLive
+          ? i18nService.t('license_service.plan_live_package')
+          : i18nService.t('license_service.plan_core_package'),
+        tierLevel: isLive ? 2 : 1,
+        status: 'active',
+        monthlyPrice: isLive ? 129 : 49,
+        annualMonthlyPrice: isLive ? 99 : 39,
+        billingCycle,
+        features: [],
+        subscriptionStartAt: now,
+        subscriptionEndAt: subEnd,
+        gracePeriodDays: graceDays,
+        warningIntervals: warnIntervals,
+        graceEndsAt: graceEnd,
+        hasRemoteDesktop: isLive,
+        hasAuditLogs: isLive,
+      });
+
+      await keystoreConfigVault.setTenantLicense(cleanId, optimisticLicense);
+      if (rawId && rawId !== cleanId) {
+        await keystoreConfigVault.setTenantLicense(rawId, optimisticLicense);
+      }
 
       // Reset grace period warning timestamp on upgrade
       try {
         await SafeSecureStore.deleteItemAsync(STORAGE_KEYS.LAST_GRACE_WARN_TS);
       } catch {}
 
-      const updated = await this.getTenantActiveLicense(cleanId, true);
+      const remoteUpdated = await this.fetchAndCacheTenantLicenseFromD1(cleanId);
+      const finalLicense = (remoteUpdated && remoteUpdated.planId === targetPlanId)
+        ? remoteUpdated
+        : optimisticLicense;
+
       return {
         success: true,
-        license: updated,
-        message: `'${updated.planName}' lisansınız başarıyla aktif edildi.`,
+        license: finalLicense,
+        message: i18nService.t('license_service.license_activated_success', { planName: finalLicense.planName }),
       };
     } catch (err: any) {
       console.warn('[HelpDeskLicenseService] upgradeTenantLicense error:', err);
       return {
         success: false,
-        message: `Lisans yükseltilirken hata oluştu: ${err?.message || err}`,
+        message: i18nService.t('license_service.license_upgrade_error', { error: String(err?.message || err) }),
       };
     }
   },
@@ -1501,7 +1586,7 @@ export const helpDeskLicenseService = {
   ): Promise<{ success: boolean; license?: any; message?: string }> {
     const cleanHash = (hash || '').trim().toUpperCase();
     if (!cleanHash) {
-      return { success: false, message: 'Lütfen geçerli bir lisans hash kodu girin.' };
+      return { success: false, message: i18nService.t('license_service.provide_valid_license_hash') };
     }
 
     let targetPlan: 'core' | 'live' = 'core';
@@ -1515,27 +1600,36 @@ export const helpDeskLicenseService = {
   async getLicensePlans(): Promise<Array<{
     id: string;
     name: string;
-    price: string;
-    operators: string;
-    customers: string;
-    grace_period_days: number;
-    warning_intervals: number;
-    is_recommended: boolean;
-    sort_order: number;
+    tier_level: number;
+    monthly_price: number;
+    annual_price: number;
+    features: string[];
+    grace_period: string;
+    grace_period_warning_interval: string;
+    is_active: boolean;
   }>> {
     try {
-      const rows = await executeSql('SELECT id, name, price, operators, customers, grace_period_days, warning_intervals, is_recommended, sort_order FROM whitedesk_license_plans ORDER BY sort_order ASC;');
-      return (rows || []).map(r => ({
-        id: String(r.id),
-        name: String(r.name),
-        price: String(r.price),
-        operators: String(r.operators),
-        customers: String(r.customers),
-        grace_period_days: Number(r.grace_period_days || (r.id === 'trial' ? 3 : 5)),
-        warning_intervals: Number(r.warning_intervals || (r.id === 'trial' ? 12 : 24)),
-        is_recommended: Boolean(r.is_recommended),
-        sort_order: Number(r.sort_order || 0),
-      }));
+      const rows = await executeSql('SELECT id, name, tier_level, monthly_price, annual_price, features, grace_period, grace_period_warning_interval, is_active, created_at FROM whitedesk_license_plans ORDER BY tier_level ASC;');
+      return (rows || []).map(r => {
+        let features: string[] = [];
+        try {
+          const parsed = typeof r.features === 'string' ? JSON.parse(r.features) : (r.features || []);
+          features = Array.isArray(parsed) ? parsed : [];
+        } catch {
+          features = [];
+        }
+        return {
+          id: String(r.id),
+          name: String(r.name),
+          tier_level: Number(r.tier_level ?? 0),
+          monthly_price: Number(r.monthly_price ?? 0),
+          annual_price: Number(r.annual_price ?? 0),
+          features,
+          grace_period: String(r.grace_period ?? '3'),
+          grace_period_warning_interval: String(r.grace_period_warning_interval ?? '12'),
+          is_active: Boolean(r.is_active),
+        };
+      });
     } catch (e) {
       console.warn('[HelpDeskLicenseService] getLicensePlans error:', e);
       return [];

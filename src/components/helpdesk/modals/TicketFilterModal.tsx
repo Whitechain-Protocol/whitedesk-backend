@@ -18,6 +18,7 @@ import {
 } from 'lucide-react-native';
 import { TenantEntry, OrgEntry, AppCatEntry, HelpDeskCategory } from '../../../services/helpDeskService';
 import { FilterSlidersIcon } from '../icons/FilterSlidersIcon';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface TicketFilterModalProps {
   visible: boolean;
@@ -43,7 +44,7 @@ export interface TicketFilterModalProps {
   filteredCount: number;
   totalCount: number;
   language?: string;
-  getLabel?: (key: string, tr: string, en: string) => string;
+  getLabel?: (key: string, tr?: string, en?: string) => string;
 }
 
 export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
@@ -68,6 +69,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
   filteredCount,
   totalCount,
 }) => {
+  const { t } = useTranslation();
   const hasActiveFilters =
     (isFounder && selectedTenantBlindId !== 'all') ||
     selectedOrgId !== 'all' ||
@@ -76,12 +78,12 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
 
   // Role göre başlık altı bilgilendirme
   const roleSubtitle = isFounder
-    ? 'TheWhite Kurucu Masası • Firma, Org, App, Kategori'
+    ? t('helpdesk.ticket_filter.subtitle_founder')
     : isGlobalAdmin
-    ? 'Global Yönetici • Org, App, Kategori'
+    ? t('helpdesk.ticket_filter.subtitle_global_admin')
     : isAdmin
-    ? 'Yönetici Masası • Org, App, Kategori'
-    : 'Bilet Filtreleme • App, Kategori';
+    ? t('helpdesk.ticket_filter.subtitle_admin')
+    : t('helpdesk.ticket_filter.subtitle_user');
 
   return (
     <Modal
@@ -101,7 +103,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                 <FilterSlidersIcon size={18} color="#15803D" strokeWidth={2.2} />
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.title}>Biletleri Filtrele</Text>
+                <Text style={styles.title}>{t('helpdesk.ticket_filter.title')}</Text>
                 <Text style={styles.subtitle} numberOfLines={1}>
                   {roleSubtitle}
                 </Text>
@@ -116,7 +118,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                 activeOpacity={0.7}
               >
                 <RotateCcw size={12} color="#DC2626" style={{ marginRight: 4 }} />
-                <Text style={styles.resetHeaderBtnText}>Sıfırla</Text>
+                <Text style={styles.resetHeaderBtnText}>{t('helpdesk.ticket_filter.reset_btn')}</Text>
               </TouchableOpacity>
             )}
 
@@ -140,7 +142,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
               <View style={styles.sectionBlock}>
                 <View style={styles.sectionTitleRow}>
                   <Building2 size={14} color="#0D9488" style={{ marginRight: 6 }} />
-                  <Text style={styles.sectionTitle}>FİRMA (TENANT)</Text>
+                  <Text style={styles.sectionTitle}>{t('helpdesk.ticket_filter.section_tenant')}</Text>
                 </View>
                 <ScrollView
                   horizontal
@@ -164,7 +166,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                         selectedTenantBlindId === 'all' && styles.filterPillTextActive,
                       ]}
                     >
-                      Tüm Firmalar
+                      {t('helpdesk.ticket_filter.all_tenants')}
                     </Text>
                   </TouchableOpacity>
 
@@ -200,7 +202,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
               <View style={styles.sectionBlock}>
                 <View style={styles.sectionTitleRow}>
                   <Users size={14} color="#059669" style={{ marginRight: 6 }} />
-                  <Text style={styles.sectionTitle}>ORGANİZASYON (ORG)</Text>
+                  <Text style={styles.sectionTitle}>{t('helpdesk.ticket_filter.section_org')}</Text>
                 </View>
                 <ScrollView
                   horizontal
@@ -224,7 +226,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                         selectedOrgId === 'all' && styles.filterPillTextActive,
                       ]}
                     >
-                      Tüm Organizasyonlar
+                      {t('helpdesk.ticket_filter.all_orgs')}
                     </Text>
                   </TouchableOpacity>
 
@@ -261,7 +263,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
             <View style={styles.sectionBlock}>
               <View style={styles.sectionTitleRow}>
                 <Smartphone size={14} color="#0D9488" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionTitle}>UYGULAMA (APP)</Text>
+                <Text style={styles.sectionTitle}>{t('helpdesk.ticket_filter.section_app')}</Text>
               </View>
               <ScrollView
                 horizontal
@@ -285,7 +287,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                       selectedAppId === 'all' && styles.filterPillTextActive,
                     ]}
                   >
-                    Tüm Uygulamalar
+                    {t('helpdesk.ticket_filter.all_apps')}
                   </Text>
                 </TouchableOpacity>
 
@@ -325,7 +327,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
             <View style={styles.sectionBlock}>
               <View style={styles.sectionTitleRow}>
                 <Tag size={14} color="#059669" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionTitle}>KATEGORİ</Text>
+                <Text style={styles.sectionTitle}>{t('helpdesk.ticket_filter.section_category')}</Text>
               </View>
               <ScrollView
                 horizontal
@@ -349,7 +351,7 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
                       selectedCategoryId === 'all' && styles.filterPillTextActive,
                     ]}
                   >
-                    Tüm Kategoriler
+                    {t('helpdesk.ticket_filter.all_categories')}
                   </Text>
                 </TouchableOpacity>
 
@@ -385,7 +387,10 @@ export const TicketFilterModal: React.FC<TicketFilterModalProps> = ({
           <View style={styles.footerRow}>
             <TouchableOpacity style={styles.applyBtn} onPress={onClose} activeOpacity={0.85}>
               <Text style={styles.applyBtnText}>
-                Filtreyi Uygula ({filteredCount} / {totalCount} Bilet)
+                {t('helpdesk.ticket_filter.apply_btn', {
+                  filtered: filteredCount,
+                  total: totalCount,
+                })}
               </Text>
             </TouchableOpacity>
           </View>

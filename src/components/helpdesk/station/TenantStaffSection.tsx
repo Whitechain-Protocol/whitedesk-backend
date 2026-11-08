@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react-native';
 import { AdminEntry, HelpDeskCategory } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 interface TenantStaffSectionProps {
   isExpanded: boolean;
@@ -44,6 +45,8 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
   onSaveAllocation,
   tAllLabel,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.geminiCard}>
       <TouchableOpacity
@@ -55,11 +58,13 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
           <Users size={20} color="#4F46E5" strokeWidth={2.2} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.geminiCardTitle}>Yetkilendirme & Ekip</Text>
-          <Text style={styles.geminiCardSubtitle}>Destek operatörleri ve departmanlar</Text>
+          <Text style={styles.geminiCardTitle}>{t('provisioning.tenant_station.staff_title')}</Text>
+          <Text style={styles.geminiCardSubtitle}>{t('provisioning.tenant_station.staff_subtitle')}</Text>
         </View>
         <View style={[styles.geminiStatusPill, { backgroundColor: '#E0E7FF' }]}>
-          <Text style={[styles.geminiStatusPillText, { color: '#4338CA' }]}>{adminsList.length} Personel</Text>
+          <Text style={[styles.geminiStatusPillText, { color: '#4338CA' }]}>
+            {t('provisioning.tenant_station.staff_count_pill', { count: adminsList.length })}
+          </Text>
         </View>
         {isExpanded ? (
           <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -70,7 +75,7 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
 
       {isExpanded && (
         <View style={styles.geminiCardBody}>
-          <Text style={styles.subSectionHeader}>Masadaki Aktif Yöneticiler</Text>
+          <Text style={styles.subSectionHeader}>{t('provisioning.tenant_station.active_admins_header')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
             {adminsList.map((adm) => {
               const isSelected = selectedAdminId === adm.white_id;
@@ -84,10 +89,10 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.adminPillAlias, isSelected && styles.adminPillAliasSelected]}>
-                    {adm.alias || 'Admin'}
+                    {adm.alias || t('helpdesk.admin_role_short')}
                   </Text>
                   <Text style={[styles.adminPillId, isSelected && styles.adminPillIdSelected]}>
-                    {adm.role === 'global_admin' ? 'WhiteCosmos' : adm.role}
+                    {adm.role === 'global_admin' ? t('provisioning.role_global_admin') : t('helpdesk.admin_role_short')}
                   </Text>
                 </TouchableOpacity>
               );
@@ -100,11 +105,11 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
             activeOpacity={0.8}
           >
             <UserPlus size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={styles.addOpBtnText}>Yeni Operatör Davet Hash'i Üret & Kopyala</Text>
+            <Text style={styles.addOpBtnText}>{t('provisioning.tenant_station.generate_operator_invite_btn')}</Text>
           </TouchableOpacity>
 
           {/* Departman Yetki Matrisi */}
-          <Text style={[styles.subSectionHeader, { marginTop: 14 }]}>Departman Yetki Matrisi</Text>
+          <Text style={[styles.subSectionHeader, { marginTop: 14 }]}>{t('provisioning.tenant_station.department_matrix_header')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
             <TouchableOpacity
               style={[styles.catPill, selectedCatIds.includes('all') && styles.catPillSelected]}
@@ -138,7 +143,7 @@ export const TenantStaffSection: React.FC<TenantStaffSectionProps> = ({
             activeOpacity={0.8}
           >
             <CheckCircle2 size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-            <Text style={[styles.fluidSubmitBtnText, { fontSize: 13 }]}>Yetkiyi Kaydet</Text>
+            <Text style={[styles.fluidSubmitBtnText, { fontSize: 13 }]}>{t('provisioning.tenant_station.save_authority_btn')}</Text>
           </TouchableOpacity>
         </View>
       )}

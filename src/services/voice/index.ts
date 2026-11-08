@@ -5,6 +5,7 @@ import { InWhiteRingtone } from '../../../modules/inwhite-ringtone';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { NotificationService } from '../notificationService';
 import { SafeSecureStore } from '../storageService';
+import { i18nService } from '../i18nService';
 import { STORAGE_KEYS } from '../helpdesk/types';
 
 import {
@@ -762,7 +763,7 @@ export class VoiceCallService {
         this.cleanupSession(failureReason);
       },
       () => {
-        this.cleanupSession('Arama sonlandırıldı.');
+        this.cleanupSession(i18nService.t('voice.call.call_terminated'));
       },
       callerWhiteId
     );
@@ -799,7 +800,7 @@ export class VoiceCallService {
       if (signal?.signalType === 'hangup' || signal?.signalType === 'reject') {
         if (this.currentSession.scope !== 'org_group') {
           console.warn('[VOICE] Counterpart hung up the call. Closing session.');
-          this.cleanupSession('Görüşme karşı tarafça sonlandırıldı.');
+          this.cleanupSession(i18nService.t('voice.call.ended_by_counterpart'));
           return;
         }
       }
@@ -809,7 +810,7 @@ export class VoiceCallService {
         if (connectedNotFoundCount >= 3) {
           if (this.currentSession.scope !== 'org_group') {
             console.warn('[VOICE] Room signal ended/cleared. Closing session.');
-            this.cleanupSession('Görüşme sonlandırıldı.');
+            this.cleanupSession(i18nService.t('voice.call.ended'));
           }
         }
         return;
@@ -856,7 +857,7 @@ export class VoiceCallService {
             ) {
               lastOfferTsHandled = offerTs;
               const joinerAlias = resolvePttPeerDisplayName(offerData.callerAlias, offerCallerId);
-              this.setPeerEvent(`${joinerAlias} katıldı`, 'join', joinerAlias);
+              this.setPeerEvent(i18nService.t('voice.ptt.peer_joined', { alias: joinerAlias }), 'join', joinerAlias);
 
               await signalingService.setupPeerConnection('callee', roomName, this.currentSession.isMuted, {
                 onRemoteTrackConnected: () => {
@@ -879,9 +880,9 @@ export class VoiceCallService {
               if (evId && evId !== myId) {
                 const displayAlias = resolvePttPeerDisplayName(offerData.lastPeerEvent.alias, evId);
                 if (offerData.lastPeerEvent.action === 'joined') {
-                  this.setPeerEvent(`${displayAlias} katıldı`, 'join', displayAlias);
+                  this.setPeerEvent(i18nService.t('voice.ptt.peer_joined', { alias: displayAlias }), 'join', displayAlias);
                 } else if (offerData.lastPeerEvent.action === 'left') {
-                  this.setPeerEvent(`${displayAlias} ayrıldı`, 'leave', displayAlias);
+                  this.setPeerEvent(i18nService.t('voice.ptt.peer_left', { alias: displayAlias }), 'leave', displayAlias);
                   InWhiteRingtone.playRadioTone('close');
                 }
               }
@@ -1078,9 +1079,9 @@ export class VoiceCallService {
         ticketId: resolvedTicketId,
         roomName: actualCallRoom,
         callerWhiteId: data.callerWhiteId || '',
-        callerAlias: data.callerAlias || (isPtt ? 'Kurumsal Telsiz' : 'Operatör'),
+        callerAlias: data.callerAlias || (isPtt ? i18nService.t('voice.ptt.corporate_radio') : i18nService.t('voice.call.default_operator')),
         calleeWhiteId: ownWhiteId || '',
-        calleeAlias: isOrgPtt ? ((data as any).orgName || (data as any).targetOrgName || 'Birim Telsizi') : 'Siz',
+        calleeAlias: isOrgPtt ? ((data as any).orgName || (data as any).targetOrgName || i18nService.t('voice.ptt.unit_radio')) : i18nService.t('voice.call.you'),
         state: 'incoming_ringing',
         connectionMode: 'p2p_direct',
         durationSeconds: 0,
@@ -1092,7 +1093,7 @@ export class VoiceCallService {
         scope: isOrgPtt ? 'org_group' : 'direct',
         pttMode,
         targetOrgId: cleanOrgId,
-        targetOrgName: (data as any).targetOrgName || (data as any).orgName || data.callerAlias || 'Kurumsal Telsiz',
+        targetOrgName: (data as any).targetOrgName || (data as any).orgName || data.callerAlias || i18nService.t('voice.ptt.corporate_radio'),
         isStandby: false,
       } as any;
       this.notify();
@@ -1191,7 +1192,7 @@ export class VoiceCallService {
 
           if (isRemoteDesktopInvite) {
             const ticketId = callData?.ticketId || 'general';
-            const adminAlias = callData?.adminAlias || 'Destek Uzmanı';
+            const adminAlias = callData?.adminAlias || i18nService.t('remote_desktop.default_support_specialist');
             console.warn('[VOICE/SIGNAL] Incoming remote desktop invite detected for ticket:', ticketId);
             void remoteDesktopService.receiveIncomingInvite(ticketId, adminAlias, true);
             void apiClient.deleteFastSignal(roomName);
@@ -1304,9 +1305,9 @@ export class VoiceCallService {
               ticketId: resolvedTicketId,
               roomName: actualCallRoom,
               callerWhiteId: callData?.callerWhiteId || '',
-              callerAlias: callData?.callerAlias || 'Operatör',
+              callerAlias: callData?.callerAlias || i18nService.t('voice.call.default_operator'),
               calleeWhiteId: ownWhiteId || '',
-              calleeAlias: isOrgPttBroadcast ? (callData?.orgName || 'Birim Telsizi') : 'Siz',
+              calleeAlias: isOrgPttBroadcast ? (callData?.orgName || i18nService.t('voice.ptt.unit_radio')) : i18nService.t('voice.call.you'),
               state: 'incoming_ringing',
               connectionMode: 'p2p_direct',
               durationSeconds: 0,

@@ -1,4 +1,5 @@
 import { HelpDeskCategory } from '../../../services/helpDeskService';
+import { i18nService } from '../../../services/i18nService';
 
 export const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
@@ -28,11 +29,11 @@ export function formatTicketDate(
 export function formatWhiteId(
   id: string | null | undefined,
   ownWhiteId?: string,
-  isTurkish: boolean = true
+  _isTurkish: boolean = true
 ): string {
   if (!id) return '';
   if (ownWhiteId && id.toLowerCase() === ownWhiteId.toLowerCase()) {
-    return isTurkish ? 'Siz' : 'You';
+    return i18nService.t('helpdesk.you_self');
   }
   return '';
 }
@@ -69,17 +70,25 @@ export function getCategoryLabel(
 ): string {
   if (!catKey || catKey === 'discussion') return '';
   if (catKey === 'root_support' || catKey === 'thewhite_support') {
-    return isTurkish ? 'TheWhite Destek' : 'TheWhite Support';
+    return i18nService.t('helpdesk.cat_thewhite_support');
   }
   if (catKey === 'internal_admin_ticket') {
-    return isTurkish ? 'Yönetici Talebi' : 'Admin Request';
+    return i18nService.t('helpdesk.cat_internal_admin_ticket');
   }
   if (catKey === 'voice' || catKey === 'general') {
     return '';
   }
+  const i18nDirect = i18nService.t(`helpdesk.cat_${catKey}`);
+  if (i18nDirect !== `helpdesk.cat_${catKey}`) {
+    return i18nDirect;
+  }
   const found = availableCategories.find(c => c.id === catKey || c.key === catKey);
   if (found) {
-    return isTurkish ? found.labelTr : found.labelEn;
+    const i18nFound = i18nService.t(`helpdesk.cat_${found.id}`);
+    if (i18nFound !== `helpdesk.cat_${found.id}`) {
+      return i18nFound;
+    }
+    return isTurkish ? found.labelTr : (found.labelEn || found.labelTr);
   }
   return '';
 }

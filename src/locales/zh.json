@@ -804,7 +804,18 @@
     "appNamePlaceholder": "应用名称 (例如: WhiteDesk)",
     "appDescPlaceholder": "简要描述...",
     "newDiscussion": "发起新讨论",
-    "tierTenant": "租户"
+    "tierTenant": "租户",
+    "adminRevokeDesc": "将从该设备撤销管理员权限，并且控制台将被锁定。",
+    "removeAdminTitle": "删除管理员",
+    "removeAdminConfirm": "您确定要删除此管理员及其所有分配吗？",
+    "selectAdminReq": "选择管理员",
+    "selectAdminReqDesc": "请选择要分配的管理员。",
+    "created": "创建于",
+    "lastAction": "最后更新",
+    "attachment": "附件",
+    "tierAppOrg": "应用 / 组织",
+    "default": "默认",
+    "all": "全部"
   },
   "license": {
     "title": "许可证与订阅",

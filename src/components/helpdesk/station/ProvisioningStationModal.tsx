@@ -21,6 +21,7 @@ import {
   Crown,
 } from 'lucide-react-native';
 import { ProvisioningHashModal } from '../../ProvisioningHashModal';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface AdminItem {
   white_id: string;
@@ -118,6 +119,8 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
   onCreateCategory,
   onOpenSdkIntegration,
 }) => {
+  const { t } = useTranslation();
+
   // Hash & QR Yetki Yönetimi Modalı
   const [hashModalVisible, setHashModalVisible] = useState<boolean>(false);
 
@@ -262,7 +265,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   <ShieldCheck size={20} color="#3B82F6" strokeWidth={2.2} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.consoleTitleText}>Provizyon Masası</Text>
+                  <Text style={styles.consoleTitleText}>{t('provisioning.station.title')}</Text>
                   <Text style={styles.consoleSubtitleText} numberOfLines={1}>
                     {displayTenantName}
                   </Text>
@@ -289,7 +292,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   <View style={styles.sectionTitleRow}>
                     <Building2 size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
                     <Text style={styles.sectionTitleText}>
-                      Kuruluşlar ({tenantsList.length})
+                      {t('provisioning.station.tenants_section_title', { count: tenantsList.length })}
                     </Text>
                   </View>
 
@@ -331,7 +334,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 <View style={styles.sectionTitleRow}>
                   <Users size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
                   <Text style={styles.sectionTitleText}>
-                    Yöneticiler ({filteredAdmins.length})
+                    {t('provisioning.station.admins_section_title', { count: filteredAdmins.length })}
                   </Text>
                 </View>
 
@@ -461,7 +464,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 <View style={styles.sectionTitleRow}>
                   <Layers size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
                   <Text style={styles.sectionTitleText}>
-                    Organizasyonlar ({filteredOrgs.length})
+                    {t('provisioning.station.orgs_section_title', { count: filteredOrgs.length })}
                   </Text>
                 </View>
 
@@ -478,7 +481,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   >
                     <Layers size={12} color={selectedStationOrg === 'all' ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
                     <Text style={[styles.chipItemText, selectedStationOrg === 'all' && styles.chipItemTextActive]}>
-                      Tümü
+                      {t('common.all')}
                     </Text>
                     {selectedStationOrg === 'all' && (
                       <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
@@ -536,7 +539,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 <View style={styles.sectionTitleRow}>
                   <LayoutGrid size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
                   <Text style={styles.sectionTitleText}>
-                    Uygulamalar ({appsList.length})
+                    {t('provisioning.station.apps_section_title', { count: appsList.length })}
                   </Text>
                 </View>
 
@@ -587,7 +590,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 <View style={styles.sectionTitleRow}>
                   <Tag size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
                   <Text style={styles.sectionTitleText}>
-                    Kategoriler ({filteredCategories.length})
+                    {t('provisioning.station.categories_section_title', { count: filteredCategories.length })}
                   </Text>
                 </View>
 
@@ -646,15 +649,15 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 <View style={styles.confirmCard}>
                   <Text style={styles.confirmTitle}>
                     {deleteConfirm.type === 'org'
-                      ? 'Organizasyonu Sil'
+                      ? t('provisioning.station.delete_org_title')
                       : deleteConfirm.type === 'app'
-                      ? 'Uygulamayı Sil'
+                      ? t('provisioning.station.delete_app_title')
                       : deleteConfirm.type === 'category'
-                      ? 'Kategoriyi Sil'
-                      : 'Yöneticiyi Kaldır'}
+                      ? t('provisioning.station.delete_category_title')
+                      : t('provisioning.station.delete_admin_title')}
                   </Text>
                   <Text style={styles.confirmDesc}>
-                    "{deleteConfirm.name}" kaydını sistemden silmek istediğinize emin misiniz?
+                    {t('provisioning.station.delete_confirm_desc', { name: deleteConfirm.name })}
                   </Text>
                   <View style={styles.confirmActionRow}>
                     <TouchableOpacity
@@ -662,7 +665,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                       onPress={() => setDeleteConfirm(null)}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.confirmCancelText}>Vazgeç</Text>
+                      <Text style={styles.confirmCancelText}>{t('provisioning.cancel_btn')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.confirmDeleteBtn}
@@ -681,7 +684,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                       }}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.confirmDeleteText}>Sil</Text>
+                      <Text style={styles.confirmDeleteText}>{t('provisioning.action_delete')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -726,8 +729,8 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   <Layers size={18} color="#3B82F6" strokeWidth={2.2} />
                 </View>
                 <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.entryModalTitle}>Yeni Organizasyon Ekle</Text>
-                  <Text style={styles.entryModalSubtitle}>Bağlı departman veya şube tanımı</Text>
+                  <Text style={styles.entryModalTitle}>{t('provisioning.station.add_org_modal_title')}</Text>
+                  <Text style={styles.entryModalSubtitle}>{t('provisioning.station.add_org_modal_sub')}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -741,7 +744,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
 
             {/* 1. Firma (Bağlanacak Kuruluş) */}
             <View style={styles.entryFieldGroup}>
-              <Text style={styles.entryFieldLabel}>FİRMA</Text>
+              <Text style={styles.entryFieldLabel}>{t('provisioning.station.company_label_upper')}</Text>
               {isFounder && tenantsList && tenantsList.length > 0 ? (
                 <ScrollView
                   horizontal
@@ -776,10 +779,10 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
 
             {/* 2. Organizasyon Adı */}
             <View style={styles.entryFieldGroup}>
-              <Text style={styles.entryFieldLabel}>ORGANİZASYON ADI</Text>
+              <Text style={styles.entryFieldLabel}>{t('provisioning.station.org_name_label_upper')}</Text>
               <TextInput
                 style={styles.entryInput}
-                placeholder="Örn: Saha Operasyon, Lojistik, Muhasebe"
+                placeholder={t('provisioning.station.org_name_placeholder')}
                 placeholderTextColor="#94A3B8"
                 value={newOrgInput}
                 onChangeText={onChangeNewOrgInput}
@@ -794,7 +797,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 onPress={() => setAddOrgModalOpen(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.entryCancelText}>Vazgeç</Text>
+                <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.entrySubmitBtn, !newOrgInput.trim() && styles.entrySubmitBtnDisabled]}
@@ -802,7 +805,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 disabled={!newOrgInput.trim()}
                 activeOpacity={0.8}
               >
-                <Text style={styles.entrySubmitText}>Ekle</Text>
+                <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -829,8 +832,8 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   <Tag size={18} color="#3B82F6" strokeWidth={2.2} />
                 </View>
                 <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.entryModalTitle}>Yeni Destek Kategorisi Ekle</Text>
-                  <Text style={styles.entryModalSubtitle}>Firma, organizasyon veya uygulama bağlama</Text>
+                  <Text style={styles.entryModalTitle}>{t('provisioning.station.add_cat_modal_title')}</Text>
+                  <Text style={styles.entryModalSubtitle}>{t('provisioning.station.add_cat_modal_sub')}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -845,7 +848,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
               {/* 1. Firma Seçimi */}
               <View style={styles.entryFieldGroup}>
-                <Text style={styles.entryFieldLabel}>FİRMA</Text>
+                <Text style={styles.entryFieldLabel}>{t('provisioning.station.company_label_upper')}</Text>
                 {isFounder && tenantsList && tenantsList.length > 0 ? (
                   <ScrollView
                     horizontal
@@ -881,8 +884,8 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
               {/* 2. Organizasyon Seçimi (Tüm Birimler / Özel Birim) */}
               <View style={styles.entryFieldGroup}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Text style={styles.entryFieldLabel}>ORGANİZASYON</Text>
-                  <Text style={styles.entryFieldHint}>{selectedCatOrg ? 'Birime Özel' : 'Tüm Birimler'}</Text>
+                  <Text style={styles.entryFieldLabel}>{t('provisioning.station.org_label_upper')}</Text>
+                  <Text style={styles.entryFieldHint}>{selectedCatOrg ? t('provisioning.station.org_specific_hint') : t('provisioning.station.all_orgs_hint')}</Text>
                 </View>
                 <ScrollView
                   horizontal
@@ -895,7 +898,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                     activeOpacity={0.75}
                   >
                     <Text style={[styles.entryChipText, !selectedCatOrg && styles.entryChipTextActive]}>
-                      Tüm Birimler (Genel)
+                      {t('provisioning.station.all_orgs_general')}
                     </Text>
                     {!selectedCatOrg && <Check size={12} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 4 }} />}
                   </TouchableOpacity>
@@ -930,8 +933,8 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
               {/* 3. Uygulama Seçimi (Tüm Uygulamalar / Özel Uygulama) */}
               <View style={styles.entryFieldGroup}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Text style={styles.entryFieldLabel}>UYGULAMA</Text>
-                  <Text style={styles.entryFieldHint}>{selectedCatApp ? 'Uygulamaya Özel' : 'Tüm Uygulamalar'}</Text>
+                  <Text style={styles.entryFieldLabel}>{t('provisioning.station.app_label_upper')}</Text>
+                  <Text style={styles.entryFieldHint}>{selectedCatApp ? t('provisioning.station.app_specific_hint') : t('provisioning.station.all_apps_hint')}</Text>
                 </View>
                 <ScrollView
                   horizontal
@@ -944,7 +947,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                     activeOpacity={0.75}
                   >
                     <Text style={[styles.entryChipText, !selectedCatApp && styles.entryChipTextActive]}>
-                      Tüm Uygulamalar (Genel)
+                      {t('provisioning.station.all_apps_general')}
                     </Text>
                     {!selectedCatApp && <Check size={12} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 4 }} />}
                   </TouchableOpacity>
@@ -971,10 +974,10 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
 
               {/* 4. Kategori Adı */}
               <View style={styles.entryFieldGroup}>
-                <Text style={styles.entryFieldLabel}>KATEGORİ ADI</Text>
+                <Text style={styles.entryFieldLabel}>{t('provisioning.station.cat_name_label_upper')}</Text>
                 <TextInput
                   style={styles.entryInput}
-                  placeholder="Örn: Donanım Arızası, Fatura Talebi, Hesap Erişimi"
+                  placeholder={t('provisioning.station.cat_name_placeholder')}
                   placeholderTextColor="#94A3B8"
                   value={newCatNameInput}
                   onChangeText={onChangeNewCatNameInput}
@@ -990,7 +993,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 onPress={() => setAddCatModalOpen(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.entryCancelText}>Vazgeç</Text>
+                <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.entrySubmitBtn, !newCatNameInput.trim() && styles.entrySubmitBtnDisabled]}
@@ -998,7 +1001,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                 disabled={!newCatNameInput.trim()}
                 activeOpacity={0.8}
               >
-                <Text style={styles.entrySubmitText}>Ekle</Text>
+                <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
               </TouchableOpacity>
             </View>
           </View>

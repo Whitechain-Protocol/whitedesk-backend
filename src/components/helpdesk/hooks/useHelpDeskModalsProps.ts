@@ -3,11 +3,12 @@ import { AppState } from 'react-native';
 import { HelpDeskModalsContainerProps } from '../modals/HelpDeskModalsContainer';
 import { SafeSecureStore } from '../../../services/storageService';
 import { helpDeskService, TenantLicenseData } from '../../../services/helpDeskService';
+import { i18nService } from '../../../services/i18nService';
 import { AdvancedFeaturesConfig, UserAdvancedPreferences } from '../types';
 
 export interface UseHelpDeskModalsPropsOptions {
   language: 'tr' | 'en';
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string | Record<string, string | number>, en?: string) => string;
   t: (key: string, params?: Record<string, string | number>) => string;
   safeTop: number;
   adminModalHeight: number;
@@ -185,11 +186,9 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
   const handleSignOut = useCallback(() => {
     setConfirmSheet({
       visible: true,
-      title: language === 'tr' ? 'Oturumu Kapat' : 'Sign Out',
-      description: language === 'tr' 
-        ? 'Bu cihazdaki yerel oturum kapatılacak ve giriş ekranına dönülecektir. Devam etmek istiyor musunuz?'
-        : 'Your session will be closed on this device. Do you want to proceed?',
-      actionText: language === 'tr' ? 'Çıkış Yap' : 'Sign Out',
+      title: getLabel('helpdesk.sign_out_title'),
+      description: getLabel('helpdesk.sign_out_desc'),
+      actionText: getLabel('helpdesk.sign_out_btn'),
       actionColor: '#EF4444',
       onAction: async () => {
         await SafeSecureStore.deleteItemAsync('inwhite_is_registered');
@@ -208,7 +207,7 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
       },
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
     });
-  }, [language, navigation, setConfirmSheet]);
+  }, [getLabel, navigation, setConfirmSheet]);
 
   const handleIdentitySave = useCallback(async () => {
     const trimmed = identityInput.trim();
@@ -249,11 +248,11 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
       const targetName = appr.type === 'delete_app' ? formatAppId(appr.target_app_id || '') : (appr.target_org_id || '');
       setConfirmSheet({
         visible: true,
-        title: getLabel('helpdesk.confirmDeleteApprovalTitle', 'Silme İşlemini Onayla', 'Confirm Deletion'),
-        description: `"${targetName}" ${getLabel('helpdesk.confirmDeleteApprovalDesc', 'öğesini sistemden kalıcı olarak silmeyi onaylıyor musunuz?', 'will be permanently removed. Do you confirm?')}`,
-        actionText: getLabel('common.delete', 'Sil', 'Delete'),
+        title: getLabel('helpdesk.confirmDeleteApprovalTitle'),
+        description: `"${targetName}" ${getLabel('helpdesk.confirmDeleteApprovalDesc')}`,
+        actionText: getLabel('common.delete'),
         actionColor: '#EF4444',
-        cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+        cancelText: getLabel('common.cancel'),
         onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
         onAction: async () => {
           setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -304,9 +303,9 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
     if (lic.isGraceExpired) {
       setConfirmSheet({
         visible: true,
-        title: 'Lisans Süresi Sona Erdi',
-        description: 'Ek kullanım süreniz tamamlandı. Kesintisiz ve güvenli iletişime devam edebilmek için lütfen bir abonelik planı seçin.',
-        actionText: 'Lisansı Yükselt',
+        title: i18nService.t('license.grace_expired_title'),
+        description: i18nService.t('license.grace_expired_desc'),
+        actionText: i18nService.t('license.grace_upgrade_btn'),
         actionColor: '#2563EB',
         onCancel: undefined,
         onAction: () => {
@@ -325,10 +324,10 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
       const days = lic.gracePeriodDays || (lic.planId === 'trial' ? 3 : lic.billingCycle === 'annual' ? 15 : 5);
       setConfirmSheet({
         visible: true,
-        title: 'Ek Kullanım Süresi Aktif',
-        description: `Lisans süreniz doldu ancak iletişiminizin kesilmemesi için +${days} günlük ek kullanım süreniz tanımlandı. Kesintisiz özgür iletişime devam etmek için bir lisans planı seçebilirsiniz.`,
-        cancelText: 'Anladım',
-        actionText: 'Lisansı Yükselt',
+        title: i18nService.t('license.grace_active_title'),
+        description: i18nService.t('license.grace_active_desc', { days }),
+        cancelText: i18nService.t('license.grace_acknowledge_btn'),
+        actionText: i18nService.t('license.grace_upgrade_btn'),
         actionColor: '#2563EB',
         onCancel: async () => {
           await helpDeskService.acknowledgeGraceWarning();
@@ -379,11 +378,8 @@ export function useHelpDeskModalsProps(options: UseHelpDeskModalsPropsOptions): 
 
   return {
     language,
-    getLabel: (a: string, b?: string, c?: string) => {
-      if (c !== undefined && b !== undefined) {
-        return getLabel(a, b, c);
-      }
-      return getLabel('', a, b || a);
+    getLabel: (a: string, b?: any, c?: string) => {
+      return getLabel(a, b, c);
     },
     t,
     safeTop,

@@ -26,7 +26,7 @@ interface UserPreferencesModalProps {
   preferences: UserAdvancedPreferences;
   onSave: (newPrefs: UserAdvancedPreferences) => Promise<void>;
   language: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string, en?: string) => string;
 }
 
 export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
@@ -34,7 +34,6 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
   onClose,
   preferences: initialPrefs,
   onSave,
-  language,
   getLabel,
 }) => {
   const [prefs, setPrefs] = useState<UserAdvancedPreferences>(initialPrefs);
@@ -78,9 +77,11 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
                 <Sliders size={18} color="#3B82F6" strokeWidth={2.2} />
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.title}>Gelişmiş Tercihler</Text>
+                <Text style={styles.title}>
+                  {getLabel('settings.advanced_features.user_preferences.title')}
+                </Text>
                 <Text style={styles.subtitle} numberOfLines={1}>
-                  Sesli arama, canlı telsiz ve makbuz indirme tercihleri
+                  {getLabel('settings.advanced_features.user_preferences.subtitle')}
                 </Text>
               </View>
             </View>
@@ -93,7 +94,9 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
           {savedToast && (
             <View style={styles.toast}>
               <CheckCircle2 size={15} color="#2563EB" style={{ marginRight: 6 }} />
-              <Text style={styles.toastText}>Tercihler başarıyla kaydedildi.</Text>
+              <Text style={styles.toastText}>
+                {getLabel('settings.advanced_features.user_preferences.saved_toast')}
+              </Text>
             </View>
           )}
 
@@ -104,18 +107,10 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.itemTitle}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.voice_label',
-                  'Sesli Aramaları Etkinleştir',
-                  'Enable Voice Calls'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.voice_label')}
               </Text>
               <Text style={styles.itemDesc}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.voice_desc',
-                  'Gelen sesli görüşme el sıkışma bildirimlerini kabul et',
-                  'Accept incoming voice call handshake requests'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.voice_desc')}
               </Text>
             </View>
             <Switch
@@ -133,18 +128,10 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.itemTitle}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.ptt_label',
-                  'Canlı Telsiz (Bas-Konuş) Etkin',
-                  'Push-to-Talk (PTT) Enabled'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.ptt_label')}
               </Text>
               <Text style={styles.itemDesc}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.ptt_desc',
-                  'Bilet içi hızlı sesli telsiz özelliğini kullan',
-                  'Use instant voice radio inside tickets'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.ptt_desc')}
               </Text>
             </View>
             <Switch
@@ -162,18 +149,10 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.itemTitle}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.rd_label',
-                  'Uzak Masaüstü Etkin',
-                  'Remote Desktop Enabled'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.rd_label')}
               </Text>
               <Text style={styles.itemDesc}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.rd_desc',
-                  'Onayınızla destek uzmanının uzak masaüstü bağlantısı kurmasına izin ver',
-                  'Allow support agent to connect via remote desktop upon your approval'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.rd_desc')}
               </Text>
             </View>
             <Switch
@@ -191,18 +170,10 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.itemTitle}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.receipt_label',
-                  'Makbuzu Otomatik İndir',
-                  'Auto-Download Receipt'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.receipt_label')}
               </Text>
               <Text style={styles.itemDesc}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.receipt_desc',
-                  'Kapanan talepler için değişmezlik makbuzunu cihaza kaydet',
-                  'Save cryptographic receipt on ticket resolution'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.receipt_desc')}
               </Text>
             </View>
             <Switch
@@ -220,18 +191,10 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={styles.itemTitle}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.pii_label',
-                  'Cihazda Otomatik Hassas Veri Maskeleme',
-                  'Client-Side PII Redaction'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.pii_label')}
               </Text>
               <Text style={styles.itemDesc}>
-                {getLabel(
-                  'settings.advanced_features.user_preferences.pii_desc',
-                  'Kart, T.C. kimlik, IBAN ve gizli anahtarlarınız cihazınızdan çıkmadan önce otomatik maskelenir (KVKK/GDPR Uyumlu).',
-                  'Cards, IDs, IBANs and secret keys are automatically masked on-device before transmission (KVKK/GDPR Compliant).'
-                )}
+                {getLabel('settings.advanced_features.user_preferences.pii_desc')}
               </Text>
             </View>
             <Switch
@@ -250,7 +213,7 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
               activeOpacity={0.7}
             >
               <Text style={styles.cancelBtnText}>
-                {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                {getLabel('common.cancel')}
               </Text>
             </TouchableOpacity>
 
@@ -264,7 +227,7 @@ export const UserPreferencesModal: React.FC<UserPreferencesModalProps> = ({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={styles.saveBtnText}>
-                  {getLabel('common.save', 'Kaydet', 'Save')}
+                  {getLabel('common.save')}
                 </Text>
               )}
             </TouchableOpacity>

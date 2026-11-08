@@ -25,15 +25,8 @@ CREATE TABLE IF NOT EXISTS whitedesk_enterprises (
   logo_align TEXT DEFAULT 'left',
   plan_id TEXT DEFAULT 'trial',
   billing_cycle TEXT DEFAULT 'monthly',
-  license_status TEXT DEFAULT 'trial_active',
-  trial_start_at TEXT DEFAULT (datetime('now')),
-  trial_end_at TEXT DEFAULT (datetime('now', '+15 days')),
-  subscription_start_at TEXT,
-  subscription_end_at TEXT,
-  grace_period_days INTEGER DEFAULT 3,
-  warning_intervals INTEGER DEFAULT 12,
-  grace_ends_at TEXT DEFAULT (datetime('now', '+18 days')),
-  license_hash TEXT,
+  subscription_start_at TEXT DEFAULT (datetime('now')),
+  subscription_end_at TEXT DEFAULT (datetime('now', '+14 days')),
   created_at INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER) * 1000)
 );
 
@@ -51,23 +44,12 @@ CREATE TABLE IF NOT EXISTS whitedesk_genesis_vault (
 CREATE TABLE IF NOT EXISTS whitedesk_license_plans (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  tier_level INTEGER NOT NULL DEFAULT 1,
+  tier_level INTEGER NOT NULL DEFAULT 0,
   monthly_price REAL DEFAULT 0,
-  annual_monthly_price REAL DEFAULT 0,
-  price REAL DEFAULT 0,
-  operators INTEGER DEFAULT 5,
-  customers INTEGER DEFAULT 100,
-  is_recommended INTEGER DEFAULT 0,
-  sort_order INTEGER DEFAULT 1,
-  features TEXT DEFAULT '{}',
-  max_admins INTEGER DEFAULT 5,
-  max_users INTEGER DEFAULT 100,
-  has_remote_desktop INTEGER DEFAULT 0,
-  has_audit_logs INTEGER DEFAULT 0,
-  grace_period_days INTEGER DEFAULT 5,
-  annual_grace_period_days INTEGER DEFAULT 15,
-  warning_intervals INTEGER DEFAULT 24,
-  annual_warning_intervals INTEGER DEFAULT 48,
+  annual_price REAL DEFAULT 0,
+  features TEXT DEFAULT '[]',
+  grace_period TEXT DEFAULT '3',
+  grace_period_warning_interval TEXT DEFAULT '12',
   is_active INTEGER DEFAULT 1,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -327,8 +309,8 @@ CREATE INDEX IF NOT EXISTS idx_rtc_room ON transient_rtc_signals(room_id, create
 -- =============================================================================
 -- 17. VARSAYILAN BAŞLANGIÇ VERİLERİ (SEED DATA)
 -- =============================================================================
-INSERT OR IGNORE INTO whitedesk_license_plans (id, name, tier_level, monthly_price, annual_monthly_price, grace_period_days, annual_grace_period_days, warning_intervals, annual_warning_intervals, features)
+INSERT OR IGNORE INTO whitedesk_license_plans (id, name, tier_level, monthly_price, annual_price, features, grace_period, grace_period_warning_interval, is_active)
 VALUES
-  ('trial', 'WhiteDesk Trial (15 Gün)', 0, 0.00, 0.00, 3, 3, 12, 12, '{"e2ee_messaging":true,"max_attachment_mb":25,"voice_ptt_calls":true,"remote_desktop":true}'),
-  ('core', 'WhiteDesk Core (Async)', 1, 9.00, 7.50, 5, 15, 24, 48, '{"e2ee_messaging":true,"max_attachment_mb":10,"voice_ptt_calls":false,"remote_desktop":false}'),
-  ('live', 'WhiteDesk Live (Sync + Async)', 2, 19.00, 15.00, 5, 15, 24, 48, '{"e2ee_messaging":true,"max_attachment_mb":50,"voice_ptt_calls":true,"remote_desktop":true}');
+  ('trial', 'Ücretsiz Deneme', 0, 0.00, 0.00, '["Ücretsiz deneme süresi","Bütün temel özellikler","Cihazda yerel AES-256 şifreleme","Mobil ve masaüstü istemcileri"]', '3', '12', 1),
+  ('core', 'CORE Paketi', 1, 49.00, 39.00, '["Cihazda yerel AES-256 şifreleme","Uçtan uca şifreleme","Sunucuda sıfır veri\\nVeriler yerel cihazlarda tutulur","Federal veri hasadı\\nTek tuşla verileri merkezde toplama","Cihazda otomatik veri maskeleme","Kör kimlik koruması","Sistem ve hata tanısı ekleme","Çift onaylı yetki kuyruğu","Mobil ve masaüstü istemcileri","Sınırsız operatör ve kullanıcı","Kategori ve organizasyon yönetimi","Dosya ve ekran görüntüsü ekleri","Gelişmiş denetim ve raporlama özellikleri"]', '{"monthly":5,"annual":15}', '{"monthly":24,"annual":48}', 1),
+  ('live', 'LIVE Paketi', 2, 129.00, 99.00, '["Bütün temel özellikler","Uzak masaüstü","Bilet içerisinden sesli görüşme","Bilet içerisinden bas-konuş","Telsiz yayını"]', '{"monthly":5,"annual":15}', '{"monthly":24,"annual":48}', 1);

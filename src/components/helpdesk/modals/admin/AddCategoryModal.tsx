@@ -21,7 +21,7 @@ export interface AddCategoryModalProps {
   onChangeCatLabel?: (text: string) => void;
   onSubmit: () => void;
   language?: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string | Record<string, string | number>, en?: string) => string;
   formatAppId?: (appId: string) => string;
 }
 
@@ -59,13 +59,13 @@ export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
         >
           <View style={styles.container}>
             <Text style={styles.title}>
-              {getLabel('helpdesk.newCatModalTitle', 'Yeni Kategori Ekle', 'Add New Category')}
+              {getLabel('helpdesk.newCatModalTitle')}
             </Text>
             <Text style={styles.subtitle}>{formatAppId(selectedAppId)}</Text>
 
             <TextInput
               style={[styles.input, { marginBottom: 10 }]}
-              placeholder={getLabel('helpdesk.newCatIdPlaceholder', 'Kategori Kodu (Örn: billing, kargo)', 'Category Code (e.g. billing, cargo)')}
+              placeholder={getLabel('helpdesk.newCatIdPlaceholder')}
               placeholderTextColor="#94a3b8"
               value={catIdInput}
               onChangeText={onChangeCatId}
@@ -75,7 +75,7 @@ export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 
             <TextInput
               style={[styles.input, { marginBottom: 16 }]}
-              placeholder={getLabel('helpdesk.newCatTrPlaceholder', 'Kategori Adı (Örn: Fatura & Ödemeler)', 'Category Label')}
+              placeholder={getLabel('helpdesk.newCatTrPlaceholder')}
               placeholderTextColor="#94a3b8"
               value={effectiveLabel}
               onChangeText={handleLabelChange}
@@ -84,7 +84,7 @@ export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                 <Text style={styles.cancelBtnText}>
-                  {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                  {getLabel('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -98,7 +98,7 @@ export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.submitBtnText}>
-                  {getLabel('helpdesk.addBtn', 'Ekle', 'Add')}
+                  {getLabel('helpdesk.addBtn')}
                 </Text>
               </TouchableOpacity>
             </View>

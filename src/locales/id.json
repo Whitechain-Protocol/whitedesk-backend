@@ -804,7 +804,18 @@
     "appNamePlaceholder": "Nama Aplikasi (cth. WhiteDesk)",
     "appDescPlaceholder": "Deskripsi singkat...",
     "newDiscussion": "Mulai Diskusi Baru",
-    "tierTenant": "Penyewa"
+    "tierTenant": "Penyewa",
+    "adminRevokeDesc": "Hak istimewa admin akan dihapus dari perangkat ini dan konsol akan dikunci.",
+    "removeAdminTitle": "Hapus Admin",
+    "removeAdminConfirm": "Apakah Anda yakin ingin menghapus admin ini dan semua alokasinya?",
+    "selectAdminReq": "Pilih Admin",
+    "selectAdminReqDesc": "Silakan pilih admin untuk dialokasikan.",
+    "created": "Dibuat",
+    "lastAction": "Pembaruan Terakhir",
+    "attachment": "Lampiran",
+    "tierAppOrg": "Aplikasi / Organisasi",
+    "default": "Default",
+    "all": "Semua"
   },
   "license": {
     "title": "Lisensi & Langganan",

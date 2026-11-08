@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { Monitor } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface RemoteDesktopPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -12,9 +13,8 @@ interface RemoteDesktopPolicyProps {
 export const RemoteDesktopPolicy: React.FC<RemoteDesktopPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const rdEnabled = config.remoteDesktop?.enabled !== false;
 
   const handleToggleRd = (val: boolean) => {
@@ -36,12 +36,10 @@ export const RemoteDesktopPolicy: React.FC<RemoteDesktopPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Remote Desktop' : 'Uzak Masaüstü'}
+            {t('settings.advanced_features.remote_desktop.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Full live screen streaming and remote touch/scroll control upon user approval.'
-              : 'Kullanıcı onayıyla canlı ekran paylaşımı ve uzaktan tıklama/kaydırma kontrolü sağlar.'}
+            {t('settings.advanced_features.remote_desktop.description')}
           </Text>
         </View>
         <Switch

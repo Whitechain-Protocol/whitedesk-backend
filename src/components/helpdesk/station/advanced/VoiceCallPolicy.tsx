@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { Phone } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface VoiceCallPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface VoiceCallPolicyProps {
 export const VoiceCallPolicy: React.FC<VoiceCallPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const voiceEnabled = Boolean(config.voiceCall.enabled);
   const userInitiateEnabled = config.voiceCall.allowUserInitiate ?? true;
 
@@ -49,12 +49,10 @@ export const VoiceCallPolicy: React.FC<VoiceCallPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'In-Ticket Voice Call' : 'Bilet İçi Sesli Görüşme'}
+            {t('settings.advanced_features.voice_call.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Encrypted peer-to-peer voice calling between operators and users inside tickets.'
-              : 'Destek talepleri içerisinde operatör ve kullanıcı arasında şifreli sesli görüşme sağlar.'}
+            {t('settings.advanced_features.voice_call.description')}
           </Text>
         </View>
         <Switch
@@ -70,12 +68,10 @@ export const VoiceCallPolicy: React.FC<VoiceCallPolicyProps> = ({
         <View style={styles.subRow}>
           <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={styles.subRowTitle}>
-              {isEn ? 'User can initiate voice call' : 'Kullanıcı sesli görüşme başlatabilir'}
+              {t('settings.advanced_features.voice_call.user_initiate_title')}
             </Text>
             <Text style={styles.subRowDesc}>
-              {isEn
-                ? 'Allow ticket creators to initiate voice calls to operators.'
-                : 'Kullanıcının bilet üzerinden operatöre sesli çağrı başlatmasına izin verir.'}
+              {t('settings.advanced_features.voice_call.user_initiate_desc')}
             </Text>
           </View>
           <Switch

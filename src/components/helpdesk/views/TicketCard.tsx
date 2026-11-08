@@ -18,7 +18,7 @@ interface TicketCardProps {
   onPress?: () => void;
   onLongPress?: () => void;
   onMenuPress?: (ticket: HelpDeskTicket, pageY?: number) => void;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, trOrParams?: string | Record<string, string | number>, en?: string, maybeParams?: Record<string, string | number>) => string;
   formatWhiteId?: (id: string) => string;
   formatAppId?: (id?: string) => string;
   formatTicketDate: (ts: number, showTime?: boolean) => string;
@@ -44,7 +44,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
       return (
         <View style={styles.pillAnswered}>
           <Text style={styles.pillAnsweredText}>
-            {getLabel('helpdesk.filterAnswered', 'Yanıtlandı', 'Answered')}
+            {getLabel('helpdesk.filterAnswered')}
           </Text>
         </View>
       );
@@ -53,7 +53,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
       return (
         <View style={styles.pillClosed}>
           <Text style={styles.pillClosedText}>
-            {getLabel('helpdesk.filterClosed', 'Kapalı', 'Closed')}
+            {getLabel('helpdesk.filterClosed')}
           </Text>
         </View>
       );
@@ -61,7 +61,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
     return (
       <View style={styles.pillOpen}>
         <Text style={styles.pillOpenText}>
-          {getLabel('helpdesk.filterOpen', 'Açık', 'Open')}
+          {getLabel('helpdesk.filterOpen')}
         </Text>
       </View>
     );
@@ -110,7 +110,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               {ticket.category === 'root_support' && (
                 <View style={styles.confidentialPill}>
                   <Lock size={9} color="#059669" style={{ marginRight: 2 }} />
-                  <Text style={styles.confidentialPillText}>Çok Gizli</Text>
+                  <Text style={styles.confidentialPillText}>{getLabel('helpdesk.top_secret')}</Text>
                 </View>
               )}
             </View>
@@ -149,7 +149,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
         const isRevoked = ticket.status === 'revoked';
         const hasChanged = isRevoked || Boolean((ticket as any).reassigned_to) || Boolean((ticket as any).reassigned_from) || Boolean(ticket.transfer_target_blind_id) || ((ticket as any).escalation_stage && (ticket as any).escalation_stage > 0);
 
-        let representativeText = 'Havuzda';
+        let representativeText = getLabel('helpdesk.in_pool');
         if (hasChanged) {
           const targetBlind = (newBlind && newBlind !== 'unassigned')
             ? newBlind
@@ -173,7 +173,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
         // Oluşturan Bilgisi (İsim varsa isim, yoksa blind id formatı: 124495...77343)
         const rawCreatorName = (ticket.user_alias || (ticket as any).user_name || '').trim();
         const rawCreatorBlind = (ticket.user_blind_id || ticket.user_white_id || '').trim();
-        let creatorText = 'Anonim';
+        let creatorText = getLabel('helpdesk.anonymous');
         if (rawCreatorName) {
           creatorText = rawCreatorName;
         } else if (rawCreatorBlind) {
@@ -220,7 +220,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                   <View style={styles.leafChip}>
                     <Leaf size={10} color="#059669" strokeWidth={2.4} />
                     <Text style={styles.leafChipText}>
-                      {selfDestructInfo.remainingText || `${selfDestructInfo.remainingDays} g`}
+                      {selfDestructInfo.remainingText || getLabel('helpdesk.remaining_days_short', { days: selfDestructInfo.remainingDays ?? 0 })}
                     </Text>
                   </View>
                 ) : null}
@@ -254,7 +254,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
             else if (parsed && typeof parsed === 'object') attList = [parsed];
           } catch {
             attList = [{
-              name: ticket.attachment_name || (ticket.attachment_type === 'image' ? 'photo.jpg' : 'ek_dosya'),
+              name: ticket.attachment_name || (ticket.attachment_type === 'image' ? getLabel('helpdesk.attachment_photo_default') : getLabel('helpdesk.attachment_file_default')),
               type: ticket.attachment_type || 'document'
             }];
           }
@@ -293,7 +293,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({
                     style={{ fontSize: 10, fontWeight: '600', color: '#334155', maxWidth: 140 }}
                     numberOfLines={1}
                   >
-                    {att.name || (isImg ? `Görsel ${attIdx + 1}` : `Belge ${attIdx + 1}`)}
+                    {att.name || (isImg ? getLabel('helpdesk.image_numbered', { index: attIdx + 1 }) : getLabel('helpdesk.document_numbered', { index: attIdx + 1 }))}
                   </Text>
                 </View>
               );

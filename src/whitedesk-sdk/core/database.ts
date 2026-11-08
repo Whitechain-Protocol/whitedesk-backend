@@ -80,15 +80,8 @@ export class WhiteDeskDatabase {
         org_pub VARCHAR(64) NOT NULL,
         plan_id VARCHAR(32) DEFAULT 'trial',
         billing_cycle VARCHAR(16) DEFAULT 'monthly',
-        license_status VARCHAR(32) DEFAULT 'trial_active',
-        trial_start_at TEXT,
-        trial_end_at TEXT,
         subscription_start_at TEXT,
         subscription_end_at TEXT,
-        grace_period_days INTEGER DEFAULT 3,
-        warning_intervals INTEGER DEFAULT 12,
-        grace_ends_at TEXT,
-        license_hash TEXT,
         created_at BIGINT NOT NULL
       );`,
 

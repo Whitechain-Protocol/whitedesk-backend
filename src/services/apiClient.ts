@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { CryptoService } from './cryptoService';
 import { pushClient } from './pushClient';
 import { relayClient, MailboxMessageItem, RelayInboxMessage } from './relayClient';
+import { i18nService } from './i18nService';
 
 /**
  * WhiteDesk Sovereign Client API Gateway
@@ -326,14 +327,14 @@ export const apiClient = {
 
       if (!response.ok) {
         const errText = await response.text();
-        return { success: false, error: errText || 'Server returned an error' };
+        return { success: false, error: errText || i18nService.t('api.server_error') };
       }
 
       const json = await response.json();
       return { success: !!json.success, ticketId: json.ticketId };
     } catch (err: any) {
       console.warn('apiClient: sendFeedback error:', err);
-      return { success: false, error: err.message || 'Network error' };
+      return { success: false, error: err.message || i18nService.t('api.network_error') };
     }
   },
 

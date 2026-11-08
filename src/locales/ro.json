@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Începe o nouă discuție",
-    "tierTenant": "Chiriaș"
+    "tierTenant": "Chiriaș",
+    "adminRevokeDesc": "Privilegiile de administrator vor fi revocate de pe acest dispozitiv, iar consola va fi blocată.",
+    "removeAdminTitle": "Eliminare administrator",
+    "removeAdminConfirm": "Sigur doriți să eliminați acest administrator și toate alocările sale?",
+    "selectAdminReq": "Selectați administratorul",
+    "selectAdminReqDesc": "Vă rugăm să selectați un administrator de alocat.",
+    "created": "Creat",
+    "lastAction": "Ultima actualizare",
+    "attachment": "Atașament",
+    "tierAppOrg": "Aplicație / Organizație",
+    "default": "Implicit",
+    "all": "Toate"
   },
   "license": {
     "title": "Licențele mele",

@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Switch } from 'react-native';
 import { Radio, Check } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface OrgRadioPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -15,9 +16,8 @@ export const OrgRadioPolicy: React.FC<OrgRadioPolicyProps> = ({
   config,
   onChange,
   orgList,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const radioEnabled = config.pushToTalk.radioEnabled ?? true;
   const allowGroupBroadcast = config.pushToTalk.allowGroupBroadcast ?? false;
 
@@ -66,12 +66,10 @@ export const OrgRadioPolicy: React.FC<OrgRadioPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Radio Broadcast' : 'Telsiz Yayını'}
+            {t('settings.advanced_features.radio.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Organizational group radio broadcast and channel announcements.'
-              : 'Kurumsal birimler ve kanallar arasında genel telsiz anons ve ses yayını.'}
+            {t('settings.advanced_features.radio.description')}
           </Text>
         </View>
         <Switch
@@ -88,12 +86,10 @@ export const OrgRadioPolicy: React.FC<OrgRadioPolicyProps> = ({
           <View style={styles.subRow}>
             <View style={{ flex: 1, paddingRight: 10 }}>
               <Text style={styles.subRowTitle}>
-                {isEn ? 'Group members can initiate broadcast' : 'Grup üyeleri yayın başlatabilir'}
+                {t('settings.advanced_features.radio.user_permission_title')}
               </Text>
               <Text style={styles.subRowDesc}>
-                {isEn
-                  ? 'Allow group channel members to broadcast announcements.'
-                  : 'Bağlı kanal üyelerinin genel anons ve telsiz yayını yapmasına izin ver.'}
+                {t('settings.advanced_features.radio.user_permission_desc')}
               </Text>
             </View>
             <Switch
@@ -108,14 +104,14 @@ export const OrgRadioPolicy: React.FC<OrgRadioPolicyProps> = ({
           {orgList && orgList.length > 0 && (
             <View style={styles.channelsBox}>
               <Text style={styles.subOptionLabel}>
-                {isEn ? 'Broadcast Channels' : 'Telsiz Kanalları'}
+                {t('settings.advanced_features.radio.allowed_channels_label')}
               </Text>
               <View style={styles.pillWrap}>
                 {orgList.map(org => {
                   const isSelected = (config.pushToTalk.allowedOrgs || []).includes(org.org_id);
                   const orgDisplayName = org.org_id === 'default' || org.name === 'default' 
-                    ? (isEn ? 'Central / General' : 'Genel Kurum / Merkez')
-                    : (org.name || (isEn ? 'Department' : 'Birim'));
+                    ? t('settings.advanced_features.radio.default_org_name')
+                    : (org.name || t('settings.advanced_features.radio.department_fallback'));
                   return (
                     <TouchableOpacity
                       key={`radio_${org.org_id}`}

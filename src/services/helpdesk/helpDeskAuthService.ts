@@ -7,6 +7,7 @@ import { executeSql, escapeSqlString, generateCosmoAlias, _roleCache, invalidate
 import { STORAGE_KEYS, CURRENT_APP_ID, HelpDeskTicket, HelpDeskMessage } from './types';
 import { helpDeskStationService } from './helpDeskStationService';
 import { helpDeskLicenseService } from './helpDeskLicenseService';
+import { i18nService } from '../i18nService';
 
 /**
  * WhiteDesk Auth & Identity Service:
@@ -263,7 +264,7 @@ export const helpDeskAuthService = {
       const cached = await SafeSecureStore.getItemAsync('admin_alias_' + ownWhiteId);
       if (cached) return cached;
     } catch {}
-    return 'Admin';
+    return i18nService.t('helpdesk.admin_role_short');
   },
 
   async getCustomAlias(): Promise<string | null> {
@@ -340,7 +341,7 @@ export const helpDeskAuthService = {
     try {
       const input = (keyOrHashInput || '').trim();
       if (!input) {
-        return { success: false, message: 'Geçersiz anahtar veya hash belirtildi.' };
+        return { success: false, message: i18nService.t('auth_service.invalid_key_or_hash') };
       }
 
       const adminBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
@@ -353,12 +354,12 @@ export const helpDeskAuthService = {
         );
 
         if (hashRows.length === 0) {
-          return { success: false, message: 'Geçersiz veya bulunamayan Kurucu (Founder) kurtarma hash\'i.' };
+          return { success: false, message: i18nService.t('auth_service.invalid_founder_recovery_hash') };
         }
 
         const hashRecord = hashRows[0];
         if (hashRecord.used) {
-          return { success: false, message: 'Bu Kurucu kurtarma hash\'i daha önce kullanılmıştır ve geçersizdir.' };
+          return { success: false, message: i18nService.t('auth_service.founder_recovery_hash_already_used') };
         }
 
         await executeSql(`
@@ -399,7 +400,7 @@ export const helpDeskAuthService = {
           role: 'founder',
           enterpriseName: 'TheWhite Enterprises',
           enterpriseBlindId: founderBlindId,
-          message: 'TheWhite the Founder (**) kimliğiniz başarıyla geri yüklendi. Tüm kurucu ve sistem yetkileri aktif edilmiştir.',
+          message: i18nService.t('auth_service.founder_identity_restored'),
         };
       }
 
@@ -410,7 +411,7 @@ export const helpDeskAuthService = {
         );
 
         if (hashRows.length === 0) {
-          return { success: false, message: 'Geçersiz veya kullanılmış Global Admin claim hash\'i.' };
+          return { success: false, message: i18nService.t('auth_service.invalid_global_admin_hash') };
         }
 
         const hashRecord = hashRows[0];
@@ -418,7 +419,7 @@ export const helpDeskAuthService = {
         const entRows = await executeSql(
           `SELECT name FROM whitedesk_enterprises WHERE enterprise_blind_id = ${escapeSqlString(targetTenantBlind)} LIMIT 1;`
         );
-        const tenantName = entRows[0]?.name ? String(entRows[0].name) : 'Tenant Organization';
+        const tenantName = entRows[0]?.name ? String(entRows[0].name) : i18nService.t('auth_service.default_enterprise_name');
 
         await executeSql(`
           INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
@@ -475,7 +476,7 @@ export const helpDeskAuthService = {
           role: 'global_admin',
           enterpriseName: tenantName,
           enterpriseBlindId: targetTenantBlind,
-          message: `'${tenantName}' Global Admin (WhiteCosmos *) yetkiniz aktifleşti. Kurumsal masanız kullanıma hazırdır.`,
+          message: i18nService.t('auth_service.global_admin_claim_success', { tenantName }),
         };
       }
 
@@ -498,20 +499,20 @@ export const helpDeskAuthService = {
         );
 
         if (hashRows.length === 0) {
-          return { success: false, message: 'Geçersiz veya kotası tükenmiş Destek Operatörü hash\'i.' };
+          return { success: false, message: i18nService.t('auth_service.invalid_operator_hash') };
         }
 
         const hashRecord = hashRows[0];
         if (hashRecord.expires_at && Number(hashRecord.expires_at) < now) {
           await executeSql(`DELETE FROM whitedesk_recovery_hashes WHERE hash = ${escapeSqlString(input)};`);
-          return { success: false, message: 'Bu operatör hash\'inin 14 günlük deneme kullanım süresi dolmuştur.' };
+          return { success: false, message: i18nService.t('auth_service.operator_hash_trial_expired') };
         }
 
         const targetTenantBlind = String(hashRecord.tenant_blind_id);
         const entRows = await executeSql(
           `SELECT name FROM whitedesk_enterprises WHERE enterprise_blind_id = ${escapeSqlString(targetTenantBlind)} LIMIT 1;`
         );
-        const tenantName = entRows[0]?.name ? String(entRows[0].name) : 'Tenant Organization';
+        const tenantName = entRows[0]?.name ? String(entRows[0].name) : i18nService.t('auth_service.default_enterprise_name');
         const opAlias = await generateCosmoAlias('admin');
 
         await executeSql(`
@@ -559,7 +560,7 @@ export const helpDeskAuthService = {
           role: 'admin',
           enterpriseName: tenantName,
           enterpriseBlindId: targetTenantBlind,
-          message: `'${tenantName}' destek ekibine katıldınız. Operatör kimliğiniz (${opAlias}) aktif edildi.`,
+          message: i18nService.t('auth_service.operator_join_success', { tenantName, alias: opAlias }),
         };
       }
 
@@ -572,7 +573,7 @@ export const helpDeskAuthService = {
 
       if (enterpriseRows.length > 0) {
         const ent = enterpriseRows[0];
-        const enterpriseName = String(ent.name || 'Organization');
+        const enterpriseName = String(ent.name || i18nService.t('auth_service.default_enterprise_name'));
         const appName = 'whitedesk';
         const orgPub = String(ent.org_pub || '');
         const isFounderTenant = Boolean(ent.is_founder_tenant) || enterpriseName.toLowerCase().includes('thewhite');
@@ -637,8 +638,8 @@ export const helpDeskAuthService = {
           enterpriseBlindId,
           adminBlindId,
           message: isFounderTenant
-            ? `Tebrikler. '${enterpriseName}' kurucu lisansörü olarak 'TheWhite the Founder (**)' yetkiniz tescil edilmiştir.`
-            : `'${enterpriseName}' Global Admin (WhiteCosmos *) yetkiniz anında aktif edildi. Kurumsal masanız kullanıma hazırdır.`,
+            ? i18nService.t('auth_service.founder_licensor_registered', { enterpriseName })
+            : i18nService.t('auth_service.global_admin_instant_activated', { enterpriseName }),
         };
       }
 
@@ -656,7 +657,7 @@ export const helpDeskAuthService = {
           ${escapeSqlString(tenantBlindForAdmin)},
           ${escapeSqlString(adminBlindId)},
           ${escapeSqlString(adminBlindId)},
-          'Admin',
+          ${escapeSqlString(i18nService.t('helpdesk.admin_role_short'))},
           'pending',
           ${now}
         );
@@ -664,13 +665,13 @@ export const helpDeskAuthService = {
 
       return {
         success: true,
-        message: 'Yönetici adaylığınız alındı. Firmanızın Global Admin (WhiteCosmos) onayı bekleniyor.',
+        message: i18nService.t('auth_service.admin_candidacy_pending'),
       };
     } catch (err: any) {
       console.warn('[HelpDeskAuthService] handleAdminClaimCommand error:', err);
       return {
         success: false,
-        message: `İşlem sırasında veritabanı hatası oluştu: ${err?.message || err}`,
+        message: i18nService.t('auth_service.db_error_during_operation', { error: err?.message || String(err) }),
       };
     }
   },
@@ -692,7 +693,7 @@ export const helpDeskAuthService = {
     try {
       const input = (keyOrHashInput || '').trim();
       if (!input) {
-        return { success: false, message: 'Lütfen geçerli bir organizasyon anahtarı veya kullanıcı hash\'i belirtin.' };
+        return { success: false, message: i18nService.t('auth_service.provide_valid_org_key_or_user_hash') };
       }
 
       const userBlindId = WhiteDeskCrypto.generateBlindId(ownWhiteId);
@@ -705,7 +706,7 @@ export const helpDeskAuthService = {
         );
 
         if (hashRows.length === 0) {
-          return { success: false, message: 'Geçersiz veya bulunamayan kullanıcı hash\'i.' };
+          return { success: false, message: i18nService.t('auth_service.invalid_user_hash') };
         }
 
         const h = hashRows[0];
@@ -716,7 +717,7 @@ export const helpDeskAuthService = {
         const entRows = await executeSql(
           `SELECT name, org_pub FROM whitedesk_enterprises WHERE enterprise_blind_id = ${escapeSqlString(tenantBlind)} LIMIT 1;`
         );
-        const tenantName = entRows[0]?.name ? String(entRows[0].name) : 'Tenant Organization';
+        const tenantName = entRows[0]?.name ? String(entRows[0].name) : i18nService.t('auth_service.default_enterprise_name');
         const orgPub = entRows[0]?.org_pub ? String(entRows[0].org_pub) : '';
 
         await executeSql(`
@@ -757,7 +758,7 @@ export const helpDeskAuthService = {
 
         if (h.expires_at && Number(h.expires_at) < now) {
           await executeSql(`DELETE FROM whitedesk_recovery_hashes WHERE hash = ${escapeSqlString(input)};`);
-          return { success: false, message: 'Bu kullanıcı hash\'inin 14 günlük kullanım süresi dolmuştur.' };
+          return { success: false, message: i18nService.t('auth_service.user_hash_expired') };
         }
 
         const newUses = Number(h.uses_count || 0) + 1;
@@ -787,7 +788,7 @@ export const helpDeskAuthService = {
           enterpriseBlindId: tenantBlind,
           orgPub,
           appId,
-          message: `'${tenantName}' kurumsal destek masasına başarıyla bağlandınız. Biletlerinizi anında oluşturabilirsiniz.`,
+          message: i18nService.t('auth_service.user_connected_to_desk', { tenantName }),
         };
       }
 
@@ -807,12 +808,12 @@ export const helpDeskAuthService = {
       if (enterpriseRows.length === 0) {
         return {
           success: false,
-          message: 'Organizasyon anahtarı bulunamadı. Lütfen yöneticinizden aldığınız geçerli org_pub anahtarını giriniz.',
+          message: i18nService.t('auth_service.org_key_not_found'),
         };
       }
 
       const ent = enterpriseRows[0];
-      const enterpriseName = String(ent.name || 'Organization');
+      const enterpriseName = String(ent.name || i18nService.t('auth_service.default_enterprise_name'));
       const enterpriseBlindId = String(ent.enterprise_blind_id || '');
       const orgPub = String(ent.org_pub || '');
 
@@ -840,13 +841,13 @@ export const helpDeskAuthService = {
         enterpriseBlindId,
         orgPub,
         appId: CURRENT_APP_ID,
-        message: `'${enterpriseName}' yardım masasına katılma talebiniz yöneticilere iletildi. Onaylandıktan sonra taleplerinizi iletebilirsiniz.`,
+        message: i18nService.t('auth_service.user_join_request_sent', { enterpriseName }),
       };
     } catch (err: any) {
       console.warn('[HelpDeskAuthService] handleUserJoinCommand error:', err);
       return {
         success: false,
-        message: `Bağlantı sırasında bir hata oluştu: ${err?.message || err}`,
+        message: i18nService.t('auth_service.connection_error', { error: err?.message || String(err) }),
       };
     }
   },
@@ -964,7 +965,7 @@ export const helpDeskAuthService = {
         return {
           success: false,
           type: 'unknown',
-          message: 'Geçersiz veya bulunamayan Profil Kurtarma Anahtarı.',
+          message: i18nService.t('auth_service.invalid_profile_recovery_key'),
         };
       }
 
@@ -974,7 +975,7 @@ export const helpDeskAuthService = {
       const targetOrgId = String(record.org_id || 'merkez');
 
       // Fetch tenant name
-      let tenantName = 'Kurum';
+      let tenantName = i18nService.t('auth_service.default_enterprise_name');
       if (roleType === 'founder') {
         tenantName = 'TheWhite Enterprises';
       } else {
@@ -1043,7 +1044,7 @@ export const helpDeskAuthService = {
       } else if (roleType === 'admin') {
         await executeSql(`
           INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
-          VALUES (${escapeSqlString(myBlindId)}, ${escapeSqlString(myBlindId)}, ${escapeSqlString(targetTenantBlind)}, 'Admin', 'admin', TRUE, ${now})
+          VALUES (${escapeSqlString(myBlindId)}, ${escapeSqlString(myBlindId)}, ${escapeSqlString(targetTenantBlind)}, ${escapeSqlString(i18nService.t('helpdesk.admin_role_short'))}, 'admin', TRUE, ${now})
           ON CONFLICT (white_id) DO UPDATE SET 
             blind_id = EXCLUDED.blind_id,
             enterprise_blind_id = EXCLUDED.enterprise_blind_id,
@@ -1098,24 +1099,27 @@ export const helpDeskAuthService = {
       invalidateHelpDeskRoleCache();
 
       const roleLabels: Record<string, string> = {
-        founder: 'Kurucu (TheWhite)',
-        global_admin: 'Küresel Yönetici (WhiteCosmos)',
-        admin: 'Yönetici',
-        user: `Kullanıcı (${targetOrgId})`,
+        founder: i18nService.t('auth_service.role_founder'),
+        global_admin: i18nService.t('auth_service.role_global_admin'),
+        admin: i18nService.t('auth_service.role_admin'),
+        user: i18nService.t('auth_service.role_user_with_org', { orgId: targetOrgId }),
       };
 
       return {
         success: true,
         type: roleType,
         enterpriseName: tenantName,
-        message: `'${tenantName}' ${roleLabels[roleType] || roleType} kimliğiniz başarıyla yüklendi ve aktif edildi.`,
+        message: i18nService.t('auth_service.profile_passkey_restored', {
+          tenantName,
+          roleLabel: roleLabels[roleType] || roleType,
+        }),
       };
     } catch (err: any) {
       console.warn('[HelpDeskAuthService] handleProfilePasskeyClaim error:', err);
       return {
         success: false,
         type: 'unknown',
-        message: `Profil geri yükleme hatası: ${err?.message || err}`,
+        message: i18nService.t('auth_service.profile_restore_error', { error: err?.message || String(err) }),
       };
     }
   },
@@ -1134,7 +1138,7 @@ export const helpDeskAuthService = {
   }> {
     const raw = String(rawQrData || '').trim();
     if (!raw) {
-      return { success: false, type: 'unknown', message: 'Taratılan QR kod içeriği boş.' };
+      return { success: false, type: 'unknown', message: i18nService.t('auth_service.qr_code_empty') };
     }
 
     let hash = '';
@@ -1205,7 +1209,7 @@ export const helpDeskAuthService = {
       return {
         success: true,
         type: 'desktop_pair',
-        message: 'WhiteDesk Masaüstü uygulaması başarıyla eşleştirildi ve aktif edildi.',
+        message: i18nService.t('auth_service.desktop_paired_success'),
         enterpriseName: entBlindId,
       };
     }
@@ -1273,7 +1277,7 @@ export const helpDeskAuthService = {
     return {
       success: false,
       type: 'unknown',
-      message: 'Geçersiz WhiteDesk QR kodu. Desteklenen bir yetkilendirme veya katılım anahtarı bulunamadı.',
+      message: i18nService.t('auth_service.invalid_qr_code'),
     };
   },
 
@@ -1292,7 +1296,7 @@ export const helpDeskAuthService = {
 
     await executeSql(`
       UPDATE whitedesk_admins 
-      SET role = 'admin', alias = 'Admin' 
+      SET role = 'admin', alias = ${escapeSqlString(i18nService.t('helpdesk.admin_role_short'))} 
       WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} AND role = 'global_admin';
     `);
 
@@ -1394,7 +1398,7 @@ export const helpDeskAuthService = {
       sender_white_id: grantorBlindId,
       sender_blind_id: grantorBlindId,
       is_admin: true,
-      message: `[Yetkilendirme Başarılı] WhiteDesk yetkiniz Ed25519 ile mühürlendi. Hoş geldiniz ${finalAlias}.`,
+      message: i18nService.t('auth_service.grant_admin_ed25519_sealed', { alias: finalAlias }),
       created_at: now,
     };
     await keystoreTicketVault.appendMessage(ticket.id, systemMsg);

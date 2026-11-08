@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   FileText,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../services/i18nService';
 
 interface SecurityPrivacyModalProps {
   visible: boolean;
@@ -29,9 +30,8 @@ interface SecurityPrivacyModalProps {
 export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
   visible,
   onClose,
-  language,
 }) => {
-  const isTr = language === 'tr';
+  const { t } = useTranslation();
   const { height: windowHeight } = useWindowDimensions();
   const modalContainerHeight = Math.round(windowHeight * 0.85);
 
@@ -53,12 +53,10 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.headerTitle}>
-                  {isTr ? 'Gizlilik ve Güvenlik Politikası' : 'Security & Privacy Policy'}
+                  {t('helpdesk.security_privacy.title')}
                 </Text>
                 <Text style={styles.headerSubtitle}>
-                  {isTr
-                    ? 'Sıfır-Bilgi Mimarisi & Kriptografik Şeffaflık'
-                    : 'Zero-Knowledge Architecture & Cryptographic Transparency'}
+                  {t('helpdesk.security_privacy.subtitle')}
                 </Text>
               </View>
             </View>
@@ -90,13 +88,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <EyeOff size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '1. Sıfır Kişisel Veri (Zero Personal Data)' : '1. Zero Personal Data Principle'}
+                  {t('helpdesk.security_privacy.card1_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'WhiteDesk hiçbir telefon numarası, gerçek ad, e-posta veya rehber erişimi talep etmez. Oturumlar, kullanıcının cihazında güvenli donanım tarafından üretilen anonim kriptografik kimliklerle (WhiteID ve Körleştirilmiş Blind ID) yürütülür. Sistem mimarisi gereği kullanıcıyı fiziksel dünyada teşhis etmek teknik olarak olanaksızdır.'
-                  : 'WhiteDesk never collects phone numbers, real names, email addresses, or contact lists. Sessions operate strictly on anonymous cryptographic keys (WhiteID and Blind ID) generated on-device. By design, personal profiling or real-world identification is technically impossible.'}
+                {t('helpdesk.security_privacy.card1_body')}
               </Text>
             </View>
 
@@ -107,13 +103,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <Lock size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '2. Uçtan Uca Şifreleme (E2EE)' : '2. End-to-End Encryption (E2EE)'}
+                  {t('helpdesk.security_privacy.card2_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'Tüm destek biletleri, mesajlar ve dosya ekleri (kamera, fotoğraf, PDF) gönderilmeden önce istemci cihazında AES-256-GCM ve Curve25519 standartlarıyla şifrelenir. Sunucular ve veri tabanı yalnızca okunamaz şifreli blokları (ciphertext) aktarır; sunucu yöneticileri dahi mesaj içeriklerini asla göremez.'
-                  : 'All tickets, chat messages, and attachments (camera, photos, PDFs) are encrypted on-device prior to transmission using AES-256-GCM and Curve25519. Relays and databases only store ciphertext; neither servers nor administrators can decrypt message contents.'}
+                {t('helpdesk.security_privacy.card2_body')}
               </Text>
             </View>
 
@@ -124,13 +118,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <Radio size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '3. Gerçek Zamanlı Ses ve Telsiz Güvenliği' : '3. Real-Time Audio & PTT Security'}
+                  {t('helpdesk.security_privacy.card3_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'Sesli görüşmeler doğrudan WebRTC P2P tüneli üzerinden uçtan uca şifreli olarak gerçekleşir. Bas-Konuş (PTT) ses patlamaları yalnızca bilet anahtarıyla mühürlenir, karşı cihazda oynatıldıktan sonra tampon bellekten (RAM) ve depolamadan kalıcı olarak imha edilir.'
-                  : 'Voice calls are conducted over peer-to-peer WebRTC encrypted tunnels. Push-to-Talk (PTT) voice bursts are encrypted per-ticket and permanently wiped from volatile memory (RAM) immediately after playback.'}
+                {t('helpdesk.security_privacy.card3_body')}
               </Text>
             </View>
 
@@ -141,13 +133,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <Trash2 size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '4. Kriptografik Anahtar İmhası (Self-Destruct)' : '4. Cryptographic Key Shredding'}
+                  {t('helpdesk.security_privacy.card4_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'Çözüme kavuşturulup kapatılan taleplerin simetrik oturum anahtarları, belirlenen saklama süresi (24 saat, 72 saat veya 7 gün) dolduğunda cihazların güvenli donanım deposundan kalıcı olarak sıfırlanır (CryptoKey.destroy). Süresi dolan veriler çözülemez gürültüye dönüşür.'
-                  : 'Symmetric session keys of resolved tickets are cryptographically destroyed from secure device storage upon expiration (24h, 72h, or 7d). Expired ciphertexts permanently turn into undecryptable mathematical noise.'}
+                {t('helpdesk.security_privacy.card4_body')}
               </Text>
             </View>
 
@@ -158,13 +148,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <FileCheck2 size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '5. Değişmezlik İspatı (Cryptographic Receipts)' : '5. Mathematical Proof of Integrity'}
+                  {t('helpdesk.security_privacy.card5_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'Kapanan talepler için tüm mesaj hash’lerinin kronolojik dizilimiyle bir Merkle Kök Özeti hesaplanır. Tarafların dijital imzalarıyla mühürlenen .json formatındaki Değişmezlik Makbuzu, hizmet sağlayıcı veya kullanıcı tarafından tek taraflı değiştirilemez kanıt niteliği taşır.'
-                  : 'Upon ticket closure, a Merkle Root Hash is computed across all chronological message hashes. Sealed with dual digital signatures, the downloadable .json receipt provides tamper-evident proof that neither party can alter.'}
+                {t('helpdesk.security_privacy.card5_body')}
               </Text>
             </View>
 
@@ -175,13 +163,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <CheckCircle2 size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '6. Reklam ve Üçüncü Taraf İzleyici Yoktur' : '6. No Third-Party Ads or Analytics'}
+                  {t('helpdesk.security_privacy.card6_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'WhiteDesk uygulamasında hiçbir reklam kütüphanesi, kullanıcı davranış takipçisi (analytics SDK) veya veri simsarı entegrasyonu yer almaz. Google Play Store ve Apple App Store gizlilik gereksinimleriyle %100 uyumludur.'
-                  : 'WhiteDesk contains zero commercial ad SDKs, behavioral trackers, or data broker modules. It is 100% compliant with Google Play Store and Apple App Store strict privacy frameworks.'}
+                {t('helpdesk.security_privacy.card6_body')}
               </Text>
             </View>
 
@@ -192,13 +178,11 @@ export const SecurityPrivacyModal: React.FC<SecurityPrivacyModalProps> = ({
                   <FileText size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.cardTitle}>
-                  {isTr ? '7. Veri Silme ve Kullanıcı Hakları (KVKK / GDPR)' : '7. Data Deletion & User Rights (GDPR)'}
+                  {t('helpdesk.security_privacy.card7_title')}
                 </Text>
               </View>
               <Text style={styles.cardBody}>
-                {isTr
-                  ? 'Kullanıcı dilediği zaman uygulamanın verilerini temizleyerek tüm yerel anahtarlarını cihazından silebilir. Sistemde hiçbir kişisel kimlik verisi tutulmadığı için silme işlemi kriptografik olarak anında tamamlanır.'
-                  : 'Users may clear app data at any time, instantly wiping cryptographic keys from the device. Since no personally identifiable information is stored server-side, privacy erasure is immediate and complete.'}
+                {t('helpdesk.security_privacy.card7_body')}
               </Text>
             </View>
           </ScrollView>

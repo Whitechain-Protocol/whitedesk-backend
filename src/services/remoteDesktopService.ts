@@ -6,6 +6,7 @@ import {
 import { apiClient } from './apiClient';
 import { P2P_STUN_SERVERS } from './voice/types';
 import { diagnosticRecorder } from './diagnosticRecorder';
+import { i18nService } from './i18nService';
 import { WhiteDeskCrypto } from '../whitedesk-sdk';
 import { InWhiteRingtone } from '../../modules/inwhite-ringtone';
 
@@ -356,7 +357,7 @@ class RemoteDesktopService {
       roomName,
       role: 'admin',
       status: 'offering',
-      peerAlias: adminAlias || 'Admin',
+      peerAlias: adminAlias || i18nService.t('helpdesk.admin_role_short'),
       liveFrameUri: null,
       targetUserWhiteId,
       callerWhiteId,
@@ -369,7 +370,7 @@ class RemoteDesktopService {
     // rd_invite POST'undan sonra D1'e ulaşıp yeni daveti siliyordu (race condition).
     // publishFastSignal('offer') zaten offer_sdp'yi ezer, answer_sdp ve adayları sıfırlar.
 
-    diagnosticRecorder.recordAction(`Uzak Masaüstü İsteği Gönderildi (#${ticketId})`, {
+    diagnosticRecorder.recordAction(i18nService.t('remote_desktop.request_sent_log', { ticketId }), {
       biletNo: `#${ticketId}`,
       oda: roomName,
     });
@@ -377,7 +378,7 @@ class RemoteDesktopService {
     const invitePayload = JSON.stringify({
       type: 'rd_invite',
       ticketId,
-      adminAlias: adminAlias || 'Admin',
+      adminAlias: adminAlias || i18nService.t('helpdesk.admin_role_short'),
       timestamp: Date.now(),
     });
 
@@ -401,7 +402,7 @@ class RemoteDesktopService {
 
     void apiClient.sendCallPushNotification(
       targetUserWhiteId || '',
-      adminAlias || 'Admin',
+      adminAlias || i18nService.t('helpdesk.admin_role_short'),
       callerWhiteId || '',
       ticketId,
       'remote_desktop'
@@ -424,7 +425,7 @@ class RemoteDesktopService {
           encrypted_payload: JSON.stringify({
             type: 'rd_invite_signal',
             ticket_id: ticketId,
-            admin_alias: adminAlias || 'Destek Uzmanı',
+            admin_alias: adminAlias || i18nService.t('remote_desktop.default_support_specialist'),
             timestamp: Date.now(),
           }),
         });
@@ -602,7 +603,7 @@ class RemoteDesktopService {
       roomName,
       role: 'user',
       status: 'incoming_offer',
-      peerAlias: adminAlias || 'Destek Uzmanı',
+      peerAlias: adminAlias || i18nService.t('remote_desktop.default_support_specialist'),
       remoteControlGranted: hasAccess,
     };
     this.notify();
@@ -718,8 +719,8 @@ class RemoteDesktopService {
     };
     this.notify();
 
-    diagnosticRecorder.recordAction(`Uzak Masaüstü Onaylandı (#${ticketId})`, {
-      kapsam: 'Sistem Geneli',
+    diagnosticRecorder.recordAction(i18nService.t('remote_desktop.approved_log', { ticketId }), {
+      kapsam: i18nService.t('remote_desktop.scope_system_wide'),
     });
 
     try {

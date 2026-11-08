@@ -14,6 +14,7 @@ import {
 import { WhiteDeskCrypto } from './crypto';
 import { WhiteDeskDatabase, escapeSql } from './database';
 import { WhiteDeskAuthority } from './authority';
+import { i18nService } from '../../services/i18nService';
 
 export class WhiteDeskClient {
   public config: WhiteDeskConfig;
@@ -250,7 +251,7 @@ export class WhiteDeskClient {
     const blindId = this.getBlindId();
     const isAdmin = this.isAdmin();
     const senderRole = isAdmin ? 'admin' : 'user';
-    const senderAlias = isAdmin ? (this.activeAllocations[0]?.alias || 'Admin') : null;
+    const senderAlias = isAdmin ? (this.activeAllocations[0]?.alias || i18nService.t('helpdesk.admin_role_short')) : null;
     const newStatus = isAdmin ? 'answered' : 'open';
 
     const sqlMsg = `

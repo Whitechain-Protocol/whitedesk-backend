@@ -6,6 +6,7 @@ import {
   mediaDevices,
 } from 'react-native-webrtc';
 import { apiClient } from '../apiClient';
+import { i18nService } from '../i18nService';
 import { InWhiteRingtone } from '../../../modules/inwhite-ringtone';
 import { P2P_STUN_SERVERS } from './types';
 
@@ -107,9 +108,9 @@ export class SignalingService {
       const audioAlreadyGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
       if (audioAlreadyGranted) return true;
       const res = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO, {
-        title: 'Mikrofon İzni',
-        message: 'Sesli görüşme gerçekleştirebilmek için mikrofon erişimine izin vermeniz gerekmektedir.',
-        buttonPositive: 'İzin Ver',
+        title: i18nService.t('voice.signaling.mic_permission_title'),
+        message: i18nService.t('voice.signaling.mic_permission_message'),
+        buttonPositive: i18nService.t('voice.signaling.mic_permission_allow'),
       });
       return res === PermissionsAndroid.RESULTS.GRANTED;
     } catch {

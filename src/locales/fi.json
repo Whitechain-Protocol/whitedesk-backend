@@ -804,7 +804,18 @@
     "appNamePlaceholder": "Sovelluksen nimi (esim. Support Desk)",
     "appDescPlaceholder": "Lyhyt kuvaus (valinnainen)",
     "newDiscussion": "Aloita uusi keskustelu",
-    "tierTenant": "Vuokralainen"
+    "tierTenant": "Vuokralainen",
+    "adminRevokeDesc": "Järjestelmänvalvojan oikeudet poistetaan tältä laitteelta ja konsoli lukitaan.",
+    "removeAdminTitle": "Poista ylläpitäjä",
+    "removeAdminConfirm": "Haluatko varmasti poistaa tämän järjestelmänvalvojan ja kaikki hänen määrityksensä?",
+    "selectAdminReq": "Valitse ylläpitäjä",
+    "selectAdminReqDesc": "Valitse määritettävä järjestelmänvalvoja.",
+    "created": "Luotu",
+    "lastAction": "Viimeisin päivitys",
+    "attachment": "Liite",
+    "tierAppOrg": "Sovellus / Organisaatio",
+    "default": "Oletus",
+    "all": "Kaikki"
   },
   "license": {
     "title": "Lisenssi & Tilaukset",

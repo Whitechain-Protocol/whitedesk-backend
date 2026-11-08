@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import { i18nService } from '../../../services/i18nService';
 
 export async function exportOrgPubCertificate(data: {
   enterpriseName?: string;
@@ -9,15 +10,15 @@ export async function exportOrgPubCertificate(data: {
   enterpriseBlindId?: string;
 }) {
   try {
-    const orgName = data.enterpriseName || 'Organization';
+    const orgName = data.enterpriseName || i18nService.t('helpdesk.cert_default_org');
     const certData = {
       enterprise_name: orgName,
       app_name: data.appName || 'WhiteDesk',
       org_pub: data.orgPub || '',
       enterprise_blind_id: data.enterpriseBlindId || '',
       issued_at: new Date().toISOString(),
-      authority: 'TheWhite Root Authority',
-      type: 'WhiteDesk Organization Public Certificate',
+      authority: i18nService.t('helpdesk.cert_issuer'),
+      type: i18nService.t('helpdesk.cert_type'),
     };
     const jsonContent = JSON.stringify(certData, null, 2);
     const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
@@ -41,7 +42,7 @@ export async function exportOrgPubCertificate(data: {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(filePath, {
           mimeType: 'application/json',
-          dialogTitle: `${orgName} Organizasyon Açık Anahtarı (org_pub)`,
+          dialogTitle: i18nService.t('settings.cert_export_dialog_title', { orgName }),
           UTI: 'public.json',
         });
       }

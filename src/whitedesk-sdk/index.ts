@@ -11,4 +11,4 @@ export * from './core/database';
 export * from './core/authority';
 export * from './core/client';
 export { diagnosticRecorder } from '../services/diagnosticRecorder';
-export { default as helpdeskLang } from './locales/helpdeskLang.json';
+export { default as translations, default as helpdeskLang } from '../locales';

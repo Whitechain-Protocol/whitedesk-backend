@@ -3,6 +3,7 @@ import { apiClient } from '../apiClient';
 import { WhiteDeskCrypto } from '../../whitedesk-sdk';
 import { helpDeskAuthService } from './helpDeskAuthService';
 import { helpDeskLicenseService } from './helpDeskLicenseService';
+import { i18nService } from '../i18nService';
 import { HelpDeskTicket, HelpDeskMessage } from './types';
 
 type SlaListener = (ticketId: string, subject: string) => void;
@@ -170,7 +171,7 @@ class SlaEscalationService {
           }
 
           // 2. Prepare Audit Trail
-          const auditLine = `[${new Date(now).toISOString()}] SLA timeout: transferred from ${oldAdminBlindId} to ${newAdminBlindId} (Stage ${nextStage})`;
+          const auditLine = i18nService.t('sla_service.audit_timeout_transfer', { timestamp: new Date(now).toISOString(), oldAdmin: oldAdminBlindId, newAdmin: newAdminBlindId, stage: nextStage });
           const updatedAudit = ticket.audit_trail ? `${ticket.audit_trail}\n${auditLine}` : auditLine;
 
           // 3. Prepare Twin A (New Admin / Pool: status = 'open')
@@ -252,12 +253,12 @@ class SlaEscalationService {
             ticket_id: ticket.id,
             app_id: ticket.app_id || 'whitedesk',
             sender_white_id: 'system',
-            sender_alias: 'Sistem',
+            sender_alias: i18nService.t('sla_service.system_sender_alias'),
             sender_blind_id: 'blind_system',
             is_admin: true,
             is_internal: false,
             visibility_level: 'customer',
-            message: `⏱️ [SLA Eskalasyonu] Yanıt süresi aşıldığı için biletiniz yeni bir temsilciye aktarıldı. (Aşama ${nextStage})`,
+            message: i18nService.t('sla_service.escalation_notice_message', { stage: nextStage }),
             created_at: now,
           };
           await keystoreTicketVault.appendMessage(ticket.id, escalationNoticeMsg);

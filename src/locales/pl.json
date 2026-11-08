@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Rozpocznij nową dyskusję",
-    "tierTenant": "Najemca"
+    "tierTenant": "Najemca",
+    "adminRevokeDesc": "Uprawnienia administratora zostaną usunięte z tego urządzenia, a konsola zostanie zablokowana.",
+    "removeAdminTitle": "Usuń administratora",
+    "removeAdminConfirm": "Czy na pewno chcesz usunąć tego administratora i wszystkie jego przydziały?",
+    "selectAdminReq": "Wybierz administratora",
+    "selectAdminReqDesc": "Wybierz administratora do przydzielenia.",
+    "created": "Utworzono",
+    "lastAction": "Ostatnia aktualizacja",
+    "attachment": "Załącznik",
+    "tierAppOrg": "Aplikacja / Organizacja",
+    "default": "Domyślny",
+    "all": "Wszystkie"
   },
   "license": {
     "title": "Moje licencje",

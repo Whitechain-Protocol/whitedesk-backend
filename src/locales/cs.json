@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Zahájit novou diskusi",
-    "tierTenant": "Nájemce"
+    "tierTenant": "Nájemce",
+    "adminRevokeDesc": "Oprávnění správce budou z tohoto zařízení odebrána a konzole bude uzamčena.",
+    "removeAdminTitle": "Odebrat správce",
+    "removeAdminConfirm": "Opravdu chcete odebrat tohoto správce a všechna jeho přiřazení?",
+    "selectAdminReq": "Vybrat správce",
+    "selectAdminReqDesc": "Vyberte správce k přiřazení.",
+    "created": "Vytvořeno",
+    "lastAction": "Poslední aktualizace",
+    "attachment": "Příloha",
+    "tierAppOrg": "Aplikace / Organizace",
+    "default": "Výchozí",
+    "all": "Vše"
   },
   "license": {
     "title": "Moje licence",

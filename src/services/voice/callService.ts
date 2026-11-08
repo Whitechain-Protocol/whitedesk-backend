@@ -1,5 +1,6 @@
 import { apiClient } from '../apiClient';
 import { helpDeskService } from '../helpDeskService';
+import { i18nService } from '../i18nService';
 import { InWhiteRingtone } from '../../../modules/inwhite-ringtone';
 import { NotificationService } from '../notificationService';
 import { VoiceCallSession } from './types';
@@ -20,7 +21,7 @@ export class CallService {
       if (config.voiceCall?.enabled === false || config.voiceCall?.policy === 'disabled') {
         return {
           allowed: false,
-          reason: 'Kurum yöneticisi bu masada güvenli sesli aramayı devre dışı bırakmıştır.',
+          reason: i18nService.t('voice.call.disabled_by_enterprise'),
         };
       }
 
@@ -28,7 +29,7 @@ export class CallService {
       if (callerPrefs.voiceCallEnabled === false) {
         return {
           allowed: false,
-          reason: 'Kendi ayarlarınızda sesli arama özelliği kapalıdır. Profil ayarlarınızdan aktif edebilirsiniz.',
+          reason: i18nService.t('voice.call.disabled_in_own_settings'),
         };
       }
 
@@ -37,7 +38,7 @@ export class CallService {
         if (calleePrefs.voiceCallEnabled === false) {
           return {
             allowed: false,
-            reason: 'Kullanıcı çağrı kabul etmiyor.',
+            reason: i18nService.t('voice.call.callee_not_accepting_calls'),
           };
         }
       }
@@ -111,7 +112,7 @@ export class CallService {
     return setInterval(async () => {
       attempts++;
       if (attempts > 60) {
-        onRejected('Karşı taraf aramayı yanıtlamadı.');
+        onRejected(i18nService.t('voice.call.no_answer'));
         return;
       }
 
@@ -174,7 +175,7 @@ export class CallService {
         }
         void apiClient.deleteFastSignal(roomName);
         NotificationService.dismissCallNotification();
-        onCancelled('Arayan taraf aramayı iptal etti.');
+        onCancelled(i18nService.t('voice.call.cancelled_by_caller'));
         return;
       }
 
@@ -187,7 +188,7 @@ export class CallService {
           }
           void apiClient.deleteFastSignal(roomName);
           NotificationService.dismissCallNotification();
-          onCancelled('Arayan taraf aramayı iptal etti.');
+          onCancelled(i18nService.t('voice.call.cancelled_by_caller'));
         }
         return;
       }
@@ -209,7 +210,7 @@ export class CallService {
       const signal = await apiClient.fetchFastSignal(roomName, role);
       if (signal?.signalType === 'hangup' || signal?.signalType === 'reject') {
         console.warn('[CallService] Counterpart hung up the call. Closing session.');
-        onHangup('Görüşme karşı tarafça sonlandırıldı.');
+        onHangup(i18nService.t('voice.call.ended_by_counterpart'));
         return;
       }
 
@@ -217,7 +218,7 @@ export class CallService {
         connectedNotFoundCount++;
         if (connectedNotFoundCount >= 3) {
           console.warn('[CallService] Room signal ended/cleared. Closing session.');
-          onHangup('Görüşme sonlandırıldı.');
+          onHangup(i18nService.t('voice.call.ended'));
         }
         return;
       }

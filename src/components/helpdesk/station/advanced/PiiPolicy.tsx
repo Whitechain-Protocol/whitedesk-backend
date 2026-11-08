@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Switch } from 'react-native';
 import { ShieldAlert, Check } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface PiiPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface PiiPolicyProps {
 export const PiiPolicy: React.FC<PiiPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const pii = config.piiRedaction || {
     enabled: true,
     maskCards: true,
@@ -63,12 +63,10 @@ export const PiiPolicy: React.FC<PiiPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Client-Side PII Redaction (KVKK/GDPR)' : 'Cihazda Otomatik Veri Maskeleme'}
+            {t('settings.advanced_features.pii_redaction.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Automatically mask card numbers, national IDs, IBANs and secret keys on-device before sending.'
-              : 'Talepler sunucuya ulaşmadan kart, T.C. kimlik, IBAN ve API anahtarı gibi kişisel verileri cihazda maskeler.'}
+            {t('settings.advanced_features.pii_redaction.description')}
           </Text>
         </View>
         <Switch
@@ -91,7 +89,7 @@ export const PiiPolicy: React.FC<PiiPolicyProps> = ({
               {pii.maskCards && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
             </View>
             <Text style={styles.checkboxText}>
-              {isEn ? 'Credit & Debit Cards (Luhn Algorithm)' : 'Kredi ve Banka Kartları (Luhn Algoritması)'}
+              {t('settings.advanced_features.pii_redaction.mask_cards')}
             </Text>
           </TouchableOpacity>
 
@@ -105,7 +103,7 @@ export const PiiPolicy: React.FC<PiiPolicyProps> = ({
               {pii.maskIdentity && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
             </View>
             <Text style={styles.checkboxText}>
-              {isEn ? 'National ID Numbers (Algorithmic Check)' : 'T.C. Kimlik Numaraları (Matematiksel Doğrulama)'}
+              {t('settings.advanced_features.pii_redaction.mask_identity')}
             </Text>
           </TouchableOpacity>
 
@@ -119,7 +117,7 @@ export const PiiPolicy: React.FC<PiiPolicyProps> = ({
               {pii.maskIban && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
             </View>
             <Text style={styles.checkboxText}>
-              {isEn ? 'IBAN Accounts (TR & International)' : 'IBAN Numaraları (TR ve Uluslararası)'}
+              {t('settings.advanced_features.pii_redaction.mask_iban')}
             </Text>
           </TouchableOpacity>
 
@@ -133,7 +131,7 @@ export const PiiPolicy: React.FC<PiiPolicyProps> = ({
               {pii.maskSecrets && <Check size={13} color="#FFFFFF" strokeWidth={3} />}
             </View>
             <Text style={styles.checkboxText}>
-              {isEn ? 'API Keys, Passwords & JWT Tokens' : 'API Anahtarları, Parolalar ve JWT Tokenlar'}
+              {t('settings.advanced_features.pii_redaction.mask_secrets')}
             </Text>
           </TouchableOpacity>
         </View>

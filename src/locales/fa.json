@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "شروع گفتگوی جدید",
-    "tierTenant": "مستأجر"
+    "tierTenant": "مستأجر",
+    "adminRevokeDesc": "امتیازات مدیریت از این دستگاه سلب شده و کنسول قفل خواهد شد.",
+    "removeAdminTitle": "حذف مدیر",
+    "removeAdminConfirm": "آیا مطمئن هستید که می‌خواهید این مدیر و تمام تخصیص‌های او را حذف کنید؟",
+    "selectAdminReq": "انتخاب مدیر",
+    "selectAdminReqDesc": "لطفاً یک مدیر برای تخصیص انتخاب کنید.",
+    "created": "ایجاد شد",
+    "lastAction": "آخرین بروزرسانی",
+    "attachment": "پیوست",
+    "tierAppOrg": "برنامه / سازمان",
+    "default": "پیش‌فرض",
+    "all": "همه"
   },
   "license": {
     "title": "مجوزهای من",

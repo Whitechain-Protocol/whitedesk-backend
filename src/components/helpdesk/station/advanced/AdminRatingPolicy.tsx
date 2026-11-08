@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { Star } from 'lucide-react-native';
 import { AdvancedFeaturesConfig } from '../../types';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface AdminRatingPolicyProps {
   config: AdvancedFeaturesConfig;
@@ -13,9 +14,8 @@ interface AdminRatingPolicyProps {
 export const AdminRatingPolicy: React.FC<AdminRatingPolicyProps> = ({
   config,
   onChange,
-  language = 'tr',
 }) => {
-  const isEn = language === 'en';
+  const { t } = useTranslation();
   const ratingEnabled = config.rating?.enabled ?? true;
   const allowInstantRating = config.rating?.allowInstantRating ?? true;
 
@@ -47,12 +47,10 @@ export const AdminRatingPolicy: React.FC<AdminRatingPolicyProps> = ({
         </View>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={styles.cardTitle}>
-            {isEn ? 'Operator Evaluation' : 'Operatör Değerlendirme'}
+            {t('settings.advanced_features.rating.title')}
           </Text>
           <Text style={styles.cardDesc}>
-            {isEn
-              ? 'Manage customer satisfaction reviews and 1-5 star ratings after ticket resolution.'
-              : 'Bilet kapandıktan sonra kullanıcının operatör hizmetini 1-5 yıldız ve geri bildirimle değerlendirmesini sağlar.'}
+            {t('settings.advanced_features.rating.description')}
           </Text>
         </View>
         <Switch
@@ -69,12 +67,10 @@ export const AdminRatingPolicy: React.FC<AdminRatingPolicyProps> = ({
           <View style={styles.rowBetween}>
             <View style={{ flex: 1, paddingRight: 10 }}>
               <Text style={styles.optionTitle}>
-                {isEn ? 'Allow Immediate Evaluation Without Delay' : 'Anında Değerlendirme İzni'}
+                {t('settings.advanced_features.rating.instant_title')}
               </Text>
               <Text style={styles.optionDesc}>
-                {isEn
-                  ? 'Allows users to rate the operator immediately upon closure without cooling period.'
-                  : 'Kullanıcının bekleme süresi olmadan kapanış anında hemen yıldız ve yorum vermesini sağlar.'}
+                {t('settings.advanced_features.rating.instant_desc')}
               </Text>
             </View>
             <Switch

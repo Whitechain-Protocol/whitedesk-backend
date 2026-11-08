@@ -21,6 +21,7 @@ import {
   Check,
   CheckCircle2,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface AdminItem {
   white_id: string;
@@ -84,6 +85,8 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
   onGenerateAdminHash,
   onGenerateUserHash,
 }) => {
+  const { t: i18nT } = useTranslation();
+
   return (
     <Modal
       visible={visible}
@@ -102,10 +105,10 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.consoleTitleText}>
-                  {language === 'tr' ? 'Yönetim & Kiracı Masası' : 'Tenant & Admin Station'}
+                  {i18nT('provisioning.tenant_station.title')}
                 </Text>
                 <Text style={styles.consoleSubtitleText} numberOfLines={1}>
-                  {currentEnterpriseName} • WhiteCosmos (*)
+                  {currentEnterpriseName} • {i18nT('provisioning.tenant_station.header_subtitle_cosmos')}
                 </Text>
               </View>
             </View>
@@ -137,11 +140,11 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                   <Building2 size={20} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.geminiCardTitle}>Kurum & Kiracı Bilgileri</Text>
-                  <Text style={styles.geminiCardSubtitle}>Sovereign mülkiyet ve bağlantı detayları</Text>
+                  <Text style={styles.geminiCardTitle}>{i18nT('provisioning.tenant_station.profile_title')}</Text>
+                  <Text style={styles.geminiCardSubtitle}>{i18nT('provisioning.tenant_station.profile_subtitle')}</Text>
                 </View>
                 <View style={styles.geminiStatusPill}>
-                  <Text style={styles.geminiStatusPillText}>Mühürlü</Text>
+                  <Text style={styles.geminiStatusPillText}>{i18nT('provisioning.tenant_station.status_sealed')}</Text>
                 </View>
                 {expandedGeminiSection === 'tenant' ? (
                   <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -153,34 +156,34 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
               {expandedGeminiSection === 'tenant' && (
                 <View style={styles.geminiCardBody}>
                   <View style={styles.infoRowItem}>
-                    <Text style={styles.infoRowLabel}>Kurum Adı</Text>
+                    <Text style={styles.infoRowLabel}>{i18nT('provisioning.tenant_station.enterprise_name_label')}</Text>
                     <Text style={styles.infoRowValue}>{currentEnterpriseName}</Text>
                   </View>
 
                   <View style={styles.infoRowItem}>
-                    <Text style={styles.infoRowLabel}>Kör Kimlik (Blind ID)</Text>
+                    <Text style={styles.infoRowLabel}>{i18nT('provisioning.tenant_station.blind_id_label')}</Text>
                     <TouchableOpacity
                       style={styles.copyChipRow}
                       onPress={onCopyBlindId}
                       activeOpacity={0.7}
                     >
                       <Text style={styles.copyChipText} numberOfLines={1} ellipsizeMode="middle">
-                        {activeEnterpriseBlindId || 'default'}
+                        {activeEnterpriseBlindId || i18nT('helpdesk.default')}
                       </Text>
                       <Copy size={13} color="#2563EB" style={{ marginLeft: 6 }} />
                     </TouchableOpacity>
                   </View>
 
                   <View style={styles.infoRowItem}>
-                    <Text style={styles.infoRowLabel}>Yönetici Yetkisi</Text>
+                    <Text style={styles.infoRowLabel}>{i18nT('provisioning.tenant_station.admin_authority_label')}</Text>
                     <Text style={[styles.infoRowValue, { color: '#2563EB', fontWeight: '800' }]}>
-                      WhiteCosmos (*) Global Admin
+                      {i18nT('provisioning.tenant_station.global_admin_authority_value')}
                     </Text>
                   </View>
 
                   <View style={styles.infoRowItem}>
-                    <Text style={styles.infoRowLabel}>Protokol</Text>
-                    <Text style={styles.infoRowValue}>Neon HTTPS • Sıfır Kişisel Veri • E2EE</Text>
+                    <Text style={styles.infoRowLabel}>{i18nT('provisioning.tenant_station.protocol_label')}</Text>
+                    <Text style={styles.infoRowValue}>{i18nT('provisioning.tenant_station.protocol_value')}</Text>
                   </View>
                 </View>
               )}
@@ -197,11 +200,11 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                   <Sparkles size={20} color="#059669" strokeWidth={2.2} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.geminiCardTitle}>Lisans & Kotalar</Text>
-                  <Text style={styles.geminiCardSubtitle}>14 gün deneme, koltuklar ve paketler</Text>
+                  <Text style={styles.geminiCardTitle}>{i18nT('provisioning.tenant_station.license_title')}</Text>
+                  <Text style={styles.geminiCardSubtitle}>{i18nT('provisioning.tenant_station.license_subtitle')}</Text>
                 </View>
                 <View style={[styles.geminiStatusPill, { backgroundColor: '#DCFCE7' }]}>
-                  <Text style={[styles.geminiStatusPillText, { color: '#15803D' }]}>14 Gün Deneme</Text>
+                  <Text style={[styles.geminiStatusPillText, { color: '#15803D' }]}>{i18nT('provisioning.tenant_station.trial_14_days_pill')}</Text>
                 </View>
                 {expandedGeminiSection === 'license' ? (
                   <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -216,16 +219,16 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                   <View style={styles.quotaCountersRow}>
                     <View style={styles.quotaBox}>
                       <Text style={styles.quotaBoxNumber}>{tenantStats.adminCount || 1} / 3</Text>
-                      <Text style={styles.quotaBoxLabel}>Operatör Koltuğu</Text>
+                      <Text style={styles.quotaBoxLabel}>{i18nT('provisioning.tenant_station.operator_seat_label')}</Text>
                     </View>
                     <View style={styles.quotaBox}>
                       <Text style={styles.quotaBoxNumber}>{tenantStats.userCount || 1} / 10</Text>
-                      <Text style={styles.quotaBoxLabel}>Müşteri Kotası</Text>
+                      <Text style={styles.quotaBoxLabel}>{i18nT('provisioning.tenant_station.customer_quota_label')}</Text>
                     </View>
                   </View>
 
                   {/* HIZLI İLAVE HASH ÜRETİMİ (ADD-ON) */}
-                  <Text style={styles.subSectionHeader}>Hızlı İlave Hash Üret (Store Add-on)</Text>
+                  <Text style={styles.subSectionHeader}>{i18nT('provisioning.console.quick_addon_header')}</Text>
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
                     <TouchableOpacity
                       style={styles.addonActionBtn}
@@ -233,7 +236,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <UserPlus size={14} color="#2563EB" style={{ marginRight: 4 }} />
-                      <Text style={styles.addonActionBtnText}>+1 Operatör ($9)</Text>
+                      <Text style={styles.addonActionBtnText}>{i18nT('provisioning.tenant_station.addon_operator_btn')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -242,7 +245,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                       activeOpacity={0.7}
                     >
                       <Users size={14} color="#2563EB" style={{ marginRight: 4 }} />
-                      <Text style={styles.addonActionBtnText}>+25 Müşteri ($9)</Text>
+                      <Text style={styles.addonActionBtnText}>{i18nT('provisioning.tenant_station.addon_customer_btn')}</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -250,32 +253,32 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                     <View style={styles.copiedBanner}>
                       <Check size={14} color="#16A34A" style={{ marginRight: 6 }} />
                       <Text style={styles.copiedBannerText} numberOfLines={1}>
-                        Yeni Hash Kopyalandı: {copiedConsoleHash}
+                        {i18nT('provisioning.console.new_hash_copied', { hash: copiedConsoleHash })}
                       </Text>
                     </View>
                   )}
 
                   {/* ABONELİK PLANLARI BİLGİ KARTLARI */}
-                  <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>Abonelik Paketleri</Text>
+                  <Text style={[styles.subSectionHeader, { marginTop: 12 }]}>{i18nT('provisioning.console.subscription_plans_header')}</Text>
                   <View style={styles.tierPlanBox}>
-                    <Text style={styles.tierPlanName}>🥉 Starter</Text>
-                    <Text style={styles.tierPlanPrice}>$19/ay · $190/yıl</Text>
-                    <Text style={styles.tierPlanDesc}>1 Admin + 1 Operatör + 25 Müşteri</Text>
+                    <Text style={styles.tierPlanName}>{i18nT('provisioning.console.starter_title')}</Text>
+                    <Text style={styles.tierPlanPrice}>{i18nT('provisioning.console.starter_price')}</Text>
+                    <Text style={styles.tierPlanDesc}>{i18nT('provisioning.console.starter_desc')}</Text>
                   </View>
 
                   <View style={[styles.tierPlanBox, styles.tierPlanBoxPro]}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={styles.tierPlanName}>🥈 Pro ⭐</Text>
-                      <Text style={styles.popularBadge}>Önerilen</Text>
+                      <Text style={styles.tierPlanName}>{i18nT('provisioning.console.pro_title')}</Text>
+                      <Text style={styles.popularBadge}>{i18nT('provisioning.tenant_station.recommended_badge')}</Text>
                     </View>
-                    <Text style={styles.tierPlanPrice}>$49/ay · $490/yıl</Text>
-                    <Text style={styles.tierPlanDesc}>1 Admin + 3 Operatör + 100 Müşteri</Text>
+                    <Text style={styles.tierPlanPrice}>{i18nT('provisioning.console.pro_price')}</Text>
+                    <Text style={styles.tierPlanDesc}>{i18nT('provisioning.console.pro_desc')}</Text>
                   </View>
 
                   <View style={styles.tierPlanBox}>
-                    <Text style={styles.tierPlanName}>🥇 Enterprise</Text>
-                    <Text style={styles.tierPlanPrice}>$149/ay · $1.490/yıl</Text>
-                    <Text style={styles.tierPlanDesc}>1 Admin + 10 Operatör + 500 Müşteri</Text>
+                    <Text style={styles.tierPlanName}>{i18nT('provisioning.console.enterprise_title')}</Text>
+                    <Text style={styles.tierPlanPrice}>{i18nT('provisioning.console.enterprise_price')}</Text>
+                    <Text style={styles.tierPlanDesc}>{i18nT('provisioning.console.enterprise_desc')}</Text>
                   </View>
                 </View>
               )}
@@ -292,11 +295,13 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                   <Users size={20} color="#4F46E5" strokeWidth={2.2} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.geminiCardTitle}>Yetkilendirme & Ekip</Text>
-                  <Text style={styles.geminiCardSubtitle}>Destek operatörleri ve departmanlar</Text>
+                  <Text style={styles.geminiCardTitle}>{i18nT('provisioning.tenant_station.staff_title')}</Text>
+                  <Text style={styles.geminiCardSubtitle}>{i18nT('provisioning.tenant_station.staff_subtitle')}</Text>
                 </View>
                 <View style={[styles.geminiStatusPill, { backgroundColor: '#E0E7FF' }]}>
-                  <Text style={[styles.geminiStatusPillText, { color: '#4338CA' }]}>{adminsList.length} Personel</Text>
+                  <Text style={[styles.geminiStatusPillText, { color: '#4338CA' }]}>
+                    {i18nT('provisioning.tenant_station.staff_count_pill', { count: adminsList.length })}
+                  </Text>
                 </View>
                 {expandedGeminiSection === 'operators' ? (
                   <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -307,7 +312,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
 
               {expandedGeminiSection === 'operators' && (
                 <View style={styles.geminiCardBody}>
-                  <Text style={styles.subSectionHeader}>Masadaki Aktif Yöneticiler</Text>
+                  <Text style={styles.subSectionHeader}>{i18nT('provisioning.tenant_station.active_admins_header')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
                     {adminsList.map((adm) => {
                       const isSelected = selectedAdminId === adm.white_id;
@@ -321,10 +326,10 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                           activeOpacity={0.8}
                         >
                           <Text style={[styles.adminPillAlias, isSelected && styles.adminPillAliasSelected]}>
-                            {adm.alias || 'Admin'}
+                            {adm.alias || i18nT('helpdesk.admin_role_short')}
                           </Text>
                           <Text style={[styles.adminPillId, isSelected && styles.adminPillIdSelected]}>
-                            {adm.role === 'global_admin' ? 'WhiteCosmos' : adm.role}
+                            {adm.role === 'global_admin' ? i18nT('provisioning.role_global_admin') : i18nT('helpdesk.admin_role_short')}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -337,11 +342,11 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <UserPlus size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.addOpBtnText}>Yeni Operatör Davet Hash'i Üret & Kopyala</Text>
+                    <Text style={styles.addOpBtnText}>{i18nT('provisioning.tenant_station.generate_operator_invite_btn')}</Text>
                   </TouchableOpacity>
 
                   {/* Departman Yetki Matrisi */}
-                  <Text style={[styles.subSectionHeader, { marginTop: 14 }]}>Departman Yetki Matrisi</Text>
+                  <Text style={[styles.subSectionHeader, { marginTop: 14 }]}>{i18nT('provisioning.tenant_station.department_matrix_header')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
                     <TouchableOpacity
                       style={[styles.catPill, selectedCatIds.includes('all') && styles.catPillSelected]}
@@ -362,7 +367,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                           activeOpacity={0.8}
                         >
                           <Text style={[styles.catPillText, isSelected && styles.catPillTextSelected]}>
-                            {cat.labelTr || cat.id}
+                            {i18nT(`helpdesk.cat_${cat.id}`) !== `helpdesk.cat_${cat.id}` ? i18nT(`helpdesk.cat_${cat.id}`) : (language === 'tr' ? cat.labelTr : (cat as any).labelEn || cat.labelTr || cat.id)}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -375,7 +380,7 @@ export const ManagementConsoleModal: React.FC<ManagementConsoleModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <CheckCircle2 size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={[styles.fluidSubmitBtnText, { fontSize: 13 }]}>Yetkiyi Kaydet</Text>
+                    <Text style={[styles.fluidSubmitBtnText, { fontSize: 13 }]}>{i18nT('provisioning.tenant_station.save_authority_btn')}</Text>
                   </TouchableOpacity>
                 </View>
               )}

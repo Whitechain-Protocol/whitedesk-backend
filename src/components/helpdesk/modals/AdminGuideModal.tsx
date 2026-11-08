@@ -27,6 +27,7 @@ import {
   Award,
   RefreshCw,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../services/i18nService';
 
 interface AdminGuideModalProps {
   visible: boolean;
@@ -37,11 +38,10 @@ interface AdminGuideModalProps {
 export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
   visible,
   onClose,
-  language,
 }) => {
+  const { t } = useTranslation();
   const { height: windowHeight } = useWindowDimensions();
   const modalContainerHeight = Math.round(windowHeight * 0.88);
-  const isTr = language === 'tr';
 
   return (
     <Modal
@@ -61,12 +61,10 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.consoleTitleText}>
-                  {isTr ? 'WhiteDesk Yönetici Kılavuzu' : 'WhiteDesk Admin Guide'}
+                  {t('helpdesk.admin_guide.title')}
                 </Text>
                 <Text style={styles.consoleSubtitleText}>
-                  {isTr
-                    ? 'Yönetim Masası, Özellikler ve Parametre El Kitabı'
-                    : 'Administration, Features & Parameters Handbook'}
+                  {t('helpdesk.admin_guide.subtitle')}
                 </Text>
               </View>
             </View>
@@ -98,19 +96,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <ShieldCheck size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '1. Sahiplik Kurulumu ve Küresel Yönetici Tescili'
-                    : '1. Ownership Setup & Global Admin Provisioning'}
+                  {t('helpdesk.admin_guide.card1_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: İlk kurulumda bilet mesaj kutusuna "admin <kurumsal_anahtar>" yazılarak tetiklenir.\n' +
-                    '• Parametreler: Lisansör tarafından sağlanan kurumsal açık anahtar kodu.\n' +
-                    '• Nasıl Çalışır: Kod girildiği anda kurumsal veri tabanı tabloları otomatik devreye girer, cihazınızın açık anahtarı Küresel Yönetici olarak tescillenir ve kurumun açık anahtar sertifikası cihazınıza yüklenir.'
-                  : '• Where to Define: Triggered via ticket message box: "admin <enterprise_key>".\n' +
-                    '• Parameters: Organization public key supplied by licensor.\n' +
-                    '• How it Works: Database tables activate immediately, your public key is registered as Global Admin, and the organization certificate is saved locally.'}
+                {t('helpdesk.admin_guide.card1_body')}
               </Text>
             </View>
 
@@ -121,19 +111,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <UserCheck size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '2. Kör Kimlik Mimarisi ve Sıfır Kişisel Veri'
-                    : '2. Blind Identifier & Zero Personal Data'}
+                  {t('helpdesk.admin_guide.card2_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > Profil Masası.\n' +
-                    '• Parametreler: 12 kelimelik donanımsal güvenlik anahtarından türetilen tek yönlü kör kimlik kodu.\n' +
-                    '• Nasıl Çalışır: Sistem ne kullanıcılardan ne de yöneticilerden telefon, e-posta veya gerçek ad soyad talep eder. Tüm işlemler kör kimlik üzerinden yürütülür; yasal ve kişisel veri saklama riskleri tamamen ortadan kalkar.'
-                  : '• Where to Define: 3-dots menu > Profile Console.\n' +
-                    '• Parameters: One-way blind ID derived from the device security seed.\n' +
-                    '• How it Works: Zero phone numbers, emails, or real identities are required. All actions occur via blind IDs, eliminating privacy liabilities.'}
+                {t('helpdesk.admin_guide.card2_body')}
               </Text>
             </View>
 
@@ -144,19 +126,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <ServerOff size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '3. Sunucuda Sıfır Veri Prensibi'
-                    : '3. Zero Data on Server Principle'}
+                  {t('helpdesk.admin_guide.card3_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Sistem mimarisi ve bilet transfer katmanı.\n' +
-                    '• Parametreler: Geçici iletim havuzu ve cihazda yerel saklama kuralları.\n' +
-                    '• Nasıl Çalışır: İletişim sırasında bilet mesajları ve ekler aracı bulut üzerinde yalnızca geçici olarak şifreli bekletilir. Alıcı cihaza ulaştığında veya bilet kapatıldığında bulut üzerindeki geçici kayıtlar anında tamamen silinir; veriler yalnızca tarafların yerel cihazlarında saklanır.'
-                  : '• Where to Define: System architecture and transit layer.\n' +
-                    '• Parameters: Ephemeral transit pool and local device storage.\n' +
-                    '• How it Works: Messages remain transiently encrypted on relay servers only until delivered. Once closed or delivered, cloud records are destroyed.'}
+                {t('helpdesk.admin_guide.card3_body')}
               </Text>
             </View>
 
@@ -167,19 +141,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Cloud size={14} color="#D97706" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '4. Bilet Havuzu ve Turuncu Bulut Simgesi'
-                    : '4. Ticket Pool & Cloud Status Indicator'}
+                  {t('helpdesk.admin_guide.card4_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Ana destek bilet listesi.\n' +
-                    '• Parametreler: Atanmış yönetici kimliği boş olan biletler.\n' +
-                    '• Nasıl Çalışır: Kullanıcıların yeni açtığı ve henüz hiçbir uzmanın üzerine almadığı sahipsiz talepler bilet kartı üzerinde turuncu bulut simgesiyle gösterilir. Bir yönetici bileti devraldığında bulut simgesi kalkar ve bilet doğrudan o uzmanın zimmetine geçer.'
-                  : '• Where to Define: Main ticket list.\n' +
-                    '• Parameters: Tickets with null assigned admin blind ID.\n' +
-                    '• How it Works: Unclaimed tickets display an orange cloud icon. Once an admin claims the ticket, the cloud indicator disappears.'}
+                {t('helpdesk.admin_guide.card4_body')}
               </Text>
             </View>
 
@@ -190,22 +156,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <CheckSquare size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '5. Bilet Operasyonları, Devralma ve Devretme Kuralları'
-                    : '5. Ticket Ownership, Claim & Transfer Protocol'}
+                  {t('helpdesk.admin_guide.card5_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Bilet detayında sağ üstteki 3 nokta menüsü ve Fısıltı sekmesi.\n' +
-                    '• Parametreler: "Bileti Devral", "Birim Değiştir", "Bileti Devret", "Bileti Kapat/Sil".\n' +
-                    '• Kurallar:\n' +
-                    '  1. Ortak havuzda veya başka bir yöneticide duran biletlerde yalnızca "Bileti Devral" ve "Birim Değiştir" çıkar; devralınmamış bilette asla "Bileti Devret" seçeneği bulunmaz.\n' +
-                    '  2. Bir yönetici yalnızca bizzat kendi üzerinde olan biletleri devredebilir veya silebilir.\n' +
-                    '  3. "Fısıltı" sekmesi üzerinden son kullanıcının göremeyeceği iç yönetici notları şifreli paylaşılır.'
-                  : '• Where to Define: Ticket detail 3-dots menu & Whisper tab.\n' +
-                    '• Parameters: "Claim Ticket", "Change Unit", "Reassign Ticket", "Close/Delete".\n' +
-                    '• Rules: Pool tickets only show Claim and Unit change. Reassignment is reserved for assigned owners. Whisper notes stay hidden from end-users.'}
+                {t('helpdesk.admin_guide.card5_body')}
               </Text>
             </View>
 
@@ -216,19 +171,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Clock size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '6. Çalışma Durumu ve Akıllı Bilet Dağıtımı'
-                    : '6. Duty Status & Smart Routing'}
+                  {t('helpdesk.admin_guide.card6_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > "Çalışma Durumu".\n' +
-                    '• Parametreler: "Açık", "Mesai Bitti", "İzinli".\n' +
-                    '• Nasıl Çalışır: Durumu "Mesai Bitti" veya "İzinli" olan yöneticilere sistem otomatik bilet ataması yapmaz. Bu biletler ortak havuzda turuncu bulut ile bekletilir veya nöbetçi yöneticilere dağıtılır.'
-                  : '• Where to Define: 3-dots menu > "Working Status".\n' +
-                    '• Parameters: "Active", "Off Duty", "On Leave".\n' +
-                    '• How it Works: Off-duty operators are bypassed in automated ticket routing to ensure uninterrupted response times.'}
+                {t('helpdesk.admin_guide.card6_body')}
               </Text>
             </View>
 
@@ -239,19 +186,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Timer size={14} color="#EA580C" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '7. Bilet Cevaplama Süresi ve Zaman Aşımı Politikası'
-                    : '7. Response Deadlines & Pool Return Policy'}
+                  {t('helpdesk.admin_guide.card7_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > "Kuruluş Ayarları" masası.\n' +
-                    '• Parametreler: İlk yanıt süresi limiti ve bilet çözüm süresi limiti (saat/dakika).\n' +
-                    '• Nasıl Çalışır: Bilet kartında geri sayım saati başlar. Süre aşıldığında sistem yöneticiyi uyarır; biletin cevapsız kalmasını önlemek amacıyla talep otomatik olarak ortak bilet havuzuna iade edilir ve diğer uzmanların devralmasına açılır.'
-                  : '• Where to Define: 3-dots menu > "Organization Settings".\n' +
-                    '• Parameters: Response deadline and resolution threshold in hours/minutes.\n' +
-                    '• How it Works: Live countdown timers monitor tickets. Overdue items trigger warnings and are automatically returned to the pool.'}
+                {t('helpdesk.admin_guide.card7_body')}
               </Text>
             </View>
 
@@ -262,22 +201,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Layers size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '8. Birim, Uygulama ve Kategori Yetkilendirme Masası'
-                    : '8. Role, Department & Category Management'}
+                  {t('helpdesk.admin_guide.card8_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > "Yetkilendirme Masası".\n' +
-                    '• Parametreler: Yöneticiler, Birimler, Uygulamalar ve Kategoriler (4 temel yapı).\n' +
-                    '• Aşamalar:\n' +
-                    '  1. Kademe: Kör kimlik girilerek yeni operatör eklenir veya yetkisi düzenlenir.\n' +
-                    '  2. Kademe: Operatörün bağlı olacağı şube, birim ve uygulamalar belirlenir.\n' +
-                    '  3. Kademe: Operatörün yalnızca uzman olduğu sorun kategorilerini görebilmesi için ilgili kategori yetkileri atanır.'
-                  : '• Where to Define: 3-dots menu > "Provisioning Console".\n' +
-                    '• Parameters: Admins, Units, Applications, Categories.\n' +
-                    '• Execution: Step 1 assigns admin blind ID; Step 2 sets branches and apps; Step 3 defines allowed ticket categories.'}
+                {t('helpdesk.admin_guide.card8_body')}
               </Text>
             </View>
 
@@ -288,19 +216,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Lock size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '9. Çift Onaylı Güvenlik ve Talep Kuyruğu'
-                    : '9. Dual-Approval Security Queue'}
+                  {t('helpdesk.admin_guide.card9_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > "Onay İstekleri Masası".\n' +
-                    '• Parametreler: Operatör terfi istekleri, yönetici silme, birim ve uygulama kaldırma talepleri.\n' +
-                    '• Nasıl Çalışır: Kritik operasyonlar doğrudan sisteme yansımaz; güvenlik kuyruğuna alınır. Küresel Yönetici tarafından ikinci bir onay verilmedikçe hiçbir kritik yetkilendirme veya silme işlemi yürürlüğe girmez.'
-                  : '• Where to Define: 3-dots menu > "Approval Requests".\n' +
-                    '• Parameters: Role promotions, admin removals, category/branch deletions.\n' +
-                    '• How it Works: High-risk administrative actions are staged in a queue until validated and approved by the Global Admin.'}
+                {t('helpdesk.admin_guide.card9_body')}
               </Text>
             </View>
 
@@ -311,19 +231,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Activity size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '10. Sistem ve Hata Tanısı İnceleme'
-                    : '10. System & Error Diagnostics Review'}
+                  {t('helpdesk.admin_guide.card10_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Kullanıcı bilet açarken "Sistem ve Hata Tanısı Ekle" anahtarı; yönetici tarafında ise bilet içi "Sistem Tanısı" sekmesi.\n' +
-                    '• Parametreler: Cihaz model bilgisi, ağ yanıt durum kodları, son işlem konsol kayıtları ve hata yığını.\n' +
-                    '• Nasıl Çalışır: Kullanıcı izin verip eklediğinde bu veriler yöneticinin açık anahtarıyla mühürlenir. Yönetici, kullanıcıyı soru yağmuruna tutmadan hatanın kök nedenini tek ekranda inceler.'
-                  : '• Where to Define: User enables "Add System Diagnostics"; admin inspects via "Diagnostics" tab.\n' +
-                    '• Parameters: Device metrics, network status codes, console stack traces.\n' +
-                    '• How it Works: User-approved diagnostic snapshots are decrypted on the admin device, expediting root-cause isolation.'}
+                {t('helpdesk.admin_guide.card10_body')}
               </Text>
             </View>
 
@@ -334,19 +246,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Monitor size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '11. Uzak Masaüstü Desteği ve Otomatik Veri Maskeleme'
-                    : '11. Remote Desktop & On-Device Data Masking'}
+                  {t('helpdesk.admin_guide.card11_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Bilet detay ekranı > "Uzak Masaüstü" butonu.\n' +
-                    '• Parametreler: Karşılıklı şifreli eşler arası oturum onayı ve yerel maskeleme filtresi.\n' +
-                    '• Nasıl Çalışır: Harici yazılım gerekmeden doğrudan uzak masaüstü bağlantısı kurulur. Kullanıcının ekranındaki şifre giriş alanları ve kişisel form verileri kullanıcının telefonunda otomatik karartılır; yönetici ekranına ham veri aktarılmaz. Yönetici canlı teknik desteği güvenle sağlar.'
-                  : '• Where to Define: Ticket detail screen > "Remote Desktop" action.\n' +
-                    '• Parameters: Mutual consent handshake and client-side redaction filter.\n' +
-                    '• How it Works: Secure peer session connects without third-party tools. Passwords and sensitive inputs are masked locally before screen transmission.'}
+                {t('helpdesk.admin_guide.card11_body')}
               </Text>
             </View>
 
@@ -357,19 +261,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Mic size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '12. Bilet İçi Sesli Görüşme, Bas-Konuş ve Telsiz Yayını'
-                    : '12. Encrypted Voice, Push-to-Talk & Radio Dispatch'}
+                  {t('helpdesk.admin_guide.card12_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Bilet üst bardaki Telefon ve Mikrofon simgeleri ile ana sayfadaki "Bir telsiz yayını başlat" düğmesi.\n' +
-                    '• Parametreler: Doğrudan cihazdan cihaza ses kanalı, 15 saniyelik kendini imha eden bas-konuş süresi, ortak acil durum telsiz frekansı.\n' +
-                    '• Nasıl Çalışır: Yazışmanın yetersiz olduğu anlarda doğrudan şifreli sesli arama yapılır. Bas-konuş mesajları dinlendikten sonra diskten kalıcı olarak parçalanarak silinir. Telsiz yayını ile tüm saha ekiplerine tek tuşla anons geçilir.'
-                  : '• Where to Define: Ticket header phone/mic buttons & Home screen "Start Radio Broadcast".\n' +
-                    '• Parameters: Peer-to-peer voice channel, 15-second self-shredding audio clips, shared dispatch frequency.\n' +
-                    '• How it Works: Direct encrypted voice calls, zero-trace voice notes, and organization-wide push-to-talk radio alerts.'}
+                {t('helpdesk.admin_guide.card12_body')}
               </Text>
             </View>
 
@@ -380,19 +276,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Database size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '13. Federal Veri Hasadı ve FDH Denetim Masası'
-                    : '13. Federal Data Harvesting & FDH Audit Console'}
+                  {t('helpdesk.admin_guide.card13_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: 3 nokta menüsü > "Federal Veri Hasadı" ve "FDH Sorgulama".\n' +
-                    '• Parametreler: Hedef yönetici seçimi, kullanıcı kapsamı, yerel bağımsız veri tabanı çıktısı.\n' +
-                    '• Nasıl Çalışır: Kurum verilerini üçüncü parti sunucularda tutmadan bağımsız kılmak için tek tuşla tüm biletler, gizli fısıltılar ve dosya ekleri yerel veri tabanına hasat edilir. İnternet bağlantısı olmasa dahi FDH Sorgulama ekranından tüm arşiv filtrelenip raporlanabilir.'
-                  : '• Where to Define: 3-dots menu > "Federal Data Harvesting" & "FDH Query".\n' +
-                    '• Parameters: Target administrator filter, user scope, local standalone database export.\n' +
-                    '• How it Works: Collects tickets, whispers, and attachments into a local sovereign database with one touch, enabling offline search and audits.'}
+                {t('helpdesk.admin_guide.card13_body')}
               </Text>
             </View>
 
@@ -403,20 +291,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <Award size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '14. Lisans ve Abonelik Masası'
-                    : '14. License & Subscription Management'}
+                  {t('helpdesk.admin_guide.card14_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Yalnızca Küresel Yönetici için 3 nokta menüsü > "Lisans & Abonelik" (Diğer kullanıcılara tamamen kapalıdır).\n' +
-                    '• Parametreler:\n' +
-                    '  - Temel Paket: Cihazda yerel AES-256 şifreleme, uçtan uca şifreleme, sunucuda sıfır veri, federal veri hasadı, cihazda otomatik veri maskeleme, kör kimlik koruması, sistem ve hata tanısı ekleme, çift onaylı yetki kuyruğu, mobil ve masaüstü istemcileri, sınırsız operatör ve kullanıcı, kategori ve organizasyon yönetimi, dosya ve ekran görüntüsü ekleri, gelişmiş denetim ve raporlama.\n' +
-                    '  - Canlı Paket: Bütün temel özellikler, uzak masaüstü, bilet içi sesli arama, bilet içi bas-konuş ve telsiz yayını.\n' +
-                    '  - Döngü Parametresi: Aylık veya Yıllık (%20 indirimli) faturalandırma seçeneği.'
-                  : '• Where to Define: Exclusively for Global Admin via 3-dots > "License & Subscription".\n' +
-                    '• Parameters: Core Plan (zero-knowledge, sovereign features) vs Live Plan (adds remote desktop, voice, radio); billing cycles (Monthly / Annual).'}
+                {t('helpdesk.admin_guide.card14_body')}
               </Text>
             </View>
 
@@ -427,19 +306,11 @@ export const AdminGuideModal: React.FC<AdminGuideModalProps> = ({
                   <RefreshCw size={14} color="#2563EB" strokeWidth={2.2} />
                 </View>
                 <Text style={styles.guideCardTitle}>
-                  {isTr
-                    ? '15. Afet Kurtarma ve Donanımsal Cihaz Değişimi'
-                    : '15. Disaster Recovery & Hardware Migration'}
+                  {t('helpdesk.admin_guide.card15_title')}
                 </Text>
               </View>
               <Text style={styles.guideCardBody}>
-                {isTr
-                  ? '• Nerede Tanımlanır: Lisansör yönetim konsolu üzerinden "wd run admin transfer" komutu ile.\n' +
-                    '• Parametreler: Eski kurum adı ve yeni cihazın açık anahtar kimliği.\n' +
-                    '• Nasıl Çalışır: Cihaz kaybolduğunda, bozulduğunda veya yeni telefona geçildiğinde yeni cihazdaki açık anahtar lisansöre iletilir. Yapılan aktarımla geçmiş tüm biletler, departmanlar, ayarlar ve yöneticilik yetkileri sıfır veri kaybıyla yeni cihaza bağlanır.'
-                  : '• Where to Define: Licensor CLI console via "wd run admin transfer".\n' +
-                    '• Parameters: Organization name and new hardware public key.\n' +
-                    '• How it Works: If a device is lost or upgraded, ownership is migrated to the new hardware public key with zero data loss.'}
+                {t('helpdesk.admin_guide.card15_body')}
               </Text>
             </View>
           </ScrollView>

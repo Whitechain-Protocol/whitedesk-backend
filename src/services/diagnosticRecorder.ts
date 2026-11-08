@@ -12,6 +12,7 @@
 
 import { Platform, Dimensions, PixelRatio, AppState, PermissionsAndroid } from 'react-native';
 import { piiSanitizer } from './piiSanitizer';
+import { i18nService } from './i18nService';
 
 export type DiagnosticEventType = 'navigation' | 'action' | 'network' | 'warning' | 'error' | 'lifecycle' | 'sdk';
 
@@ -24,10 +25,10 @@ export interface DiagnosticEvent {
 }
 
 export interface DevicePermissionsSnapshot {
-  microphone: 'Açık' | 'Kapalı' | 'Bilinmiyor';
-  camera: 'Açık' | 'Kapalı' | 'Bilinmiyor';
-  notifications: 'Açık' | 'Kapalı' | 'Bilinmiyor';
-  keystoreVault: 'Donanım Mühürlü (Aktif)';
+  microphone: string;
+  camera: string;
+  notifications: string;
+  keystoreVault: string;
 }
 
 export interface DeviceTelemetry {
@@ -71,21 +72,21 @@ class DiagnosticRecorderService {
   private isRecordingError = false;
   private isRecordingWarning = false;
   private permissionsCache: DevicePermissionsSnapshot = {
-    microphone: 'Bilinmiyor',
-    camera: 'Bilinmiyor',
-    notifications: 'Bilinmiyor',
-    keystoreVault: 'Donanım Mühürlü (Aktif)',
+    microphone: i18nService.t('diagnostics.permission_unknown'),
+    camera: i18nService.t('diagnostics.permission_unknown'),
+    notifications: i18nService.t('diagnostics.permission_unknown'),
+    keystoreVault: i18nService.t('diagnostics.keystore_hardware_sealed'),
   };
 
   constructor() {
     const { width, height } = Dimensions.get('window');
     const ratio = PixelRatio.get();
     const fScale = Number(PixelRatio.getFontScale().toFixed(2));
-    this.recordNavigation('Uygulama Başlatıldı (Cold Boot)', {
-      motor: 'Hermes AOT',
+    this.recordNavigation(i18nService.t('diagnostics.app_cold_boot'), {
+      [i18nService.t('diagnostics.field_engine')]: i18nService.t('diagnostics.engine_hermes'),
       platform: `${Platform.OS.toUpperCase()} v${Platform.Version}`,
-      ekran: `${Math.round(width)}x${Math.round(height)} dp (${ratio}x)`,
-      yazıÖlçeği: `${fScale}x${fScale > 1.15 ? ' (Büyütülmüş)' : ' (Standart)'}`,
+      [i18nService.t('diagnostics.field_screen')]: `${Math.round(width)}x${Math.round(height)} ${i18nService.t('common.dp')} (${ratio}x)`,
+      [i18nService.t('diagnostics.field_font_scale')]: `${fScale}x${fScale > 1.15 ? ` (${i18nService.t('diagnostics.font_enlarged')})` : ` (${i18nService.t('diagnostics.font_standard')})`}`,
     });
     this.setupGlobalErrorHandler();
     this.setupNetworkInterceptor();
@@ -107,10 +108,10 @@ class DiagnosticRecorderService {
           : Promise.resolve(true)),
       ]);
       this.permissionsCache = {
-        microphone: micGranted ? 'Açık' : 'Kapalı',
-        camera: camGranted ? 'Açık' : 'Kapalı',
-        notifications: notifGranted ? 'Açık' : 'Kapalı',
-        keystoreVault: 'Donanım Mühürlü (Aktif)',
+        microphone: micGranted ? i18nService.t('diagnostics.permission_on') : i18nService.t('diagnostics.permission_off'),
+        camera: camGranted ? i18nService.t('diagnostics.permission_on') : i18nService.t('diagnostics.permission_off'),
+        notifications: notifGranted ? i18nService.t('diagnostics.permission_on') : i18nService.t('diagnostics.permission_off'),
+        keystoreVault: i18nService.t('diagnostics.keystore_hardware_sealed'),
       };
     } catch {}
   }
@@ -129,8 +130,8 @@ class DiagnosticRecorderService {
               id: `ev_${this.eventIdCounter++}`,
               type: 'lifecycle',
               timestamp: Date.now(),
-              label: 'Durum: Uygulama Arka Plana Alındı (Background)',
-              details: { durum: 'background', çalışmaSüresi: this.getFormattedUptime() },
+              label: i18nService.t('diagnostics.state_background'),
+              details: { [i18nService.t('diagnostics.field_status')]: i18nService.t('diagnostics.status_background_short'), [i18nService.t('diagnostics.field_uptime')]: this.getFormattedUptime() },
             });
           } else if (nextState === 'active') {
             void this.refreshPermissionsSnapshot();
@@ -138,8 +139,8 @@ class DiagnosticRecorderService {
               id: `ev_${this.eventIdCounter++}`,
               type: 'lifecycle',
               timestamp: Date.now(),
-              label: 'Durum: Uygulama Ön Plana Döndü (Active)',
-              details: { durum: 'active', çalışmaSüresi: this.getFormattedUptime() },
+              label: i18nService.t('diagnostics.state_active'),
+              details: { [i18nService.t('diagnostics.field_status')]: 'active', [i18nService.t('diagnostics.field_uptime')]: this.getFormattedUptime() },
             });
           }
         }
@@ -151,7 +152,9 @@ class DiagnosticRecorderService {
     const elapsedSec = Math.max(1, Math.floor((Date.now() - this.bootTimestamp) / 1000));
     const mins = Math.floor(elapsedSec / 60);
     const secs = elapsedSec % 60;
-    return mins > 0 ? `${mins} dk ${secs} sn` : `${secs} sn`;
+    return mins > 0
+      ? i18nService.t('diagnostics.uptime_min_sec', { mins, secs })
+      : i18nService.t('diagnostics.uptime_sec', { secs });
   }
 
   /**
@@ -176,7 +179,7 @@ class DiagnosticRecorderService {
     if (this.isRecordingWarning) return;
     this.isRecordingWarning = true;
     try {
-      const cleanMsg = piiSanitizer.sanitize(String(message || 'Uyarı')).sanitizedText;
+      const cleanMsg = piiSanitizer.sanitize(String(message || i18nService.t('diagnostics.warning_default'))).sanitizedText;
       const last = this.buffer[this.buffer.length - 1];
       if (last && last.type === 'warning' && last.label.includes(cleanMsg.slice(0, 60))) {
         return;
@@ -185,7 +188,7 @@ class DiagnosticRecorderService {
         id: `ev_${this.eventIdCounter++}`,
         type: 'warning',
         timestamp: Date.now(),
-        label: `UYARI: ${cleanMsg.slice(0, 100)}`,
+        label: `${i18nService.t('diagnostics.warning_prefix')}: ${cleanMsg.slice(0, 100)}`,
         details: details ? this.sanitizeDetails(details) : { message: cleanMsg },
       });
     } finally {
@@ -197,7 +200,8 @@ class DiagnosticRecorderService {
    * Ekran geçişlerini kaydet
    */
   public recordNavigation(screenName: string, params?: Record<string, any>): void {
-    const label = screenName.startsWith('Ekran:') ? screenName : `Ekran: ${screenName}`;
+    const screenPrefix = `${i18nService.t('diagnostics.screen_prefix')}:`;
+    const label = screenName.startsWith(screenPrefix) ? screenName : `${screenPrefix} ${screenName}`;
     // Aynı ekran ardı ardına tekrar tetiklendiyse mükerrer kayıt ekleme
     const last = this.buffer[this.buffer.length - 1];
     if (last && last.type === 'navigation' && last.label === label && Date.now() - last.timestamp < 1500) {
@@ -249,7 +253,7 @@ class DiagnosticRecorderService {
     }
 
     const upperMethod = method.toUpperCase();
-    const statusLabel = status === 0 ? 'AĞ HATASI' : isSlow && isSuccess ? `${status} • YAVAŞ` : String(status);
+    const statusLabel = status === 0 ? i18nService.t('diagnostics.network_error_label') : isSlow && isSuccess ? `${status} • ${i18nService.t('diagnostics.network_slow_label')}` : String(status);
     const label = `${upperMethod} ${cleanUrl} (${statusLabel})`;
 
     // Arka plan periyodik yoklamaları (GET /api/relay/inbox veya /api/signal) başarılı ve hızlıysa
@@ -269,8 +273,8 @@ class DiagnosticRecorderService {
           prevNet.timestamp = Date.now();
           prevNet.details = {
             ...prevNet.details,
-            süre: `${durationMs} ms`,
-            durum: `${status} (Başarılı)`,
+            [i18nService.t('diagnostics.field_duration')]: `${durationMs} ${i18nService.t('common.ms')}`,
+            [i18nService.t('diagnostics.field_status')]: `${status} (${i18nService.t('diagnostics.network_status_success')})`,
           };
           return;
         }
@@ -278,16 +282,18 @@ class DiagnosticRecorderService {
     }
 
     const detailsObj: Record<string, any> = {
-      metod: upperMethod,
-      uçNokta: cleanUrl,
-      durum: status === 0 ? `0 (Bağlantı Hatası)` : `${status} (${isSuccess ? (isSlow ? 'Yavaş Yanıt' : 'Başarılı') : 'Hatalı'})`,
-      süre: `${durationMs} ms`,
+      [i18nService.t('diagnostics.field_method')]: upperMethod,
+      [i18nService.t('diagnostics.field_endpoint')]: cleanUrl,
+      [i18nService.t('diagnostics.field_status')]: status === 0
+        ? `0 (${i18nService.t('diagnostics.network_connection_error')})`
+        : `${status} (${isSuccess ? (isSlow ? i18nService.t('diagnostics.network_slow_response') : i18nService.t('diagnostics.network_status_success')) : i18nService.t('diagnostics.network_status_failed')})`,
+      [i18nService.t('diagnostics.field_duration')]: `${durationMs} ${i18nService.t('common.ms')}`,
       durationMs,
       isSuccess,
       isSlow,
     };
     if (errorMsg) {
-      detailsObj.hata = piiSanitizer.sanitize(errorMsg).sanitizedText;
+      detailsObj[i18nService.t('diagnostics.field_error')] = piiSanitizer.sanitize(errorMsg).sanitizedText;
     }
 
     this.pushEvent({
@@ -306,14 +312,14 @@ class DiagnosticRecorderService {
     if (this.isRecordingError) return;
     this.isRecordingError = true;
     try {
-      const cleanMsg = piiSanitizer.sanitize(String(message || 'Bilinmeyen Hata')).sanitizedText;
+      const cleanMsg = piiSanitizer.sanitize(String(message || i18nService.t('diagnostics.unknown_error'))).sanitizedText;
       const cleanStack = stack ? piiSanitizer.sanitize(String(stack).slice(0, 600)).sanitizedText : undefined;
 
       this.pushEvent({
         id: `ev_${this.eventIdCounter++}`,
         type: 'error',
         timestamp: Date.now(),
-        label: `HATA: ${cleanMsg.slice(0, 100)}`,
+        label: `${i18nService.t('diagnostics.error_prefix')}: ${cleanMsg.slice(0, 100)}`,
         details: {
           message: cleanMsg,
           stack: cleanStack,
@@ -343,11 +349,11 @@ class DiagnosticRecorderService {
 
     for (const [k, v] of Object.entries(obj)) {
       if (sensitiveKeys.some(sk => k.toLowerCase().includes(sk))) {
-        sanitized[k] = '[GİZLENDİ]';
+        sanitized[k] = i18nService.t('pii.redacted');
       } else if (typeof v === 'string') {
         sanitized[k] = piiSanitizer.sanitize(v).sanitizedText;
       } else if (typeof v === 'object' && v !== null) {
-        sanitized[k] = '[NESNE]';
+        sanitized[k] = i18nService.t('diagnostics.object_placeholder');
       } else {
         sanitized[k] = v;
       }
@@ -365,14 +371,14 @@ class DiagnosticRecorderService {
     return {
       platform: Platform.OS,
       osVersion: Platform.Version,
-      appVersion: '1.0.0 (Hermes AOT)',
-      screenResolution: `${Math.round(width)}x${Math.round(height)} dp (${ratio}x)`,
-      fontScale: `${fScale}x${fScale > 1.15 ? ' (Büyük)' : ' (Normal)'}`,
+      appVersion: i18nService.t('diagnostics.app_version_hermes'),
+      screenResolution: `${Math.round(width)}x${Math.round(height)} ${i18nService.t('common.dp')} (${ratio}x)`,
+      fontScale: `${fScale}x${fScale > 1.15 ? ` (${i18nService.t('diagnostics.font_large')})` : ` (${i18nService.t('diagnostics.font_normal')})`}`,
       sessionUptime: this.getFormattedUptime(),
       appState: AppState.currentState || 'active',
       permissions: { ...this.permissionsCache },
-      locale: 'tr-TR',
-      memoryState: 'Normal',
+      locale: i18nService.getCurrentLanguage(),
+      memoryState: i18nService.t('diagnostics.memory_normal'),
       timestamp: Date.now(),
     };
   }
@@ -448,16 +454,29 @@ class DiagnosticRecorderService {
             if (url) {
               this.recordNetwork(method, url, response.status, duration);
               if (response.status >= 500) {
-                this.recordError(`Sunucu Hatası: ${method} ${url.split('?')[0]} (HTTP ${response.status})`);
+                this.recordError(
+                  i18nService.t('diagnostics.server_error_http', {
+                    method,
+                    url: url.split('?')[0],
+                    status: response.status,
+                  })
+                );
               }
             }
             return response;
           } catch (err: any) {
             const duration = Date.now() - start;
-            const errMsg = err?.message || 'Ağ bağlantı hatası';
+            const errMsg = err?.message || i18nService.t('diagnostics.network_connection_failed');
             if (url && err?.name !== 'AbortError') {
               this.recordNetwork(method, url, 0, duration, errMsg);
-              this.recordError(`Ağ İsteği Başarısız (${method} ${url.split('?')[0]}): ${errMsg}`, err?.stack);
+              this.recordError(
+                i18nService.t('diagnostics.network_request_failed', {
+                  method,
+                  url: url.split('?')[0],
+                  error: errMsg,
+                }),
+                err?.stack
+              );
             }
             throw err;
           }
@@ -475,7 +494,7 @@ class DiagnosticRecorderService {
       if (g.ErrorUtils && typeof g.ErrorUtils.setGlobalHandler === 'function') {
         const defaultHandler = g.ErrorUtils.getGlobalHandler();
         g.ErrorUtils.setGlobalHandler((error: any, isFatal?: boolean) => {
-          this.recordError(error?.message || 'Global Sistem Hatası', error?.stack);
+          this.recordError(error?.message || i18nService.t('diagnostics.global_system_error'), error?.stack);
           if (defaultHandler) defaultHandler(error, isFatal);
         });
       }

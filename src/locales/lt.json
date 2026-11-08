@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Pradėti naują diskusiją",
-    "tierTenant": "Nuomininkas"
+    "tierTenant": "Nuomininkas",
+    "adminRevokeDesc": "Administratoriaus teisės bus pašalintos iš šio įrenginio, o pultas bus užrakintas.",
+    "removeAdminTitle": "Pašalinti administratorių",
+    "removeAdminConfirm": "Ar tikrai norite pašalinti šį administratorių ir visus jo priskyrimus?",
+    "selectAdminReq": "Pasirinkti administratorių",
+    "selectAdminReqDesc": "Pasirinkite priskiriamą administratorių.",
+    "created": "Sukurta",
+    "lastAction": "Paskutinis atnaujinimas",
+    "attachment": "Priedas",
+    "tierAppOrg": "Programa / Organizacija",
+    "default": "Numatytasis",
+    "all": "Visi"
   },
   "license": {
     "title": "Mano licencijos",

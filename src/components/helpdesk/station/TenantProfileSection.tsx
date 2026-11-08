@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Copy,
 } from 'lucide-react-native';
+import { useTranslation } from '../../../services/i18nService';
 
 interface TenantProfileSectionProps {
   isExpanded: boolean;
@@ -27,6 +28,8 @@ export const TenantProfileSection: React.FC<TenantProfileSectionProps> = ({
   activeEnterpriseBlindId,
   onCopyBlindId,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.geminiCard}>
       <TouchableOpacity
@@ -38,11 +41,11 @@ export const TenantProfileSection: React.FC<TenantProfileSectionProps> = ({
           <Building2 size={20} color="#2563EB" strokeWidth={2.2} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.geminiCardTitle}>Kurum & Kiracı Bilgileri</Text>
-          <Text style={styles.geminiCardSubtitle}>Sovereign mülkiyet ve bağlantı detayları</Text>
+          <Text style={styles.geminiCardTitle}>{t('provisioning.tenant_station.profile_title')}</Text>
+          <Text style={styles.geminiCardSubtitle}>{t('provisioning.tenant_station.profile_subtitle')}</Text>
         </View>
         <View style={styles.geminiStatusPill}>
-          <Text style={styles.geminiStatusPillText}>Mühürlü</Text>
+          <Text style={styles.geminiStatusPillText}>{t('provisioning.tenant_station.status_sealed')}</Text>
         </View>
         {isExpanded ? (
           <ChevronUp size={20} color="#64748B" style={{ marginLeft: 6 }} />
@@ -54,12 +57,12 @@ export const TenantProfileSection: React.FC<TenantProfileSectionProps> = ({
       {isExpanded && (
         <View style={styles.geminiCardBody}>
           <View style={styles.infoRowItem}>
-            <Text style={styles.infoRowLabel}>Kurum Adı</Text>
+            <Text style={styles.infoRowLabel}>{t('provisioning.tenant_station.enterprise_name_label')}</Text>
             <Text style={styles.infoRowValue}>{currentEnterpriseName}</Text>
           </View>
 
           <View style={styles.infoRowItem}>
-            <Text style={styles.infoRowLabel}>Kör Kimlik (Blind ID)</Text>
+            <Text style={styles.infoRowLabel}>{t('provisioning.tenant_station.blind_id_label')}</Text>
             <TouchableOpacity 
               style={styles.copyChipRow}
               onPress={() => onCopyBlindId(activeEnterpriseBlindId || 'default')}
@@ -73,15 +76,15 @@ export const TenantProfileSection: React.FC<TenantProfileSectionProps> = ({
           </View>
 
           <View style={styles.infoRowItem}>
-            <Text style={styles.infoRowLabel}>Yönetici Yetkisi</Text>
+            <Text style={styles.infoRowLabel}>{t('provisioning.tenant_station.admin_authority_label')}</Text>
             <Text style={[styles.infoRowValue, { color: '#2563EB', fontWeight: '800' }]}>
-              WhiteCosmos (*) Global Admin
+              {t('provisioning.tenant_station.global_admin_authority_value')}
             </Text>
           </View>
 
           <View style={styles.infoRowItem}>
-            <Text style={styles.infoRowLabel}>Protokol</Text>
-            <Text style={styles.infoRowValue}>Neon HTTPS • Sıfır Kişisel Veri • E2EE</Text>
+            <Text style={styles.infoRowLabel}>{t('provisioning.tenant_station.protocol_label')}</Text>
+            <Text style={styles.infoRowValue}>{t('provisioning.tenant_station.protocol_value')}</Text>
           </View>
         </View>
       )}

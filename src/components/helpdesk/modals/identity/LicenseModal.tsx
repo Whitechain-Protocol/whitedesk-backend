@@ -17,6 +17,7 @@ import {
   ArrowLeft,
 } from 'lucide-react-native';
 import { helpDeskService } from '../../../../services/helpDeskService';
+import { useTranslation } from '../../../../services/i18nService';
 
 export interface LicenseModalProps {
   visible: boolean;
@@ -30,8 +31,8 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   visible,
   onClose,
   enterpriseBlindId,
-  language = 'tr',
 }) => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<'current' | 'manage'>('current');
   const [activeLicense, setActiveLicense] = useState<any | null>(null);
   const [allPlans, setAllPlans] = useState<any[]>([]);
@@ -50,7 +51,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   const loadLicenseData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const lic = await helpDeskService.getTenantActiveLicense(enterpriseBlindId || 'default');
+      const lic = await helpDeskService.getTenantActiveLicense(enterpriseBlindId || 'default', true);
       setActiveLicense(lic);
       const plans = await helpDeskService.getAllPlans();
       setAllPlans(plans);
@@ -91,18 +92,16 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
         setViewMode('current');
 
         const cycleLabel = targetCycle === 'annual'
-          ? (language === 'tr' ? 'Yıllık' : 'Annual')
-          : (language === 'tr' ? 'Aylık' : 'Monthly');
+          ? t('license.modal.cycle_annual')
+          : t('license.modal.cycle_monthly');
 
         Alert.alert(
-          language === 'tr' ? 'Lisans Güncellendi' : 'License Updated',
-          language === 'tr'
-            ? `${res.license.planName} (${cycleLabel}) başarıyla tanımlandı.`
-            : `${res.license.planName} (${cycleLabel}) updated successfully.`
+          t('license.modal.updated_title'),
+          t('license.modal.updated_desc', { planName: res.license.planName, cycle: cycleLabel })
         );
       }
     } catch (e: any) {
-      Alert.alert('Hata', e?.message || 'Lisans güncellenirken bir sorun oluştu.');
+      Alert.alert(t('common.error'), e?.message || t('license.modal.update_error'));
     } finally {
       setIsUpdating(false);
     }
@@ -114,67 +113,45 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
   const isTrial = !isLive && !isCore;
 
   const currentPlanName = isLive
-    ? 'LIVE Paketi'
+    ? t('license.modal.plan_live')
     : isCore
-    ? 'CORE Paketi'
-    : (language === 'tr' ? 'Ücretsiz Deneme' : 'Free Trial');
+    ? t('license.modal.plan_core')
+    : t('license.modal.plan_trial');
 
   const activePlanId: 'core' | 'live' = isLive ? 'live' : 'core';
 
   // Bütün lisanslarda birebir aynı formatta listelenen net ve mükerrersiz özellik maddeleri
   const getPlanFeatureList = (planId: 'core' | 'live') => {
     if (planId === 'live') {
-      return language === 'tr'
-        ? [
-            'Bütün temel özellikler',
-            'Uzak masaüstü',
-            'Bilet içerisinden sesli görüşme',
-            'Bilet içerisinden bas-konuş',
-            'Telsiz yayını',
-          ]
-        : [
-            'All basic features',
-            'Remote desktop',
-            'In-ticket voice calling',
-            'In-ticket push-to-talk',
-            'Radio broadcast',
-          ];
+      return [
+        t('license.modal.feat_live_1'),
+        t('license.modal.feat_live_2'),
+        t('license.modal.feat_live_3'),
+        t('license.modal.feat_live_4'),
+        t('license.modal.feat_live_5'),
+      ];
     }
-    return language === 'tr'
-      ? [
-          'Cihazda yerel AES-256 şifreleme',
-          'Uçtan uca şifreleme',
-          'Sunucuda sıfır veri\nVeriler yerel cihazlarda tutulur',
-          'Federal veri hasadı\nTek tuşla verileri merkezde toplama',
-          'Cihazda otomatik veri maskeleme',
-          'Kör kimlik koruması',
-          'Sistem ve hata tanısı ekleme',
-          'Çift onaylı yetki kuyruğu',
-          'Mobil ve masaüstü istemcileri',
-          'Sınırsız operatör ve kullanıcı',
-          'Kategori ve organizasyon yönetimi',
-          'Dosya ve ekran görüntüsü ekleri',
-          'Gelişmiş denetim ve raporlama özellikleri',
-        ]
-      : [
-          'On-device AES-256 encryption',
-          'End-to-end encryption',
-          'Zero data on server\nData kept on local devices',
-          'Federal data harvesting\nOne-touch centralized data collection',
-          'Automatic on-device data masking',
-          'Blind identifier shield',
-          'System and error diagnostics attachment',
-          'Dual-approval authorization queue',
-          'Mobile and desktop clients',
-          'Unlimited operators and users',
-          'Category and organization management',
-          'File and screenshot attachments',
-          'Advanced audit and reporting features',
-        ];
+    return [
+      t('license.modal.feat_core_1'),
+      t('license.modal.feat_core_2'),
+      t('license.modal.feat_core_3'),
+      t('license.modal.feat_core_4'),
+      t('license.modal.feat_core_5'),
+      t('license.modal.feat_core_6'),
+      t('license.modal.feat_core_7'),
+      t('license.modal.feat_core_8'),
+      t('license.modal.feat_core_9'),
+      t('license.modal.feat_core_10'),
+      t('license.modal.feat_core_11'),
+      t('license.modal.feat_core_12'),
+      t('license.modal.feat_core_13'),
+    ];
   };
 
-  // 2. Ekranda sadece seçilebilir olan alternatif planlar gösterilir (mevcut plan gizlenir)
-  const selectablePlans = allPlans.filter((p) => p.id !== activeLicense?.planId);
+  // 2. Ekranda sadece seçilebilir olan alternatif planlar veya farklı döngü gösterilir
+  const selectablePlans = allPlans.filter(
+    (p) => p.id !== activeLicense?.planId || selectedCycle !== activeLicense?.billingCycle
+  );
   const displayPlans = selectablePlans.length > 0 ? selectablePlans : allPlans;
 
   return (
@@ -200,20 +177,20 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 </TouchableOpacity>
                 <View>
                   <Text style={styles.headerTitle}>
-                    {language === 'tr' ? 'Lisans Yönetimi' : 'License Management'}
+                    {t('license.modal.manage_title')}
                   </Text>
                   <Text style={styles.headerSubtitle}>
-                    {language === 'tr' ? 'Geçiş yapılabilecek lisans seçenekleri' : 'Selectable license options'}
+                    {t('license.modal.manage_subtitle')}
                   </Text>
                 </View>
               </View>
             ) : (
               <View>
                 <Text style={styles.headerTitle}>
-                  {language === 'tr' ? 'Lisans & Abonelik' : 'License & Subscription'}
+                  {t('license.modal.title')}
                 </Text>
                 <Text style={styles.headerSubtitle}>
-                  {language === 'tr' ? 'Kuruluş yetki ve abonelik seviyesi' : 'Enterprise tier and subscription'}
+                  {t('license.modal.subtitle')}
                 </Text>
               </View>
             )}
@@ -227,7 +204,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color="#1A73E8" />
               <Text style={styles.loadingText}>
-                {language === 'tr' ? 'Lisans bilgisi yükleniyor...' : 'Loading license info...'}
+                {t('license.modal.loading')}
               </Text>
             </View>
           ) : viewMode === 'current' ? (
@@ -239,14 +216,14 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
               <View style={styles.activeBanner}>
                 <View style={styles.activeBannerHeader}>
                   <Text style={styles.activePlanLabel}>
-                    {language === 'tr' ? 'Kullanımdaki Plan:' : 'Active Plan:'}
+                    {t('license.modal.active_plan_label')}
                   </Text>
                   <Text style={styles.activePlanName}>{currentPlanName}</Text>
                   <View style={styles.activeChip}>
                     <Text style={styles.activeChipText}>
                       {!isTrial
-                        ? (language === 'tr' ? 'Aktif' : 'Active')
-                        : `${activeLicense?.trialDaysRemaining ?? 14} Gün`}
+                        ? t('license.modal.status_active')
+                        : t('license.modal.trial_days_remaining', { days: activeLicense?.trialDaysRemaining ?? 14 })}
                     </Text>
                   </View>
                 </View>
@@ -254,12 +231,12 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 <View style={styles.activeMetaRow}>
                   <Text style={styles.activeMetaText}>
                     {!isTrial
-                      ? (activeLicense?.billingCycle === 'annual' ? 'Yıllık Döngü' : 'Aylık Döngü')
-                      : 'Deneme Süresi'}
+                      ? (activeLicense?.billingCycle === 'annual' ? t('license.modal.annual_cycle') : t('license.modal.monthly_cycle'))
+                      : t('license.modal.trial_period')}
                   </Text>
                   <Text style={styles.metaDot}>•</Text>
                   <Text style={[styles.activeMetaText, styles.desktopOn]}>
-                    {language === 'tr' ? 'Masaüstü & Mobil İstemci Aktif' : 'Desktop & Mobile Active'}
+                    {t('license.modal.desktop_mobile_active')}
                   </Text>
                 </View>
               </View>
@@ -267,7 +244,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
               {/* Kullanımdaki Planın Lisans Detayları */}
               <View style={styles.currentDetailsBox}>
                 <Text style={styles.sectionHeaderTitle}>
-                  {language === 'tr' ? 'Lisans Detayları' : 'License Details'}
+                  {t('license.modal.details_title')}
                 </Text>
 
                 <View style={styles.featureList}>
@@ -295,7 +272,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 activeOpacity={0.8}
               >
                 <Text style={styles.manageNavBtnText}>
-                  {language === 'tr' ? 'Lisans Yönetimi' : 'License Management'}
+                  {t('license.modal.manage_title')}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -313,7 +290,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <Text style={[styles.cycleBtnText, selectedCycle === 'monthly' && styles.cycleBtnTextActive]}>
-                      {language === 'tr' ? 'Aylık' : 'Monthly'}
+                      {t('license.modal.cycle_monthly')}
                     </Text>
                   </TouchableOpacity>
 
@@ -323,7 +300,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <Text style={[styles.cycleBtnText, selectedCycle === 'annual' && styles.cycleBtnTextActive]}>
-                      {language === 'tr' ? 'Yıllık (%20 İndirimli)' : 'Annual (20% Off)'}
+                      {t('license.modal.cycle_annual_discount')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -345,23 +322,19 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                           <Text style={styles.planTitle}>{plan.name}</Text>
                           <Text style={styles.planOneLiner}>
                             {isPlanLive
-                              ? (language === 'tr'
-                                  ? 'Bütün temel özellikler, uzak masaüstü, sesli görüşme ve telsiz yayını'
-                                  : 'All basic features, remote desktop, voice calling and radio broadcast')
-                              : (language === 'tr'
-                                  ? 'Uçtan uca şifreleme, sınırsız operatör, mobil ve masaüstü istemcileri'
-                                  : 'End-to-end encryption, unlimited operators, mobile and desktop clients')}
+                              ? t('license.modal.live_oneliner')
+                              : t('license.modal.core_oneliner')}
                           </Text>
                         </View>
 
                         <View style={styles.priceContainer}>
                           <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                             <Text style={styles.priceAmount}>${price}</Text>
-                            <Text style={styles.pricePeriod}> / ay</Text>
+                            <Text style={styles.pricePeriod}>{t('license.modal.per_month')}</Text>
                           </View>
                           {selectedCycle === 'annual' && (
                             <Text style={styles.billedAnnuallyText}>
-                              {language === 'tr' ? 'Yıllık faturalandırılır' : 'Billed annually'}
+                              {t('license.modal.billed_annually')}
                             </Text>
                           )}
                         </View>
@@ -374,7 +347,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                         activeOpacity={0.7}
                       >
                         <Text style={styles.accordionToggleTitle}>
-                          {language === 'tr' ? 'Lisans Detayları' : 'License Details'}
+                          {t('license.modal.details_title')}
                         </Text>
                         {isExpanded ? (
                           <ChevronUp size={16} color="#1A73E8" />
@@ -414,7 +387,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                           <ActivityIndicator size="small" color="#FFFFFF" />
                         ) : (
                           <Text style={styles.actionBtnText}>
-                            {language === 'tr' ? 'Lisans Seviyesini Değiştir' : 'Change License Tier'}
+                            {t('license.modal.change_tier_btn')}
                           </Text>
                         )}
                       </TouchableOpacity>

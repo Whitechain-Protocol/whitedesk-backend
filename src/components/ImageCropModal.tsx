@@ -13,6 +13,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { X, Check, Scissors, RotateCcw } from 'lucide-react-native';
+import { useTranslation } from '../services/i18nService';
 
 interface ImageCropModalProps {
   visible: boolean;
@@ -27,6 +28,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [containerLayout, setContainerLayout] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -228,8 +230,8 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             <X size={22} color="#FFFFFF" />
           </TouchableOpacity>
           <View style={styles.headerTitleBox}>
-            <Text style={styles.headerTitle}>Logoyu Kırp & Çerçevele</Text>
-            <Text style={styles.headerSubtitle}>4 kenardan daraltarak logoyu çevreleyin</Text>
+            <Text style={styles.headerTitle}>{t('helpdesk.crop_logo_title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('helpdesk.crop_logo_subtitle')}</Text>
           </View>
           <TouchableOpacity onPress={resetCrop} style={styles.headerResetBtn} disabled={isProcessing}>
             <RotateCcw size={18} color="#94A3B8" />
@@ -376,7 +378,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             disabled={isProcessing}
             activeOpacity={0.7}
           >
-            <Text style={styles.cancelBtnText}>Vazgeç</Text>
+            <Text style={styles.cancelBtnText}>{t('helpdesk.cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -391,7 +393,7 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
               <Scissors size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
             )}
             <Text style={styles.confirmBtnText}>
-              {isProcessing ? 'Arka Plan Temizleniyor...' : 'Tamam & Arka Planı Kaldır'}
+              {isProcessing ? t('helpdesk.crop_removing_bg') : t('helpdesk.crop_confirm_remove_bg')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -2,7 +2,28 @@
   <string name="app_name">WhiteDesk</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
-  <string name="call_notification_answer_action">Katıl</string>
-  <string name="call_notification_decline_action">Kapat</string>
-  <string name="call_notification_hang_up_action">Kapat</string>
+  <string name="call_notification_answer_action">Join</string>
+  <string name="call_notification_decline_action">Decline</string>
+  <string name="call_notification_hang_up_action">Hang Up</string>
+  <string name="wd_default_caller_admin">Admin</string>
+  <string name="wd_support_title">WhiteDesk Support</string>
+  <string name="wd_support_new_msg">You have a new support message.</string>
+  <string name="wd_rd_request_title">Remote Desktop Request</string>
+  <string name="wd_ptt_broadcast_title">Radio Broadcast</string>
+  <string name="wd_ptt_call_title">Push-to-Talk Call</string>
+  <string name="wd_voice_call_title">Incoming Voice Call</string>
+  <string name="wd_support_call_title">WhiteDesk Support Call</string>
+  <string name="wd_rd_request_body">%1$s is waiting for your approval to connect to your screen.</string>
+  <string name="wd_ptt_broadcast_body">%1$s started a radio broadcast.</string>
+  <string name="wd_ptt_call_body">%1$s is making a Push-to-Talk call</string>
+  <string name="wd_voice_call_body">%1$s is making a voice call...</string>
+  <string name="wd_call_request_fallback">Call request</string>
+  <string name="wd_channel_calls_name">WhiteDesk Secure Voice Calls</string>
+  <string name="wd_channel_calls_desc">WhiteDesk incoming 1-on-1 voice calls</string>
+  <string name="wd_channel_ptt_name">WhiteDesk Field Radio Broadcasts</string>
+  <string name="wd_channel_ptt_desc">Corporate radio and push-to-talk broadcast notifications</string>
+  <string name="wd_channel_rd_name">WhiteDesk Remote Desktop Requests</string>
+  <string name="wd_channel_rd_desc">Remote desktop screen sharing approval notifications</string>
+  <string name="wd_channel_tickets_name">WhiteDesk Support Notifications</string>
+  <string name="wd_channel_tickets_desc">New support tickets and message notifications</string>
 </resources>

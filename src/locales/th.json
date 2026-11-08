@@ -804,7 +804,18 @@
     "appNamePlaceholder": "ชื่อแอป (เช่น WhiteDesk)",
     "appDescPlaceholder": "คำอธิบายสั้นๆ...",
     "newDiscussion": "เริ่มการสนทนาใหม่",
-    "tierTenant": "ผู้เช่า"
+    "tierTenant": "ผู้เช่า",
+    "adminRevokeDesc": "สิทธิ์ของผู้ดูแลระบบจะถูกลบออกจากอุปกรณ์นี้และคอนโซลจะถูกล็อค",
+    "removeAdminTitle": "ลบผู้ดูแลระบบ",
+    "removeAdminConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบผู้ดูแลระบบนี้และการจัดสรรทั้งหมด?",
+    "selectAdminReq": "เลือกผู้ดูแลระบบ",
+    "selectAdminReqDesc": "โปรดเลือกผู้ดูแลระบบที่จะจัดสรร",
+    "created": "สร้างเมื่อ",
+    "lastAction": "อัปเดตล่าสุด",
+    "attachment": "ไฟล์แนบ",
+    "tierAppOrg": "แอปพลิเคชัน / องค์กร",
+    "default": "ค่าเริ่มต้น",
+    "all": "ทั้งหมด"
   },
   "license": {
     "title": "ใบอนุญาตและการสมัครสมาชิก",

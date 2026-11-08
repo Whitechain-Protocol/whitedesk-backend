@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Почати нове обговорення",
-    "tierTenant": "Орендар"
+    "tierTenant": "Орендар",
+    "adminRevokeDesc": "Права адміністратора будуть відкликані з цього пристрою, а консоль заблоковано.",
+    "removeAdminTitle": "Видалити адміністратора",
+    "removeAdminConfirm": "Ви впевнені, що хочете видалити цього адміністратора та всі його призначення?",
+    "selectAdminReq": "Виберіть адміністратора",
+    "selectAdminReqDesc": "Будь ласка, виберіть адміністратора для призначення.",
+    "created": "Створено",
+    "lastAction": "Останнє оновлення",
+    "attachment": "Вкладення",
+    "tierAppOrg": "Додаток / Організація",
+    "default": "За замовчуванням",
+    "all": "Всі"
   },
   "license": {
     "title": "Мої ліцензії",

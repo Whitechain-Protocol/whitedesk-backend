@@ -10,6 +10,87 @@
 
 import { sendFcmPushNotification } from './fcm';
 
+const WORKER_LOCALES: Record<string, Record<string, Record<string, string>>> = {
+  tr: {
+    push_notifications: {
+      default_support_title: 'WhiteDesk Destek',
+      default_operator_alias: 'Operatör',
+      default_field_officer: 'Saha Görevlisi',
+      default_corp_radio: 'Kurumsal Telsiz',
+      default_field_radio: 'Kurumsal Saha Telsizi',
+      default_user_alias: 'Kullanıcı',
+      default_admin_alias: 'Yönetici',
+      remote_desktop_title_with_alias: 'Uzak Masaüstü İsteği: {alias}',
+      remote_desktop_title: 'Uzak Masaüstü İsteği',
+      remote_desktop_body: '{alias} cihaz ekranınıza bağlanmak için onayınızı bekliyor.',
+      ptt_title_with_alias: 'Bas-Konuş İsteği: {alias}',
+      ptt_title: 'Gelen Bas-Konuş Çağrısı',
+      ptt_body: '{alias} bas-konuş çağrısı başlattı.',
+      ptt_body_connect: '{alias} bas-konuş telsiz bağlantısı kurmak istiyor.',
+      voice_call_title_with_alias: 'Gelen Çağrı: {alias}',
+      voice_call_title: 'Gelen Sesli Görüşme',
+      voice_call_body: '{alias} arıyor...',
+      voice_call_body_you: '{alias} sizi arıyor...',
+      org_radio_title: 'Telsiz Anonsu: {groupName}',
+      org_radio_body: '{alias} canlı telsiz yayını başlattı. Dinlemek için dokunun.',
+      new_support_message_body: 'Yeni destek mesajınız var.',
+      claim_root_granted: 'TheWhite Kök Erişimi Verildi',
+      claim_admin_restored: 'Yönetici oturumu geri yüklendi',
+      claim_user_restored: 'Kiracı için kullanıcı oturumu geri yüklendi',
+      claim_code_not_recognized: 'Kod tanınmadı. Lütfen yöneticinizden geçerli bir hash isteyin.',
+    },
+    helpdesk: {
+      admin_role_short: 'Admin',
+    },
+  },
+  en: {
+    push_notifications: {
+      default_support_title: 'WhiteDesk Support',
+      default_operator_alias: 'Operator',
+      default_field_officer: 'Field Officer',
+      default_corp_radio: 'Corporate Radio',
+      default_field_radio: 'Corporate Field Radio',
+      default_user_alias: 'User',
+      default_admin_alias: 'Admin',
+      remote_desktop_title_with_alias: 'Remote Desktop Request: {alias}',
+      remote_desktop_title: 'Remote Desktop Request',
+      remote_desktop_body: '{alias} is waiting for your approval to connect to your screen.',
+      ptt_title_with_alias: 'Push-to-Talk Request: {alias}',
+      ptt_title: 'Incoming Push-to-Talk Call',
+      ptt_body: '{alias} started a push-to-talk call.',
+      ptt_body_connect: '{alias} wants to establish a push-to-talk radio connection.',
+      voice_call_title_with_alias: 'Incoming Call: {alias}',
+      voice_call_title: 'Incoming Voice Call',
+      voice_call_body: '{alias} is calling...',
+      voice_call_body_you: '{alias} is calling you...',
+      org_radio_title: 'Radio Broadcast: {groupName}',
+      org_radio_body: '{alias} started a live radio broadcast. Tap to listen.',
+      new_support_message_body: 'You have a new support message.',
+      claim_root_granted: 'TheWhite Root Access Granted',
+      claim_admin_restored: 'Admin session restored',
+      claim_user_restored: 'User session restored for tenant',
+      claim_code_not_recognized: 'Code not recognized. Please ask your administrator for a valid hash.',
+    },
+    helpdesk: {
+      admin_role_short: 'Admin',
+    },
+  },
+};
+
+function workerI18n(key: string, params?: Record<string, string | number>, lang: string = 'tr'): string {
+  const normalizedLang = lang && WORKER_LOCALES[lang] ? lang : 'tr';
+  const [section, subKey] = key.split('.');
+  const template =
+    WORKER_LOCALES[normalizedLang]?.[section]?.[subKey] ??
+    WORKER_LOCALES.tr?.[section]?.[subKey] ??
+    key;
+  if (!params) return template;
+  return Object.entries(params).reduce(
+    (acc, [k, v]) => acc.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v ?? '')),
+    template
+  );
+}
+
 export interface Env {
   AUTH_RELAY: DurableObjectNamespace;
   DB?: D1Database;
@@ -269,19 +350,31 @@ async function ensureD1Schema(db: D1Database): Promise<void> {
       )
     `).run();
 
-    // Auto-migrate grace period & warning_intervals columns on consolidated whitedesk_enterprises & whitedesk_license_plans
+    // Auto-clean whitedesk_tenant_licenses and redundant columns on whitedesk_enterprises
     try { await db.prepare(`DROP VIEW IF EXISTS whitedesk_tenant_licenses`).run(); } catch {}
     try { await db.prepare(`DROP TABLE IF EXISTS whitedesk_tenant_licenses`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_enterprises ADD COLUMN grace_period_days INTEGER DEFAULT 3`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_enterprises ADD COLUMN warning_intervals INTEGER DEFAULT 12`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_enterprises ADD COLUMN grace_ends_at TEXT`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_license_plans ADD COLUMN grace_period_days INTEGER DEFAULT 5`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_license_plans ADD COLUMN annual_grace_period_days INTEGER DEFAULT 15`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_license_plans ADD COLUMN warning_intervals INTEGER DEFAULT 24`).run(); } catch {}
-    try { await db.prepare(`ALTER TABLE whitedesk_license_plans ADD COLUMN annual_warning_intervals INTEGER DEFAULT 48`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN grace_period_days`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN warning_intervals`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN grace_ends_at`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN license_status`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN trial_start_at`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN trial_end_at`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE whitedesk_enterprises DROP COLUMN license_hash`).run(); } catch {}
     try {
-      await db.prepare(`UPDATE whitedesk_license_plans SET grace_period_days = 3, annual_grace_period_days = 3, warning_intervals = 12, annual_warning_intervals = 12 WHERE id = 'trial'`).run();
-      await db.prepare(`UPDATE whitedesk_license_plans SET grace_period_days = 5, annual_grace_period_days = 15, warning_intervals = 24, annual_warning_intervals = 48 WHERE id IN ('core', 'live')`).run();
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS whitedesk_license_plans (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          tier_level INTEGER NOT NULL DEFAULT 0,
+          monthly_price REAL DEFAULT 0,
+          annual_price REAL DEFAULT 0,
+          features TEXT DEFAULT '[]',
+          grace_period TEXT DEFAULT '3',
+          grace_period_warning_interval TEXT DEFAULT '12',
+          is_active INTEGER DEFAULT 1,
+          created_at TEXT DEFAULT (datetime('now'))
+        )
+      `).run();
     } catch {}
 
     schemaVerifiedInIsolate = true;
@@ -503,7 +596,7 @@ export default {
               role: 'founder',
               enterpriseBlindId: 'thewhite',
               alias: 'TheWhite',
-              message: 'TheWhite Root Access Granted',
+              message: workerI18n('push_notifications.claim_root_granted'),
             }),
             { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
           );
@@ -524,7 +617,7 @@ export default {
               role: adm.role || 'admin',
               enterpriseBlindId: adm.enterprise_blind_id,
               alias: adm.alias,
-              message: 'Admin session restored',
+              message: workerI18n('push_notifications.claim_admin_restored'),
             }),
             { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
           );
@@ -544,7 +637,7 @@ export default {
               role: 'user',
               enterpriseBlindId: tenant.enterprise_blind_id,
               tenantName: tenant.name,
-              message: 'User session restored for tenant',
+              message: workerI18n('push_notifications.claim_user_restored'),
             }),
             { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
           );
@@ -553,7 +646,7 @@ export default {
         return new Response(
           JSON.stringify({
             success: false,
-            error: 'Code not recognized. Please ask your administrator for a valid hash.',
+            error: workerI18n('push_notifications.claim_code_not_recognized'),
           }),
           { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
@@ -795,16 +888,20 @@ export default {
 
           const isRemoteDesktop = callType === 'remote_desktop' || bodyType === 'remote_desktop_offer';
           const isPtt = !isRemoteDesktop && (callType === 'ptt' || bodyType === 'direct_ptt');
-          const alias = callerAlias || 'WhiteDesk Destek';
+          const alias = callerAlias || workerI18n('push_notifications.default_support_title');
           const resolvedType = bodyType || (isRemoteDesktop ? 'remote_desktop_offer' : (isPtt ? 'direct_ptt' : 'incoming_call'));
           const resolvedCallType = isRemoteDesktop ? 'remote_desktop' : (isPtt ? 'ptt' : 'call');
 
           const pushTitle = isRemoteDesktop
-            ? `Uzak Masaüstü İsteği: ${alias}`
-            : (isPtt ? `Bas-Konuş İsteği: ${alias}` : `Gelen Çağrı: ${alias}`);
+            ? workerI18n('push_notifications.remote_desktop_title_with_alias', { alias })
+            : (isPtt
+                ? workerI18n('push_notifications.ptt_title_with_alias', { alias })
+                : workerI18n('push_notifications.voice_call_title_with_alias', { alias }));
           const pushBody = isRemoteDesktop
-            ? `${alias} cihaz ekranınıza bağlanmak için onayınızı bekliyor.`
-            : (isPtt ? `${alias} bas-konuş çağrısı başlattı.` : `${alias} arıyor...`);
+            ? workerI18n('push_notifications.remote_desktop_body', { alias })
+            : (isPtt
+                ? workerI18n('push_notifications.ptt_body', { alias })
+                : workerI18n('push_notifications.voice_call_body', { alias }));
 
           const result = await sendFcmPushNotification(env.FIREBASE_SERVICE_ACCOUNT, targetTokens, {
             title: pushTitle,
@@ -982,12 +1079,12 @@ export default {
             });
           }
 
-          const groupName = orgName || 'Kurumsal Telsiz';
-          const alias = callerAlias || 'Saha Görevlisi';
+          const groupName = orgName || workerI18n('push_notifications.default_corp_radio');
+          const alias = callerAlias || workerI18n('push_notifications.default_field_officer');
 
           const result = await sendFcmPushNotification(env.FIREBASE_SERVICE_ACCOUNT, tokensToSend, {
-            title: `Telsiz Anonsu: ${groupName}`,
-            body: `${alias} canlı telsiz yayını başlattı. Dinlemek için dokunun.`,
+            title: workerI18n('push_notifications.org_radio_title', { groupName }),
+            body: workerI18n('push_notifications.org_radio_body', { alias }),
             priority: 'high',
             ttl: '30s',
             isCall: true,
@@ -1089,8 +1186,8 @@ export default {
           tokens = (fallbackRows || []).map((r: any) => r.push_token).filter((t: string) => t && !senderTokens.has(t));
         }
 
-        const resolvedTitle = title || title_tr || 'WhiteDesk Destek';
-        const resolvedBody = rawBody || bodyText || body_tr || messageText || message || 'Yeni destek mesajınız var.';
+        const resolvedTitle = title || title_tr || workerI18n('push_notifications.default_support_title');
+        const resolvedBody = rawBody || bodyText || body_tr || messageText || message || workerI18n('push_notifications.new_support_message_body');
 
         const res = await sendFcmPushNotification(env.FIREBASE_SERVICE_ACCOUNT, tokens, {
           title: resolvedTitle,
@@ -1273,9 +1370,9 @@ export default {
             if (!blind) return;
             const idx = activePeers.findIndex((p) => p.whiteId.toLowerCase() === blind.toLowerCase());
             if (idx >= 0) {
-              activePeers[idx] = { whiteId: blind, alias: alias || activePeers[idx].alias || 'Kullanıcı', ts: now };
+              activePeers[idx] = { whiteId: blind, alias: alias || activePeers[idx].alias || workerI18n('push_notifications.default_user_alias'), ts: now };
             } else {
-              activePeers.push({ whiteId: blind, alias: alias || 'Kullanıcı', ts: now });
+              activePeers.push({ whiteId: blind, alias: alias || workerI18n('push_notifications.default_user_alias'), ts: now });
             }
           };
 
@@ -1294,7 +1391,7 @@ export default {
             try {
               const offerObj = JSON.parse(sdp);
               if (offerObj.callerWhiteId) {
-                await upsertPeer(offerObj.callerWhiteId, offerObj.callerAlias || 'Yönetici');
+                await upsertPeer(offerObj.callerWhiteId, offerObj.callerAlias || workerI18n('push_notifications.default_admin_alias'));
               }
               offerObj.activePeers = activePeers;
               finalOfferSdp = JSON.stringify(offerObj);
@@ -1659,7 +1756,7 @@ export default {
         }
 
         const targetKey = existing?.white_id || blindId;
-        const resolvedAlias = name || existing?.alias || 'Admin';
+        const resolvedAlias = name || existing?.alias || workerI18n('helpdesk.admin_role_short');
         const resolvedRole = existing?.role || 'admin';
 
         await env.DB.prepare(`

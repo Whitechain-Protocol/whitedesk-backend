@@ -70,7 +70,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 interface I18nContextType {
   language: string;
   setLanguage: (lang: string) => Promise<void>;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: (key: string, paramsOrFallback?: Record<string, string | number> | string, maybeParams?: Record<string, string | number>) => string;
   languages: LanguageOption[];
   currentLanguageDetails: LanguageOption;
   getLanguageName: (targetCode: string) => string;
@@ -122,40 +122,63 @@ export const i18nService = {
   getCurrentLanguage: () => currentActiveLanguage,
   getLanguageName: (targetCode: string) => getLocalizedLanguageName(currentActiveLanguage, targetCode),
   
-  t: (key: string, params?: Record<string, string | number>): string => {
-    return resolveTranslation(currentActiveLanguage, key, params);
+  t: (key: string, paramsOrFallback?: Record<string, string | number> | string, maybeParams?: Record<string, string | number>): string => {
+    return resolveTranslation(currentActiveLanguage, key, paramsOrFallback, maybeParams);
   }
 };
 
-function resolveTranslation(lang: string, key: string, params?: Record<string, string | number>): string {
+function lookupInLang(lang: string, key: string): string | undefined {
+  const dict = translations[lang];
+  if (!dict) return undefined;
+
   const keys = key.split('.');
-  
+  const value: any = keys.reduce((obj, k) => (obj && typeof obj === 'object' ? obj[k] : undefined), dict);
+  if (typeof value === 'string') return value;
+
+  if (!key.startsWith('helpdesk.') && dict.helpdesk && typeof dict.helpdesk === 'object') {
+    const hdValue: any = keys.reduce((obj, k) => (obj && typeof obj === 'object' ? obj[k] : undefined), dict.helpdesk);
+    if (typeof hdValue === 'string') return hdValue;
+  }
+
+  return undefined;
+}
+
+function resolveTranslation(
+  lang: string,
+  key: string,
+  paramsOrFallback?: Record<string, string | number> | string,
+  maybeParams?: Record<string, string | number>
+): string {
+  const fallbackStr = typeof paramsOrFallback === 'string' ? paramsOrFallback : undefined;
+  const params = typeof paramsOrFallback === 'object' && paramsOrFallback !== null ? paramsOrFallback : maybeParams;
+
   // Try selected language
-  let value = keys.reduce((obj, k) => obj && obj[k], translations[lang]);
-  
+  let value = lookupInLang(lang, key);
+
   // Fallback to English if not found
   if (value === undefined && lang !== 'en') {
-    value = keys.reduce((obj, k) => obj && obj[k], translations['en']);
+    value = lookupInLang('en', key);
   }
-  
-  // Fallback to raw key if still not found
+
+  // Fallback to Turkish master dictionary if not yet in English
+  if (value === undefined && lang !== 'tr') {
+    value = lookupInLang('tr', key);
+  }
+
+  // Fallback to provided fallback string or raw key if still not found
   if (value === undefined) {
-    return key;
+    value = fallbackStr !== undefined ? fallbackStr : key;
   }
-  
-  if (typeof value !== 'string') {
-    return String(value);
-  }
-  
-  // Replace parameters like {count}, {name}
+
+  // Replace parameters like {count}, {name} or {{count}}, {{name}}
   if (params) {
     let result = value;
     for (const [paramKey, paramVal] of Object.entries(params)) {
-      result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramVal));
+      result = result.replace(new RegExp(`\\{\\{?${paramKey}\\}?\\}`, 'g'), String(paramVal));
     }
     return result;
   }
-  
+
   return value;
 }
 
@@ -211,8 +234,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const t = useCallback((key: string, params?: Record<string, string | number>): string => {
-    return resolveTranslation(language, key, params);
+  const t = useCallback((key: string, paramsOrFallback?: Record<string, string | number> | string, maybeParams?: Record<string, string | number>): string => {
+    return resolveTranslation(language, key, paramsOrFallback, maybeParams);
   }, [language]);
 
   const getLanguageName = useCallback((targetCode: string): string => {

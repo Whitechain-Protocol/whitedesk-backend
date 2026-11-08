@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { helpDeskService, HelpDeskTicket, HelpDeskMessage } from '../../../services/helpDeskService';
 import { WhiteDeskCrypto } from '../../../whitedesk-sdk';
 import { ephemeralAuthService } from '../../../services/ephemeralAuthService';
+import { i18nService } from '../../../services/i18nService';
 import { AdvancedFeaturesConfig } from '../types';
 
 export interface UseHelpDeskGovernanceProps {
@@ -19,7 +20,7 @@ export interface UseHelpDeskGovernanceProps {
   setTickets: React.Dispatch<React.SetStateAction<HelpDeskTicket[]>>;
   advancedFeaturesConfig: AdvancedFeaturesConfig | null;
   language: 'tr' | 'en';
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string | Record<string, string | number>, en?: string) => string;
   formatWhiteId: (id: string | null | undefined) => string;
   setConfirmSheet: (sheet: any) => void;
   handleBackToList: () => void;
@@ -120,15 +121,12 @@ export function useHelpDeskGovernance({
       setTickets(prev => prev.map(t => t.id === tkt.id ? { ...t, org_id: orgId, app_id: appId } : t));
       setTicketOrgAssignModalVisible(false);
 
-      const isTr = language === 'tr';
       Alert.alert(
-        isTr ? 'Org / App Düzenle' : 'Org / App Assignment',
-        isTr
-          ? 'Organizasyon birimi ve uygulama ataması başarıyla güncellendi.'
-          : 'Organization unit and application assignment successfully updated.'
+        getLabel('helpdesk.org_app_assign_title'),
+        getLabel('helpdesk.org_app_assign_updated_desc')
       );
     }
-  }, [targetActionTicket, selectedTicket, activeEnterpriseBlindId, language, setSelectedTicket, setTickets]);
+  }, [targetActionTicket, selectedTicket, activeEnterpriseBlindId, getLabel, setSelectedTicket, setTickets]);
 
   // 3. Delete single ticket
   const handleDeleteSingleTicket = useCallback(() => {
@@ -137,11 +135,11 @@ export function useHelpDeskGovernance({
     setTicketActionModalVisible(false);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteTicketTitle', 'Bileti Sil', 'Delete Ticket'),
-      description: `#${tkt.id} ${getLabel('helpdesk.deleteTicketConfirm', 'numaralı bilet ve tüm mesajları kalıcı olarak silinecektir. Onaylıyor musunuz?', 'ticket and all its messages will be permanently deleted. Do you confirm?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteTicketTitle'),
+      description: `#${tkt.id} ${getLabel('helpdesk.deleteTicketConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -163,11 +161,11 @@ export function useHelpDeskGovernance({
     setTicketActionModalVisible(false);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.adminRevokeUserTitle', 'Yöneticilik Yetkisini İptal Et (Revoke)', 'Revoke Admin Authority'),
-      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.adminRevokeConfirm', 'kullanıcısının yöneticilik yetkisi iptal edilecek ve cihazındaki kasa derhal sıfırlanacaktır. Onaylıyor musunuz?', 'admin privileges will be revoked and device vault wiped via Poison Pill. Do you confirm?')}`,
-      actionText: getLabel('helpdesk.adminRevokeAction', 'Yetkiyi İptal Et', 'Revoke Authority'),
+      title: getLabel('helpdesk.adminRevokeUserTitle'),
+      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.adminRevokeConfirm')}`,
+      actionText: getLabel('helpdesk.adminRevokeAction'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -208,11 +206,11 @@ export function useHelpDeskGovernance({
     setTicketActionModalVisible(false);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.makeCosmosTitle', 'WhiteCosmos (Global Admin *) Ata', 'Assign WhiteCosmos (Global Admin *)'),
-      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.makeCosmosConfirm', 'kullanıcısını bu kiracının yetkili WhiteCosmos Global Yöneticisi yapmak istiyor musunuz?', 'promote this user to the WhiteCosmos Global Admin for this tenant?')}`,
-      actionText: getLabel('helpdesk.makeCosmosAction', 'Global Admin Ata', 'Assign Global Admin'),
+      title: getLabel('helpdesk.makeCosmosTitle'),
+      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.makeCosmosConfirm')}`,
+      actionText: getLabel('helpdesk.makeCosmosAction'),
       actionColor: '#7C3AED',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -239,11 +237,11 @@ export function useHelpDeskGovernance({
     setTicketActionModalVisible(false);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.blockUserTitle', 'Kullanıcıyı Engelle', 'Block User'),
-      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.blockUserConfirm', 'kullanıcısının tüm destek biletleri ve erişimleri engellenecektir. Onaylıyor musunuz?', 'user tickets and access will be blocked. Do you confirm?')}`,
-      actionText: getLabel('helpdesk.blockUserAction', 'Engelle', 'Block User'),
+      title: getLabel('helpdesk.blockUserTitle'),
+      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.blockUserConfirm')}`,
+      actionText: getLabel('helpdesk.blockUserAction'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -261,11 +259,11 @@ export function useHelpDeskGovernance({
     setTicketActionModalVisible(false);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteTicketUserTitle', 'Bileti ve Kullanıcıyı Sil', 'Delete Ticket and User'),
-      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.deleteTicketUserConfirm', 'kullanıcısının biletleri ve sistem bağlaması kalıcı olarak silinecektir. Onaylıyor musunuz?', 'user tickets and bindings will be permanently deleted. Do you confirm?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteTicketUserTitle'),
+      description: `${formatWhiteId(targetId)} ${getLabel('helpdesk.deleteTicketUserConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -277,20 +275,17 @@ export function useHelpDeskGovernance({
 
   // 9. Self destruct / Digital Clean proposal
   const showDigitalCleanProposal = useCallback((ticket: HelpDeskTicket) => {
-    const isTr = language === 'tr';
     const retentionHours = Number(advancedFeaturesConfig?.selfDestruct?.retentionAfterResolvedHours) || 72;
     const durationText = retentionHours >= 168
-      ? (isTr ? `${Math.round(retentionHours / 24)} gün` : `${Math.round(retentionHours / 24)} days`)
-      : (isTr ? `${retentionHours} saat` : `${retentionHours} hours`);
+      ? i18nService.t('helpdesk.duration_days', { count: Math.round(retentionHours / 24) })
+      : i18nService.t('helpdesk.duration_hours', { count: retentionHours });
 
     setConfirmSheet({
       visible: true,
-      title: isTr ? 'Silme Sürecini Başlat' : 'Start Deletion Process',
-      description: isTr
-        ? `Bilet ve ekleri ${durationText} sonra yerel depolama ve sunucudan kalıcı olarak silinsin mi?`
-        : `Shall this ticket and attachments be permanently purged after ${durationText}?`,
-      actionText: isTr ? 'Süreci Başlat' : 'Start Process',
-      cancelText: isTr ? 'Sakla' : 'Keep',
+      title: getLabel('helpdesk.self_destruct_start_title'),
+      description: i18nService.t('helpdesk.self_destruct_start_desc', { duration: durationText }),
+      actionText: getLabel('helpdesk.self_destruct_start_btn'),
+      cancelText: getLabel('helpdesk.self_destruct_keep_btn'),
       actionColor: '#10B981',
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -303,11 +298,9 @@ export function useHelpDeskGovernance({
         setTimeout(() => {
           setConfirmSheet({
             visible: true,
-            title: isTr ? 'Silme Süreci Başlatıldı' : 'Deletion Process Started',
-            description: isTr
-              ? `Bilet ${durationText} sonra silinecektir. Dilediğinizde menüden durdurabilirsiniz.`
-              : `Ticket will be purged in ${durationText}. You can stop this anytime from the menu.`,
-            actionText: isTr ? 'Tamam' : 'OK',
+            title: getLabel('helpdesk.self_destruct_started_title'),
+            description: i18nService.t('helpdesk.self_destruct_started_desc', { duration: durationText }),
+            actionText: getLabel('common.ok'),
             actionColor: '#10B981',
             onAction: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
           });
@@ -317,18 +310,15 @@ export function useHelpDeskGovernance({
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
       },
     });
-  }, [language, advancedFeaturesConfig, loadData, setSelectedTicket, setTickets, setConfirmSheet]);
+  }, [advancedFeaturesConfig, getLabel, loadData, setSelectedTicket, setTickets, setConfirmSheet]);
 
   const handleStopAutoDelete = useCallback((ticket: HelpDeskTicket) => {
-    const isTr = language === 'tr';
     setConfirmSheet({
       visible: true,
-      title: isTr ? 'Silme Sürecini Durdur' : 'Stop Deletion Process',
-      description: isTr
-        ? 'Silme sayacını durdurup bileti saklamak istiyor musunuz?'
-        : 'Do you want to stop the deletion countdown and retain this ticket?',
-      actionText: isTr ? 'Süreci Durdur' : 'Stop Process',
-      cancelText: isTr ? 'Vazgeç' : 'Cancel',
+      title: getLabel('helpdesk.self_destruct_stop_title'),
+      description: getLabel('helpdesk.self_destruct_stop_desc'),
+      actionText: getLabel('helpdesk.self_destruct_stop_btn'),
+      cancelText: getLabel('common.cancel'),
       actionColor: '#EF4444',
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -339,11 +329,9 @@ export function useHelpDeskGovernance({
         setTimeout(() => {
           setConfirmSheet({
             visible: true,
-            title: isTr ? 'Silme Süreci Durduruldu' : 'Deletion Process Stopped',
-            description: isTr
-              ? 'Biletiniz saklanmaya devam edecektir.'
-              : 'Deletion countdown stopped. Your ticket will be retained.',
-            actionText: isTr ? 'Tamam' : 'OK',
+            title: getLabel('helpdesk.self_destruct_stopped_title'),
+            description: getLabel('helpdesk.self_destruct_stopped_desc'),
+            actionText: getLabel('common.ok'),
             actionColor: '#3B82F6',
             onAction: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
           });
@@ -353,7 +341,7 @@ export function useHelpDeskGovernance({
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
       },
     });
-  }, [language, loadData, setSelectedTicket, setTickets, setConfirmSheet]);
+  }, [getLabel, loadData, setSelectedTicket, setTickets, setConfirmSheet]);
 
   const handleStartSelfDestruct = useCallback(async (ticket?: any) => {
     const tkt = (ticket && typeof ticket === 'object' && 'id' in ticket && typeof ticket.id === 'string')

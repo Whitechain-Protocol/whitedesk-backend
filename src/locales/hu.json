@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "Új beszélgetés indítása",
-    "tierTenant": "Bérlő"
+    "tierTenant": "Bérlő",
+    "adminRevokeDesc": "A rendszergazdai jogosultságok eltávolításra kerülnek erről az eszközről, és a konzol zárolásra kerül.",
+    "removeAdminTitle": "Rendszergazda eltávolítása",
+    "removeAdminConfirm": "Biztosan el kívánja távolítani ezt a rendszergazdát és az összes hozzárendelését?",
+    "selectAdminReq": "Rendszergazda kiválasztása",
+    "selectAdminReqDesc": "Kérjük, válasszon egy rendszergazdát a hozzárendeléshez.",
+    "created": "Létrehozva",
+    "lastAction": "Utolsó frissítés",
+    "attachment": "Melléklet",
+    "tierAppOrg": "Alkalmazás / Szervezet",
+    "default": "Alapértelmezett",
+    "all": "Összes"
   },
   "license": {
     "title": "Saját licencek",

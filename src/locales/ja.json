@@ -804,7 +804,18 @@
     "appNamePlaceholder": "アプリ名 (例: WhiteDesk)",
     "appDescPlaceholder": "簡単な説明...",
     "newDiscussion": "新しいディスカッションを開始",
-    "tierTenant": "テナント"
+    "tierTenant": "テナント",
+    "adminRevokeDesc": "この端末から管理者権限が削除され、コンソールがロックされます。",
+    "removeAdminTitle": "管理者を削除",
+    "removeAdminConfirm": "この管理者とそのすべての割り当てを削除してもよろしいですか？",
+    "selectAdminReq": "管理者を選択",
+    "selectAdminReqDesc": "割り当てる管理者を選択してください。",
+    "created": "作成日時",
+    "lastAction": "最終更新",
+    "attachment": "添付ファイル",
+    "tierAppOrg": "アプリ / 組織",
+    "default": "デフォルト",
+    "all": "すべて"
   },
   "license": {
     "title": "ライセンスとサブスクリプション",

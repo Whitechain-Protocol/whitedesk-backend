@@ -6,6 +6,7 @@ import * as Sharing from 'expo-sharing';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { AttachedFile } from '../types';
 import { getFileMimeType, isImageFile } from '../utils/fileMimeUtils';
+import { i18nService } from '../../../services/i18nService';
 
 export function useHelpDeskAttachments() {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -39,7 +40,7 @@ export function useHelpDeskAttachments() {
     }
     return {
       data: JSON.stringify(files),
-      name: `${files.length} dosya`,
+      name: i18nService.t('helpdesk.multiple_files_count', { count: files.length }),
       type: 'multi',
     };
   }, []);
@@ -110,7 +111,7 @@ export function useHelpDeskAttachments() {
           const base64Data = await ReactNativeBlobUtil.fs.readFile(doc.uri, 'base64');
           newDocs.push({
             data: base64Data,
-            name: doc.name || 'document.pdf',
+            name: doc.name || i18nService.t('helpdesk.attachment_file_default'),
             type: 'document',
             mimeType: doc.mimeType || 'application/octet-stream',
           });
@@ -180,7 +181,7 @@ export function useHelpDeskAttachments() {
 
   const handleOpenDocument = useCallback(async (name: string, dataOrUri: string) => {
     try {
-      const cleanName = name || 'document.pdf';
+      const cleanName = name || i18nService.t('helpdesk.attachment_file_default');
       const binaryPath = await ensureBinaryFile(dataOrUri, cleanName);
       const isPdf = cleanName.toLowerCase().endsWith('.pdf');
 

@@ -4,6 +4,7 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import { helpDeskService, HelpDeskCategory, HelpDeskTicket, AdminEntry, AppCatEntry } from '../../../services/helpDeskService';
+import { i18nService } from '../../../services/i18nService';
 import { CustomFieldDef, CatalogItem } from '../types';
 
 export const COSMIC_PREFIXES = [
@@ -31,7 +32,7 @@ export interface UseHelpDeskStationProps {
   selectedAdminId: string;
   setSelectedAdminId: (id: string) => void;
   language: 'tr' | 'en';
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string | Record<string, string | number>, en?: string) => string;
   formatWhiteId: (id: string | null | undefined) => string;
   formatAppId: (appId: string | null | undefined) => string;
   getCategoryLabel: (catKey: string | null | undefined) => string;
@@ -154,9 +155,9 @@ export function useHelpDeskStation({
     if (!trimmed) {
       setConfirmSheet({
         visible: true,
-        title: 'Hata',
-        description: 'Lütfen geçerli bir kurum/firma adı belirtin.',
-        actionText: 'Tamam',
+        title: getLabel('common.error'),
+        description: getLabel('helpdesk.err_invalid_enterprise_name'),
+        actionText: getLabel('common.ok'),
         onAction: () => setConfirmSheet((p: any) => ({ ...p, visible: false })),
       });
       return;
@@ -167,13 +168,13 @@ export function useHelpDeskStation({
       setCurrentEnterpriseName(trimmed);
       setConfirmSheet({
         visible: true,
-        title: 'Başarılı',
-        description: `Firma adı '${trimmed}' olarak güncellendi.`,
-        actionText: 'Tamam',
+        title: getLabel('common.success'),
+        description: i18nService.t('helpdesk.enterprise_name_updated', { name: trimmed }),
+        actionText: getLabel('common.ok'),
         onAction: () => setConfirmSheet((p: any) => ({ ...p, visible: false })),
       });
     }
-  }, [editTenantNameInput, activeEnterpriseBlindId, setCurrentEnterpriseName, setConfirmSheet]);
+  }, [editTenantNameInput, activeEnterpriseBlindId, getLabel, setCurrentEnterpriseName, setConfirmSheet]);
 
   const processTransparentLogo = useCallback(async (uri: string): Promise<string> => {
     try {
@@ -215,7 +216,7 @@ export function useHelpDeskStation({
           mimeType.includes('jpg');
 
         if (!isSvg && !isRaster) {
-          Alert.alert('Geçersiz Format', 'Lütfen SVG, PNG veya JPG formatında bir logo dosyası seçin.');
+          Alert.alert(getLabel('helpdesk.err_invalid_logo_format_title'), getLabel('helpdesk.err_invalid_logo_format_desc'));
           return;
         }
 
@@ -250,9 +251,9 @@ export function useHelpDeskStation({
       }
     } catch (err) {
       console.warn('[useHelpDeskStation] Pick logo error:', err);
-      Alert.alert('Hata', 'Logo yüklenirken bir sorun oluştu.');
+      Alert.alert(getLabel('common.error'), getLabel('helpdesk.err_logo_upload'));
     }
-  }, [activeEnterpriseBlindId, processTransparentLogo]);
+  }, [activeEnterpriseBlindId, getLabel, processTransparentLogo]);
 
   const handleRemoveLogo = useCallback(async () => {
     const blindId = activeEnterpriseBlindId || 'default';
@@ -286,8 +287,8 @@ export function useHelpDeskStation({
         const isPdf = (asset.name || '').toLowerCase().endsWith('.pdf') || (asset.mimeType || '').includes('pdf');
         if (isPdf) {
           Alert.alert(
-            'PDF Bilgilendirmesi',
-            'PDF içindeki logoyu en net şekilde alabilmek için lütfen ilgili sayfanın ekran görüntüsünü (screenshot) alıp dosyalar içerisinden seçin.'
+            getLabel('helpdesk.pdf_logo_notice_title'),
+            getLabel('helpdesk.pdf_logo_notice_desc')
           );
           return;
         }
@@ -296,9 +297,9 @@ export function useHelpDeskStation({
       }
     } catch (err) {
       console.warn('[useHelpDeskStation] Pick document for crop error:', err);
-      Alert.alert('Hata', 'Belge/dosya seçilirken bir sorun oluştu.');
+      Alert.alert(getLabel('common.error'), getLabel('helpdesk.err_document_pick'));
     }
-  }, []);
+  }, [getLabel]);
 
   const handleConfirmCrop = useCallback(async (cropInfo: { x: number; y: number; width: number; height: number }) => {
     try {
@@ -339,25 +340,25 @@ export function useHelpDeskStation({
       setCropSourceImageUri(null);
     } catch (err) {
       console.warn('[useHelpDeskStation] Crop & transparent logo error:', err);
-      Alert.alert('Hata', 'Logo kırpılırken ve arka planı temizlenirken bir sorun oluştu.');
+      Alert.alert(getLabel('common.error'), getLabel('helpdesk.err_logo_crop'));
       setCropModalVisible(false);
       setCropSourceImageUri(null);
     }
-  }, [cropSourceImageUri, activeEnterpriseBlindId]);
+  }, [cropSourceImageUri, activeEnterpriseBlindId, getLabel]);
 
   const handleLongPressLogoToCrop = useCallback(() => {
     if (!tenantLogoUri) return;
     const cleanUri = tenantLogoUri.split('?')[0];
     if (cleanUri.toLowerCase().endsWith('.svg')) {
       Alert.alert(
-        'Vektör Logo (SVG)',
-        'SVG logolar vektörel olduğu için doğrudan kayıpsız ölçeklenir. Kırpma aracı raster (PNG/JPG) görseller için geçerlidir.'
+        getLabel('helpdesk.svg_logo_notice_title'),
+        getLabel('helpdesk.svg_logo_notice_desc')
       );
       return;
     }
     setCropSourceImageUri(cleanUri);
     setCropModalVisible(true);
-  }, [tenantLogoUri]);
+  }, [tenantLogoUri, getLabel]);
 
   // --- Handlers: Custom Fields ---
   const handleAddChip = useCallback(async (label: string) => {
@@ -399,24 +400,24 @@ export function useHelpDeskStation({
       const blindId = activeEnterpriseBlindId || 'default';
       const res = await helpDeskService.generateNewAdminHash(blindId, 1);
       if (!res.success || !res.hash) {
-        Alert.alert('Hata', 'Operatör lisans anahtarı üretilemedi.');
+        Alert.alert(getLabel('common.error'), getLabel('helpdesk.err_operator_license_gen'));
         return;
       }
-      const filename = `whitedesk_operator_lisansi_${Date.now()}.txt`;
+      const filename = `whitedesk_operator_license_${Date.now()}.txt`;
       const content = [
         '============================================================',
-        'WHITEDESK LİSANS DOSYASI',
+        getLabel('helpdesk.license_file_header'),
         '============================================================',
-        `Kuruluş     : ${currentEnterpriseName}`,
-        'Lisans Türü : Operatör Koltuğu (+1)',
-        `Üretim Tarihi: ${new Date().toLocaleString('tr-TR')}`,
+        i18nService.t('helpdesk.license_file_enterprise', { name: currentEnterpriseName || '' }),
+        getLabel('helpdesk.license_file_type_operator'),
+        i18nService.t('helpdesk.license_file_date', { date: new Date().toLocaleString() }),
         '',
-        'LİSANS ANAHTARI (HASH):',
+        getLabel('helpdesk.license_file_key_label'),
         res.hash,
         '============================================================',
-        'Bu dosyayı güvenli bir yerde saklayın.',
-        'Operatör davetinde veya Lisans Yükseltme ekranında',
-        'bu anahtarı kullanarak yetkilendirme sağlayabilirsiniz.',
+        getLabel('helpdesk.license_file_keep_safe'),
+        getLabel('helpdesk.license_file_operator_note1'),
+        getLabel('helpdesk.license_file_operator_note2'),
         '============================================================',
       ].join('\n');
 
@@ -426,15 +427,15 @@ export function useHelpDeskStation({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(filePath, {
           mimeType: 'text/plain',
-          dialogTitle: 'Operatör Lisansını Kaydet',
+          dialogTitle: getLabel('helpdesk.save_operator_license_title'),
           UTI: 'public.plain-text',
         });
       }
       await loadConsoleData();
     } catch (err: any) {
-      Alert.alert('Hata', err?.message || 'Lisans dosyası oluşturulamadı.');
+      Alert.alert(getLabel('common.error'), err?.message || getLabel('helpdesk.err_license_file_create'));
     }
-  }, [activeEnterpriseBlindId, currentEnterpriseName, loadConsoleData]);
+  }, [activeEnterpriseBlindId, currentEnterpriseName, getLabel, loadConsoleData]);
 
   const handleGenerateOperatorInviteHash = useCallback(async () => {
     await handleGenerateOperatorAddonFile();
@@ -445,24 +446,24 @@ export function useHelpDeskStation({
       const blindId = activeEnterpriseBlindId || 'default';
       const res = await helpDeskService.generateNewUserHash(blindId, 25);
       if (!res.success || !res.hash) {
-        Alert.alert('Hata', 'Müşteri kota lisansı üretilemedi.');
+        Alert.alert(getLabel('common.error'), getLabel('helpdesk.err_customer_license_gen'));
         return;
       }
-      const filename = `whitedesk_musteri_kotasi_${Date.now()}.txt`;
+      const filename = `whitedesk_customer_quota_${Date.now()}.txt`;
       const content = [
         '============================================================',
-        'WHITEDESK LİSANS DOSYASI',
+        getLabel('helpdesk.license_file_header'),
         '============================================================',
-        `Kuruluş     : ${currentEnterpriseName}`,
-        'Lisans Türü : Müşteri Kotası (+25)',
-        `Üretim Tarihi: ${new Date().toLocaleString('tr-TR')}`,
+        i18nService.t('helpdesk.license_file_enterprise', { name: currentEnterpriseName || '' }),
+        getLabel('helpdesk.license_file_type_customer'),
+        i18nService.t('helpdesk.license_file_date', { date: new Date().toLocaleString() }),
         '',
-        'LİSANS ANAHTARI (HASH):',
+        getLabel('helpdesk.license_file_key_label'),
         res.hash,
         '============================================================',
-        'Bu dosyayı güvenli bir yerde saklayın.',
-        'Lisans Yükseltme alanında bu anahtarı doğrulatarak',
-        '25 kişilik müşteri kotanızı anında aktif edebilirsiniz.',
+        getLabel('helpdesk.license_file_keep_safe'),
+        getLabel('helpdesk.license_file_customer_note1'),
+        getLabel('helpdesk.license_file_customer_note2'),
         '============================================================',
       ].join('\n');
 
@@ -472,15 +473,15 @@ export function useHelpDeskStation({
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(filePath, {
           mimeType: 'text/plain',
-          dialogTitle: 'Müşteri Kota Lisansını Kaydet',
+          dialogTitle: getLabel('helpdesk.save_customer_license_title'),
           UTI: 'public.plain-text',
         });
       }
       await loadConsoleData();
     } catch (err: any) {
-      Alert.alert('Hata', err?.message || 'Lisans dosyası oluşturulamadı.');
+      Alert.alert(getLabel('common.error'), err?.message || getLabel('helpdesk.err_license_file_create'));
     }
-  }, [activeEnterpriseBlindId, currentEnterpriseName, loadConsoleData]);
+  }, [activeEnterpriseBlindId, currentEnterpriseName, getLabel, loadConsoleData]);
 
   const handleUpgradeLicenseWithHash = useCallback(async () => {
     const trimmed = licenseUpgradeHashInput.trim();
@@ -490,9 +491,9 @@ export function useHelpDeskStation({
       setLicenseUpgradeHashInput('');
       setConfirmSheet({
         visible: true,
-        title: 'Lisans Güncellendi',
+        title: getLabel('helpdesk.license_updated_title'),
         description: res.message,
-        actionText: 'Tamam',
+        actionText: getLabel('common.ok'),
         onAction: () => setConfirmSheet((p: any) => ({ ...p, visible: false })),
       });
       await loadConsoleData();
@@ -500,13 +501,13 @@ export function useHelpDeskStation({
     } else {
       setConfirmSheet({
         visible: true,
-        title: 'Geçersiz Kod',
+        title: getLabel('helpdesk.invalid_code_title'),
         description: res.message,
-        actionText: 'Tamam',
+        actionText: getLabel('common.ok'),
         onAction: () => setConfirmSheet((p: any) => ({ ...p, visible: false })),
       });
     }
-  }, [licenseUpgradeHashInput, ownWhiteId, setConfirmSheet, loadConsoleData, loadData]);
+  }, [licenseUpgradeHashInput, ownWhiteId, getLabel, setConfirmSheet, loadConsoleData, loadData]);
 
   // --- Handlers: Org / App / Category / Allocation CRUD ---
   const handleCreateOrg = useCallback(async (customName?: string, targetTenantBlindId?: string) => {
@@ -562,14 +563,14 @@ export function useHelpDeskStation({
   const handleDeleteCategory = useCallback((catId: string) => {
     if (catId === 'all') return;
     const cat = availableCategories.find(c => c.id === catId || c.key === catId);
-    const catLabel = cat ? (language === 'tr' ? cat.labelTr : cat.labelEn) : catId;
+    const catLabel = getCategoryLabel(catId) || (cat ? (cat.labelTr || cat.labelEn) : catId);
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteCatTitle', 'Kategoriyi Sil', 'Delete Category'),
-      description: `"${catLabel}" ${getLabel('helpdesk.deleteCatConfirm', 'kategorisi sistemden silinecek. Onaylıyor musunuz?', 'category will be removed from the system. Do you confirm?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteCatTitle'),
+      description: `"${catLabel}" ${getLabel('helpdesk.deleteCatConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -582,17 +583,17 @@ export function useHelpDeskStation({
         setAvailableCategories(cats);
       },
     });
-  }, [availableCategories, language, getLabel, setConfirmSheet, selectedAppId, CURRENT_APP_ID, loadConsoleData, setAvailableCategories, setSelectedCatIds]);
+  }, [availableCategories, getCategoryLabel, getLabel, setConfirmSheet, selectedAppId, CURRENT_APP_ID, loadConsoleData, setAvailableCategories, setSelectedCatIds]);
 
   const handleDeleteApp = useCallback((appId: string) => {
     if (appId === 'all' || appId === 'inwhite') return;
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteAppTitle', 'Uygulamayı Sil', 'Delete Application'),
-      description: `"${formatAppId(appId)}" ${getLabel('helpdesk.deleteAppConfirm', 'uygulaması sistemden ve tüm yetkilendirmelerden silinecektir. Onaylıyor musunuz?', 'application and all allocations will be removed. Do you confirm?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteAppTitle'),
+      description: `"${formatAppId(appId)}" ${getLabel('helpdesk.deleteAppConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -610,11 +611,11 @@ export function useHelpDeskStation({
     if (orgId === 'default' || orgId === '*') return;
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteOrgTitle', 'Organizasyonu Sil', 'Delete Organization'),
-      description: `"${orgId}" ${getLabel('helpdesk.deleteOrgConfirm', 'organizasyonu ve bağlı yetkilendirmeler sistemden silinecektir. Onaylıyor musunuz?', 'organization and all allocations will be removed. Do you confirm?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteOrgTitle'),
+      description: `"${orgId}" ${getLabel('helpdesk.deleteOrgConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -710,11 +711,11 @@ export function useHelpDeskStation({
   const handleRemoveAdmin = useCallback((adminWhiteId: string) => {
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.removeAdminTitle', 'Yöneticiyi Sil', 'Remove Admin'),
-      description: `${formatWhiteId(adminWhiteId)} ${getLabel('helpdesk.removeAdminConfirm', 'yöneticisini ve tüm yetki atamalarını silmek istediğinizden emin misiniz?', 'Are you sure you want to remove this admin and all their allocations?')}`,
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.removeAdminTitle'),
+      description: `${formatWhiteId(adminWhiteId)} ${getLabel('helpdesk.removeAdminConfirm')}`,
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
@@ -739,20 +740,23 @@ export function useHelpDeskStation({
       setAddAdminModalVisible(false);
 
       const ticketIdLabel = `#${targetTicket.id}`;
-      const appLabel = targetApp === '*' ? (language === 'tr' ? 'Tüm Uygulamalar (*)' : 'All Apps (*)') : formatAppId(targetApp);
-      const catLabel = targetCat === '*' ? (language === 'tr' ? 'Tüm Kategoriler (*)' : 'All Categories (*)') : getCategoryLabel(targetCat);
+      const appLabel = targetApp === '*' ? getLabel('helpdesk.all_apps_wildcard') : formatAppId(targetApp);
+      const catLabel = targetCat === '*' ? getLabel('helpdesk.all_cats_wildcard') : getCategoryLabel(targetCat);
 
-      const descTemplate = language === 'tr'
-        ? `${ticketIdLabel} bilet sahibine (${targetAlias}) [${appLabel} • ${catLabel}] için Ed25519 kriptografik yönetici yetkisi tanımlanacak ve Neon sistemine mühürlenecektir. Onaylıyor musunuz?`
-        : `${ticketIdLabel} ticket owner will be authorized as ${targetAlias} for [${appLabel} • ${catLabel}] with Ed25519 and sealed to Neon. Do you confirm?`;
+      const descTemplate = i18nService.t('helpdesk.assign_admin_from_ticket_desc', {
+        ticketId: ticketIdLabel,
+        alias: targetAlias,
+        appLabel,
+        catLabel,
+      });
 
       setConfirmSheet({
         visible: true,
-        title: getLabel('helpdesk.assignAdminTitle', 'Admin Authorization', 'Admin Authorization'),
+        title: getLabel('helpdesk.assignAdminTitle'),
         description: descTemplate,
-        actionText: getLabel('helpdesk.grantAuthority', 'Yetkilendir', 'Authorize'),
+        actionText: getLabel('helpdesk.grantAuthority'),
         actionColor: '#10B981',
-        cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+        cancelText: getLabel('common.cancel'),
         onCancel: () => {
           setConfirmSheet((prev: any) => ({ ...prev, visible: false }));
           setAssigningTicket(null);
@@ -818,11 +822,11 @@ export function useHelpDeskStation({
   const handleDeleteAlloc = useCallback((adminWhiteId: string, appId: string, orgId?: string) => {
     setConfirmSheet({
       visible: true,
-      title: getLabel('helpdesk.deleteAllocTitle', 'Atamayı Sil', 'Delete Allocation'),
-      description: getLabel('helpdesk.deleteAllocConfirm', 'Bu yetki ataması sistemden silinecektir.', 'This allocation will be removed from the system.'),
-      actionText: getLabel('common.delete', 'Sil', 'Delete'),
+      title: getLabel('helpdesk.deleteAllocTitle'),
+      description: getLabel('helpdesk.deleteAllocConfirm'),
+      actionText: getLabel('common.delete'),
       actionColor: '#EF4444',
-      cancelText: getLabel('common.cancel', 'Vazgeç', 'Cancel'),
+      cancelText: getLabel('common.cancel'),
       onCancel: () => setConfirmSheet((prev: any) => ({ ...prev, visible: false })),
       onAction: async () => {
         setConfirmSheet((prev: any) => ({ ...prev, visible: false }));

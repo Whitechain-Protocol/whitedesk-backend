@@ -46,7 +46,7 @@ interface TicketListViewProps {
   filteredTickets: HelpDeskTicket[];
   openTicketDetail: (ticket: HelpDeskTicket) => void;
   handleTicketLongPress: (ticket: HelpDeskTicket) => void;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, trOrParams?: string | Record<string, string | number>, en?: string, maybeParams?: Record<string, string | number>) => string;
   formatWhiteId: (id: string) => string;
   formatAppId: (id?: string) => string;
   formatTicketDate: (ts: number, showTime?: boolean) => string;
@@ -136,12 +136,12 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.sectionTitleText}>
-              {isAdmin ? 'WhiteDesk Admin' : 'WhiteDesk'}
+              {isAdmin ? getLabel('helpdesk.titleAdmin') : getLabel('helpdesk.titleUser')}
             </Text>
             <Text style={styles.sectionSubtitleText}>
               {isAdmin
-                ? (isFounder ? 'TheWhite Root Licensing & Multi-Tenant' : (currentEnterpriseName || 'Kurumsal Destek Masası'))
-                : (currentEnterpriseName || 'Destek ve Operasyon Merkezi')}
+                ? (isFounder ? getLabel('helpdesk.founder_root_subtitle') : (currentEnterpriseName || getLabel('helpdesk.enterprise_support_desk')))
+                : (currentEnterpriseName || getLabel('helpdesk.support_and_ops_center'))}
             </Text>
 
             {/* "Kendinizi tanımlayın" with grey pencil icon */}
@@ -152,7 +152,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
             >
               <Edit3 size={12} color="#94A3B8" strokeWidth={2} style={{ marginRight: 4 }} />
               <Text style={styles.identifyText}>
-                {customAlias ? customAlias : (language === 'tr' ? 'Kendinizi tanımlayın' : 'Identify yourself')}
+                {customAlias ? customAlias : getLabel('helpdesk.identify_yourself')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -168,7 +168,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         >
           <Plus size={18} color="#FFFFFF" strokeWidth={2.5} style={{ marginRight: 6 }} />
           <Text style={styles.fluidNewTicketBtnText}>
-            {language === 'en' ? 'Create a new ticket' : 'Yeni bir bilet oluştur'}
+            {getLabel('helpdesk.create_new_ticket_btn')}
           </Text>
           <ArrowUp size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
         </TouchableOpacity>
@@ -183,7 +183,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         >
           <MessageSquare size={18} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 6 }} />
           <Text style={styles.fluidNewTicketBtnText}>
-            {language === 'en' ? 'Start a discussion' : 'Bir tartışma başlat'}
+            {getLabel('helpdesk.start_discussion_btn')}
           </Text>
           {isMasterAdmin || isFounder || isTheWhite || isGlobalAdmin ? (
             <ArrowDown size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
@@ -205,7 +205,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         >
           <Radio size={18} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 8 }} />
           <Text style={styles.fluidNewTicketBtnText}>
-            {language === 'en' ? 'Start a radio broadcast' : 'Bir telsiz yayını başlat'}
+            {getLabel('helpdesk.start_radio_broadcast_btn')}
           </Text>
         </TouchableOpacity>
       )}
@@ -217,7 +217,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
             <Search size={17} color="#94A3B8" strokeWidth={2} style={{ marginRight: 8 }} />
             <TextInput
               style={styles.fluidSearchInput}
-              placeholder={getLabel('helpdesk.searchPlaceholder', 'Bilet no veya konu ara...', 'Search by ticket no or subject...')}
+              placeholder={getLabel('helpdesk.searchPlaceholder')}
               placeholderTextColor="#94A3B8"
               value={ticketSearchQuery}
               onChangeText={setTicketSearchQuery}
@@ -319,7 +319,7 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
                     activeOpacity={0.7}
                   >
                     <Text style={styles.clearAllFilterChipText}>
-                      {language === 'en' ? 'Clear Filters' : 'Filtreleri Temizle'}
+                      {getLabel('helpdesk.clear_filters')}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -332,12 +332,12 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
             {(['all', 'open', 'answered', 'closed'] as const).map((filterKey) => {
               const isSelected = statusFilter === filterKey;
               const label = filterKey === 'all'
-                ? getLabel('helpdesk.filterAll', 'Tümü', 'All')
+                ? getLabel('helpdesk.filterAll')
                 : filterKey === 'open'
-                  ? getLabel('helpdesk.filterOpen', 'Açık', 'Open')
+                  ? getLabel('helpdesk.filterOpen')
                   : filterKey === 'answered'
-                    ? getLabel('helpdesk.filterAnswered', 'Yanıtlandı', 'Answered')
-                    : getLabel('helpdesk.filterClosed', 'Kapalı', 'Closed');
+                    ? getLabel('helpdesk.filterAnswered')
+                    : getLabel('helpdesk.filterClosed');
 
               return (
                 <TouchableOpacity
@@ -361,10 +361,10 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
             <MessageSquare size={36} color="#CBD5E1" strokeWidth={1.5} style={{ marginBottom: 10 }} />
             <Text style={styles.emptyTextFluid}>
               {ticketSearchQuery.trim()
-                ? getLabel('helpdesk.emptySearch', 'Arama kriterlerinize uygun bilet bulunamadı.', 'No tickets match your search.')
+                ? getLabel('helpdesk.emptySearch')
                 : statusFilter !== 'all'
-                  ? getLabel('helpdesk.emptyFilter', 'Bu filtrede destek bileti bulunmuyor.', 'No support tickets in this filter.')
-                  : getLabel('helpdesk.emptyTickets', 'Henüz bir destek biletiniz yok.', 'No support tickets found.')}
+                  ? getLabel('helpdesk.emptyFilter')
+                  : getLabel('helpdesk.emptyTickets')}
             </Text>
           </View>
         ) : (

@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App-namn (t.ex. Support Desk)",
     "appDescPlaceholder": "Kort beskrivning (valfritt)",
     "newDiscussion": "Starta ny diskussion",
-    "tierTenant": "Hyresgäst"
+    "tierTenant": "Hyresgäst",
+    "adminRevokeDesc": "Administratörsrättigheter tas bort från den här enheten och konsolen låses.",
+    "removeAdminTitle": "Ta bort administratör",
+    "removeAdminConfirm": "Är du säker på att du vill ta bort den här administratören och alla dess tilldelningar?",
+    "selectAdminReq": "Välj administratör",
+    "selectAdminReqDesc": "Välj en administratör att tilldela.",
+    "created": "Skapad",
+    "lastAction": "Senaste uppdatering",
+    "attachment": "Bilaga",
+    "tierAppOrg": "Applikation / Organisation",
+    "default": "Standard",
+    "all": "Alla"
   },
   "license": {
     "title": "Licens & Abonnemang",

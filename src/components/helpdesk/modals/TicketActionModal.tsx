@@ -26,6 +26,7 @@ import {
 import { HelpDeskTicket, helpDeskService } from '../../../services/helpDeskService';
 import { checkTicketHasDiagnostics } from '../utils/helpdeskFormatters';
 import { WhiteDeskCrypto } from '../../../whitedesk-sdk';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface TicketActionModalProps {
   visible: boolean;
@@ -39,7 +40,7 @@ export interface TicketActionModalProps {
   targetActionRole: 'founder' | 'global_admin' | 'admin' | 'none';
   getRank: (role: any) => number;
   language: string;
-  getLabel: (key: string, tr: string, en: string) => string;
+  getLabel: (key: string, tr?: string, en?: string) => string;
   formatWhiteId: (id: string) => string;
   onDeleteSingleTicket: () => void;
   onRevokeUserAdmin: () => void;
@@ -96,6 +97,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
   safeTop = 44,
   anchorY = null,
 }) => {
+  const { t } = useTranslation();
   if (!ticket) return null;
 
   const targetId = ticket.user_white_id || ticket.user_blind_id || '';
@@ -158,7 +160,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
                 >
                   <Activity size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                   <Text style={styles.menuText}>
-                    {language === 'tr' ? 'Sistem Tanısını İncele' : 'Inspect Diagnostic'}
+                    {t('helpdesk.ticket_action.inspect_diagnostic')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -173,7 +175,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
                 >
                   <Trash2 size={16} color="#DC2626" strokeWidth={2} style={styles.menuIcon} />
                   <Text style={[styles.menuText, { color: '#DC2626' }]}>
-                    {language === 'tr' ? 'Sistem Tanısını Sil' : 'Delete Diagnostic'}
+                    {t('helpdesk.ticket_action.delete_diagnostic')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -190,7 +192,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
               >
                 <Cpu size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Sistem Tanısı Ekle' : 'Add Diagnostic'}
+                  {t('helpdesk.ticket_action.add_diagnostic')}
                 </Text>
               </TouchableOpacity>
             )
@@ -208,7 +210,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Star size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Hizmeti Değerlendir' : 'Rate Support'}
+                {t('helpdesk.ticket_action.rate_support')}
               </Text>
             </TouchableOpacity>
           )}
@@ -225,7 +227,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Database size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Bileti Devral' : 'Take Over'}
+                {t('helpdesk.ticket_action.take_over')}
               </Text>
             </TouchableOpacity>
           )}
@@ -242,7 +244,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Layers size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Birim Değiştir' : 'Change Unit'}
+                {t('helpdesk.ticket_action.change_unit')}
               </Text>
             </TouchableOpacity>
           )}
@@ -259,7 +261,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <ArrowRight size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Bileti Devret' : 'Hand Over'}
+                {t('helpdesk.ticket_action.hand_over')}
               </Text>
             </TouchableOpacity>
           )}
@@ -276,7 +278,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <X size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Devri İptal Et' : 'Cancel Hand Over'}
+                {t('helpdesk.ticket_action.cancel_hand_over')}
               </Text>
             </TouchableOpacity>
           )}
@@ -294,7 +296,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
               >
                 <RotateCcw size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Silme Sürecini Durdur' : 'Stop Deletion Process'}
+                  {t('helpdesk.ticket_action.stop_deletion')}
                 </Text>
               </TouchableOpacity>
             )
@@ -310,7 +312,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
               >
                 <Leaf size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
                 <Text style={styles.menuText}>
-                  {language === 'tr' ? 'Silme Sürecini Başlat' : 'Start Deletion Process'}
+                  {t('helpdesk.ticket_action.start_deletion')}
                 </Text>
               </TouchableOpacity>
             )
@@ -328,7 +330,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <UserPlus size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Yönetici Yetkisi Ver' : 'Grant Admin Privileges'}
+                {t('helpdesk.ticket_action.grant_admin')}
               </Text>
             </TouchableOpacity>
           )}
@@ -345,7 +347,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Sparkles size={16} color="#4A5568" strokeWidth={2} style={styles.menuIcon} />
               <Text style={styles.menuText}>
-                {language === 'tr' ? 'Kiracı Global Yöneticisi Ata' : 'Assign Global Admin'}
+                {t('helpdesk.ticket_action.assign_global_admin')}
               </Text>
             </TouchableOpacity>
           )}
@@ -365,7 +367,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <LogOut size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
               <Text style={[styles.menuText, styles.menuTextWipe]}>
-                {language === 'tr' ? 'Yöneticilik Yetkisini İptal Et' : 'Revoke Admin Authority'}
+                {t('helpdesk.ticket_action.revoke_admin')}
               </Text>
             </TouchableOpacity>
           )}
@@ -382,7 +384,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <ShieldCheck size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
               <Text style={[styles.menuText, styles.menuTextWipe]}>
-                {language === 'tr' ? 'Kullanıcıyı Engelle' : 'Block User'}
+                {t('helpdesk.ticket_action.block_user')}
               </Text>
             </TouchableOpacity>
           )}
@@ -399,7 +401,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Trash2 size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
               <Text style={[styles.menuText, styles.menuTextWipe]}>
-                {language === 'tr' ? 'Bileti Sil' : 'Delete Ticket'}
+                {t('helpdesk.ticket_action.delete_ticket')}
               </Text>
             </TouchableOpacity>
           )}
@@ -416,7 +418,7 @@ export const TicketActionModal: React.FC<TicketActionModalProps> = ({
             >
               <Trash2 size={16} color="#EF4444" strokeWidth={2} style={styles.menuIcon} />
               <Text style={[styles.menuText, styles.menuTextWipe]}>
-                {language === 'tr' ? 'Bileti ve Kullanıcıyı Sil' : 'Delete User & Ticket'}
+                {t('helpdesk.ticket_action.delete_user_and_ticket')}
               </Text>
             </TouchableOpacity>
           )}

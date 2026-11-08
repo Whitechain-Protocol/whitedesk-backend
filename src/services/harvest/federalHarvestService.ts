@@ -3,6 +3,7 @@ import * as Crypto from 'expo-crypto';
 import { HelpDeskTicket, HelpDeskMessage } from '../helpDeskService';
 import { keystoreTicketVault } from '../keystoreTicketVault';
 import { relayClient } from '../relayClient';
+import { i18nService } from '../i18nService';
 import { FDHScope, FDHJob, FDHManifest, FDHAttachmentRecord, FDHIncomingPayload } from './types';
 
 class FederalHarvestService {
@@ -72,9 +73,9 @@ class FederalHarvestService {
    */
   public getSqliteSchema(): string {
     return `-- ====================================================================
--- WhiteDesk Sovereign Federal Data Harvesting (FDH) Database
--- Engine: SQLite 3 / PostgreSQL Multi-Platform Ingestion Schema
--- Generated: ${new Date().toISOString()}
+-- ${i18nService.t('fdh.harvest.sql_header_title')}
+-- ${i18nService.t('fdh.harvest.sql_header_compat')}
+-- ${i18nService.t('fdh.harvest.sql_header_generated', { date: new Date().toISOString() })}
 -- ====================================================================
 
 PRAGMA foreign_keys = ON;
@@ -180,7 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_fdh_att_tkt ON fdh_attachments(ticket_id);
       }
 
       // 2. Fetch local tickets & filter
-      onProgress?.({ stage: 'Yerel biletler taranıyor...', current: 0, total: 0 });
+      onProgress?.({ stage: i18nService.t('fdh.scanning_local_tickets'), current: 0, total: 0 });
       const allLocalTickets = await keystoreTicketVault.getTickets();
       const targetTickets = this.filterTicketsByScope(allLocalTickets, scope);
 
@@ -214,13 +215,17 @@ CREATE INDEX IF NOT EXISTS idx_fdh_att_tkt ON fdh_attachments(ticket_id);
         const tkt = targetTickets[i];
         const tktNum = (tkt as any).ticket_number || tkt.id;
         const orgId = tkt.org_id || (tkt as any).organization_id || 'general';
-        const tktTitle = tkt.subject || (tkt as any).title || 'Başlıksız Bilet';
+        const tktTitle = tkt.subject || (tkt as any).title || i18nService.t('fdh.untitled_ticket');
         const tktPriority = (tkt as any).priority || 'medium';
         const userAlias = (tkt as any).user_alias || '';
         const adminAlias = tkt.transfer_target_alias || (tkt as any).assigned_admin_alias || '';
 
         onProgress?.({
-          stage: `Bilet işleniyor (${i + 1}/${targetTickets.length}): ${tktNum}`,
+          stage: i18nService.t('fdh.processing_ticket_progress', {
+            current: i + 1,
+            total: targetTickets.length,
+            ticketNumber: tktNum,
+          }),
           current: i + 1,
           total: targetTickets.length,
         });

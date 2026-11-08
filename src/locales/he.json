@@ -804,7 +804,18 @@
     "appNamePlaceholder": "App Name (e.g. Support Desk)",
     "appDescPlaceholder": "Short description (optional)",
     "newDiscussion": "התחל דיון חדש",
-    "tierTenant": "דייר"
+    "tierTenant": "דייר",
+    "adminRevokeDesc": "הרשאות מנהל יוסרו ממכשיר זה ומסוף הניהול יינעל.",
+    "removeAdminTitle": "הסר מנהל",
+    "removeAdminConfirm": "האם אתה בטוח שברצונך להסיר מנהל זה ואת כל ההקצאות שלו?",
+    "selectAdminReq": "בחר מנהל",
+    "selectAdminReqDesc": "אנא בחר מנהל להקצאה.",
+    "created": "נוצר",
+    "lastAction": "עדכון אחרון",
+    "attachment": "קובץ מצורף",
+    "tierAppOrg": "יישום / ארגון",
+    "default": "ברירת מחדל",
+    "all": "הכל"
   },
   "license": {
     "title": "הרישיונות שלי",

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { UserCheck, X } from 'lucide-react-native';
 import { ApprovalEntry } from '../../../../services/helpDeskService';
+import { useTranslation } from '../../../../services/i18nService';
 
 interface ApprovalsModalProps {
   visible: boolean;
@@ -33,6 +34,7 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
   onReviewApproval,
   onApproveWithConfirm,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -52,7 +54,7 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <UserCheck size={18} color="#D97706" style={{ marginRight: 8 }} />
               <Text style={styles.attachModalTitle}>
-                {language === 'tr' ? 'Bekleyen Yetki Onayları' : 'Pending Approvals'}
+                {t('admin.approvals.title')}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -63,20 +65,20 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
           <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
             {pendingApprovals.length === 0 ? (
               <Text style={{ textAlign: 'center', color: '#94A3B8', paddingVertical: 20, fontSize: 13 }}>
-                {language === 'tr' ? 'Bekleyen onay talebi bulunmuyor.' : 'No pending approval requests.'}
+                {t('admin.approvals.empty')}
               </Text>
             ) : (
               pendingApprovals.map((appr) => {
                 const isDeleteReq = appr.type === 'delete_app' || appr.type === 'delete_org';
                 const roleTitle = appr.type === 'global_admin'
-                  ? 'WhiteCosmos (Global Admin *)'
+                  ? t('helpdesk.role_global_admin')
                   : appr.type === 'admin'
-                  ? (language === 'tr' ? 'Yönetici (Admin)' : 'Admin')
+                  ? t('admin.approvals.role_admin')
                   : appr.type === 'delete_app'
-                  ? (language === 'tr' ? 'Uygulama Silme Talebi' : 'App Deletion Request')
+                  ? t('admin.approvals.role_delete_app')
                   : appr.type === 'delete_org'
-                  ? (language === 'tr' ? 'Organizasyon Silme Talebi' : 'Org Deletion Request')
-                  : (language === 'tr' ? 'Bölüm Kullanıcısı' : 'Divisional User Binding');
+                  ? t('admin.approvals.role_delete_org')
+                  : t('admin.approvals.role_divisional_user');
 
                 const candidateId = appr.candidate_white_id || appr.candidate_blind_id;
                 const tenantDisplay = appr.tenant_name || appr.tenant_blind_id;
@@ -95,22 +97,22 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
                       <View style={{ marginBottom: 4 }}>
                         <Text style={[styles.approvalCandidateText, { fontWeight: '700', color: '#DC2626' }]}>
                           {appr.type === 'delete_app' 
-                            ? `${language === 'tr' ? 'Silinecek Uygulama' : 'Target App'}: ${formatAppId(appr.target_app_id || '')}`
-                            : `${language === 'tr' ? 'Silinecek Organizasyon' : 'Target Org'}: ${appr.target_org_id || ''}`
+                            ? `${t('admin.approvals.target_app')}: ${formatAppId(appr.target_app_id || '')}`
+                            : `${t('admin.approvals.target_org')}: ${appr.target_org_id || ''}`
                           }
                         </Text>
                         <Text style={[styles.approvalEnterpriseText, { color: '#64748B' }]}>
-                          {language === 'tr' ? 'Talep Eden Admin:' : 'Requester Admin:'} {appr.candidate_alias || formatWhiteId(candidateId)}
+                          {t('admin.approvals.requester_admin')} {appr.candidate_alias || formatWhiteId(candidateId)}
                         </Text>
                       </View>
                     ) : (
                       <Text style={styles.approvalCandidateText}>
-                        ID: {formatWhiteId(candidateId)}
+                        {t('admin.approvals.candidate_id_prefix')} {formatWhiteId(candidateId)}
                       </Text>
                     )}
                     {tenantDisplay && (
                       <Text style={styles.approvalEnterpriseText}>
-                        {language === 'tr' ? 'Kiracı/Şirket:' : 'Tenant/Enterprise:'} {tenantDisplay}
+                        {t('admin.approvals.tenant_enterprise')} {tenantDisplay}
                       </Text>
                     )}
                     <View style={styles.approvalActionsRow}>
@@ -120,7 +122,7 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
                         activeOpacity={0.7}
                       >
                         <Text style={styles.approvalRejectText}>
-                          {language === 'tr' ? 'Reddet' : 'Reject'}
+                          {t('admin.approvals.btn_reject')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -129,7 +131,7 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
                         activeOpacity={0.7}
                       >
                         <Text style={styles.approvalAcceptText}>
-                          {language === 'tr' ? 'Onayla' : 'Approve'}
+                          {t('admin.approvals.btn_approve')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -145,7 +147,7 @@ export const ApprovalsModal: React.FC<ApprovalsModalProps> = ({
             activeOpacity={0.7}
           >
             <Text style={styles.attachCancelText}>
-              {getLabel('common.close', 'Kapat', 'Close')}
+              {t('common.close')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -804,7 +804,18 @@
     "appNamePlaceholder": "Applicatienaam (bijv. Support Desk)",
     "appDescPlaceholder": "Korte beschrijving (optioneel)",
     "newDiscussion": "Nieuwe discussie starten",
-    "tierTenant": "Huurder"
+    "tierTenant": "Huurder",
+    "adminRevokeDesc": "Beheerdersrechten worden van dit apparaat verwijderd en de console wordt vergrendeld.",
+    "removeAdminTitle": "Beheerder verwijderen",
+    "removeAdminConfirm": "Weet u zeker dat u deze beheerder en al diens toewijzingen wilt verwijderen?",
+    "selectAdminReq": "Beheerder selecteren",
+    "selectAdminReqDesc": "Selecteer een beheerder om toe te wijzen.",
+    "created": "Aangemaakt",
+    "lastAction": "Laatste update",
+    "attachment": "Bijlage",
+    "tierAppOrg": "Applicatie / Organisatie",
+    "default": "Standaard",
+    "all": "Alle"
   },
   "license": {
     "title": "Licentie & Abonnementen",

@@ -96,9 +96,9 @@ export function SdkIntegrationModal({
     try {
       let res: { success: boolean; bridgeKey: string };
       if (onCreateBridge) {
-        res = await onCreateBridge(selectedOrgId, appNameInput.trim() || 'Harici Uygulama');
+        res = await onCreateBridge(selectedOrgId, appNameInput.trim() || t('integration.default_external_app'));
       } else {
-        res = await helpDeskService.createSdkBridge(enterpriseBlindId, selectedOrgId, appNameInput.trim() || 'Harici Uygulama');
+        res = await helpDeskService.createSdkBridge(enterpriseBlindId, selectedOrgId, appNameInput.trim() || t('integration.default_external_app'));
       }
       if (res.success && res.bridgeKey) {
         setGeneratedKey(res.bridgeKey);
@@ -119,7 +119,7 @@ export function SdkIntegrationModal({
 
   const codeSnippet = generatedKey
     ? `WhiteDeskSDK.init({ bridgeKey: "${generatedKey}" });`
-    : `WhiteDeskSDK.init({ bridgeKey: "60_karakterlik_sdk_kopru_anahtari" });`;
+    : `WhiteDeskSDK.init({ bridgeKey: "${t('integration.placeholder_bridge_key')}" });`;
 
   const handleCopyCode = async () => {
     await Clipboard.setStringAsync(codeSnippet);
@@ -152,7 +152,7 @@ export function SdkIntegrationModal({
             <View style={styles.explanationBanner}>
               <Code2 size={16} color="#2563EB" style={{ marginRight: 8, marginTop: 2 }} />
               <Text style={styles.explanationBannerText}>
-                Harici sistemleri (ERP, Mobil, Web) WhiteDesk altyapısına bağlayın ve 60 karakterlik SDK köprü anahtarı üreterek entegrasyon sağlayın.
+                {t('integration.explanation_banner')}
               </Text>
             </View>
 
@@ -161,7 +161,7 @@ export function SdkIntegrationModal({
               <Text style={styles.fieldLabel}>{t('integration.company_label')}</Text>
               <View style={styles.readOnlyBox}>
                 <Building2 size={16} color="#2563EB" style={{ marginRight: 8 }} />
-                <Text style={styles.readOnlyText}>{enterpriseName || 'Kuruluş'}</Text>
+                <Text style={styles.readOnlyText}>{enterpriseName || t('integration.default_company')}</Text>
               </View>
             </View>
 
@@ -239,7 +239,7 @@ export function SdkIntegrationModal({
                   <TouchableOpacity style={styles.miniCopyBtn} onPress={handleCopyKey}>
                     {copiedKey ? <Check size={14} color="#16A34A" /> : <Copy size={14} color="#2563EB" />}
                     <Text style={[styles.miniCopyBtnText, copiedKey && { color: '#16A34A' }]}>
-                      {copiedKey ? 'Kopyalandı' : t('integration.copy_btn')}
+                      {copiedKey ? t('common.copied') : t('integration.copy_btn')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -255,7 +255,7 @@ export function SdkIntegrationModal({
                   <TouchableOpacity style={styles.miniCopyBtn} onPress={handleCopyCode}>
                     {copiedCode ? <Check size={14} color="#16A34A" /> : <Copy size={14} color="#2563EB" />}
                     <Text style={[styles.miniCopyBtnText, copiedCode && { color: '#16A34A' }]}>
-                      {copiedCode ? 'Kopyalandı' : t('integration.copy_btn')}
+                      {copiedCode ? t('common.copied') : t('integration.copy_btn')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -268,13 +268,13 @@ export function SdkIntegrationModal({
             {/* 6. MEVCUT AKTİF ENTEGRASYONLAR LİSTESİ */}
             {localBridges.length > 0 && (
               <View style={[styles.fieldSection, { marginTop: 24 }]}>
-                <Text style={styles.fieldLabel}>Mevcut SDK Köprüleri ({localBridges.length})</Text>
+                <Text style={styles.fieldLabel}>{t('integration.active_bridges_label', { count: localBridges.length })}</Text>
                 {localBridges.map(br => {
                   const targetOrg = localOrgs.find(o => o.org_id === br.org_id);
                   return (
                     <View key={`br_${br.id}`} style={styles.bridgeCard}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.bridgeAppName}>{br.app_name || 'Uygulama'}</Text>
+                        <Text style={styles.bridgeAppName}>{br.app_name || t('integration.default_app_label')}</Text>
                         <Text style={styles.bridgeOrgName}>
                           {targetOrg ? targetOrg.name : t('integration.org_all')}
                         </Text>
@@ -304,7 +304,7 @@ export function SdkIntegrationModal({
       <BottomConfirmationSheet
         visible={!!revokeTarget}
         title={t('integration.revoke_confirm_title')}
-        description={`"${revokeTarget?.appName}" uygulamasının SDK köprü anahtarı ve WhiteDesk bağlantısı kalıcı olarak iptal edilecektir. Devam etmek istiyor musunuz?`}
+        description={t('integration.revoke_confirm_dynamic_desc', { appName: revokeTarget?.appName || '' })}
         actionText={t('integration.revoke_confirm_action')}
         actionColor="#DC2626"
         onAction={async () => {

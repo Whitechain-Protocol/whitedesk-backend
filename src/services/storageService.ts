@@ -31,7 +31,7 @@ export const SafeSecureStore = {
       
       const options = isSensitive ? {
         keychainAccessible: SecureStore.WHEN_UNLOCKED,
-        authenticationPrompt: 'Authorize inWhite to decrypt your secure asymmetric keys',
+        authenticationPrompt: (() => { try { return require('./i18nService').i18nService.t('storage.biometric_auth_prompt'); } catch { return require('../locales/tr.json').storage.biometric_auth_prompt; } })(),
       } : undefined;
 
       return await SecureStore.getItemAsync(key, options as any);

@@ -28,6 +28,7 @@ import {
   Lock,
 } from 'lucide-react-native';
 import { helpDeskService } from '../../../services/helpDeskService';
+import { useTranslation } from '../../../services/i18nService';
 
 export interface LicenseStationModalProps {
   visible: boolean;
@@ -54,6 +55,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
   adminsList = [],
   tenantStats,
 }) => {
+  const { t, language } = useTranslation();
   const [loading, setLoading] = useState<boolean>(true);
   const [upgrading, setUpgrading] = useState<boolean>(false);
   const [activeLicense, setActiveLicense] = useState<any | null>(null);
@@ -79,7 +81,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
   const loadLicense = useCallback(async () => {
     try {
       setLoading(true);
-      const lic = await helpDeskService.getTenantActiveLicense(activeEnterpriseBlindId);
+      const lic = await helpDeskService.getTenantActiveLicense(activeEnterpriseBlindId, true);
       setActiveLicense(lic);
     } catch (e) {
       console.warn('[LicenseStationModal] loadLicense error:', e);
@@ -109,7 +111,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
       setShowUpgradeModal(true);
     } catch (e) {
       console.warn('[LicenseStationModal] handleOpenUpgrade error:', e);
-      Alert.alert('Hata', 'Yükseltme seçenekleri yüklenirken bir problem oluştu.');
+      Alert.alert(t('common.error'), t('license.station.upgrade_load_error'));
     } finally {
       setUpgrading(false);
     }
@@ -137,12 +139,18 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
         setActiveLicense(res.license);
         setCheckoutStep(false);
         setShowUpgradeModal(false);
-        Alert.alert('Ödeme Başarılı', `${selectedPlanForCheckout.name} aboneliğiniz başarıyla başlatıldı.`);
+        Alert.alert(
+          t('license.station.payment_success_title'),
+          t('license.station.payment_success_desc', { planName: selectedPlanForCheckout.name })
+        );
       } else {
-        Alert.alert('Ödeme Başarısız', res.message || 'İşlem tamamlanamadı.');
+        Alert.alert(
+          t('license.station.payment_failed_title'),
+          res.message || t('license.station.payment_failed_fallback')
+        );
       }
     } catch (e: any) {
-      Alert.alert('Hata', e?.message || 'Ödeme tamamlanırken hata oluştu.');
+      Alert.alert(t('common.error'), e?.message || t('license.station.payment_error_fallback'));
     } finally {
       setProcessingPayment(false);
     }
@@ -178,9 +186,9 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                 <Star size={20} color="#2563EB" strokeWidth={2.2} />
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.titleText}>Lisans & Abonelik</Text>
+                <Text style={styles.titleText}>{t('license.station.title')}</Text>
                 <Text style={styles.subtitleText} numberOfLines={1}>
-                  {currentEnterpriseName} • Aktif Yetki & Plan
+                  {currentEnterpriseName} • {t('license.station.subtitle')}
                 </Text>
               </View>
             </View>
@@ -196,7 +204,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#2563EB" />
-              <Text style={styles.loadingText}>Lisans durumu sorgulanıyor...</Text>
+              <Text style={styles.loadingText}>{t('license.station.loading_status')}</Text>
             </View>
           ) : (
             <ScrollView
@@ -220,7 +228,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                       <Sparkles size={20} color="#D97706" strokeWidth={2.2} />
                     )}
                     <Text style={styles.activePlanTitle}>
-                      {activeLicense?.planName || '14 Günlük Deneme'}
+                      {activeLicense?.planName || t('license.station.trial_14_days_default')}
                     </Text>
                   </View>
 
@@ -236,7 +244,11 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                       styles.statusBadgeText,
                       { color: isTrial ? '#B45309' : isLive ? '#6D28D9' : '#1D4ED8' }
                     ]}>
-                      {isTrial ? 'Ücretsiz Deneme' : isLive ? 'Zirve Paket' : 'Aktif Plan'}
+                      {isTrial
+                        ? t('license.station.status_free_trial')
+                        : isLive
+                        ? t('license.station.status_top_tier')
+                        : t('license.station.status_active_plan')}
                     </Text>
                   </View>
                 </View>
@@ -246,10 +258,12 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   <View style={styles.trialInfoBox}>
                     <View style={styles.trialRow}>
                       <Text style={styles.trialRemainingDaysText}>
-                        {isNaN(Number(activeLicense?.trialDaysRemaining)) ? 14 : (activeLicense?.trialDaysRemaining ?? 14)} Gün Kaldı
+                        {t('license.station.trial_days_remaining', {
+                          days: isNaN(Number(activeLicense?.trialDaysRemaining)) ? 14 : (activeLicense?.trialDaysRemaining ?? 14),
+                        })}
                       </Text>
                       <Text style={styles.trialValidText}>
-                        Sovereign WhiteChain ağı üzerinde tam yetkili değerlendirme lisansı devrede.
+                        {t('license.station.trial_valid_desc')}
                       </Text>
                     </View>
                   </View>
@@ -261,24 +275,25 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                           ? activeLicense?.annualMonthlyPrice
                           : activeLicense?.monthlyPrice}
                       </Text>
-                      <Text style={styles.pricePeriod}>/ ay</Text>
+                      <Text style={styles.pricePeriod}>{t('license.station.per_month')}</Text>
                       {activeLicense?.billingCycle === 'annual' && (
                         <View style={styles.annualSavingBadge}>
-                          <Text style={styles.annualSavingText}>Yıllık Taahhüt</Text>
+                          <Text style={styles.annualSavingText}>{t('license.station.annual_commitment')}</Text>
                         </View>
                       )}
                     </View>
                     <Text style={styles.subDetailText}>
-                      Dönem Sonu: {activeLicense?.subscriptionEndAt
-                        ? new Date(activeLicense.subscriptionEndAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
-                        : '1 Yıl Geçerli'}
+                      {t('license.station.period_end_prefix')}{' '}
+                      {activeLicense?.subscriptionEndAt
+                        ? new Date(activeLicense.subscriptionEndAt).toLocaleDateString(language || undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+                        : t('license.station.valid_1_year')}
                     </Text>
                   </View>
                 )}
 
                 {/* Features Checklist */}
                 <View style={styles.featuresSection}>
-                  <Text style={styles.featuresHeaderLabel}>Paket Kapsamı & Yetkiler:</Text>
+                  <Text style={styles.featuresHeaderLabel}>{t('license.station.features_header')}</Text>
                   {(activeLicense?.features || []).map((feat: string, idx: number) => (
                     <View key={`feat_${idx}`} style={styles.featureItemRow}>
                       <CheckCircle2 size={15} color="#10B981" strokeWidth={2.2} style={{ marginTop: 1 }} />
@@ -292,14 +307,18 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   <View style={styles.trialCountersRow}>
                     <View style={styles.trialCounterCol}>
                       <Users size={16} color="#2563EB" />
-                      <Text style={styles.counterValText}>{adminsList.length} / 1 İmi</Text>
-                      <Text style={styles.counterSubText}>Yönetici Kurtarma</Text>
+                      <Text style={styles.counterValText}>
+                        {t('license.station.counter_admin_tokens', { count: adminsList.length })}
+                      </Text>
+                      <Text style={styles.counterSubText}>{t('license.station.counter_admin_sub')}</Text>
                     </View>
                     <View style={styles.counterDivider} />
                     <View style={styles.trialCounterCol}>
                       <Headphones size={16} color="#2563EB" />
-                      <Text style={styles.counterValText}>{tenantStats?.userCount || 1} / 10 İmi</Text>
-                      <Text style={styles.counterSubText}>Kör Erişim İmi</Text>
+                      <Text style={styles.counterValText}>
+                        {t('license.station.counter_user_tokens', { count: tenantStats?.userCount || 1 })}
+                      </Text>
+                      <Text style={styles.counterSubText}>{t('license.station.counter_user_sub')}</Text>
                     </View>
                   </View>
                 )}
@@ -316,7 +335,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   >
                     <Zap size={18} color="#FFFFFF" strokeWidth={2.4} />
                     <Text style={styles.upgradeBtnText}>
-                      {isTrial ? 'Lisansı Yükselt (Paketleri Gör)' : 'LIVE Pakete Yükselt'}
+                      {isTrial ? t('license.station.upgrade_from_trial_btn') : t('license.station.upgrade_to_live_btn')}
                     </Text>
                     {upgrading ? (
                       <ActivityIndicator size="small" color="#FFFFFF" style={{ marginLeft: 6 }} />
@@ -326,15 +345,15 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   </TouchableOpacity>
                   <Text style={styles.upgradeHintText}>
                     {isTrial
-                      ? 'Ücretsiz denemeden CORE veya LIVE paketine anında geçiş yapın.'
-                      : 'Canlı müdahale ve uzak masaüstü desteği için LIVE pakete geçin.'}
+                      ? t('license.station.upgrade_from_trial_hint')
+                      : t('license.station.upgrade_to_live_hint')}
                   </Text>
                 </View>
               ) : (
                 <View style={styles.topTierBadgeBox}>
                   <Award size={18} color="#7C3AED" strokeWidth={2.2} />
                   <Text style={styles.topTierBadgeText}>
-                    Tebrikler! Kurumunuz en üst seviye LIVE paket ayrıcalıklarından yararlanıyor.
+                    {t('license.station.top_tier_congrats')}
                   </Text>
                 </View>
               )}
@@ -360,9 +379,11 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
               <>
                 <View style={styles.subModalHeader}>
                   <View>
-                    <Text style={styles.subModalTitle}>Lisans Paketini Yükselt</Text>
+                    <Text style={styles.subModalTitle}>{t('license.station.modal_upgrade_title')}</Text>
                     <Text style={styles.subModalSub}>
-                      {upgradePlans.length === 2 ? 'CORE veya LIVE paketini seçin' : 'LIVE paketine geçiş yapın'}
+                      {upgradePlans.length === 2
+                        ? t('license.station.modal_upgrade_sub_both')
+                        : t('license.station.modal_upgrade_sub_live')}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -380,7 +401,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                     onPress={() => setBillingCycle('monthly')}
                   >
                     <Text style={[styles.cycleBtnText, billingCycle === 'monthly' && styles.cycleBtnTextActive]}>
-                      Aylık Faturalama
+                      {t('license.station.billing_monthly')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -388,7 +409,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                     onPress={() => setBillingCycle('annual')}
                   >
                     <Text style={[styles.cycleBtnText, billingCycle === 'annual' && styles.cycleBtnTextActive]}>
-                      Yıllık Taahhüt (%20 Tasarruf)
+                      {t('license.station.billing_annual_save')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -416,18 +437,18 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                             </Text>
                             {isPlanLive && (
                               <View style={styles.recommendedPill}>
-                                <Text style={styles.recommendedPillText}>Önerilen</Text>
+                                <Text style={styles.recommendedPillText}>{t('license.station.recommended_pill')}</Text>
                               </View>
                             )}
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <Text style={[styles.optionPrice, isPlanLive && { color: '#7C3AED' }]}>
                               ${displayPrice}
-                              <Text style={styles.optionPriceSub}> / ay</Text>
+                              <Text style={styles.optionPriceSub}> {t('license.station.per_month')}</Text>
                             </Text>
                             {billingCycle === 'annual' && (
                               <Text style={styles.optionPriceAnnualNote}>
-                                Yıllık taahhüt
+                                {t('license.station.annual_commitment_lower')}
                               </Text>
                             )}
                           </View>
@@ -450,7 +471,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                           activeOpacity={0.8}
                         >
                           <Text style={styles.selectPlanBtnText}>
-                            Ödeme Sayfasına Git (${displayPrice}/ay)
+                            {t('license.station.go_to_checkout_btn', { price: displayPrice })}
                           </Text>
                           <ChevronRight size={16} color="#FFFFFF" />
                         </TouchableOpacity>
@@ -472,7 +493,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                     <ArrowLeft size={18} color="#0F172A" />
                   </TouchableOpacity>
                   <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={styles.subModalTitle}>Ödeme & Onay</Text>
+                    <Text style={styles.subModalTitle}>{t('license.station.checkout_title')}</Text>
                     <Text style={styles.subModalSub}>{selectedPlanForCheckout?.name}</Text>
                   </View>
                   <TouchableOpacity
@@ -485,42 +506,44 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
 
                 {/* Sipariş Özeti Kartı */}
                 <View style={styles.orderSummaryCard}>
-                  <Text style={styles.orderSummaryTitle}>Sipariş Özeti</Text>
+                  <Text style={styles.orderSummaryTitle}>{t('license.station.order_summary_title')}</Text>
 
                   <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Kuruluş:</Text>
+                    <Text style={styles.summaryLabel}>{t('license.station.summary_enterprise_label')}</Text>
                     <Text style={styles.summaryVal}>{currentEnterpriseName}</Text>
                   </View>
 
                   <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Paket:</Text>
+                    <Text style={styles.summaryLabel}>{t('license.station.summary_plan_label')}</Text>
                     <Text style={[styles.summaryVal, { fontWeight: '800' }]}>
                       {selectedPlanForCheckout?.name}
                     </Text>
                   </View>
 
                   <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Faturalama:</Text>
+                    <Text style={styles.summaryLabel}>{t('license.station.summary_billing_label')}</Text>
                     <Text style={styles.summaryVal}>
-                      {billingCycle === 'annual' ? 'Yıllık Taahhüt (%20 İndirimli)' : 'Aylık'}
+                      {billingCycle === 'annual'
+                        ? t('license.station.summary_billing_annual')
+                        : t('license.station.summary_billing_monthly')}
                     </Text>
                   </View>
 
                   <View style={styles.summaryDivider} />
 
                   <View style={styles.summaryTotalRow}>
-                    <Text style={styles.summaryTotalLabel}>Tahsil Edilecek Tutar:</Text>
+                    <Text style={styles.summaryTotalLabel}>{t('license.station.summary_total_label')}</Text>
                     <Text style={styles.summaryTotalVal}>${checkoutTotal}.00</Text>
                   </View>
                   {billingCycle === 'annual' && (
                     <Text style={styles.annualSavingNote}>
-                      12 aylık toplam: $39 x 12 yerine aylık $49'a göre yılda $120 tasarruf sağlandı.
+                      {t('license.station.annual_saving_note')}
                     </Text>
                   )}
                 </View>
 
                 {/* Ödeme Yöntemi Seçimi */}
-                <Text style={styles.paymentMethodTitle}>Ödeme Yöntemi</Text>
+                <Text style={styles.paymentMethodTitle}>{t('license.station.payment_method_title')}</Text>
                 <View style={styles.paymentMethodTabsRow}>
                   <TouchableOpacity
                     style={[styles.paymentMethodTab, paymentMethod === 'card' && styles.paymentMethodTabActive]}
@@ -528,7 +551,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   >
                     <CreditCard size={16} color={paymentMethod === 'card' ? '#2563EB' : '#64748B'} />
                     <Text style={[styles.paymentMethodTabText, paymentMethod === 'card' && styles.paymentMethodTabTextActive]}>
-                      Kredi / Banka Kartı
+                      {t('license.station.payment_method_card')}
                     </Text>
                   </TouchableOpacity>
 
@@ -538,7 +561,7 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   >
                     <Building2 size={16} color={paymentMethod === 'invoice' ? '#2563EB' : '#64748B'} />
                     <Text style={[styles.paymentMethodTabText, paymentMethod === 'invoice' && styles.paymentMethodTabTextActive]}>
-                      Kurumsal Fatura / EFT
+                      {t('license.station.payment_method_invoice')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -547,10 +570,10 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                 {paymentMethod === 'card' ? (
                   <View style={styles.cardForm}>
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Kart Sahibi</Text>
+                      <Text style={styles.inputLabel}>{t('license.station.card_holder_label')}</Text>
                       <TextInput
                         style={styles.textInput}
-                        placeholder="Ad Soyad"
+                        placeholder={t('license.station.card_holder_placeholder')}
                         placeholderTextColor="#94A3B8"
                         value={cardHolder}
                         onChangeText={setCardHolder}
@@ -558,10 +581,10 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                     </View>
 
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>Kart Numarası</Text>
+                      <Text style={styles.inputLabel}>{t('license.station.card_number_label')}</Text>
                       <TextInput
                         style={styles.textInput}
-                        placeholder="•••• •••• •••• ••••"
+                        placeholder={t('helpdesk.card_number_placeholder')}
                         placeholderTextColor="#94A3B8"
                         keyboardType="numeric"
                         maxLength={19}
@@ -572,10 +595,10 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
 
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       <View style={[styles.inputGroup, { flex: 1 }]}>
-                        <Text style={styles.inputLabel}>Son Kullanma</Text>
+                        <Text style={styles.inputLabel}>{t('license.station.card_expiry_label')}</Text>
                         <TextInput
                           style={styles.textInput}
-                          placeholder="AA/YY"
+                          placeholder={t('license.station.card_expiry_placeholder')}
                           placeholderTextColor="#94A3B8"
                           keyboardType="numeric"
                           maxLength={5}
@@ -584,10 +607,10 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                         />
                       </View>
                       <View style={[styles.inputGroup, { flex: 1 }]}>
-                        <Text style={styles.inputLabel}>CVC / CVV</Text>
+                        <Text style={styles.inputLabel}>{t('license.station.card_cvv_label')}</Text>
                         <TextInput
                           style={styles.textInput}
-                          placeholder="•••"
+                          placeholder={t('helpdesk.card_cvv_placeholder')}
                           placeholderTextColor="#94A3B8"
                           keyboardType="numeric"
                           maxLength={4}
@@ -601,9 +624,9 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                 ) : (
                   <View style={styles.invoiceInfoBox}>
                     <Building2 size={24} color="#2563EB" style={{ marginBottom: 6 }} />
-                    <Text style={styles.invoiceInfoTitle}>Kurumsal Cari / Fatura ile Ödeme</Text>
+                    <Text style={styles.invoiceInfoTitle}>{t('license.station.invoice_info_title')}</Text>
                     <Text style={styles.invoiceInfoSub}>
-                      '{currentEnterpriseName}' kurumsal vergi kayıtlarınıza uygun e-fatura düzenlenir ve aboneliğiniz anında aktif edilir.
+                      {t('license.station.invoice_info_sub', { enterpriseName: currentEnterpriseName })}
                     </Text>
                   </View>
                 )}
@@ -618,8 +641,8 @@ export const LicenseStationModal: React.FC<LicenseStationModalProps> = ({
                   <Lock size={16} color="#FFFFFF" strokeWidth={2.4} />
                   <Text style={styles.completePaymentBtnText}>
                     {processingPayment
-                      ? 'Ödeme İşleniyor...'
-                      : `$${checkoutTotal}.00 Öde & Lisansı Başlat`}
+                      ? t('license.station.processing_payment_btn')
+                      : t('license.station.pay_and_activate_btn', { total: checkoutTotal })}
                   </Text>
                   {processingPayment && <ActivityIndicator size="small" color="#FFFFFF" style={{ marginLeft: 8 }} />}
                 </TouchableOpacity>

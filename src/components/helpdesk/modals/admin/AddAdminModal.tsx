@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { Sparkles, ShieldCheck } from 'lucide-react-native';
+import { i18nService, useTranslation } from '../../../../services/i18nService';
 
 export interface AdminAppOption {
   app_id: string;
@@ -67,6 +68,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
   formatAppId = (id: string) => id,
   getLabel,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -91,8 +93,8 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                 <ShieldCheck size={18} color="#3B82F6" style={{ marginRight: 6 }} />
                 <Text style={styles.title}>
                   {assigningTicket
-                    ? (language === 'tr' ? 'Yönetici Yetkilendirme' : 'Admin Authorization')
-                    : getLabel('helpdesk.newAdminModalTitle', 'Yeni Yönetici Ekle', 'Add New Admin')}
+                    ? t('admin.add_admin.auth_title')
+                    : t('helpdesk.newAdminModalTitle')}
                 </Text>
               </View>
               {assigningTicket && (
@@ -107,7 +109,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                 {/* App Selector */}
                 <View style={styles.sectionBox}>
                   <Text style={styles.fieldLabel}>
-                    {language === 'tr' ? 'Uygulama' : 'Application'}
+                    {t('admin.add_admin.app_label')}
                   </Text>
                   <ScrollView
                     horizontal
@@ -128,7 +130,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                           assignAppId === '*' && styles.chipPillTextActive,
                         ]}
                       >
-                        🌐 {language === 'tr' ? 'Tümü (*)' : 'All (*)'}
+                        🌐 {t('admin.add_admin.all_wildcard')}
                       </Text>
                     </TouchableOpacity>
 
@@ -178,7 +180,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                 {/* Category Selector */}
                 <View style={styles.sectionBox}>
                   <Text style={styles.fieldLabel}>
-                    {language === 'tr' ? 'Kategori' : 'Category'}
+                    {t('admin.add_admin.category_label')}
                   </Text>
                   <ScrollView
                     horizontal
@@ -199,13 +201,14 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                           assignCatId === '*' && styles.chipPillTextActive,
                         ]}
                       >
-                        🌐 {language === 'tr' ? 'Tümü (*)' : 'All (*)'}
+                        🌐 {t('admin.add_admin.all_wildcard')}
                       </Text>
                     </TouchableOpacity>
 
                     {modalAppCategories.map((cat) => {
                       const isSelected = assignCatId === cat.id;
-                      const label = language === 'tr' ? cat.labelTr : cat.labelEn;
+                      const i18nCat = i18nService.t(`helpdesk.cat_${cat.id}`);
+                      const label = i18nCat !== `helpdesk.cat_${cat.id}` ? i18nCat : (language === 'tr' ? cat.labelTr : (cat.labelEn || cat.labelTr));
                       return (
                         <TouchableOpacity
                           key={cat.id}
@@ -234,7 +237,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
               /* Non-ticket manual admin WhiteID */
               <TextInput
                 style={[styles.input, { marginBottom: 12 }]}
-                placeholder={getLabel('helpdesk.newAdminIdPlaceholder', 'WhiteID (Örn: 0362bed5...)', 'WhiteID')}
+                placeholder={t('helpdesk.newAdminIdPlaceholder')}
                 placeholderTextColor="#94a3b8"
                 value={newAdminIdInput}
                 onChangeText={onChangeNewAdminId}
@@ -247,7 +250,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
             <View style={[styles.sectionBox, { marginBottom: 16 }]}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <Text style={styles.fieldLabel}>
-                  {language === 'tr' ? 'İsim / Kod Adı' : 'Name / Alias'}
+                  {t('admin.add_admin.name_alias_label')}
                 </Text>
                 <TouchableOpacity
                   onPress={onSuggestNextCount}
@@ -257,25 +260,19 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
                   style={styles.suggestBtn}
                 >
                   <Sparkles size={12} color="#3B82F6" style={{ marginRight: 4 }} />
-                  <Text style={styles.suggestBtnText}>Suggest</Text>
+                  <Text style={styles.suggestBtnText}>{t('admin.add_admin.suggest_btn')}</Text>
                 </TouchableOpacity>
               </View>
 
               <TextInput
                 style={[styles.input, { borderColor: newAdminAliasInput ? '#BFDBFE' : '#E2E8F0' }]}
-                placeholder={getLabel(
-                  'helpdesk.newAdminAliasPlaceholder',
-                  'İsim / Kod Adı (Örn: Planet-1, Ahmet)',
-                  'Name / Alias (e.g. Planet-1, Ahmet)'
-                )}
+                placeholder={t('helpdesk.newAdminAliasPlaceholder')}
                 placeholderTextColor="#94a3b8"
                 value={newAdminAliasInput}
                 onChangeText={onChangeNewAdminAlias}
               />
               <Text style={styles.suggestHint}>
-                {language === 'tr'
-                  ? '💡 Suggest: Dokun: +1 | Uzun bas: Planet, Orbit...'
-                  : '💡 Suggest: Tap: +1 | Long-press: Planet, Orbit...'}
+                {t('admin.add_admin.suggest_hint')}
               </Text>
             </View>
 
@@ -283,7 +280,7 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
                 <Text style={styles.cancelBtnText}>
-                  {getLabel('common.cancel', 'Vazgeç', 'Cancel')}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -298,8 +295,8 @@ export const AddAdminModal: React.FC<AddAdminModalProps> = ({
               >
                 <Text style={styles.submitBtnText}>
                   {assigningTicket
-                    ? getLabel('helpdesk.assignAdminBtn', 'Yetkilendir ve Mühürle', 'Authorize & Seal')
-                    : getLabel('helpdesk.addBtn', 'Ekle', 'Add')}
+                    ? t('helpdesk.assignAdminBtn')
+                    : t('helpdesk.addBtn')}
                 </Text>
               </TouchableOpacity>
             </View>
