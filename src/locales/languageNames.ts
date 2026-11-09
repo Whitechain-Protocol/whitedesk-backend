@@ -1,4 +1,4 @@
-// Pre-computed 54x54 localized language names dictionary
+// Pre-computed 60x60 localized language names dictionary
 // Every language name is written as it appears in the currently selected language.
 export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = {
   "en": {
@@ -55,7 +55,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalan",
     "eu": "Basque",
     "is": "Icelandic",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharic",
+    "ha": "Hausa",
+    "ky": "Kyrgyz",
+    "mn": "Mongolian",
+    "sq": "Albanian",
+    "ta": "Tamil"
   },
   "tr": {
     "en": "İngilizce",
@@ -111,7 +117,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalanca",
     "eu": "Baskça",
     "is": "İzlandaca",
-    "sw": "Svahili"
+    "sw": "Svahili",
+    "am": "Amharca",
+    "ha": "Hausa dili",
+    "ky": "Kırgızca",
+    "mn": "Moğolca",
+    "sq": "Arnavutça",
+    "ta": "Tamilce"
   },
   "de": {
     "en": "Englisch",
@@ -167,7 +179,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalanisch",
     "eu": "Baskisch",
     "is": "Isländisch",
-    "sw": "Suaheli"
+    "sw": "Suaheli",
+    "am": "Amharisch",
+    "ha": "Haussa",
+    "ky": "Kirgisisch",
+    "mn": "Mongolisch",
+    "sq": "Albanisch",
+    "ta": "Tamil"
   },
   "sv": {
     "en": "Engelska",
@@ -223,7 +241,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalanska",
     "eu": "Baskiska",
     "is": "Isländska",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amhariska",
+    "ha": "Hausa",
+    "ky": "Kirgiziska",
+    "mn": "Mongoliska",
+    "sq": "Albanska",
+    "ta": "Tamil"
   },
   "nl": {
     "en": "Engels",
@@ -279,7 +303,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalaans",
     "eu": "Baskisch",
     "is": "IJslands",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amhaars",
+    "ha": "Hausa",
+    "ky": "Kirgizisch",
+    "mn": "Mongools",
+    "sq": "Albanees",
+    "ta": "Tamil"
   },
   "no": {
     "en": "Engelsk",
@@ -335,7 +365,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalansk",
     "eu": "Baskisk",
     "is": "Islandsk",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharisk",
+    "ha": "Hausa",
+    "ky": "Kirgisisk",
+    "mn": "Mongolsk",
+    "sq": "Albansk",
+    "ta": "Tamil"
   },
   "fi": {
     "en": "Englanti",
@@ -391,7 +427,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalaani",
     "eu": "Baski",
     "is": "Islanti",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amhara",
+    "ha": "Hausa",
+    "ky": "Kirgiisi",
+    "mn": "Mongoli",
+    "sq": "Albania",
+    "ta": "Tamili"
   },
   "ja": {
     "en": "英語",
@@ -447,7 +489,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "カタルーニャ語",
     "eu": "バスク語",
     "is": "アイスランド語",
-    "sw": "スワヒリ語"
+    "sw": "スワヒリ語",
+    "am": "アムハラ語",
+    "ha": "ハウサ語",
+    "ky": "キルギス語",
+    "mn": "モンゴル語",
+    "sq": "アルバニア語",
+    "ta": "タミル語"
   },
   "fa": {
     "en": "انگلیسی",
@@ -503,7 +551,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "کاتالان",
     "eu": "باسکی",
     "is": "ایسلندی",
-    "sw": "سواحیلی"
+    "sw": "سواحیلی",
+    "am": "امهری",
+    "ha": "هوسایی",
+    "ky": "قرقیزی",
+    "mn": "مغولی",
+    "sq": "آلبانیایی",
+    "ta": "تامیلی"
   },
   "ru": {
     "en": "Английский",
@@ -559,7 +613,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Каталанский",
     "eu": "Баскский",
     "is": "Исландский",
-    "sw": "Суахили"
+    "sw": "Суахили",
+    "am": "Амхарский",
+    "ha": "Хауса",
+    "ky": "Киргизский",
+    "mn": "Монгольский",
+    "sq": "Албанский",
+    "ta": "Тамильский"
   },
   "ar": {
     "en": "الإنجليزية",
@@ -615,7 +675,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "الكتالونية",
     "eu": "الباسكية",
     "is": "الآيسلندية",
-    "sw": "السواحلية"
+    "sw": "السواحلية",
+    "am": "الأمهرية",
+    "ha": "الهوسا",
+    "ky": "القيرغيزية",
+    "mn": "المنغولية",
+    "sq": "الألبانية",
+    "ta": "التاميلية"
   },
   "es": {
     "en": "Inglés",
@@ -671,7 +737,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalán",
     "eu": "Vasco",
     "is": "Islandés",
-    "sw": "Suajili"
+    "sw": "Suajili",
+    "am": "Amárico",
+    "ha": "Hausa",
+    "ky": "Kirguís",
+    "mn": "Mongol",
+    "sq": "Albanés",
+    "ta": "Tamil"
   },
   "it": {
     "en": "Inglese",
@@ -727,7 +799,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalano",
     "eu": "Basco",
     "is": "Islandese",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amarico",
+    "ha": "Hausa",
+    "ky": "Kirghiso",
+    "mn": "Mongolo",
+    "sq": "Albanese",
+    "ta": "Tamil"
   },
   "zh": {
     "en": "英语",
@@ -783,7 +861,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "加泰罗尼亚语",
     "eu": "巴斯克语",
     "is": "冰岛语",
-    "sw": "斯瓦希里语"
+    "sw": "斯瓦希里语",
+    "am": "阿姆哈拉语",
+    "ha": "豪萨语",
+    "ky": "吉尔吉斯语",
+    "mn": "蒙古语",
+    "sq": "阿尔巴尼亚语",
+    "ta": "泰米尔语"
   },
   "et": {
     "en": "Inglise",
@@ -839,7 +923,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalaani",
     "eu": "Baski",
     "is": "Islandi",
-    "sw": "Suahiili"
+    "sw": "Suahiili",
+    "am": "Amhara",
+    "ha": "Hausa",
+    "ky": "Kirgiisi",
+    "mn": "Mongoli",
+    "sq": "Albaania",
+    "ta": "Tamili"
   },
   "lt": {
     "en": "Anglų",
@@ -895,7 +985,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalonų",
     "eu": "Baskų",
     "is": "Islandų",
-    "sw": "Svahilių"
+    "sw": "Svahilių",
+    "am": "Amharų",
+    "ha": "Hausų",
+    "ky": "Kirgizų",
+    "mn": "Mongolų",
+    "sq": "Albanų",
+    "ta": "Tamilų"
   },
   "lv": {
     "en": "Angļu",
@@ -951,7 +1047,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalāņu",
     "eu": "Basku",
     "is": "Islandiešu",
-    "sw": "Svahili"
+    "sw": "Svahili",
+    "am": "Amharu",
+    "ha": "Hausu",
+    "ky": "Kirgīzu",
+    "mn": "Mongoļu",
+    "sq": "Albāņu",
+    "ta": "Tamilu"
   },
   "fr": {
     "en": "Anglais",
@@ -1007,7 +1109,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalan",
     "eu": "Basque",
     "is": "Islandais",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharique",
+    "ha": "Haoussa",
+    "ky": "Kirghize",
+    "mn": "Mongol",
+    "sq": "Albanais",
+    "ta": "Tamoul"
   },
   "my": {
     "en": "အင်္ဂလိပ်",
@@ -1063,7 +1171,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "ကာတလန်",
     "eu": "ဘာစ့်ခ်",
     "is": "အိုက်စလန်",
-    "sw": "ဆွာဟီလီ"
+    "sw": "ဆွာဟီလီ",
+    "am": "အမ်ဟာရစ်ခ်",
+    "ha": "ဟာဥစာ",
+    "ky": "ကာဂျစ်",
+    "mn": "မွန်ဂိုလီးယား",
+    "sq": "အယ်လ်ဘေးနီးယား",
+    "ta": "တမီးလ်"
   },
   "uk": {
     "en": "Англійська",
@@ -1119,7 +1233,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Каталанська",
     "eu": "Баскська",
     "is": "Ісландська",
-    "sw": "Суахілі"
+    "sw": "Суахілі",
+    "am": "Амхарська",
+    "ha": "Хауса",
+    "ky": "Киргизька",
+    "mn": "Монгольська",
+    "sq": "Албанська",
+    "ta": "Тамільська"
   },
   "pl": {
     "en": "Angielski",
@@ -1175,7 +1295,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Kataloński",
     "eu": "Baskijski",
     "is": "Islandzki",
-    "sw": "Suahili"
+    "sw": "Suahili",
+    "am": "Amharski",
+    "ha": "Hausa",
+    "ky": "Kirgiski",
+    "mn": "Mongolski",
+    "sq": "Albański",
+    "ta": "Tamilski"
   },
   "cs": {
     "en": "Angličtina",
@@ -1231,7 +1357,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalánština",
     "eu": "Baskičtina",
     "is": "Islandština",
-    "sw": "Svahilština"
+    "sw": "Svahilština",
+    "am": "Amharština",
+    "ha": "Hauština",
+    "ky": "Kyrgyzština",
+    "mn": "Mongolština",
+    "sq": "Albánština",
+    "ta": "Tamilština"
   },
   "hu": {
     "en": "Angol",
@@ -1287,7 +1419,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalán",
     "eu": "Baszk",
     "is": "Izlandi",
-    "sw": "Szuahéli"
+    "sw": "Szuahéli",
+    "am": "Amhara",
+    "ha": "Hausza",
+    "ky": "Kirgiz",
+    "mn": "Mongol",
+    "sq": "Albán",
+    "ta": "Tamil"
   },
   "ro": {
     "en": "Engleză",
@@ -1343,7 +1481,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalană",
     "eu": "Bască",
     "is": "Islandeză",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharică",
+    "ha": "Hausa",
+    "ky": "Kârgâză",
+    "mn": "Mongolă",
+    "sq": "Albaneză",
+    "ta": "Tamilă"
   },
   "ko": {
     "en": "영어",
@@ -1399,7 +1543,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "카탈루냐어",
     "eu": "바스크어",
     "is": "아이슬란드어",
-    "sw": "스와힐리어"
+    "sw": "스와힐리어",
+    "am": "암하라어",
+    "ha": "하우사어",
+    "ky": "키르기스어",
+    "mn": "몽골어",
+    "sq": "알바니아어",
+    "ta": "타밀어"
   },
   "vi": {
     "en": "Tiếng Anh",
@@ -1455,7 +1605,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Tiếng Catalan",
     "eu": "Tiếng Basque",
     "is": "Tiếng Iceland",
-    "sw": "Tiếng Swahili"
+    "sw": "Tiếng Swahili",
+    "am": "Tiếng Amharic",
+    "ha": "Tiếng Hausa",
+    "ky": "Tiếng Kyrgyz",
+    "mn": "Tiếng Mông Cổ",
+    "sq": "Tiếng Albania",
+    "ta": "Tiếng Tamil"
   },
   "th": {
     "en": "อังกฤษ",
@@ -1511,7 +1667,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "กาตาลา",
     "eu": "บาสก์",
     "is": "ไอซ์แลนด์",
-    "sw": "สวาฮีลี"
+    "sw": "สวาฮีลี",
+    "am": "อัมฮารา",
+    "ha": "เฮาซา",
+    "ky": "คีร์กีซ",
+    "mn": "มองโกเลีย",
+    "sq": "แอลเบเนีย",
+    "ta": "ทมิฬ"
   },
   "hi": {
     "en": "अंग्रेज़ी",
@@ -1567,7 +1729,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "कातालान",
     "eu": "बास्क",
     "is": "आइसलैंडिक",
-    "sw": "स्वाहिली"
+    "sw": "स्वाहिली",
+    "am": "अम्हेरी",
+    "ha": "हौसा",
+    "ky": "किर्गीज़",
+    "mn": "मंगोलियाई",
+    "sq": "अल्बानियाई",
+    "ta": "तमिल"
   },
   "ur": {
     "en": "انگریزی",
@@ -1623,7 +1791,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "کاتالان",
     "eu": "باسک",
     "is": "آئس لینڈی",
-    "sw": "سواحلی"
+    "sw": "سواحلی",
+    "am": "امہاری",
+    "ha": "ہؤسا",
+    "ky": "کرغیزی",
+    "mn": "منگولین",
+    "sq": "البانی",
+    "ta": "تمل"
   },
   "id": {
     "en": "Inggris",
@@ -1679,7 +1853,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalan",
     "eu": "Basque",
     "is": "Islandia",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharik",
+    "ha": "Hausa",
+    "ky": "Kirgiz",
+    "mn": "Mongolia",
+    "sq": "Albania",
+    "ta": "Tamil"
   },
   "he": {
     "en": "אנגלית",
@@ -1735,7 +1915,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "קטלאנית",
     "eu": "בסקית",
     "is": "איסלנדית",
-    "sw": "סוואהילית"
+    "sw": "סוואהילית",
+    "am": "אמהרית",
+    "ha": "האוסה",
+    "ky": "קירגיזית",
+    "mn": "מונגולית",
+    "sq": "אלבנית",
+    "ta": "טמילית"
   },
   "pt": {
     "en": "Inglês",
@@ -1791,7 +1977,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalão",
     "eu": "Basco",
     "is": "Islandês",
-    "sw": "Suaíli"
+    "sw": "Suaíli",
+    "am": "Amárico",
+    "ha": "Hauçá",
+    "ky": "Quirguiz",
+    "mn": "Mongol",
+    "sq": "Albanês",
+    "ta": "Tâmil"
   },
   "zh-CN": {
     "en": "英语",
@@ -1847,7 +2039,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "加泰罗尼亚语",
     "eu": "巴斯克语",
     "is": "冰岛语",
-    "sw": "斯瓦希里语"
+    "sw": "斯瓦希里语",
+    "am": "阿姆哈拉语",
+    "ha": "豪萨语",
+    "ky": "吉尔吉斯语",
+    "mn": "蒙古语",
+    "sq": "阿尔巴尼亚语",
+    "ta": "泰米尔语"
   },
   "zh-TW": {
     "en": "英語",
@@ -1903,7 +2101,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "加泰隆尼亞語",
     "eu": "巴斯克語",
     "is": "冰島語",
-    "sw": "斯瓦希里語"
+    "sw": "斯瓦希里語",
+    "am": "阿姆哈拉文",
+    "ha": "豪薩文",
+    "ky": "吉爾吉斯文",
+    "mn": "蒙古文",
+    "sq": "阿爾巴尼亞文",
+    "ta": "坦米爾文"
   },
   "zh-HK": {
     "en": "英語",
@@ -1959,7 +2163,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "加泰隆尼亞語",
     "eu": "巴斯克語",
     "is": "冰島語",
-    "sw": "斯瓦希里語"
+    "sw": "斯瓦希里語",
+    "am": "岩哈拉語",
+    "ha": "豪薩文",
+    "ky": "吉爾吉斯文",
+    "mn": "蒙古文",
+    "sq": "阿爾巴尼亞文",
+    "ta": "泰米爾文"
   },
   "zh-SG": {
     "en": "英语",
@@ -2015,7 +2225,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "加泰罗尼亚语",
     "eu": "巴斯克语",
     "is": "冰岛语",
-    "sw": "斯瓦希里语"
+    "sw": "斯瓦希里语",
+    "am": "阿姆哈拉语",
+    "ha": "豪萨语",
+    "ky": "吉尔吉斯语",
+    "mn": "蒙古语",
+    "sq": "阿尔巴尼亚语",
+    "ta": "泰米尔语"
   },
   "da": {
     "en": "Engelsk",
@@ -2071,7 +2287,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalansk",
     "eu": "Baskisk",
     "is": "Islandsk",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharisk",
+    "ha": "Hausa",
+    "ky": "Kirgisisk",
+    "mn": "Mongolsk",
+    "sq": "Albansk",
+    "ta": "Tamil"
   },
   "el": {
     "en": "Αγγλικά",
@@ -2127,7 +2349,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Καταλανικά",
     "eu": "Βασκικά",
     "is": "Ισλανδικά",
-    "sw": "Σουαχίλι"
+    "sw": "Σουαχίλι",
+    "am": "Αμχαρικά",
+    "ha": "Χάουσα",
+    "ky": "Κιργιζικά",
+    "mn": "Μογγολικά",
+    "sq": "Αλβανικά",
+    "ta": "Ταμιλικά"
   },
   "tl": {
     "en": "Ingles",
@@ -2183,7 +2411,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalan",
     "eu": "Basko",
     "is": "Islandes",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharic",
+    "ha": "Hausa",
+    "ky": "Kyrgyz",
+    "mn": "Mongolian",
+    "sq": "Albanian",
+    "ta": "Tamil"
   },
   "ms": {
     "en": "Inggeris",
@@ -2239,7 +2473,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Catalonia",
     "eu": "Basque",
     "is": "Iceland",
-    "sw": "Swahili"
+    "sw": "Swahili",
+    "am": "Amharic",
+    "ha": "Hausa",
+    "ky": "Kirghiz",
+    "mn": "Mongolia",
+    "sq": "Albania",
+    "ta": "Tamil"
   },
   "sk": {
     "en": "Angličtina",
@@ -2295,7 +2535,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalánčina",
     "eu": "Baskičtina",
     "is": "Islandčina",
-    "sw": "Svahilčina"
+    "sw": "Svahilčina",
+    "am": "Amharčina",
+    "ha": "Hauština",
+    "ky": "Kirgizština",
+    "mn": "Mongolčina",
+    "sq": "Albánčina",
+    "ta": "Tamilčina"
   },
   "bg": {
     "en": "Английски",
@@ -2351,7 +2597,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Каталонски",
     "eu": "Баски",
     "is": "Исландски",
-    "sw": "Суахили"
+    "sw": "Суахили",
+    "am": "Амхарски",
+    "ha": "Хауса",
+    "ky": "Киргизки",
+    "mn": "Монголски",
+    "sq": "Албански",
+    "ta": "Тамилски"
   },
   "hr": {
     "en": "Engleski",
@@ -2407,7 +2659,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalonski",
     "eu": "Baskijski",
     "is": "Islandski",
-    "sw": "Svahili"
+    "sw": "Svahili",
+    "am": "Amharski",
+    "ha": "Hausa",
+    "ky": "Kirgiski",
+    "mn": "Mongolski",
+    "sq": "Albanski",
+    "ta": "Tamilski"
   },
   "sr": {
     "en": "Енглески",
@@ -2463,7 +2721,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Каталонски",
     "eu": "Баскијски",
     "is": "Исландски",
-    "sw": "Свахили"
+    "sw": "Свахили",
+    "am": "Амхарски",
+    "ha": "Хауса",
+    "ky": "Киргиски",
+    "mn": "Монголски",
+    "sq": "Албански",
+    "ta": "Тамилски"
   },
   "sl": {
     "en": "Angleščina",
@@ -2519,7 +2783,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalonščina",
     "eu": "Baskovščina",
     "is": "Islandščina",
-    "sw": "Svahili"
+    "sw": "Svahili",
+    "am": "Amharščina",
+    "ha": "Havščina",
+    "ky": "Kirgiščina",
+    "mn": "Mongolščina",
+    "sq": "Albanščina",
+    "ta": "Tamilščina"
   },
   "kk": {
     "en": "Ағылшын тілі",
@@ -2575,7 +2845,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Каталан тілі",
     "eu": "Баск тілі",
     "is": "Исланд тілі",
-    "sw": "Суахили тілі"
+    "sw": "Суахили тілі",
+    "am": "Амхар тілі",
+    "ha": "Хауса тілі",
+    "ky": "Қырғыз тілі",
+    "mn": "Моңғол тілі",
+    "sq": "Албан тілі",
+    "ta": "Тамил тілі"
   },
   "az": {
     "en": "İngilis dili",
@@ -2631,7 +2907,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalan dili",
     "eu": "Bask dili",
     "is": "İsland dili",
-    "sw": "Suahili dili"
+    "sw": "Suahili dili",
+    "am": "Amhar",
+    "ha": "Hausa",
+    "ky": "Qırğız",
+    "mn": "Monqol",
+    "sq": "Alban",
+    "ta": "Tamil"
   },
   "bn": {
     "en": "ইংরেজি",
@@ -2687,7 +2969,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "কাতালান",
     "eu": "বাস্ক",
     "is": "আইসল্যান্ডীয়",
-    "sw": "সোয়াহিলি"
+    "sw": "সোয়াহিলি",
+    "am": "আমহারিক",
+    "ha": "হাউসা",
+    "ky": "কিরগিজ",
+    "mn": "মোঙ্গোলীয়",
+    "sq": "আলবেনীয়",
+    "ta": "তামিল"
   },
   "ka": {
     "en": "ინგლისური",
@@ -2743,7 +3031,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "კატალანური",
     "eu": "ბასკური",
     "is": "ისლანდიური",
-    "sw": "სუაჰილი"
+    "sw": "სუაჰილი",
+    "am": "Ამჰარული",
+    "ha": "Ჰაუსა",
+    "ky": "Ყირგიზული",
+    "mn": "Მონღოლური",
+    "sq": "Ალბანური",
+    "ta": "Ტამილური"
   },
   "uz": {
     "en": "Ingliz tili",
@@ -2799,7 +3093,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalan tili",
     "eu": "Bask tili",
     "is": "Island tili",
-    "sw": "Svahili tili"
+    "sw": "Svahili tili",
+    "am": "Amxar",
+    "ha": "Xausa",
+    "ky": "Qirgʻizcha",
+    "mn": "Mongol",
+    "sq": "Alban",
+    "ta": "Tamil"
   },
   "ca": {
     "en": "Anglès",
@@ -2855,7 +3155,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Català",
     "eu": "Basc",
     "is": "Islandès",
-    "sw": "Suahili"
+    "sw": "Suahili",
+    "am": "Amhàric",
+    "ha": "Haussa",
+    "ky": "Kirguís",
+    "mn": "Mongol",
+    "sq": "Albanès",
+    "ta": "Tàmil"
   },
   "eu": {
     "en": "Ingelesa",
@@ -2911,7 +3217,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalana",
     "eu": "Euskara",
     "is": "Islandiera",
-    "sw": "Swahilia"
+    "sw": "Swahilia",
+    "am": "Amharera",
+    "ha": "Hausa",
+    "ky": "Kirgizera",
+    "mn": "Mongoliera",
+    "sq": "Albaniera",
+    "ta": "Tamilera"
   },
   "is": {
     "en": "Enska",
@@ -2967,7 +3279,13 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Katalónska",
     "eu": "Baskneska",
     "is": "Íslenska",
-    "sw": "Svahílí"
+    "sw": "Svahílí",
+    "am": "Amharíska",
+    "ha": "Hása",
+    "ky": "Kirgiska",
+    "mn": "Mongólska",
+    "sq": "Albanska",
+    "ta": "Tamílska"
   },
   "sw": {
     "en": "Kiingereza",
@@ -3023,10 +3341,394 @@ export const LOCALIZED_LANGUAGE_NAMES: Record<string, Record<string, string>> = 
     "ca": "Kikatalani",
     "eu": "Kibaski",
     "is": "Kiisilandi",
-    "sw": "Kiswahili"
+    "sw": "Kiswahili",
+    "am": "Kiamhari",
+    "ha": "Kihausa",
+    "ky": "Kikyrgyz",
+    "mn": "Kimongolia",
+    "sq": "Kialbania",
+    "ta": "Kitamili"
+  },
+  "am": {
+    "en": "እንግሊዝኛ",
+    "tr": "ቱርክኛ",
+    "de": "ጀርመንኛ",
+    "sv": "ስዊድንኛ",
+    "nl": "ደች",
+    "no": "ኖርዌይኛ",
+    "fi": "ፊንላንድኛ",
+    "ja": "ጃፓንኛ",
+    "fa": "ፐርሺያኛ",
+    "ru": "ራሽያኛ",
+    "ar": "ዓረብኛ",
+    "es": "ስፓኒሽ",
+    "it": "ጣሊያንኛ",
+    "zh": "ቻይንኛ",
+    "et": "ኢስቶኒያንኛ",
+    "lt": "ሊቱዌንያኛ",
+    "lv": "ላትቪያኛ",
+    "fr": "ፈረንሳይኛ",
+    "my": "ቡርማኛ",
+    "uk": "ዩክሬንኛ",
+    "pl": "ፖሊሽ",
+    "cs": "ቼክኛ",
+    "hu": "ሀንጋሪኛ",
+    "ro": "ሮማኒያኛ",
+    "ko": "ኮሪያኛ",
+    "vi": "ቪየትናምኛ",
+    "th": "ታይ",
+    "hi": "ሕንድኛ",
+    "ur": "ኡርዱኛ",
+    "id": "ኢንዶኔዥያኛ",
+    "he": "ዕብራይስጥ",
+    "pt": "ፖርቹጋልኛ",
+    "zh-CN": "ቻይንኛ (ቻይና)",
+    "zh-TW": "ቻይንኛ (ባህላዊ)",
+    "zh-HK": "ቻይንኛ (ሆንግ ኮንግ ልዩ የአስተዳደር ክልል ቻይና)",
+    "zh-SG": "ቻይንኛ (ሲንጋፖር)",
+    "da": "ዴኒሽ",
+    "el": "ግሪክኛ",
+    "tl": "ፊሊፒንኛ",
+    "ms": "ማላይ",
+    "sk": "ስሎቫክኛ",
+    "bg": "ቡልጋሪኛ",
+    "hr": "ክሮሽያንኛ",
+    "sr": "ሰርብያኛ",
+    "sl": "ስሎቬንኛ",
+    "kk": "ካዛክኛ",
+    "az": "አዘርባጃንኛ",
+    "bn": "ቤንጋሊኛ",
+    "ka": "ጆርጂያንኛ",
+    "uz": "ኡዝቤክኛ",
+    "ca": "ካታላንኛ",
+    "eu": "ባስክኛ",
+    "is": "አይስላንድኛ",
+    "sw": "ስዋሂሊኛ",
+    "am": "አማርኛ",
+    "ha": "ሃውሳኛ",
+    "ky": "ክይርግይዝ",
+    "mn": "ሞንጎሊያኛ",
+    "sq": "አልባንያንኛ",
+    "ta": "ታሚል"
+  },
+  "ha": {
+    "en": "Turanci",
+    "tr": "Harshen Turkiyya",
+    "de": "Jamusanci",
+    "sv": "Harshen Suwedan",
+    "nl": "Holanci",
+    "no": "Harhsen Norway",
+    "fi": "Yaren mutanen Finland",
+    "ja": "Japananci",
+    "fa": "Farisanci",
+    "ru": "Rashanci",
+    "ar": "Larabci",
+    "es": "Sifaniyanci",
+    "it": "Italiyanci",
+    "zh": "Harshen Sinanci",
+    "et": "Istoniyanci",
+    "lt": "Lituweniyanci",
+    "lv": "Latbiyanci",
+    "fr": "Faransanci",
+    "my": "Burmanci",
+    "uk": "Harshen Yukuren",
+    "pl": "Harshen Polan",
+    "cs": "Cek",
+    "hu": "Harshen Hungari",
+    "ro": "Romaniyanci",
+    "ko": "Harshen Koriya",
+    "vi": "Harshen Biyetinam",
+    "th": "Thai",
+    "hi": "Harshen Hindi",
+    "ur": "Urdanci",
+    "id": "Harshen Indunusiya",
+    "he": "Ibrananci",
+    "pt": "Harshen Potugis",
+    "zh-CN": "Harshen Sinanci (Sin)",
+    "zh-TW": "Harshen Sinanci (Na gargajiya)",
+    "zh-HK": "Harshen Sinanci (Babban Yankin Mulkin Hong Kong na Ƙasar Sin)",
+    "zh-SG": "Harshen Sinanci (Singapur)",
+    "da": "Danish",
+    "el": "Girkanci",
+    "tl": "Dan Filifin",
+    "ms": "Harshen Malay",
+    "sk": "Basulke",
+    "bg": "Bulgariyanci",
+    "hr": "Kuroshiyan",
+    "sr": "Sabiyan",
+    "sl": "Basulabe",
+    "kk": "Kazakh",
+    "az": "Azerbaijanci",
+    "bn": "Bengali",
+    "ka": "Jojiyanci",
+    "uz": "Uzbek",
+    "ca": "Kataloniyanci",
+    "eu": "Basque",
+    "is": "Yaren mutanen Iceland",
+    "sw": "Harshen Suwahili",
+    "am": "Amharik",
+    "ha": "Hausa",
+    "ky": "Kirgizanci",
+    "mn": "Mongoliyanci",
+    "sq": "Albaniyanci",
+    "ta": "Tamil"
+  },
+  "ky": {
+    "en": "Англисче",
+    "tr": "Түркчө",
+    "de": "Немисче",
+    "sv": "Шведче",
+    "nl": "Голландча",
+    "no": "Норвежче",
+    "fi": "Финче",
+    "ja": "Жапончо",
+    "fa": "Фарсча",
+    "ru": "Орусча",
+    "ar": "Арабча",
+    "es": "Испанча",
+    "it": "Италиянча",
+    "zh": "Кытайча",
+    "et": "Эстончо",
+    "lt": "Литовчо",
+    "lv": "Латышча",
+    "fr": "Французча",
+    "my": "Бурмача",
+    "uk": "Украинче",
+    "pl": "Полякча",
+    "cs": "Чехче",
+    "hu": "Венгерче",
+    "ro": "Румынча",
+    "ko": "Корейче",
+    "vi": "Вьетнамча",
+    "th": "Тайча",
+    "hi": "Хиндиче",
+    "ur": "Урдуча",
+    "id": "Индонезияча",
+    "he": "Ивритче",
+    "pt": "Португалча",
+    "zh-CN": "кытайча (Кытай)",
+    "zh-TW": "Кытайча (Салттуу)",
+    "zh-HK": "кытайча (Гонконг Кытай ААА)",
+    "zh-SG": "кытайча (Сингапур)",
+    "da": "Датча",
+    "el": "Грекче",
+    "tl": "Филипинче",
+    "ms": "Малайча",
+    "sk": "Словакча",
+    "bg": "Болгарча",
+    "hr": "хорватча",
+    "sr": "Сербче",
+    "sl": "словенче",
+    "kk": "Казакча",
+    "az": "Азербайжанча",
+    "bn": "Бангладешче",
+    "ka": "Грузинче",
+    "uz": "Өзбекче",
+    "ca": "каталончо",
+    "eu": "баскча",
+    "is": "исландча",
+    "sw": "Суахиличе",
+    "am": "Амхарча",
+    "ha": "Хаусача",
+    "ky": "Кыргызча",
+    "mn": "Монголчо",
+    "sq": "Албанча",
+    "ta": "Тамилче"
+  },
+  "mn": {
+    "en": "Англи",
+    "tr": "Турк",
+    "de": "Герман",
+    "sv": "Швед",
+    "nl": "Нидерланд",
+    "no": "Норвег",
+    "fi": "Фин",
+    "ja": "Япон",
+    "fa": "Перс",
+    "ru": "Орос",
+    "ar": "Араб",
+    "es": "Испани",
+    "it": "Итали",
+    "zh": "Хятад",
+    "et": "Эстони",
+    "lt": "Литва",
+    "lv": "Латви",
+    "fr": "Франц",
+    "my": "Бирм",
+    "uk": "Украин",
+    "pl": "Польш",
+    "cs": "Чех",
+    "hu": "Мажар",
+    "ro": "Румын",
+    "ko": "Солонгос",
+    "vi": "Вьетнам",
+    "th": "Тай",
+    "hi": "Хинди",
+    "ur": "Урду",
+    "id": "Индонези",
+    "he": "Еврей",
+    "pt": "Португал",
+    "zh-CN": "хятад (Хятад)",
+    "zh-TW": "Хятад (уламжлалт)",
+    "zh-HK": "хятад (БНХАУ-ын Тусгай захиргааны бүс Хонг-Конг)",
+    "zh-SG": "хятад (Сингапур)",
+    "da": "Дани",
+    "el": "Грек",
+    "tl": "Филипино",
+    "ms": "Малай",
+    "sk": "Словак",
+    "bg": "Болгар",
+    "hr": "хорват",
+    "sr": "Серб",
+    "sl": "словени",
+    "kk": "Казах",
+    "az": "Азербайжан",
+    "bn": "Бенгал",
+    "ka": "Гүрж",
+    "uz": "Узбек",
+    "ca": "каталан",
+    "eu": "баск",
+    "is": "исланд",
+    "sw": "Свахили",
+    "am": "Амхар",
+    "ha": "Хауса",
+    "ky": "Киргиз",
+    "mn": "Монгол",
+    "sq": "Албани",
+    "ta": "Тамил"
+  },
+  "sq": {
+    "en": "Anglisht",
+    "tr": "Turqisht",
+    "de": "Gjermanisht",
+    "sv": "Suedisht",
+    "nl": "Holandisht",
+    "no": "Norvegjisht",
+    "fi": "Finlandisht",
+    "ja": "Japonisht",
+    "fa": "Persisht",
+    "ru": "Rusisht",
+    "ar": "Arabisht",
+    "es": "Spanjisht",
+    "it": "Italisht",
+    "zh": "Kinezisht",
+    "et": "Estonisht",
+    "lt": "Lituanisht",
+    "lv": "Letonisht",
+    "fr": "Frëngjisht",
+    "my": "Birmanisht",
+    "uk": "Ukrainisht",
+    "pl": "Polonisht",
+    "cs": "Çekisht",
+    "hu": "Hungarisht",
+    "ro": "Rumanisht",
+    "ko": "Koreanisht",
+    "vi": "Vietnamisht",
+    "th": "Tajlandisht",
+    "hi": "Indisht",
+    "ur": "Urduisht",
+    "id": "Indonezisht",
+    "he": "Hebraisht",
+    "pt": "Portugalisht",
+    "zh-CN": "Kinezisht (Kinë)",
+    "zh-TW": "Kinezisht (tradicional)",
+    "zh-HK": "Kinezisht (RPA i Hong-Kongut)",
+    "zh-SG": "Kinezisht (Singapor)",
+    "da": "Danisht",
+    "el": "Greqisht",
+    "tl": "Filipinisht",
+    "ms": "Malajisht",
+    "sk": "Sllovakisht",
+    "bg": "Bullgarisht",
+    "hr": "Kroatisht",
+    "sr": "Serbisht",
+    "sl": "Sllovenisht",
+    "kk": "Kazakisht",
+    "az": "Azerbajxhanisht",
+    "bn": "Bengalisht",
+    "ka": "Gjeorgjisht",
+    "uz": "Uzbekisht",
+    "ca": "Katalonisht",
+    "eu": "Baskisht",
+    "is": "Islandisht",
+    "sw": "Suahilisht",
+    "am": "Amarisht",
+    "ha": "Hausisht",
+    "ky": "Kirgizisht",
+    "mn": "Mongolisht",
+    "sq": "Shqip",
+    "ta": "Tamilisht"
+  },
+  "ta": {
+    "en": "ஆங்கிலம்",
+    "tr": "துருக்கிஷ்",
+    "de": "ஜெர்மன்",
+    "sv": "ஸ்வீடிஷ்",
+    "nl": "டச்சு",
+    "no": "நார்வேஜியன்",
+    "fi": "ஃபின்னிஷ்",
+    "ja": "ஜாப்பனீஸ்",
+    "fa": "பெர்ஷியன்",
+    "ru": "ரஷியன்",
+    "ar": "அரபிக்",
+    "es": "ஸ்பானிஷ்",
+    "it": "இத்தாலியன்",
+    "zh": "சீனம்",
+    "et": "எஸ்டோனியன்",
+    "lt": "லிதுவேனியன்",
+    "lv": "லாட்வியன்",
+    "fr": "பிரெஞ்சு",
+    "my": "பர்மீஸ்",
+    "uk": "உக்ரைனியன்",
+    "pl": "போலிஷ்",
+    "cs": "செக்",
+    "hu": "ஹங்கேரியன்",
+    "ro": "ரோமேனியன்",
+    "ko": "கொரியன்",
+    "vi": "வியட்நாமீஸ்",
+    "th": "தாய்",
+    "hi": "இந்தி",
+    "ur": "உருது",
+    "id": "இந்தோனேஷியன்",
+    "he": "ஹீப்ரூ",
+    "pt": "போர்ச்சுகீஸ்",
+    "zh-CN": "சீனம் (சீனா)",
+    "zh-TW": "சீனம் (பாரம்பரியம்)",
+    "zh-HK": "சீனம் (ஹாங்காங் எஸ்ஏஆர் சீனா)",
+    "zh-SG": "சீனம் (சிங்கப்பூர்)",
+    "da": "டேனிஷ்",
+    "el": "கிரேக்கம்",
+    "tl": "ஃபிலிபினோ",
+    "ms": "மலாய்",
+    "sk": "ஸ்லோவாக்",
+    "bg": "பல்கேரியன்",
+    "hr": "குரோஷியன்",
+    "sr": "செர்பியன்",
+    "sl": "ஸ்லோவேனியன்",
+    "kk": "கசாக்",
+    "az": "அசர்பைஜானி",
+    "bn": "வங்காளம்",
+    "ka": "ஜார்ஜியன்",
+    "uz": "உஸ்பெக்",
+    "ca": "கேட்டலான்",
+    "eu": "பாஸ்க்",
+    "is": "ஐஸ்லேண்டிக்",
+    "sw": "ஸ்வாஹிலி",
+    "am": "அம்ஹாரிக்",
+    "ha": "ஹௌஸா",
+    "ky": "கிர்கிஸ்",
+    "mn": "மங்கோலியன்",
+    "sq": "அல்பேனியன்",
+    "ta": "தமிழ்"
   }
 };
 
-export function getLocalizedLanguageName(currentLang: string, targetLang: string): string {
-  return LOCALIZED_LANGUAGE_NAMES[currentLang]?.[targetLang] || LOCALIZED_LANGUAGE_NAMES['en']?.[targetLang] || targetLang;
+export function getLocalizedLanguageName(uiLang: string, targetLang: string): string {
+  const normUi = uiLang in LOCALIZED_LANGUAGE_NAMES ? uiLang : uiLang.split(/[-_]/)[0];
+  const dict = LOCALIZED_LANGUAGE_NAMES[normUi] || LOCALIZED_LANGUAGE_NAMES['en'];
+  if (dict && dict[targetLang]) {
+    return dict[targetLang];
+  }
+  const baseTarget = targetLang.split(/[-_]/)[0];
+  return (dict && dict[baseTarget]) || LOCALIZED_LANGUAGE_NAMES['en']?.[targetLang] || targetLang;
 }

@@ -58,6 +58,12 @@ const lazyLoaders: Record<string, () => any> = {
   eu: () => require('./eu.json'),
   is: () => require('./is.json'),
   sw: () => require('./sw.json'),
+  am: () => require('./am.json'),
+  ha: () => require('./ha.json'),
+  ky: () => require('./ky.json'),
+  mn: () => require('./mn.json'),
+  sq: () => require('./sq.json'),
+  ta: () => require('./ta.json'),
 };
 
 export function getTranslation(lang: string): any {

@@ -67,6 +67,12 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'eu', name: 'Basque', nativeName: 'Euskara' },
   { code: 'is', name: 'Icelandic', nativeName: 'Íslenska' },
   { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili' },
+  { code: 'am', name: 'Amharic', nativeName: 'አማርኛ' },
+  { code: 'ha', name: 'Hausa', nativeName: 'Hausa' },
+  { code: 'ky', name: 'Kyrgyz', nativeName: 'Кыргызча' },
+  { code: 'mn', name: 'Mongolian', nativeName: 'Монгол хэл' },
+  { code: 'sq', name: 'Albanian', nativeName: 'Shqip' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
 ];
 
 interface I18nContextType {
