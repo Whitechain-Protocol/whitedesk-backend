@@ -47,6 +47,8 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'zh', name: 'Chinese', nativeName: '简体中文' },
   { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
   { code: 'zh-TW', name: 'Chinese (Traditional)', nativeName: '繁體中文' },
+  { code: 'zh-HK', name: 'Chinese (Traditional, Hong Kong)', nativeName: '繁體中文（香港）' },
+  { code: 'zh-SG', name: 'Chinese (Simplified, Singapore)', nativeName: '简体中文（新加坡）' },
   { code: 'da', name: 'Danish', nativeName: 'Dansk' },
   { code: 'el', name: 'Greek', nativeName: 'Ελληνικά' },
   { code: 'tl', name: 'Tagalog', nativeName: 'Tagalog' },
@@ -85,15 +87,50 @@ const I18nContext = createContext<I18nContextType>({
   getLanguageName: (code: string) => code,
 });
 
+function matchSupportedLocale(rawLocale?: string | null): string | null {
+  if (!rawLocale) return null;
+  const tag = String(rawLocale).trim().replace(/_/g, '-');
+  if (!tag) return null;
+
+  const lower = tag.toLowerCase();
+
+  // 1. Exact regional match (e.g., zh-CN, zh-TW, zh-HK, zh-SG)
+  const exact = SUPPORTED_LANGUAGES.find(l => l.code.toLowerCase() === lower);
+  if (exact) return exact.code;
+
+  // 2. Chinese script + region resolution (iOS/Android: zh-Hant-TW, zh-Hant-HK, zh-Hans-CN, zh-Hans-SG)
+  if (lower.startsWith('zh-')) {
+    if (lower.includes('-hk') || lower.includes('-mo')) return 'zh-HK';
+    if (lower.includes('-tw') || lower.includes('-hant')) return 'zh-TW';
+    if (lower.includes('-sg')) return 'zh-SG';
+    if (lower.includes('-cn') || lower.includes('-hans')) return 'zh-CN';
+    return 'zh';
+  }
+
+  // 3. Primary language subtag + OS ISO legacy alias mapping
+  const primary = lower.split('-')[0];
+  const aliasMap: Record<string, string> = {
+    nb: 'no',  // Norwegian Bokmål -> no
+    nn: 'no',  // Norwegian Nynorsk -> no
+    fil: 'tl', // Filipino -> Tagalog (tl)
+    iw: 'he',  // Legacy Android Hebrew -> he
+    in: 'id',  // Legacy Android Indonesian -> id
+  };
+  const resolvedCode = aliasMap[primary] || primary;
+  if (SUPPORTED_LANGUAGES.some(l => l.code === resolvedCode)) {
+    return resolvedCode;
+  }
+
+  return null;
+}
+
 export function detectDeviceLanguage(): string {
   try {
     // 1. ECMAScript Intl API (Supported natively in Hermes, V8, and Web)
     const intlLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (intlLocale) {
-      const code = intlLocale.split(/[-_]/)[0].toLowerCase();
-      if (SUPPORTED_LANGUAGES.some(l => l.code === code)) {
-        return code;
-      }
+    const matchedIntl = matchSupportedLocale(intlLocale);
+    if (matchedIntl) {
+      return matchedIntl;
     }
   } catch (_) {}
 
@@ -105,11 +142,9 @@ export function detectDeviceLanguage(): string {
           NativeModules.SettingsManager?.settings?.AppleLanguages?.[0]
         : NativeModules.I18nManager?.localeIdentifier;
 
-    if (systemLocale) {
-      const code = String(systemLocale).split(/[-_]/)[0].toLowerCase();
-      if (SUPPORTED_LANGUAGES.some(l => l.code === code)) {
-        return code;
-      }
+    const matchedSystem = matchSupportedLocale(systemLocale);
+    if (matchedSystem) {
+      return matchedSystem;
     }
   } catch (_) {}
 
@@ -152,17 +187,12 @@ function resolveTranslation(
   const fallbackStr = typeof paramsOrFallback === 'string' ? paramsOrFallback : undefined;
   const params = typeof paramsOrFallback === 'object' && paramsOrFallback !== null ? paramsOrFallback : maybeParams;
 
-  // Try selected language
+  // Try selected language (loads ONLY this language into memory)
   let value = lookupInLang(lang, key);
 
-  // Fallback to English if not found
+  // Fallback strictly to English if key is not found in selected language
   if (value === undefined && lang !== 'en') {
     value = lookupInLang('en', key);
-  }
-
-  // Fallback to Turkish master dictionary if not yet in English
-  if (value === undefined && lang !== 'tr') {
-    value = lookupInLang('tr', key);
   }
 
   // Fallback to provided fallback string or raw key if still not found

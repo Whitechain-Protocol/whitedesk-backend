@@ -327,6 +327,17 @@ export function useHelpDeskTicketState({
       setTickets(list);
       setLoading(false);
 
+      // ⚡ ANINDA D1 RELAY HAVUZU SENKRONİZASYONU: Yenileme / giriş anında 1.5sn beklemeden bekleyen biletleri çek
+      void (async () => {
+        try {
+          const hasChangesImmediate = await helpDeskService.syncRelayInbox(myId, tenantFilter, effectiveRole);
+          if (hasChangesImmediate) {
+            const updatedImmediate = await helpDeskService.getTickets(myId, admin, CURRENT_APP_ID, tenantFilter, effectiveRole);
+            setTickets(updatedImmediate);
+          }
+        } catch {}
+      })();
+
       // Kurumsal logo, kategori ve yapılandırma verilerini arka planda paralel yükle
       const [savedLogo, savedAlign, advConfig, userPrefs, cats, orgs, apps, tenantMeta] = await Promise.all([
         helpDeskService.getTenantLogo(targetTenantId || 'default').catch(() => null),

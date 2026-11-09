@@ -122,3 +122,14 @@ flowchart TD
    * 3-nokta menüsünde "Profil"in en üstte olduğu, provizyon konsolunda `ShieldCheck` ikonu olduğu ve lisansın menüden kalktığı kontrol edilecek.
    * Profil modalında QR kod, maskeli hash, göz ikonuna tıklanınca biyometri tetiklenmesi kontrol edilecek.
    * Lisans kartının global adminde tıklanıp `LicenseStationModal`'ı açtığı, normal kullanıcıda salt okunur kaldığı test edilecek.
+
+---
+
+## 🔐 5. Profil QR (`wd_prof_...`) ve `wdrun` Yönetici Anahtarları Oturum Kurtarma Kuralı (KİLİTLİ SÜREÇ)
+
+1. **Profil QR Kodu (`wd_prof_...`) ile Birebir Aynı Oturum Kurtarma:**
+   * Profil modalında üretilen `wd_prof_<32hex>` kodu ([`getOrCreateProfilePasskey`](file:///c:/whitedesk/src/services/helpdesk/helpDeskAuthService.ts)), `whitedesk_recovery_hashes` tablosuna yalnızca firma ve rol bazında değil, doğrudan o yöneticinin/kullanıcının **`used_by_blind_id = myBlindId`**, `org_id` ve `app_id` değerleriyle kişiye özel olarak mühürlenir.
+   * Yönetici telefonunu kaybettiğinde veya yeni bir cihaza geçtiğinde, sakladığı bu QR kodu (ilk açılış ekranından veya uygulama içinden) okuttuğunda ([`handleProfilePasskeyClaim`](file:///c:/whitedesk/src/services/helpdesk/helpDeskAuthService.ts) & [`claimUnifiedHash`](file:///c:/whitedesk/src/services/helpdesk/helpDeskLicenseService.ts)), yeni cihazda rastgele bir kimlik oluşturulmaz; `used_by_blind_id` içindeki **orijinal `blind_id`**, `whitedesk_admins` üzerindeki **`alias` (Ad Soyad / Rumuz)**, **rol** ve **departman (`org_id`)** bilgileri yeni cihazın `OWN_WHITE_ID` ve kurumsal oturumuna birebir geri yüklenir.
+2. **`wdrun` Admin Anahtarlarının İlk Giriş ve Bilet Kutusu (`admin <kod>`) Tam Uyumu:**
+   * `wdrun` üzerinde firma seçilerek üretilen `ga_cosmos_...`, `adm_oper_...`, `tw_founder_...` anahtarları veya doğrudan eklenen `blind_...` yönetici kimlikleri; hem ilk ana girişteki **"Kod ile Giriş Yap" (`Giriş Kodunuz`)** kutusundan hem de bilet mesaj kutusundan **`admin <kod/blind_id>`** komutuyla girildiğinde aynı deterministik `blind_id` kimliğini (`OWN_WHITE_ID`) mühürler ve onaya düşürmeden yönetici oturumunu doğrudan açar.
+

@@ -1064,8 +1064,8 @@
     <input type="hidden" id="admin-modal-tenant-id">
 
     <div class="form-group">
-      <label>Admin WhiteID veya BlindID</label>
-      <input type="text" id="admin-modal-whiteid" placeholder="Örn: bod_xxxxxx veya blind_xxxxxx">
+      <label>Admin WhiteID / BlindID (İsteğe Bağlı)</label>
+      <input type="text" id="admin-modal-whiteid" placeholder="Boş bırakırsanız otomatik adm_oper_... anahtarı üretilir">
     </div>
 
     <div class="form-group">
@@ -4589,9 +4589,13 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
 
   async function generateBlindId(whiteId, salt = SYSTEM_SALT) {
     if (!whiteId) return '';
+    const clean = String(whiteId).trim().toLowerCase();
+    if (clean.startsWith('blind_') || clean.startsWith('ent_')) {
+      return clean;
+    }
     const enc = new TextEncoder();
     const keyData = enc.encode(salt);
-    const msgData = enc.encode(whiteId.trim().toLowerCase());
+    const msgData = enc.encode(clean);
     const key = await window.crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sig = await window.crypto.subtle.sign('HMAC', key, msgData);
     const hex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -4827,13 +4831,16 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
 
           <div class="tenant-detail-body">
             <!-- Sub-tabs nav -->
-            <div class="detail-subtabs">
-              <button class="subtab-btn active" onclick="switchSubTab('${t.enterprise_blind_id}', 'cosmos', event)">👑 WhiteCosmos</button>
-              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'admins', event)">🛡️ Yöneticiler (${t.adminsCount})</button>
-              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'categories', event)">🏷️ Birim & Kategoriler</button>
-              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'users', event)">👥 Personeller (${t.usersCount})</button>
-              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'approvals', event)">⏳ Onaylar (${t.pendingApprovalsCount})</button>
-              <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'dr', event)">💾 Afet Kurtarma</button>
+            <div class="detail-subtabs" style="justify-content: space-between; align-items: center;">
+              <div style="display: flex; gap: 6px; overflow-x: auto;">
+                <button class="subtab-btn active" onclick="switchSubTab('${t.enterprise_blind_id}', 'cosmos', event)">👑 WhiteCosmos</button>
+                <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'admins', event)">🛡️ Yöneticiler (${t.adminsCount})</button>
+                <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'categories', event)">🏷️ Birim & Kategoriler</button>
+                <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'users', event)">👥 Personeller (${t.usersCount})</button>
+                <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'approvals', event)">⏳ Onaylar (${t.pendingApprovalsCount})</button>
+                <button class="subtab-btn" onclick="switchSubTab('${t.enterprise_blind_id}', 'dr', event)">💾 Afet Kurtarma</button>
+              </div>
+              ${!t.is_founder_tenant ? `<button class="btn btn-danger btn-sm" style="margin-left: auto; white-space: nowrap;" onclick="deleteTenantCompletely('${t.enterprise_blind_id}', '${t.name.replace(/'/g, "\\'")}', event)">🗑️ Firmayı Sil</button>` : ''}
             </div>
 
             <!-- 1. WhiteCosmos Sub-Tab -->
@@ -4915,7 +4922,11 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
           </div>
         </div>
         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
-          <div><strong>Kör Kimlik (Blind ID):</strong> <span class="mono">${t.cosmos.white_id}</span></div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong>Kör Kimlik (Blind ID):</strong>
+            <span class="mono">${t.cosmos.white_id}</span>
+            <button class="copy-btn" style="margin-left: 0;" onclick="navigator.clipboard.writeText('${t.cosmos.white_id}'); alert('Kopyalandı: ${t.cosmos.white_id}');">Kopyala</button>
+          </div>
           <div><strong>Tescil Tarihi:</strong> ${new Date(Number(t.cosmos.created_at)).toLocaleString('tr-TR')}</div>
           <div><strong>Durum:</strong> ${t.cosmos.is_active ? '✓ Aktif' : '✗ Pasif'}</div>
         </div>
@@ -4947,7 +4958,12 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
             return `
               <tr>
                 <td><strong>${adm.alias}</strong></td>
-                <td><span class="mono">${adm.white_id.slice(0, 18)}...</span></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="mono">${adm.white_id}</span>
+                    <button class="copy-btn" style="margin-left: 0;" onclick="navigator.clipboard.writeText('${adm.white_id}'); alert('Kopyalandı: ${adm.white_id}');">Kopyala</button>
+                  </div>
+                </td>
                 <td>${alloc ? (alloc.app_id + ' / ' + alloc.org_id) : 'Genel'}</td>
                 <td>${cats.join(', ')}</td>
                 <td>
@@ -5106,16 +5122,67 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
           Sunucu çökmesi veya veritabanı taşınması durumunda bu kiracıyı saniyeler içinde sıfırdan ayağa kaldırmak için fiziksel dosyaları indirin:
         </p>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <a class="btn btn-outline btn-sm" href="tenants/${slug}/schema.sql" download="${slug}_schema.sql">
-            📥 schema.sql İndir
-          </a>
-          <a class="btn btn-outline btn-sm" href="tenants/${slug}/keys.json" download="${slug}_keys.json">
-            📥 keys.json (Anahtarlar) İndir
-          </a>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a class="btn btn-outline btn-sm" href="tenants/${slug}/schema.sql" download="${slug}_schema.sql">
+              📥 schema.sql İndir
+            </a>
+            <a class="btn btn-outline btn-sm" href="tenants/${slug}/keys.json" download="${slug}_keys.json">
+              📥 keys.json (Anahtarlar) İndir
+            </a>
+          </div>
+          ${!t.is_founder_tenant ? `<button class="btn btn-danger btn-sm" onclick="deleteTenantCompletely('${t.enterprise_blind_id}', '${t.name.replace(/'/g, "\\'")}', event)">🗑️ Firmayı Veritabanından Tamamen Sil</button>` : ''}
         </div>
       </div>
     `;
+  }
+
+  async function deleteTenantCompletely(tenantBlindId, tenantName, evt) {
+    if (evt) evt.stopPropagation();
+    if (!tenantBlindId) return;
+    const msg = "DİKKAT: '" + (tenantName || tenantBlindId) + "' firmasını ve bu firmaya bağlı TÜM yöneticileri, personelleri, şubeleri, kategorileri, kurtarma anahtarlarını ve mesajları veritabanından kalıcı olarak silmek istediğinizden emin misiniz?";
+    if (!confirm(msg)) return;
+
+    try {
+      await executeSql('DELETE FROM transient_messages WHERE recipient_blind_id = ' + escapeSql(tenantBlindId) + ' OR recipient_blind_id IN (SELECT white_id FROM whitedesk_admins WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ') OR recipient_blind_id IN (SELECT user_blind_id FROM whitedesk_user_bindings WHERE tenant_blind_id = ' + escapeSql(tenantBlindId) + ');');
+      try {
+        await executeSql('DELETE FROM transient_rtc_signals WHERE recipient_blind_id = ' + escapeSql(tenantBlindId) + ' OR recipient_blind_id IN (SELECT white_id FROM whitedesk_admins WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ');');
+      } catch (e) {}
+      try {
+        await executeSql('DELETE FROM whitedesk_ticket_ratings WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      } catch (e) {}
+      try {
+        await executeSql('DELETE FROM whitedesk_sdk_bridges WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      } catch (e) {}
+      try {
+        await executeSql('DELETE FROM whitedesk_desktop_sessions WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      } catch (e) {}
+      await executeSql('DELETE FROM whitedesk_approvals WHERE tenant_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_recovery_hashes WHERE tenant_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_user_bindings WHERE tenant_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_categories WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_apps WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_orgs WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_admins WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_genesis_vault WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+      await executeSql('DELETE FROM whitedesk_enterprises WHERE enterprise_blind_id = ' + escapeSql(tenantBlindId) + ';');
+
+      try {
+        await fetch('/api/tenant/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantBlindId })
+        });
+      } catch (e) {}
+
+      if (expandedTenantBlindId === tenantBlindId) {
+        expandedTenantBlindId = null;
+      }
+      alert("'" + (tenantName || tenantBlindId) + "' firması ve tüm bağlı verileri veritabanından tamamen silindi.");
+      await loadTenantAuditSummary();
+    } catch (e) {
+      alert('Firma silinirken hata oluştu: ' + e.message);
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -5306,25 +5373,31 @@ module.exports = (typeof self === 'object' && self.self === self && self) ||
   }
   async function submitNewAdminModal() {
     const tenantBlindId = document.getElementById('admin-modal-tenant-id').value;
-    const adminWhiteId = document.getElementById('admin-modal-whiteid').value.trim();
+    const rawAdminInput = document.getElementById('admin-modal-whiteid').value.trim();
     const alias = document.getElementById('admin-modal-alias').value.trim() || 'Admin';
     const appId = document.getElementById('admin-modal-app').value;
     const orgId = document.getElementById('admin-modal-org').value;
     const cats = document.getElementById('admin-modal-cats').value.split(',').map(s => s.trim()).filter(Boolean);
 
-    if (!adminWhiteId) {
-      alert('Admin WhiteID gereklidir.');
-      return;
-    }
-
     try {
-      const blindId = await generateBlindId(adminWhiteId);
+      const operatorHash = rawAdminInput.startsWith('adm_oper_')
+        ? rawAdminInput
+        : ('adm_oper_' + randomHex(24));
+      const seedForBlind = rawAdminInput || operatorHash;
+      const blindId = await generateBlindId(seedForBlind);
       const now = Date.now();
       const catsJson = JSON.stringify(cats.length > 0 ? cats : ['all']).replace(/'/g, "''");
 
-          await executeSql('INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, org_id, app_id, categories, alias, role, is_active, created_at, updated_at) VALUES (' + escapeSql(blindId) + ', ' + escapeSql(blindId) + ', ' + escapeSql(tenantBlindId) + ', ' + escapeSql(orgId || 'default') + ', ' + escapeSql(appId) + ', ' + escapeSql(catsJson) + ', ' + escapeSql(alias) + ', ' + escapeSql('admin') + ', TRUE, ' + now + ', ' + now + ') ON CONFLICT (white_id) DO UPDATE SET enterprise_blind_id = EXCLUDED.enterprise_blind_id, org_id = EXCLUDED.org_id, app_id = EXCLUDED.app_id, categories = EXCLUDED.categories, alias = EXCLUDED.alias, role = ' + escapeSql('admin') + ', is_active = TRUE, updated_at = ' + now + ';');
+      await executeSql('INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, org_id, app_id, categories, alias, role, is_active, created_at, updated_at) VALUES (' + escapeSql(blindId) + ', ' + escapeSql(blindId) + ', ' + escapeSql(tenantBlindId) + ', ' + escapeSql(orgId || 'default') + ', ' + escapeSql(appId) + ', ' + escapeSql(catsJson) + ', ' + escapeSql(alias) + ', ' + escapeSql('admin') + ', TRUE, ' + now + ', ' + now + ') ON CONFLICT (white_id) DO UPDATE SET blind_id = EXCLUDED.blind_id, enterprise_blind_id = EXCLUDED.enterprise_blind_id, org_id = EXCLUDED.org_id, app_id = EXCLUDED.app_id, categories = EXCLUDED.categories, alias = EXCLUDED.alias, role = ' + escapeSql('admin') + ', is_active = TRUE, updated_at = ' + now + ';');
 
-      alert('Admin başarıyla eklendi!');
+      await executeSql('INSERT INTO whitedesk_recovery_hashes (hash, type, tenant_blind_id, org_id, app_id, categories, used, max_uses, uses_count, used_by_blind_id, created_at) VALUES (' + escapeSql(operatorHash) + ", 'admin', " + escapeSql(tenantBlindId) + ', ' + escapeSql(orgId || 'default') + ', ' + escapeSql(appId) + ', ' + escapeSql(catsJson) + ', FALSE, 999999, 0, ' + escapeSql(blindId) + ', ' + now + ') ON CONFLICT (hash) DO UPDATE SET tenant_blind_id = EXCLUDED.tenant_blind_id, org_id = EXCLUDED.org_id, app_id = EXCLUDED.app_id, used_by_blind_id = EXCLUDED.used_by_blind_id;');
+
+      try {
+        await navigator.clipboard.writeText(operatorHash);
+      } catch (err) {}
+
+      alert('Admin başarıyla eklendi!\n\nGiriş Kodu (Panoya Kopyalandı):\n' + operatorHash + '\n\nAdmin Blind ID:\n' + blindId + '\n\n(Hem ilk Kod ile Giriş ekranından hem de bilet kutusundan "admin ' + operatorHash + '" veya "admin ' + blindId + '" ile doğrudan giriş yapılabilir.)');
+      document.getElementById('admin-modal-whiteid').value = '';
       closeNewAdminModal();
       loadTenantAuditSummary();
     } catch (e) {

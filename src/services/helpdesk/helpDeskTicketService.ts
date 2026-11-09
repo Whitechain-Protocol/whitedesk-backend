@@ -81,9 +81,6 @@ export const helpDeskTicketService = {
 
     filtered.sort((a, b) => (b.updated_at || b.created_at || 0) - (a.updated_at || a.created_at || 0));
 
-    // Arka planda sessizce D1 relay havuzunu kontrol et
-    void helpDeskRelayService.syncRelayInbox(ownWhiteId, activeTenantBlindId, callerRole);
-
     return filtered;
   },
 
@@ -442,7 +439,7 @@ export const helpDeskTicketService = {
 
           try {
             let pushTargetBlindId = targetRecipientBlindId;
-            if (!pushTargetBlindId || !pushTargetBlindId.startsWith('blind_') || pushTargetBlindId === 'blind_thewhite_root') {
+            if (!pushTargetBlindId || !/^([0-9a-f]{60}|blind_)/i.test(pushTargetBlindId) || pushTargetBlindId === 'blind_thewhite_root') {
               pushTargetBlindId = await helpDeskAuthService.getAdminWhiteId();
             }
             if (pushTargetBlindId && pushTargetBlindId.toLowerCase() !== blindId.toLowerCase()) {

@@ -489,7 +489,27 @@ async function computeBlindId(id: string): Promise<string> {
   if (!id) return '';
   const trimmed = id.toLowerCase().trim();
   if (trimmed.startsWith('blind_') || trimmed.startsWith('ent_')) return trimmed;
+  if (/^[0-9a-f]{60}$/.test(trimmed)) return 'blind_' + trimmed.slice(0, 32);
 
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(SYSTEM_SALT),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(trimmed));
+  const hex = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return 'blind_' + hex.slice(0, 32);
+}
+
+async function computeLegacyDoubleBlindId(id: string): Promise<string> {
+  if (!id) return '';
+  const trimmed = id.toLowerCase().trim();
+  if (!/^[0-9a-f]{60}$/.test(trimmed)) return '';
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     'raw',
@@ -1319,26 +1339,31 @@ export default {
 
           if (candidate) {
             const candStr = typeof candidate === 'string' ? candidate : JSON.stringify(candidate);
-            const existing = await env.DB.prepare('SELECT * FROM ephemeral_signals WHERE room_name = ?').bind(roomName).first<any>();
+            const initCaller = role === 'caller' ? JSON.stringify([candStr]) : '[]';
+            const initCallee = role === 'callee' ? JSON.stringify([candStr]) : '[]';
 
-            if (existing) {
-              const col = role === 'caller' ? 'caller_candidates' : 'callee_candidates';
-              let list: string[] = [];
-              try {
-                list = JSON.parse(existing[col] || '[]');
-              } catch {}
-              list.push(candStr);
-              await env.DB.prepare(`UPDATE ephemeral_signals SET ${col} = ?, updated_at = ? WHERE room_name = ?`)
-                .bind(JSON.stringify(list), now, roomName)
-                .run();
-            } else {
-              const callerJson = role === 'caller' ? JSON.stringify([candStr]) : '[]';
-              const calleeJson = role === 'callee' ? JSON.stringify([candStr]) : '[]';
-              await env.DB.prepare(`
-                INSERT OR REPLACE INTO ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
-                VALUES (?, ?, ?, ?)
-              `).bind(roomName, callerJson, calleeJson, now).run();
-            }
+            await env.DB.prepare(`
+              INSERT INTO ephemeral_signals (room_name, caller_candidates, callee_candidates, updated_at)
+              VALUES (?, ?, ?, ?)
+              ON CONFLICT(room_name) DO UPDATE SET
+                caller_candidates = CASE
+                  WHEN ? = 'caller' THEN json_insert(
+                    CASE WHEN json_valid(ephemeral_signals.caller_candidates) THEN ephemeral_signals.caller_candidates ELSE '[]' END,
+                    '$[#]',
+                    ?
+                  )
+                  ELSE ephemeral_signals.caller_candidates
+                END,
+                callee_candidates = CASE
+                  WHEN ? = 'callee' THEN json_insert(
+                    CASE WHEN json_valid(ephemeral_signals.callee_candidates) THEN ephemeral_signals.callee_candidates ELSE '[]' END,
+                    '$[#]',
+                    ?
+                  )
+                  ELSE ephemeral_signals.callee_candidates
+                END,
+                updated_at = excluded.updated_at
+            `).bind(roomName, initCaller, initCallee, now, role, candStr, role, candStr).run();
 
             return new Response(JSON.stringify({ success: true, iceAdded: true }), {
               headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -1403,7 +1428,13 @@ export default {
             const params: any[] = [now];
 
             if (isRealOfferSdp && finalOfferSdp) {
-              updateQuery += ', offer_sdp = ?, answer_sdp = NULL, caller_candidates = \'[]\', callee_candidates = \'[]\'';
+              const hadPreviousOffer = Boolean(existing.offer_sdp && String(existing.offer_sdp).trim().length > 0);
+              if (hadPreviousOffer) {
+                updateQuery += ', offer_sdp = ?, answer_sdp = NULL, caller_candidates = \'[]\', callee_candidates = \'[]\'';
+              } else {
+                // Satır bu çağrının erken gelen ICE adayları tarafından oluşturulmuşsa caller_candidates korunur
+                updateQuery += ', offer_sdp = ?, answer_sdp = NULL';
+              }
               params.push(finalOfferSdp);
             } else if (signalType === 'mode-switch' && typeof sdp === 'string' && sdp.trim().startsWith('{')) {
               if (existing.offer_sdp && existing.offer_sdp.trim().startsWith('{')) {
@@ -1488,8 +1519,14 @@ export default {
             await env.DB.prepare(updateQuery).bind(...params).run();
           } else {
             await env.DB.prepare(`
-              INSERT OR REPLACE INTO ephemeral_signals (room_name, offer_sdp, answer_sdp, signal_type, target_mode, updated_at)
-              VALUES (?, ?, ?, ?, ?, ?)
+              INSERT INTO ephemeral_signals (room_name, offer_sdp, answer_sdp, signal_type, target_mode, caller_candidates, callee_candidates, updated_at)
+              VALUES (?, ?, ?, ?, ?, '[]', '[]', ?)
+              ON CONFLICT(room_name) DO UPDATE SET
+                offer_sdp = COALESCE(excluded.offer_sdp, ephemeral_signals.offer_sdp),
+                answer_sdp = COALESCE(excluded.answer_sdp, ephemeral_signals.answer_sdp),
+                signal_type = COALESCE(excluded.signal_type, ephemeral_signals.signal_type),
+                target_mode = COALESCE(excluded.target_mode, ephemeral_signals.target_mode),
+                updated_at = excluded.updated_at
             `).bind(
               roomName,
               (isRealOfferSdp || signalType === 'mode-switch') ? (finalOfferSdp || null) : null,
@@ -1571,18 +1608,52 @@ export default {
         const params: any[] = [];
         if (isFounder) {
           query += ' ORDER BY created_at ASC LIMIT 100;';
-        } else if (recipientBlindId && ticketId) {
-          query += ' WHERE recipient_blind_id = ? AND ticket_id = ? ORDER BY created_at ASC LIMIT 100;';
-          params.push(recipientBlindId, ticketId);
         } else if (recipientBlindId) {
-          if (recipientBlindId.includes(',')) {
-            const ids = recipientBlindId.split(',').map((s) => s.trim()).filter(Boolean);
-            const placeholders = ids.map(() => '?').join(',');
-            query += ` WHERE recipient_blind_id IN (${placeholders}) ORDER BY created_at ASC LIMIT 100;`;
-            params.push(...ids);
+          const rawIds = recipientBlindId.split(',').map((s) => s.trim()).filter(Boolean);
+          const expandedIds = new Set<string>();
+          const entIds: string[] = [];
+
+          for (const raw of rawIds) {
+            expandedIds.add(raw);
+            const norm = await computeBlindId(raw);
+            if (norm) expandedIds.add(norm);
+            const dbl = await computeLegacyDoubleBlindId(raw);
+            if (dbl) expandedIds.add(dbl);
+            if (raw.startsWith('ent_')) entIds.push(raw);
+          }
+
+          if (entIds.length > 0) {
+            for (const entId of entIds) {
+              try {
+                const { results: admRows } = await env.DB.prepare(
+                  'SELECT white_id, blind_id FROM whitedesk_admins WHERE enterprise_blind_id = ?'
+                ).bind(entId).all<{ white_id: string; blind_id: string }>();
+                for (const adm of admRows || []) {
+                  if (adm.white_id) {
+                    expandedIds.add(adm.white_id);
+                    const nW = await computeBlindId(adm.white_id);
+                    if (nW) expandedIds.add(nW);
+                    const dW = await computeLegacyDoubleBlindId(adm.white_id);
+                    if (dW) expandedIds.add(dW);
+                  }
+                  if (adm.blind_id) {
+                    expandedIds.add(adm.blind_id);
+                    const nB = await computeBlindId(adm.blind_id);
+                    if (nB) expandedIds.add(nB);
+                  }
+                }
+              } catch {}
+            }
+          }
+
+          const finalIds = Array.from(expandedIds).filter(Boolean);
+          const placeholders = finalIds.map(() => '?').join(',');
+          if (ticketId) {
+            query += ` WHERE recipient_blind_id IN (${placeholders}) AND ticket_id = ? ORDER BY created_at ASC LIMIT 100;`;
+            params.push(...finalIds, ticketId);
           } else {
-            query += ' WHERE recipient_blind_id = ? ORDER BY created_at ASC LIMIT 100;';
-            params.push(recipientBlindId);
+            query += ` WHERE recipient_blind_id IN (${placeholders}) ORDER BY created_at ASC LIMIT 100;`;
+            params.push(...finalIds);
           }
         } else if (ticketId) {
           query += ' WHERE ticket_id = ? ORDER BY created_at ASC LIMIT 100;';
@@ -1737,9 +1808,10 @@ export default {
           snoozeUntil = 0;
         }
 
+        const legacyDouble = await computeLegacyDoubleBlindId(rawId);
         const existing = await env.DB.prepare(
-          'SELECT white_id, counter, is_active, alias, role FROM whitedesk_admins WHERE white_id = ? OR blind_id = ? OR white_id = ? LIMIT 1'
-        ).bind(blindId, blindId, rawId).first<{ white_id: string; counter: number; is_active: number; alias: string; role: string }>();
+          'SELECT white_id, counter, is_active, alias, role FROM whitedesk_admins WHERE white_id = ? OR blind_id = ? OR white_id = ? OR blind_id = ? LIMIT 1'
+        ).bind(blindId, blindId, rawId, legacyDouble || blindId).first<{ white_id: string; counter: number; is_active: number; alias: string; role: string }>();
 
         let counter = existing?.counter ?? 0;
 

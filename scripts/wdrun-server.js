@@ -34,6 +34,7 @@ const {
   deleteGlobalAdmin,
   addAdminToTenant,
   deleteAdminFromTenant,
+  deleteTenantCompletely,
   updateAdminAllocations,
   addOrgToTenant,
   deleteOrgFromTenant,
@@ -195,6 +196,12 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/tenant/cosmos/delete' && req.method === 'POST') {
       const body = await parseJsonBody(req);
       const result = await deleteGlobalAdmin(body.tenantBlindId, body.adminBlindId);
+      return sendJson(res, 200, { success: true, result });
+    }
+
+    if (pathname === '/api/tenant/delete' && req.method === 'POST') {
+      const body = await parseJsonBody(req);
+      const result = await deleteTenantCompletely(body.tenantBlindId);
       return sendJson(res, 200, { success: true, result });
     }
 

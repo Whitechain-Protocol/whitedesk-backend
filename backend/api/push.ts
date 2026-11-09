@@ -19,9 +19,11 @@ function tPush(key: string, params?: Record<string, string | number>): string {
 
 function computeBlindId(id: string): string {
   if (!id) return '';
-  if (id.startsWith('blind_')) return id.toLowerCase().trim();
+  const clean = id.trim().toLowerCase();
+  if (clean.startsWith('blind_') || clean.startsWith('ent_')) return clean;
+  if (/^[0-9a-f]{60}$/.test(clean)) return 'blind_' + clean.slice(0, 32);
   const hmac = crypto.createHmac('sha256', SYSTEM_SALT);
-  hmac.update(id.trim().toLowerCase());
+  hmac.update(clean);
   return 'blind_' + hmac.digest('hex').slice(0, 32);
 }
 

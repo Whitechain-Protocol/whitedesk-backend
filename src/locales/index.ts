@@ -1,12 +1,9 @@
-import en from './en.json';
+// In-memory cache for loaded translations (strictly lazy-loaded: ONLY the active language is loaded on boot)
+const loadedTranslations: Record<string, any> = {};
 
-// In-memory cache for loaded translations (only English loaded at cold boot)
-const loadedTranslations: Record<string, any> = {
-  en,
-};
-
-// Lazy loaders for all other languages so Hermes parses ONLY en.json on cold boot
+// Lazy loaders for all 54 languages so Hermes parses ONLY the active device language on cold boot
 const lazyLoaders: Record<string, () => any> = {
+  en: () => require('./en.json'),
   tr: () => require('./tr.json'),
   de: () => require('./de.json'),
   fr: () => require('./fr.json'),
@@ -38,11 +35,29 @@ const lazyLoaders: Record<string, () => any> = {
   he: () => require('./he.json'),
   ur: () => require('./ur.json'),
   hi: () => require('./hi.json'),
-  // 2nd+3rd expansion waves: zh-CN reuses the existing Simplified Chinese pack (zh.json).
-  // da, el, tl, zh-TW, zh-HK, zh-SG, ms, sk, bg, hr, sr, sl, kk, az, bn, ka, uz, ca, eu, is
-  // and sw intentionally have no loader yet — getTranslation() automatically falls back to
-  // English until their own JSON packs are created.
-  'zh-CN': () => require('./zh.json'),
+  // 2nd + 3rd expansion waves (all 54 languages fully localized with 2,442 keys)
+  'zh-CN': () => require('./zh-CN.json'),
+  'zh-TW': () => require('./zh-TW.json'),
+  'zh-HK': () => require('./zh-HK.json'),
+  'zh-SG': () => require('./zh-SG.json'),
+  da: () => require('./da.json'),
+  el: () => require('./el.json'),
+  tl: () => require('./tl.json'),
+  ms: () => require('./ms.json'),
+  sk: () => require('./sk.json'),
+  bg: () => require('./bg.json'),
+  hr: () => require('./hr.json'),
+  sr: () => require('./sr.json'),
+  sl: () => require('./sl.json'),
+  kk: () => require('./kk.json'),
+  az: () => require('./az.json'),
+  bn: () => require('./bn.json'),
+  ka: () => require('./ka.json'),
+  uz: () => require('./uz.json'),
+  ca: () => require('./ca.json'),
+  eu: () => require('./eu.json'),
+  is: () => require('./is.json'),
+  sw: () => require('./sw.json'),
 };
 
 export function getTranslation(lang: string): any {
@@ -55,10 +70,14 @@ export function getTranslation(lang: string): any {
       loadedTranslations[lang] = loaded;
       return loaded;
     } catch {
-      return loadedTranslations['en'] || {};
+      if (lang !== 'en') return getTranslation('en');
+      return {};
     }
   }
-  return loadedTranslations['en'] || {};
+  if (lang !== 'en') {
+    return getTranslation('en');
+  }
+  return {};
 }
 
 // Proxy for complete backward compatibility with `translations[lang]`

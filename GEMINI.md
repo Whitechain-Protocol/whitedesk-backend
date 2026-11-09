@@ -33,6 +33,16 @@
    - Tüm iletişimde (biletler, yanıtlar, sesli arama, 1-e-1 bas-konuş, genel telsiz yayını, uzak masaüstü) `whitedesk_user_bindings` tablosuna bakılmaz; **tekil referans bilet kartındaki `blind_id` değeridir**.
    - Arka planda veya ön planda sürekli çalışan, fatura ve limit tüketen periyodik sorgulama (**idle polling**) kesinlikle yasaktır; çağrı ve bildirimler %100 FCM Push tetiklemesiyle uyanır.
 
+8. **Yönetici Anahtarları (`wdrun` / İlk Kodla Giriş / Bilet Kutusu `admin <kod>`) ve Profil QR (`wd_prof_...`) Oturum Kurtarma Kuralı (KİLİTLİ SÜREÇ KURALI):**
+   - **A. `wdrun` ve Uygulama İçi Yönetici Anahtarlarının Çift Kapı Uyumu (`claimUnifiedHash` & `handleAdminClaimCommand`):**
+     - `wdrun` panelinde firma seçilerek üretilen tüm yönetici anahtarları (`ga_cosmos_...`, `adm_oper_...`, `tw_founder_...`) ve doğrudan tanımlanan yönetici kimlikleri (`blind_...`), hem uygulamanın **ilk açılışındaki "Kod ile Giriş Yap" (`Giriş Kodunuz`)** ekranından hem de uygulama içindeki **bilet mesaj kutusundan `admin <kod/blind_id>`** komutuyla girildiğinde **%100 aynı deterministik sonucu** üretmek zorundadır.
+     - Bir erişim/kurtarma hash kodu (`ga_cosmos_...`, `adm_oper_...`, `tw_founder_...`) girildiğinde her iki kapıda da `CryptoVaultService.deriveVaultFromAccessKey(hash).blindId` üzerinden deterministik `blind_id` üretilir, cihazın `OWN_WHITE_ID` kimliği olarak mühürlenir ve `whitedesk_admins` tablosuna bu `blind_id` ile kaydedilir.
+     - Eğer `whitedesk_admins` tablosunda önceden kayıtlı bir `blind_...` kimliği doğrudan girilirse (giriş kutusuna `blind_...` veya bilet kutusuna `admin blind_...`), sistem bunu tekrar hashlemez ve onay (`pending`) kuyruğuna düşürmez; doğrudan ilgili `blind_...` değerini cihazın `OWN_WHITE_ID` kimliği olarak atayıp yönetici oturumunu anında açar.
+   - **B. Profil QR Kodu (`wd_prof_...`) ile Cihaz Kaybı Sonrası Birebir Aynı Oturum ve Kimlik Kurtarma Süreci:**
+     - Yönetici veya kullanıcı kendi cihazındaki **Profil** ekranında yer alan QR kodunu (`wd_prof_<32hex>`) oluşturduğunda (`getOrCreateProfilePasskey`), `whitedesk_recovery_hashes` tablosuna `tenant_blind_id`, `type` (`role`), `org_id`, `app_id` bilgileriyle birlikte kullanıcının o anki **gerçek `blind_id` kimliği (`used_by_blind_id = myBlindId`)** kişiye özel olarak mühürlenir.
+     - Telefon kaybolduğunda, sıfırlandığında veya yeni bir cihaza geçildiğinde, saklanan bu Profil QR kodu (veya `wd_prof_...` metni) yeni cihazda **ilk giriş ekranından ya da uygulama içi barkod okuyucu / bilet kutusundan** okutulduğunda (`handleProfilePasskeyClaim` & `claimUnifiedHash`), sistem yeni cihazda rastgele yeni bir `blind_id` üretmez; `whitedesk_recovery_hashes.used_by_blind_id` içinde kayıtlı **orijinal `blind_id` kimliğini**, `whitedesk_admins` tablosundaki **rumuzunu (`alias`), rolünü, departmanını (`org_id`) ve kurumsal oturumunu** yeni cihaza birebir geri yükler (`OWN_WHITE_ID` olarak mühürler).
+     - Bu sayede yönetici yeni cihazında **aynı `blind_id`** ile oturum açmış olur; kendisine atanmış açık biletlerin yeni yanıtları, sesli aramalar, 1-e-1 bas-konuş ve telsiz çağrıları kesintisiz olarak aynı kimliğe düşmeye devam eder.
+
 ---
 
 ## 🗂️ Hiyerarşik Mimari ve Plan Dokümantasyon Ağacı (`c:\whitedesk\project_plans\`)

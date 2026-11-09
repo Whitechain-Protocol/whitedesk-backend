@@ -129,13 +129,16 @@ export const CryptoService = {
   },
 
   async getWhiteId(): Promise<string | null> {
+    const raw = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.WHITE_ID);
+    if (raw && raw.trim().toLowerCase().startsWith('blind_')) {
+      return WhiteDeskCrypto.generateBlindId(raw.trim());
+    }
     const pub = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.PUBLIC_KEY);
     if (pub && pub.trim().length > 10) {
       const blindId = WhiteDeskCrypto.generateBlindId(pub.trim());
       await SafeSecureStore.setItemAsync(SECURE_STORE_KEYS.WHITE_ID, blindId);
       return blindId;
     }
-    const raw = await SafeSecureStore.getItemAsync(SECURE_STORE_KEYS.WHITE_ID);
     if (!raw) return null;
     const blindId = WhiteDeskCrypto.generateBlindId(raw);
     await SafeSecureStore.setItemAsync(SECURE_STORE_KEYS.WHITE_ID, blindId);

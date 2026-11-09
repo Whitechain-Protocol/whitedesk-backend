@@ -125,7 +125,7 @@ export const helpDeskRelayService = {
         for (const item of allTransientItems) {
           try {
             // Cihazın kendi gönderdiği mesajı kendisinin tüketip silmesini (vaporization) engelle!
-            if (item.sender_blind_id === ownBlindId) {
+            if (WhiteDeskCrypto.generateBlindId(item.sender_blind_id || '') === ownBlindId) {
               continue;
             }
             let payloadData: any = null;
@@ -191,7 +191,8 @@ export const helpDeskRelayService = {
                 payloadData.initial_message.attachments = attachmentsList;
               }
 
-              const isAssignedToMe = payloadData.ticket?.assigned_admin_blind_id === ownBlindId;
+              const assignedAdminBlind = WhiteDeskCrypto.generateBlindId(payloadData.ticket?.assigned_admin_blind_id || '');
+              const isAssignedToMe = Boolean(assignedAdminBlind && assignedAdminBlind === ownBlindId);
               if (isPrivilegedMonitor && !isAssignedToMe) {
                 payloadData.ticket.is_relay_pending = true;
                 payloadData.ticket.relay_item_id = item.id;
@@ -506,8 +507,9 @@ export const helpDeskRelayService = {
             }
 
             // ⚡ INSTANT VAPORIZATION: D1 ve R2'den anında sil (Sunucuda 0 iz!)
-            // Global adminler ve kurucu çekerken bilet sunucuda kalır; devralındığında veya normal admin çektiğinde buharlaşır
-            if (!isPrivilegedMonitor) {
+            // Global adminler ve kurucu başka admine atanmış bileti izlerken sunucuda kalır; doğrudan kendisine atanmışsa veya normal admin çektiğinde buharlaşır
+            const shouldKeepInRelayForSubAdmin = isPrivilegedMonitor && payloadData?.type === 'ticket_header' && payloadData?.ticket?.is_relay_pending === true;
+            if (!shouldKeepInRelayForSubAdmin) {
               await apiClient.confirmRelayAck(item.id, item.attachment_r2_key);
             }
           } catch (itemErr) {

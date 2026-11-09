@@ -66,9 +66,26 @@ export class SignalingService {
   private localStream: any = null;
   private remoteStream: any = null;
   private pendingRemoteCandidates: any[] = [];
+  private gatheredLocalCandidates: string[] = [];
+  private seenRemoteCandidates: Set<string> = new Set();
+  private candidateSendChain: Promise<any> = Promise.resolve();
   private remoteDescriptionSet = false;
   private remoteOfferSdp: string | null = null;
   private pendingRoomDeletions: Map<string, any> = new Map();
+
+  private embedGatheredCandidatesIntoSdp(sdp: string): string {
+    if (!sdp || this.gatheredLocalCandidates.length === 0) return sdp;
+    let out = sdp;
+    for (const rawCand of this.gatheredLocalCandidates) {
+      const clean = (rawCand || '').trim();
+      if (!clean) continue;
+      const line = clean.startsWith('a=') ? clean : `a=${clean}`;
+      if (!out.includes(line)) {
+        out = out.endsWith('\r\n') ? `${out}${line}\r\n` : `${out}\r\n${line}\r\n`;
+      }
+    }
+    return out;
+  }
 
   cancelPendingDeletion(roomName: string): void {
     const timer = this.pendingRoomDeletions.get(roomName);
@@ -130,8 +147,23 @@ export class SignalingService {
       return false;
     }
 
+    if (this.pc) {
+      try {
+        this.pc.close();
+      } catch {}
+      this.pc = null;
+    }
+    this.remoteDescriptionSet = false;
+    this.pendingRemoteCandidates = [];
+    this.gatheredLocalCandidates = [];
+    this.seenRemoteCandidates.clear();
+
     try {
-      if (!this.localStream) {
+      const hasLiveTrack =
+        this.localStream &&
+        typeof this.localStream.getAudioTracks === 'function' &&
+        this.localStream.getAudioTracks().some((t: any) => t && t.readyState !== 'ended');
+      if (!hasLiveTrack) {
         const audioConstraints = {
           channelCount: 1,
           echoCancellation: true,
@@ -174,23 +206,30 @@ export class SignalingService {
 
     if (this.localStream) {
       this.localStream.getAudioTracks().forEach((track: any) => {
-        if (initialMuted) {
-          track.enabled = false;
-        }
+        track.enabled = !initialMuted;
         this.pc.addTrack(track, this.localStream);
       });
     }
 
     this.pc.onicecandidate = (event: any) => {
       if (event?.candidate) {
-        void apiClient.publishFastSignal(
-          roomName,
-          role,
-          'ice-candidate',
-          undefined,
-          undefined,
-          JSON.stringify(event.candidate)
-        );
+        const candText = event.candidate?.candidate;
+        if (typeof candText === 'string' && candText.trim().length > 0) {
+          this.gatheredLocalCandidates.push(candText.trim());
+        }
+        const serialized = JSON.stringify(event.candidate);
+        this.candidateSendChain = this.candidateSendChain
+          .then(() =>
+            apiClient.publishFastSignal(
+              roomName,
+              role,
+              'ice-candidate',
+              undefined,
+              undefined,
+              serialized
+            )
+          )
+          .catch(() => {});
       }
     };
 
@@ -252,8 +291,9 @@ export class SignalingService {
       const offer = await this.pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
       const optimizedOfferSdp = optimizeOpusSdp(offer.sdp);
       await this.pc.setLocalDescription(new RTCSessionDescription({ type: 'offer', sdp: optimizedOfferSdp }));
-      await this.waitForIceGathering(800);
-      return this.pc.localDescription?.sdp || optimizedOfferSdp;
+      await this.waitForIceGathering(1000);
+      const baseSdp = this.pc.localDescription?.sdp || optimizedOfferSdp;
+      return this.embedGatheredCandidatesIntoSdp(baseSdp);
     } catch (err) {
       console.warn('[VOICE/SIGNALING] Error creating WebRTC offer:', err);
       return '';
@@ -321,8 +361,9 @@ export class SignalingService {
       const answer = await this.pc.createAnswer();
       const optimizedAnswerSdp = optimizeOpusSdp(answer.sdp);
       await this.pc.setLocalDescription(new RTCSessionDescription({ type: 'answer', sdp: optimizedAnswerSdp }));
-      await this.waitForIceGathering(800);
-      return this.pc.localDescription?.sdp || optimizedAnswerSdp;
+      await this.waitForIceGathering(1000);
+      const baseAnswerSdp = this.pc.localDescription?.sdp || optimizedAnswerSdp;
+      return this.embedGatheredCandidatesIntoSdp(baseAnswerSdp);
     } catch (err) {
       console.warn('[VOICE/SIGNALING] Error creating answer SDP:', err);
       return '';
@@ -330,6 +371,11 @@ export class SignalingService {
   }
 
   queueRemoteCandidate(cand: any): void {
+    if (!cand) return;
+    const dedupKey = typeof cand === 'string' ? cand : (cand.candidate || JSON.stringify(cand));
+    if (!dedupKey || this.seenRemoteCandidates.has(dedupKey)) return;
+    this.seenRemoteCandidates.add(dedupKey);
+
     if (!this.remoteDescriptionSet || !this.pc) {
       this.pendingRemoteCandidates.push(cand);
     } else {
@@ -412,6 +458,8 @@ export class SignalingService {
     }
     this.remoteStream = null;
     this.pendingRemoteCandidates = [];
+    this.gatheredLocalCandidates = [];
+    this.seenRemoteCandidates.clear();
     this.remoteDescriptionSet = false;
     this.remoteOfferSdp = null;
   }

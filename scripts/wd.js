@@ -48,6 +48,7 @@ function generateBlindId(whiteId, salt = SYSTEM_SALT) {
   if (!whiteId) return '';
   const clean = whiteId.trim().toLowerCase();
   if (clean.startsWith('blind_') || clean.startsWith('ent_')) return clean;
+  if (/^[0-9a-f]{60}$/.test(clean)) return 'blind_' + clean.slice(0, 32);
   const hash = createHmac('sha256', salt).update(clean).digest('hex');
   return 'blind_' + hash.slice(0, 32);
 }
@@ -695,15 +696,17 @@ async function deleteGlobalAdmin(tenantBlindId, adminBlindId) {
 }
 
 async function addAdminToTenant(tenantBlindId, adminWhiteId, alias, appId = '*', orgId = 'default', categories = ['all']) {
-  if (!tenantBlindId || !adminWhiteId) throw new Error('tenantBlindId and adminWhiteId required');
-  const blindId = generateBlindId(adminWhiteId);
+  if (!tenantBlindId) throw new Error('tenantBlindId required');
+  const rawSeed = (adminWhiteId || '').trim() || ('adm_oper_' + randomBytes(24).toString('hex'));
+  const operatorHash = rawSeed.startsWith('adm_oper_') ? rawSeed : ('adm_oper_' + randomBytes(24).toString('hex'));
+  const blindId = generateBlindId(rawSeed);
   const now = Date.now();
   const cleanAlias = alias || 'Admin';
   const catsJson = JSON.stringify(Array.isArray(categories) ? categories : ['all']);
 
   await executeSql(`
     INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, org_id, app_id, categories, is_active, created_at)
-    VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(cleanAlias)}, 'admin', ${escapeSqlString(orgId)}, ${escapeSqlString(appId)}, '${catsJson}'::jsonb, TRUE, ${now})
+    VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(tenantBlindId)}, ${escapeSqlString(cleanAlias)}, 'admin', ${escapeSqlString(orgId)}, ${escapeSqlString(appId)}, ${escapeSqlString(catsJson)}, TRUE, ${now})
     ON CONFLICT (white_id) DO UPDATE SET 
       blind_id = EXCLUDED.blind_id,
       enterprise_blind_id = EXCLUDED.enterprise_blind_id, 
@@ -715,7 +718,70 @@ async function addAdminToTenant(tenantBlindId, adminWhiteId, alias, appId = '*',
       is_active = TRUE;
   `);
 
-  return { success: true, blindId };
+  await executeSql(`
+    INSERT INTO whitedesk_recovery_hashes (
+      hash, type, tenant_blind_id, org_id, app_id, categories, used, max_uses, uses_count, used_by_blind_id, created_at
+    ) VALUES (
+      ${escapeSqlString(operatorHash)},
+      'admin',
+      ${escapeSqlString(tenantBlindId)},
+      ${escapeSqlString(orgId)},
+      ${escapeSqlString(appId)},
+      ${escapeSqlString(catsJson)},
+      FALSE,
+      999999,
+      0,
+      ${escapeSqlString(blindId)},
+      ${now}
+    ) ON CONFLICT (hash) DO UPDATE SET
+      tenant_blind_id = EXCLUDED.tenant_blind_id,
+      org_id = EXCLUDED.org_id,
+      app_id = EXCLUDED.app_id,
+      used_by_blind_id = EXCLUDED.used_by_blind_id;
+  `);
+
+  return { success: true, blindId, operatorHash };
+}
+
+async function deleteTenantCompletely(tenantBlindId) {
+  if (!tenantBlindId) throw new Error('tenantBlindId required');
+  const rows = await executeSql(`SELECT name, is_founder_tenant FROM whitedesk_enterprises WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)} LIMIT 1;`);
+  const tenantName = rows[0]?.name ? String(rows[0].name) : '';
+
+  await executeSql(`DELETE FROM transient_messages WHERE recipient_blind_id = ${escapeSqlString(tenantBlindId)} OR recipient_blind_id IN (SELECT white_id FROM whitedesk_admins WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)}) OR recipient_blind_id IN (SELECT user_blind_id FROM whitedesk_user_bindings WHERE tenant_blind_id = ${escapeSqlString(tenantBlindId)});`);
+  try {
+    await executeSql(`DELETE FROM transient_rtc_signals WHERE recipient_blind_id = ${escapeSqlString(tenantBlindId)} OR recipient_blind_id IN (SELECT white_id FROM whitedesk_admins WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)});`);
+  } catch {}
+  try {
+    await executeSql(`DELETE FROM whitedesk_ticket_ratings WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  } catch {}
+  try {
+    await executeSql(`DELETE FROM whitedesk_sdk_bridges WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  } catch {}
+  try {
+    await executeSql(`DELETE FROM whitedesk_desktop_sessions WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  } catch {}
+  await executeSql(`DELETE FROM whitedesk_approvals WHERE tenant_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_recovery_hashes WHERE tenant_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_user_bindings WHERE tenant_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_categories WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_apps WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_orgs WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_admins WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_genesis_vault WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+  await executeSql(`DELETE FROM whitedesk_enterprises WHERE enterprise_blind_id = ${escapeSqlString(tenantBlindId)};`);
+
+  if (tenantName) {
+    try {
+      const slug = sanitizeFolderName(tenantName);
+      const dir = path.join(TENANTS_ROOT, slug);
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    } catch {}
+  }
+
+  return { success: true, deletedTenantBlindId: tenantBlindId, deletedTenantName: tenantName };
 }
 
 async function deleteAdminFromTenant(tenantBlindId, adminBlindId) {
@@ -1039,6 +1105,7 @@ module.exports = {
   deleteGlobalAdmin,
   addAdminToTenant,
   deleteAdminFromTenant,
+  deleteTenantCompletely,
   updateAdminAllocations,
   addOrgToTenant,
   deleteOrgFromTenant,

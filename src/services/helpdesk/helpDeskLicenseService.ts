@@ -853,16 +853,20 @@ export const helpDeskLicenseService = {
     const now = Date.now();
     const derivedVault = CryptoVaultService.deriveVaultFromAccessKey(input);
     const effectiveWhiteId = derivedVault.whiteId;
-    const blindId = derivedVault.blindId;
+    let blindId = derivedVault.blindId;
 
     if (input.startsWith('wd_prof_')) {
       const { helpDeskAuthService } = require('./helpDeskAuthService');
       const claimRes = await helpDeskAuthService.handleProfilePasskeyClaim(ownWhiteId || effectiveWhiteId, input);
+      const restoredTenantBlindId =
+        claimRes.enterpriseBlindId ||
+        (await SafeSecureStore.getItemAsync(STORAGE_KEYS.ACTIVE_TENANT_BLIND_ID)) ||
+        '';
       return {
         success: claimRes.success,
         role: (claimRes.type || 'user') as any,
         enterpriseName: claimRes.enterpriseName || '',
-        enterpriseBlindId: '',
+        enterpriseBlindId: restoredTenantBlindId,
         message: claimRes.message,
       };
     }
@@ -878,12 +882,18 @@ export const helpDeskLicenseService = {
       );
 
       let record = hashRows.length > 0 ? hashRows[0] : null;
+      let existingAdminAlias = '';
+      let existingAdminOrgId = record?.org_id ? String(record.org_id) : '';
 
       let detectedType: 'founder' | 'global_admin' | 'admin' | 'user' = 'user';
       let targetTenantBlind = record?.tenant_blind_id ? String(record.tenant_blind_id) : '';
 
       if (record) {
         detectedType = record.type as any;
+        if (record.used_by_blind_id && String(record.used_by_blind_id).trim().startsWith('blind_')) {
+          blindId = WhiteDeskCrypto.generateBlindId(String(record.used_by_blind_id).trim());
+          await SafeSecureStore.setItemAsync(STORAGE_KEYS.OWN_WHITE_ID, blindId);
+        }
         if (record.expires_at && Number(record.expires_at) < now) {
           return {
             success: false,
@@ -922,15 +932,29 @@ export const helpDeskLicenseService = {
         } else if (input.startsWith('usr_div_') || input.startsWith('usr_acc_')) {
           detectedType = 'user';
         } else {
-          const cleanInput = input.startsWith('wh-') ? input.slice(3) : input;
+          const cleanInput = input.startsWith('wh-') ? input.slice(3).trim() : input.trim();
+          const cleanBlindInput = WhiteDeskCrypto.generateBlindId(cleanInput);
 
-          // 1. Check if input or cleanInput is an existing admin
+          // 1. Check if input or cleanInput is an existing admin (e.g. blind_... from wdrun)
           const adminSearch = await executeSql(
-            `SELECT white_id, enterprise_blind_id, role, alias FROM whitedesk_admins WHERE white_id = ${escapeSqlString(cleanInput)} OR white_id = ${escapeSqlString(input)} OR white_id = ${escapeSqlString(derivedVault.blindId)} OR blind_id = ${escapeSqlString(derivedVault.blindId)} LIMIT 1;`
+            `SELECT white_id, blind_id, enterprise_blind_id, org_id, role, alias
+             FROM whitedesk_admins
+             WHERE white_id = ${escapeSqlString(cleanInput)}
+                OR blind_id = ${escapeSqlString(cleanInput)}
+                OR white_id = ${escapeSqlString(cleanBlindInput)}
+                OR blind_id = ${escapeSqlString(cleanBlindInput)}
+                OR white_id = ${escapeSqlString(derivedVault.blindId)}
+                OR blind_id = ${escapeSqlString(derivedVault.blindId)}
+             LIMIT 1;`
           );
           if (adminSearch.length > 0) {
             detectedType = (adminSearch[0].role as any) || 'admin';
             targetTenantBlind = String(adminSearch[0].enterprise_blind_id || '');
+            const matchedAdminId = String(adminSearch[0].white_id || adminSearch[0].blind_id || cleanBlindInput);
+            blindId = WhiteDeskCrypto.generateBlindId(matchedAdminId);
+            await SafeSecureStore.setItemAsync(STORAGE_KEYS.OWN_WHITE_ID, blindId);
+            if (adminSearch[0].alias) existingAdminAlias = String(adminSearch[0].alias);
+            if (adminSearch[0].org_id) existingAdminOrgId = String(adminSearch[0].org_id);
           } else {
             // 2. Check enterprises
             const entSearch = await executeSql(
@@ -985,21 +1009,23 @@ export const helpDeskLicenseService = {
       }
 
       if (detectedType === 'founder') {
+        const fAlias = existingAdminAlias || 'TheWhite';
         await executeSql(`
           INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
-          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, 'blind_thewhite_root', 'TheWhite', 'founder', TRUE, ${now})
+          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, 'blind_thewhite_root', ${escapeSqlString(fAlias)}, 'founder', TRUE, ${now})
           ON CONFLICT (white_id) DO UPDATE SET 
             blind_id = EXCLUDED.blind_id,
             enterprise_blind_id = EXCLUDED.enterprise_blind_id,
             role = 'founder',
-            alias = 'TheWhite',
+            alias = COALESCE(whitedesk_admins.alias, EXCLUDED.alias),
             is_active = TRUE;
         `);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ROLE, 'founder');
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_NAME, 'TheWhite Enterprises');
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_BLIND_ID, 'blind_thewhite_root');
+        await SafeSecureStore.setItemAsync(STORAGE_KEYS.ACTIVE_TENANT_BLIND_ID, 'blind_thewhite_root');
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_WHITE_ID, blindId);
-        await SafeSecureStore.setItemAsync(STORAGE_KEYS.CUSTOM_ALIAS, 'TheWhite');
+        await SafeSecureStore.setItemAsync(STORAGE_KEYS.CUSTOM_ALIAS, fAlias);
         invalidateHelpDeskRoleCache();
 
         if (record) {
@@ -1016,14 +1042,21 @@ export const helpDeskLicenseService = {
       }
 
       if (detectedType === 'global_admin') {
+        const gaAlias = existingAdminAlias || 'WhiteCosmos';
+        await executeSql(`
+          DELETE FROM whitedesk_admins
+          WHERE enterprise_blind_id = ${escapeSqlString(targetTenantBlind)}
+            AND role = 'global_admin'
+            AND white_id != ${escapeSqlString(blindId)};
+        `);
         await executeSql(`
           INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
-          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(targetTenantBlind)}, 'WhiteCosmos', 'global_admin', TRUE, ${now})
+          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(targetTenantBlind)}, ${escapeSqlString(gaAlias)}, 'global_admin', TRUE, ${now})
           ON CONFLICT (white_id) DO UPDATE SET 
             blind_id = EXCLUDED.blind_id,
             enterprise_blind_id = EXCLUDED.enterprise_blind_id,
             role = 'global_admin',
-            alias = 'WhiteCosmos',
+            alias = COALESCE(whitedesk_admins.alias, EXCLUDED.alias),
             is_active = TRUE;
         `);
 
@@ -1031,7 +1064,7 @@ export const helpDeskLicenseService = {
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_BLIND_ID, targetTenantBlind);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ENTERPRISE_NAME, tenantName);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_WHITE_ID, blindId);
-        await SafeSecureStore.setItemAsync(STORAGE_KEYS.CUSTOM_ALIAS, 'WhiteCosmos');
+        await SafeSecureStore.setItemAsync(STORAGE_KEYS.CUSTOM_ALIAS, gaAlias);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ACTIVE_TENANT_BLIND_ID, targetTenantBlind);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.USER_ENTERPRISE_NAME, tenantName);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.USER_ORG_BLIND_ID, targetTenantBlind);
@@ -1051,15 +1084,24 @@ export const helpDeskLicenseService = {
       }
 
       if (detectedType === 'admin') {
-        const opAlias = await generateCosmoAlias('admin');
+        if (!existingAdminAlias || !existingAdminOrgId) {
+          const checkAdm = await executeSql(
+            `SELECT alias, org_id FROM whitedesk_admins WHERE white_id = ${escapeSqlString(blindId)} OR blind_id = ${escapeSqlString(blindId)} LIMIT 1;`
+          );
+          if (!existingAdminAlias && checkAdm[0]?.alias) existingAdminAlias = String(checkAdm[0].alias);
+          if (!existingAdminOrgId && checkAdm[0]?.org_id) existingAdminOrgId = String(checkAdm[0].org_id);
+        }
+        const opAlias = existingAdminAlias || (await generateCosmoAlias('admin'));
+        const effectiveOrgId = existingAdminOrgId || 'merkez';
         await executeSql(`
-          INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, alias, role, is_active, created_at)
-          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(targetTenantBlind)}, ${escapeSqlString(opAlias)}, 'admin', TRUE, ${now})
+          INSERT INTO whitedesk_admins (white_id, blind_id, enterprise_blind_id, org_id, alias, role, is_active, created_at)
+          VALUES (${escapeSqlString(blindId)}, ${escapeSqlString(blindId)}, ${escapeSqlString(targetTenantBlind)}, ${escapeSqlString(effectiveOrgId)}, ${escapeSqlString(opAlias)}, 'admin', TRUE, ${now})
           ON CONFLICT (white_id) DO UPDATE SET 
             blind_id = EXCLUDED.blind_id,
             enterprise_blind_id = EXCLUDED.enterprise_blind_id,
+            org_id = COALESCE(whitedesk_admins.org_id, EXCLUDED.org_id),
             role = 'admin',
-            alias = EXCLUDED.alias,
+            alias = COALESCE(whitedesk_admins.alias, EXCLUDED.alias),
             is_active = TRUE;
         `);
 
@@ -1071,6 +1113,8 @@ export const helpDeskLicenseService = {
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.ACTIVE_TENANT_BLIND_ID, targetTenantBlind);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.USER_ENTERPRISE_NAME, tenantName);
         await SafeSecureStore.setItemAsync(STORAGE_KEYS.USER_ORG_BLIND_ID, targetTenantBlind);
+        await SafeSecureStore.setItemAsync(STORAGE_KEYS.ADMIN_ORG_ID, effectiveOrgId);
+        await SafeSecureStore.setItemAsync(STORAGE_KEYS.USER_ORG_ID, effectiveOrgId);
         invalidateHelpDeskRoleCache();
 
         if (record) {
