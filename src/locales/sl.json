@@ -358,7 +358,7 @@
     "svg_logo_notice_desc": "Ker so logotipi SVG vektorski, se prilagajajo velikosti brez izgub. Orodje za obrezovanje velja za rastrske slike (PNG/JPG).",
     "svg_logo_notice_title": "Vektorski logotip (SVG)",
     "ticket_taken_over_desc": "Zahtevek je bil uspešno prevzet in dodeljen vam.",
-    "ticket_taken_over_sys_msg": "Zahtevek je bil odstranjen iz naprave in ga je zaradi poteka SLA prevzel nov strokovnjak.",
+    "ticket_taken_over_sys_msg": "⚡ [Prevzeto] Zahtevek je izhlapel s posredniškega strežnika (D1/R2) in ga je prevzel @{{alias}}.",
     "ticket_taken_over_title": "Zahtevek prevzet",
     "user_resolution_approval_note": "Potrditev rešitve s strani uporabnika",
     "voice_call_alert_title": "Glasovni klic",

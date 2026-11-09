@@ -358,7 +358,7 @@
     "svg_logo_notice_desc": "Budući da su SVG logotipi vektorski, skaliraju se bez gubitka kvalitete. Alat za obrezivanje primjenjuje se na rasterske (PNG/JPG) slike.",
     "svg_logo_notice_title": "Vektorski logotip (SVG)",
     "ticket_taken_over_desc": "Zahtjev je uspješno preuzet i dodijeljen vama.",
-    "ticket_taken_over_sys_msg": "Zahtjev je uklonjen s uređaja i preuzeo ga je novi stručnjak zbog isteka SLA-a.",
+    "ticket_taken_over_sys_msg": "⚡ [Preuzeto] Zahtjev je isparen s poslužitelja za prijenos (D1/R2) i preuzeo ga je @{{alias}}.",
     "ticket_taken_over_title": "Zahtjev preuzet",
     "user_resolution_approval_note": "Korisnička potvrda rješenja",
     "voice_call_alert_title": "Glasovni poziv",

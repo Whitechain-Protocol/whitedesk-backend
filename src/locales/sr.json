@@ -358,7 +358,7 @@
     "svg_logo_notice_desc": "Pošto su SVG logotipi vektorski, skaliraju se bez gubitka kvaliteta. Alatka za opsecanje primenjuje se na rasterske (PNG/JPG) slike.",
     "svg_logo_notice_title": "Vektorski logotip (SVG)",
     "ticket_taken_over_desc": "Tiket je uspešno preuzet i dodeljen vama.",
-    "ticket_taken_over_sys_msg": "Tiket je uklonjen sa uređaja i preuzeo ga je novi stručnjak zbog isteka SLA.",
+    "ticket_taken_over_sys_msg": "⚡ [Preuzeto] Tiket je isparen sa servera za prenos (D1/R2) i preuzeo ga je @{{alias}}.",
     "ticket_taken_over_title": "Tiket preuzet",
     "user_resolution_approval_note": "Korisnička potvrda rešenja",
     "voice_call_alert_title": "Glasovni poziv",
