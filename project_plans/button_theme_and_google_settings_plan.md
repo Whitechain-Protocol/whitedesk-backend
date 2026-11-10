@@ -96,19 +96,20 @@ Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 | **04** | Canlı Tech Mavi | `#3B82F6` | **`#F97316`** | `#10B981` |
 | **05** | Klasik Dengeli Mavi | `#4A90E2` | **`#F38240`** | `#38A169` |
 | **06** | Kobalt Pastel | `#4C82E6` | **`#E88452`** | `#3FA87E` |
-| **07** | Gök / Azure Mavi | `#3A8FC4` | **`#DC7B62`** | `#559E84` |
-| **08** | Duru Gök Pasteli | `#4293C3` | **`#DD8066`** | `#54A086` |
-| **09** | Uçuk Buzul Mavisi | `#4D96BD` | **`#DE866D`** | `#5AA389` |
-| **10** | Sisli Göl Pasteli | `#5394B1` | **`#DD8972`** | `#5C9E86` |
-| **11** | Durgun Kıyı Pasteli | `#4F8DA6` | **`#DE8369`** | `#53977F` |
-| **12** | Buz Mavisi & Amber | `#5188A6` | **`#E07A5F`** | `#4D9078` |
-| **13** | Dumanlı Slate Mavisi | `#5D7A88` | **`#DE8F6E`** | `#6BA292` |
-| **14** | Vintage Mat Mavi | `#557A95` | **`#D9834F`** | `#608871` |
-| **15** | Pastel Şeker Mavisi | `#639FAB` | **`#E28456`** | `#5BA88E` |
-| **16** | Puslu Mineral Mavi | `#6C8299` | **`#D38260`** | `#5B9279` |
-| **17** | Çerçeveli Saf Mavi (Ghost) | `#FFFFFF` (`#2B6CB0`) | **`#FFFFFF` (`#DD6B20`)** | `#FFFFFF` (`#2F855A`) |
-| **18** | Açık Göl Mavisi Dolgu | `#DCEAF4` | **`#FEE8D8`** | `#DBEFE2` |
-| **19** | Buzul Tint (En Açık Zemin) | `#EBF3FC` | **`#FEF0E7`** | `#EAF7EF` |
+| **07** | **Kurumsal Mavi & Bakır** | **`#2E75D8`** | **`#C85A32`** | **`#269B69`** |
+| **08** | Gök / Azure Mavi | `#3A8FC4` | **`#DC7B62`** | `#559E84` |
+| **09** | Duru Gök Pasteli | `#4293C3` | **`#DD8066`** | `#54A086` |
+| **10** | Uçuk Buzul Mavisi | `#4D96BD` | **`#DE866D`** | `#5AA389` |
+| **11** | Sisli Göl Pasteli | `#5394B1` | **`#DD8972`** | `#5C9E86` |
+| **12** | Durgun Kıyı Pasteli | `#4F8DA6` | **`#DE8369`** | `#53977F` |
+| **13** | Buz Mavisi & Amber | `#5188A6` | **`#E07A5F`** | `#4D9078` |
+| **14** | Dumanlı Slate Mavisi | `#5D7A88` | **`#DE8F6E`** | `#6BA292` |
+| **15** | Vintage Mat Mavi | `#557A95` | **`#D9834F`** | `#608871` |
+| **16** | Pastel Şeker Mavisi | `#639FAB` | **`#E28456`** | `#5BA88E` |
+| **17** | Puslu Mineral Mavi | `#6C8299` | **`#D38260`** | `#5B9279` |
+| **18** | Çerçeveli Saf Mavi (Ghost) | `#FFFFFF` (`#2B6CB0`) | **`#FFFFFF` (`#DD6B20`)** | `#FFFFFF` (`#2F855A`) |
+| **19** | Açık Göl Mavisi Dolgu | `#DCEAF4` | **`#FEE8D8`** | `#DBEFE2` |
+| **20** | Buzul Tint (En Açık Zemin) | `#EBF3FC` | **`#FEF0E7`** | `#EAF7EF` |
 
 ---
 
@@ -125,7 +126,7 @@ Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 
 ## 5. Değiştirilecek Dosyalar
 
-1. **`src/services/helpdesk/buttonThemeService.ts`** *(19 palet tanımı, D1 senkronizasyonu ve SafeSecureStore önbelleği)*
+1. **`src/services/helpdesk/buttonThemeService.ts`** *(20 palet tanımı, D1 senkronizasyonu ve SafeSecureStore önbelleği)*
 2. **`src/components/helpdesk/types.ts`** *(AdvancedFeaturesConfig içine `buttonThemeId?: number` eklenmesi)*
 3. **`src/components/helpdesk/station/SettingsStationModal.tsx`** *(Google kart teması dönüşümü + 5. Inline Buton Teması kartı)*
 4. **`src/components/helpdesk/views/TicketListView.tsx`** *(3 butonun seçili temaya ve turuncu tartışma butonuna bağlanması)*
