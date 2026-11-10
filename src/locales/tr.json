@@ -1158,7 +1158,26 @@
       "button_theme_title": "Buton Teması",
       "button_theme_sub": "Ana ekrandaki bilet, tartışma ve telsiz butonlarının renk paleti",
       "button_theme_select_btn": "Temayı Seç",
-      "button_theme_selected_btn": "Seçildi ✓"
+      "button_theme_selected_btn": "Seçildi ✓",
+      "palette_1": "Parlament / İndigo (Katı)",
+      "palette_2": "Derin İndigo-Mavi",
+      "palette_3": "Safir Pastel",
+      "palette_4": "Canlı Tech Mavi",
+      "palette_5": "Klasik Dengeli Mavi",
+      "palette_6": "Kobalt Pastel",
+      "palette_7": "Gök / Azure Mavi",
+      "palette_8": "Duru Gök Pasteli",
+      "palette_9": "Uçuk Buzul Mavisi",
+      "palette_10": "Sisli Göl Pasteli",
+      "palette_11": "Durgun Kıyı Pasteli",
+      "palette_12": "Buz Mavisi & Amber",
+      "palette_13": "Dumanlı Slate Mavisi",
+      "palette_14": "Vintage Mat Mavi",
+      "palette_15": "Pastel Şeker Mavisi",
+      "palette_16": "Puslu Mineral Mavi",
+      "palette_17": "Çerçeveli Saf Mavi (Ghost)",
+      "palette_18": "Açık Göl Mavisi Dolgu",
+      "palette_19": "Buzul Tint (En Açık Zemin)"
     }
   },
   "ticket": {

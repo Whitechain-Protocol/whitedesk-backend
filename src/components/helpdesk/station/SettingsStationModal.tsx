@@ -512,9 +512,11 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 </View>
               </View>
 
-              {/* Aktif Palet Adı */}
+              {/* Aktif Palet Adı (60 Dile Lokalize) */}
               <View style={styles.themeNameWrapper}>
-                <Text style={styles.themeNameText}>{activePalette.name}</Text>
+                <Text style={styles.themeNameText}>
+                  {t(`settings.station.palette_${activePalette.id}`, activePalette.name)}
+                </Text>
               </View>
 
               {/* 3 Buton Canlı Önizleme Yığını */}

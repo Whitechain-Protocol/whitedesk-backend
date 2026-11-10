@@ -1158,7 +1158,26 @@
       "button_theme_title": "Tema dei pulsanti",
       "button_theme_sub": "Tavolozza dei colori per i pulsanti di ticket, discussione e radio nella schermata principale",
       "button_theme_select_btn": "Seleziona tema",
-      "button_theme_selected_btn": "Selezionato ✓"
+      "button_theme_selected_btn": "Selezionato ✓",
+      "palette_1": "Parlamento / Indaco (Solido)",
+      "palette_2": "Blu indaco profondo",
+      "palette_3": "Zaffiro pastello",
+      "palette_4": "Blu tech vivace",
+      "palette_5": "Blu classico bilanciato",
+      "palette_6": "Cobalto pastello",
+      "palette_7": "Blu cielo / azzurro",
+      "palette_8": "Pastello cielo sereno",
+      "palette_9": "Blu ghiacciaio tenue",
+      "palette_10": "Pastello lago nebbioso",
+      "palette_11": "Pastello costa calma",
+      "palette_12": "Blu ghiaccio e ambra",
+      "palette_13": "Blu ardesia fumoso",
+      "palette_14": "Blu opaco vintage",
+      "palette_15": "Blu caramella pastello",
+      "palette_16": "Blu minerale velato",
+      "palette_17": "Blu puro bordato (Ghost)",
+      "palette_18": "Campitura blu lago chiaro",
+      "palette_19": "Tinta glaciale (Sfondo chiarissimo)"
     }
   },
   "ticket": {

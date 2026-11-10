@@ -1158,7 +1158,26 @@
       "button_theme_title": "Tema de botones",
       "button_theme_sub": "Paleta de colores para los botones de ticket, debate y radio en la pantalla principal",
       "button_theme_select_btn": "Seleccionar tema",
-      "button_theme_selected_btn": "Seleccionado ✓"
+      "button_theme_selected_btn": "Seleccionado ✓",
+      "palette_1": "Parlamento / Índigo (Sólido)",
+      "palette_2": "Azul índigo profundo",
+      "palette_3": "Zafiro pastel",
+      "palette_4": "Azul tecnológico vibrante",
+      "palette_5": "Azul clásico equilibrado",
+      "palette_6": "Cobalto pastel",
+      "palette_7": "Azul cielo / azur",
+      "palette_8": "Pastel cielo despejado",
+      "palette_9": "Azul glaciar suave",
+      "palette_10": "Pastel lago brumoso",
+      "palette_11": "Pastel costa serena",
+      "palette_12": "Azul hielo y ámbar",
+      "palette_13": "Azul pizarra ahumado",
+      "palette_14": "Azul mate vintage",
+      "palette_15": "Azul caramelo pastel",
+      "palette_16": "Azul mineral brumoso",
+      "palette_17": "Azul puro delineado (Ghost)",
+      "palette_18": "Relleno azul lago claro",
+      "palette_19": "Tinte glaciar (Fondo más claro)"
     }
   },
   "ticket": {

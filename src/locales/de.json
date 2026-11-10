@@ -1158,7 +1158,26 @@
       "button_theme_title": "Schaltflächen-Design",
       "button_theme_sub": "Farbpalette für Ticket-, Diskussions- und Funk-Schaltflächen auf dem Startbildschirm",
       "button_theme_select_btn": "Design auswählen",
-      "button_theme_selected_btn": "Ausgewählt ✓"
+      "button_theme_selected_btn": "Ausgewählt ✓",
+      "palette_1": "Parlament / Indigo (Solide)",
+      "palette_2": "Tiefes Indigoblau",
+      "palette_3": "Saphir-Pastell",
+      "palette_4": "Lebendiges Tech-Blau",
+      "palette_5": "Klassisch ausgewogenes Blau",
+      "palette_6": "Kobalt-Pastell",
+      "palette_7": "Himmel- / Azurblau",
+      "palette_8": "Klares Himmelspastell",
+      "palette_9": "Zartes Gletscherblau",
+      "palette_10": "Nebliges Seepastell",
+      "palette_11": "Ruhiges Küstenpastell",
+      "palette_12": "Eisblau & Bernstein",
+      "palette_13": "Rauchiges Schieferblau",
+      "palette_14": "Vintage Mattblau",
+      "palette_15": "Pastell-Zuckerblau",
+      "palette_16": "Dunstiges Mineralblau",
+      "palette_17": "Umrandetes Reinblau (Ghost)",
+      "palette_18": "Helle Seeblau-Füllung",
+      "palette_19": "Gletscher-Tönung (Hellster Grund)"
     }
   },
   "ticket": {

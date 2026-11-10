@@ -1158,7 +1158,26 @@
       "button_theme_title": "按鈕主題",
       "button_theme_sub": "主畫面中工單、討論與無線電通訊按鈕的調色盤",
       "button_theme_select_btn": "選擇主題",
-      "button_theme_selected_btn": "已選取 ✓"
+      "button_theme_selected_btn": "已選取 ✓",
+      "palette_1": "议会 / 靛蓝（纯色）",
+      "palette_2": "深靛青蓝",
+      "palette_3": "蓝宝柔粉",
+      "palette_4": "活力科技蓝",
+      "palette_5": "经典均衡蓝",
+      "palette_6": "钴蓝柔粉",
+      "palette_7": "天际 / 蔚蓝",
+      "palette_8": "晴空柔蓝",
+      "palette_9": "淡雅冰川蓝",
+      "palette_10": "雾湖柔粉蓝",
+      "palette_11": "静谧海岸柔蓝",
+      "palette_12": "冰蓝与琥珀",
+      "palette_13": "烟熏岩板蓝",
+      "palette_14": "复古哑光蓝",
+      "palette_15": "柔粉糖果蓝",
+      "palette_16": "薄雾矿物蓝",
+      "palette_17": "纯蓝线框（幽灵风格）",
+      "palette_18": "浅湖蓝填充",
+      "palette_19": "冰川微浅蓝（极简背景）"
     }
   },
   "ticket": {

@@ -1158,7 +1158,26 @@
       "button_theme_title": "Thème des boutons",
       "button_theme_sub": "Palette de couleurs pour les boutons de ticket, de discussion et de radio sur l'écran principal",
       "button_theme_select_btn": "Sélectionner le thème",
-      "button_theme_selected_btn": "Sélectionné ✓"
+      "button_theme_selected_btn": "Sélectionné ✓",
+      "palette_1": "Parlement / Indigo (Plein)",
+      "palette_2": "Bleu indigo profond",
+      "palette_3": "Saphir pastel",
+      "palette_4": "Bleu tech éclatant",
+      "palette_5": "Bleu équilibré classique",
+      "palette_6": "Cobalt pastel",
+      "palette_7": "Bleu ciel / azur",
+      "palette_8": "Pastel ciel limpide",
+      "palette_9": "Bleu glacier doux",
+      "palette_10": "Pastel lac brumeux",
+      "palette_11": "Pastel côte paisible",
+      "palette_12": "Bleu glacier & ambre",
+      "palette_13": "Bleu ardoise fumé",
+      "palette_14": "Bleu mat vintage",
+      "palette_15": "Bleu bonbon pastel",
+      "palette_16": "Bleu minéral voilé",
+      "palette_17": "Bleu pur avec contour (Ghost)",
+      "palette_18": "Remplissage bleu lac clair",
+      "palette_19": "Teinte glaciaire (Fond très clair)"
     }
   },
   "ticket": {

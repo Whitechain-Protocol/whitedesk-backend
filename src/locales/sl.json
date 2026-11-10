@@ -1158,7 +1158,26 @@
       "button_theme_title": "Button Theme",
       "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
       "button_theme_select_btn": "Select Theme",
-      "button_theme_selected_btn": "Selected ✓"
+      "button_theme_selected_btn": "Selected ✓",
+      "palette_1": "Parliament / Indigo (Solid)",
+      "palette_2": "Deep Indigo Blue",
+      "palette_3": "Sapphire Pastel",
+      "palette_4": "Vibrant Tech Blue",
+      "palette_5": "Classic Balanced Blue",
+      "palette_6": "Cobalt Pastel",
+      "palette_7": "Sky / Azure Blue",
+      "palette_8": "Clear Sky Pastel",
+      "palette_9": "Soft Glacier Blue",
+      "palette_10": "Misty Lake Pastel",
+      "palette_11": "Calm Coast Pastel",
+      "palette_12": "Ice Blue & Amber",
+      "palette_13": "Smoky Slate Blue",
+      "palette_14": "Vintage Matte Blue",
+      "palette_15": "Pastel Candy Blue",
+      "palette_16": "Hazy Mineral Blue",
+      "palette_17": "Outlined Pure Blue (Ghost)",
+      "palette_18": "Light Lake Blue Fill",
+      "palette_19": "Glacial Tint (Lightest Background)"
     }
   },
   "ticket": {
