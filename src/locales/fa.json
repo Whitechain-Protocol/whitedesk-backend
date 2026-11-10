@@ -1154,7 +1154,11 @@
       "field_required": "فیلد الزامی",
       "field_optional": "اختیاری",
       "custom_field_placeholder": "مثال: شماره سریال دستگاه، بخش...",
-      "add_custom_field_btn": "افزودن فیلد سفارشی"
+      "add_custom_field_btn": "افزودن فیلد سفارشی",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

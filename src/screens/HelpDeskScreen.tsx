@@ -43,6 +43,7 @@ import { TicketDetailView } from '../components/helpdesk/views/TicketDetailView'
 import { remoteDesktopService } from '../services/remoteDesktopService';
 import { WhiteDeskCrypto } from '../whitedesk-sdk';
 import { TicketListView } from '../components/helpdesk/views/TicketListView';
+import { buttonThemeService, ButtonTheme } from '../services/helpdesk/buttonThemeService';
 import { 
   useHelpDeskAttachments,
   useHelpDeskVoice,
@@ -150,6 +151,22 @@ export default function HelpDeskScreen() {
   const [ticketClientPrefs, setTicketClientPrefs] = useState<UserAdvancedPreferences>(DEFAULT_USER_ADVANCED_PREFERENCES);
   const [userPrefsModalVisible, setUserPrefsModalVisible] = useState(false);
   const [savingAdvancedConfig, setSavingAdvancedConfig] = useState(false);
+
+  // Button Theme State
+  const [buttonTheme, setButtonTheme] = useState<ButtonTheme>(buttonThemeService.getDefaultTheme());
+
+  useEffect(() => {
+    buttonThemeService.getSavedTheme().then(setButtonTheme);
+    const unsub = buttonThemeService.subscribe(setButtonTheme);
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (advancedFeaturesConfig?.buttonThemeId) {
+      const theme = buttonThemeService.getThemeById(advancedFeaturesConfig.buttonThemeId);
+      setButtonTheme(theme);
+    }
+  }, [advancedFeaturesConfig?.buttonThemeId]);
 
   const [confirmSheet, setConfirmSheet] = useState<{
     visible: boolean;
@@ -1083,6 +1100,7 @@ export default function HelpDeskScreen() {
             (isAdmin || Boolean(advancedFeaturesConfig?.pushToTalk?.allowGroupBroadcast ?? advancedFeaturesConfig?.pushToTalk?.allowUserPtt))
           }
           onRadioBroadcastPress={handleOrgGroupPttPress}
+          buttonTheme={buttonTheme}
         />
       </Animated.ScrollView>
 

@@ -1154,7 +1154,11 @@
       "field_required": "Pole wymagane",
       "field_optional": "Opcjonalne",
       "custom_field_placeholder": "np. Nr seryjny urządzenia, Dział...",
-      "add_custom_field_btn": "Dodaj pole niestandardowe"
+      "add_custom_field_btn": "Dodaj pole niestandardowe",
+      "button_theme_title": "Motyw przycisków",
+      "button_theme_sub": "Paleta kolorów dla przycisków zgłoszeń, dyskusji i krótkofalówki na ekranie głównym",
+      "button_theme_select_btn": "Wybierz motyw",
+      "button_theme_selected_btn": "Wybrano ✓"
     }
   },
   "ticket": {

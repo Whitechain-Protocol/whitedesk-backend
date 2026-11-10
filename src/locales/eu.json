@@ -1154,7 +1154,11 @@
       "field_required": "Beharrezko eremua",
       "field_optional": "Aukerakoa",
       "custom_field_placeholder": "adib., Gailuaren serie-zk., Saila...",
-      "add_custom_field_btn": "Gehitu eremu pertsonalizatua"
+      "add_custom_field_btn": "Gehitu eremu pertsonalizatua",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

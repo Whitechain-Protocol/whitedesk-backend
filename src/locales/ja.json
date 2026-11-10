@@ -1154,7 +1154,11 @@
       "field_required": "必須項目",
       "field_optional": "任意",
       "custom_field_placeholder": "例: デバイスシリアル番号、部署...",
-      "add_custom_field_btn": "カスタムフィールドを追加"
+      "add_custom_field_btn": "カスタムフィールドを追加",
+      "button_theme_title": "ボタンテーマ",
+      "button_theme_sub": "メイン画面のチケット、ディスカッション、無線ボタンのカラーパレット",
+      "button_theme_select_btn": "テーマを選択",
+      "button_theme_selected_btn": "選択済み ✓"
     }
   },
   "ticket": {

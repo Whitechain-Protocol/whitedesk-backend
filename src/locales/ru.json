@@ -1154,7 +1154,11 @@
       "field_required": "Обязательное поле",
       "field_optional": "Необязательное",
       "custom_field_placeholder": "напр., Серийный № устройства, Отдел...",
-      "add_custom_field_btn": "Добавить поле"
+      "add_custom_field_btn": "Добавить поле",
+      "button_theme_title": "Тема кнопок",
+      "button_theme_sub": "Цветовая палитра для кнопок заявок, обсуждений и рации на главном экране",
+      "button_theme_select_btn": "Выбрать тему",
+      "button_theme_selected_btn": "Выбрано ✓"
     }
   },
   "ticket": {

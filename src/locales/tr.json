@@ -1154,7 +1154,11 @@
       "field_required": "Zorunlu Alan",
       "field_optional": "İsteğe Bağlı",
       "custom_field_placeholder": "Örn: Cihaz Seri No, Departman...",
-      "add_custom_field_btn": "Özel Alan Ekle"
+      "add_custom_field_btn": "Özel Alan Ekle",
+      "button_theme_title": "Buton Teması",
+      "button_theme_sub": "Ana ekrandaki bilet, tartışma ve telsiz butonlarının renk paleti",
+      "button_theme_select_btn": "Temayı Seç",
+      "button_theme_selected_btn": "Seçildi ✓"
     }
   },
   "ticket": {

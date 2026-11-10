@@ -1154,7 +1154,11 @@
       "field_required": "தேவையான புலம்",
       "field_optional": "விருப்பத்தேர்வு",
       "custom_field_placeholder": "எ.கா: சாதன வரிசை எண், துறை...",
-      "add_custom_field_btn": "தனிப்பயன் புலத்தைச் சேர்"
+      "add_custom_field_btn": "தனிப்பயன் புலத்தைச் சேர்",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

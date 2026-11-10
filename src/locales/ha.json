@@ -1154,7 +1154,11 @@
       "field_required": "Wurin da Ake Buƙata",
       "field_optional": "Na Zaɓi",
       "custom_field_placeholder": "misali: Lambar Serial na Na'ura, Sashe...",
-      "add_custom_field_btn": "Ƙara Wurin Musamman"
+      "add_custom_field_btn": "Ƙara Wurin Musamman",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

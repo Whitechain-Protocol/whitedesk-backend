@@ -29,6 +29,7 @@ import { TicketFilterStatus } from '../types';
 import { TicketCard } from './TicketCard';
 import { FilterSlidersIcon } from '../icons/FilterSlidersIcon';
 import { HeadphoneChatIcon } from '../icons/HeadphoneChatIcon';
+import { buttonThemeService, ButtonTheme } from '../../../services/helpdesk/buttonThemeService';
 
 interface TicketListViewProps {
   isAdmin: boolean;
@@ -74,6 +75,7 @@ interface TicketListViewProps {
   onRadioBroadcastPress?: () => void;
   isSearchActive?: boolean;
   onSearchFocusChange?: (focused: boolean) => void;
+  buttonTheme?: ButtonTheme;
 }
 
 export const TicketListView: React.FC<TicketListViewProps> = ({
@@ -119,7 +121,9 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
   onRadioBroadcastPress,
   isSearchActive = false,
   onSearchFocusChange,
+  buttonTheme,
 }) => {
+  const theme = buttonTheme || buttonThemeService.getDefaultTheme();
   const isTheWhite = Boolean(
     currentEnterpriseName &&
     (currentEnterpriseName.toLowerCase().includes('thewhite') ||
@@ -159,52 +163,81 @@ export const TicketListView: React.FC<TicketListViewProps> = ({
         </View>
       </View>
 
-      {/* 1. MAVİ: Yeni bir bilet oluştur (Herkeste yukarı ok: Kullanıcı, admin, global admin. Kurucuda bulunmaz.) */}
+      {/* 1. TEMA: Yeni bir bilet oluştur */}
       {!isFounder && !isTheWhite && (!isMasterAdmin || isGlobalAdmin) && (
         <TouchableOpacity
-          style={[styles.fluidNewTicketBtn, isSearchActive && { display: 'none' }]}
+          style={[
+            styles.fluidNewTicketBtn,
+            {
+              backgroundColor: theme.ticket.bg,
+              borderColor: theme.ticket.border !== 'transparent' ? theme.ticket.border : 'transparent',
+              borderWidth: theme.ticket.border !== 'transparent' ? 1 : 0,
+              shadowColor: theme.ticket.bg !== '#FFFFFF' ? theme.ticket.bg : '#000000',
+            },
+            isSearchActive && { display: 'none' },
+          ]}
           onPress={onNewTicketPress}
           activeOpacity={0.85}
         >
-          <Plus size={18} color="#FFFFFF" strokeWidth={2.5} style={{ marginRight: 6 }} />
-          <Text style={styles.fluidNewTicketBtnText}>
+          <Plus size={18} color={theme.ticket.text} strokeWidth={2.5} style={{ marginRight: 6 }} />
+          <Text style={[styles.fluidNewTicketBtnText, { color: theme.ticket.text }]}>
             {getLabel('helpdesk.create_new_ticket_btn')}
           </Text>
-          <ArrowUp size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
+          <ArrowUp size={16} color={theme.ticket.text} strokeWidth={2.5} style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       )}
 
-      {/* 2. MOR: Bir Tartışma Başlat (Admin, Global Admin, Kurucu) */}
+      {/* 2. TEMA (TURUNCU): Bir Tartışma Başlat (Admin, Global Admin, Kurucu) */}
       {(isAdmin || isFounder || isMasterAdmin || isTheWhite) && (
         <TouchableOpacity
-          style={[styles.fluidNewTicketBtn, styles.fluidDiscussionPurpleBtn, isSearchActive && { display: 'none' }]}
+          style={[
+            styles.fluidNewTicketBtn,
+            styles.fluidDiscussionPurpleBtn,
+            {
+              backgroundColor: theme.disc.bg,
+              borderColor: theme.disc.border !== 'transparent' ? theme.disc.border : 'transparent',
+              borderWidth: theme.disc.border !== 'transparent' ? 1 : 0,
+              shadowColor: theme.disc.bg !== '#FFFFFF' ? theme.disc.bg : '#000000',
+            },
+            isSearchActive && { display: 'none' },
+          ]}
           onPress={onNewDiscussionPress || onNewTicketPress}
           activeOpacity={0.85}
         >
-          <MessageSquare size={18} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 6 }} />
-          <Text style={styles.fluidNewTicketBtnText}>
+          <MessageSquare size={18} color={theme.disc.text} strokeWidth={2.2} style={{ marginRight: 6 }} />
+          <Text style={[styles.fluidNewTicketBtnText, { color: theme.disc.text }]}>
             {getLabel('helpdesk.start_discussion_btn')}
           </Text>
           {isMasterAdmin || isFounder || isTheWhite || isGlobalAdmin ? (
-            <ArrowDown size={16} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 6 }} />
+            <ArrowDown size={16} color={theme.disc.text} strokeWidth={2.5} style={{ marginLeft: 6 }} />
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 6 }}>
-              <ArrowRight size={15} color="#FFFFFF" strokeWidth={2.5} />
-              <ArrowUp size={15} color="#FFFFFF" strokeWidth={2.5} style={{ marginLeft: 2 }} />
+              <ArrowRight size={15} color={theme.disc.text} strokeWidth={2.5} />
+              <ArrowUp size={15} color={theme.disc.text} strokeWidth={2.5} style={{ marginLeft: 2 }} />
             </View>
           )}
         </TouchableOpacity>
       )}
 
-      {/* 3. YEŞİL: Bir telsiz yayını başlat (Oksuz, sol ikonlu, lisanslandığında herkeste var) */}
+      {/* 3. TEMA: Bir telsiz yayını başlat */}
       {showRadioBroadcastBar && onRadioBroadcastPress && (
         <TouchableOpacity
-          style={[styles.fluidNewTicketBtn, styles.fluidRadioBroadcastBtn, isSearchActive && { display: 'none' }]}
+          style={[
+            styles.fluidNewTicketBtn,
+            styles.fluidRadioBroadcastBtn,
+            {
+              backgroundColor: theme.radio.bg,
+              borderColor: theme.radio.border !== 'transparent' ? theme.radio.border : 'transparent',
+              borderWidth: theme.radio.border !== 'transparent' ? 1 : 0,
+              shadowColor: theme.radio.bg !== '#FFFFFF' ? theme.radio.bg : '#000000',
+            },
+            isSearchActive && { display: 'none' },
+          ]}
           onPress={onRadioBroadcastPress}
           activeOpacity={0.85}
         >
-          <Radio size={18} color="#FFFFFF" strokeWidth={2.2} style={{ marginRight: 8 }} />
-          <Text style={styles.fluidNewTicketBtnText}>
+          <Radio size={18} color={theme.radio.text} strokeWidth={2.2} style={{ marginRight: 8 }} />
+          <Text style={[styles.fluidNewTicketBtnText, { color: theme.radio.text }]}>
             {getLabel('helpdesk.start_radio_broadcast_btn')}
           </Text>
         </TouchableOpacity>
@@ -461,8 +494,8 @@ const styles = Object.freeze(StyleSheet.create({
     color: '#FFFFFF',
   },
   fluidDiscussionPurpleBtn: {
-    backgroundColor: '#7C3AED',
-    shadowColor: '#7C3AED',
+    backgroundColor: '#EA580C',
+    shadowColor: '#EA580C',
     marginTop: -4,
     marginBottom: 14,
   },

@@ -1154,7 +1154,11 @@
       "field_required": "Задължително поле",
       "field_optional": "По избор",
       "custom_field_placeholder": "напр. Сериен № на устройство, Отдел...",
-      "add_custom_field_btn": "Добавяне на персонализирано поле"
+      "add_custom_field_btn": "Добавяне на персонализирано поле",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

@@ -1154,7 +1154,11 @@
       "field_required": "حقل إلزامي",
       "field_optional": "اختياري",
       "custom_field_placeholder": "مثال: الرقم التسلسلي للجهاز، القسم...",
-      "add_custom_field_btn": "إضافة حقل مخصص"
+      "add_custom_field_btn": "إضافة حقل مخصص",
+      "button_theme_title": "سمة الأزرار",
+      "button_theme_sub": "لوحة الألوان لأزرار التذاكر والمناقشة والراديو على الشاشة الرئيسية",
+      "button_theme_select_btn": "تحديد السمة",
+      "button_theme_selected_btn": "تم التحديد ✓"
     }
   },
   "ticket": {

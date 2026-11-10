@@ -1154,7 +1154,11 @@
       "field_required": "Campo obbligatorio",
       "field_optional": "Opzionale",
       "custom_field_placeholder": "es. N. di serie dispositivo, Reparto...",
-      "add_custom_field_btn": "Aggiungi campo personalizzato"
+      "add_custom_field_btn": "Aggiungi campo personalizzato",
+      "button_theme_title": "Tema dei pulsanti",
+      "button_theme_sub": "Tavolozza dei colori per i pulsanti di ticket, discussione e radio nella schermata principale",
+      "button_theme_select_btn": "Seleziona tema",
+      "button_theme_selected_btn": "Selezionato ✓"
     }
   },
   "ticket": {

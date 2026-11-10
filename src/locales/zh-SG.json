@@ -1154,7 +1154,11 @@
       "field_required": "必填字段",
       "field_optional": "选填字段",
       "custom_field_placeholder": "例如：设备序列号、所属部门...",
-      "add_custom_field_btn": "添加自定义字段"
+      "add_custom_field_btn": "添加自定义字段",
+      "button_theme_title": "按钮主题",
+      "button_theme_sub": "主屏幕上工单、讨论与对讲机按钮的调色板",
+      "button_theme_select_btn": "选择主题",
+      "button_theme_selected_btn": "已选择 ✓"
     }
   },
   "ticket": {

@@ -1154,7 +1154,11 @@
       "field_required": "Câmp obligatoriu",
       "field_optional": "Opțional",
       "custom_field_placeholder": "ex.: Nr. serie dispozitiv, Departament...",
-      "add_custom_field_btn": "Adaugă câmp personalizat"
+      "add_custom_field_btn": "Adaugă câmp personalizat",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

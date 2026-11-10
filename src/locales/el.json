@@ -1154,7 +1154,11 @@
       "field_required": "Υποχρεωτικό Πεδίο",
       "field_optional": "Προαιρετικό",
       "custom_field_placeholder": "π.χ. Σειριακός Αρ. Συσκευής, Τμήμα...",
-      "add_custom_field_btn": "Προσθήκη Προσαρμοσμένου Πεδίου"
+      "add_custom_field_btn": "Προσθήκη Προσαρμοσμένου Πεδίου",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

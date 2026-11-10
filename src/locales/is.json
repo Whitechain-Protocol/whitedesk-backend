@@ -1154,7 +1154,11 @@
       "field_required": "Skyldureitur",
       "field_optional": "Valfrjálst",
       "custom_field_placeholder": "t.d. Raðnúmer tækis, Deild...",
-      "add_custom_field_btn": "Bæta við sérsniðnum reit"
+      "add_custom_field_btn": "Bæta við sérsniðnum reit",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

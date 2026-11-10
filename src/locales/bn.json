@@ -1154,7 +1154,11 @@
       "field_required": "প্রয়োজনীয় ফিল্ড",
       "field_optional": "ঐচ্ছিক",
       "custom_field_placeholder": "যেমন, ডিভাইস সিরিয়াল নং, বিভাগ...",
-      "add_custom_field_btn": "কাস্টম ফিল্ড যোগ করুন"
+      "add_custom_field_btn": "কাস্টম ফিল্ড যোগ করুন",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

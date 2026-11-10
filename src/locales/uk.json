@@ -1154,7 +1154,11 @@
       "field_required": "Обов'язкове поле",
       "field_optional": "Необов'язкове",
       "custom_field_placeholder": "напр., Серійний № пристрою, Відділ...",
-      "add_custom_field_btn": "Додати поле"
+      "add_custom_field_btn": "Додати поле",
+      "button_theme_title": "Тема кнопок",
+      "button_theme_sub": "Колірна палітра для кнопок заявок, обговорень та рації на головному екрані",
+      "button_theme_select_btn": "Вибрати тему",
+      "button_theme_selected_btn": "Вибрано ✓"
     }
   },
   "ticket": {

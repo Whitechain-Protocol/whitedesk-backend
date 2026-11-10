@@ -846,6 +846,7 @@ export function HelpDeskModalsContainer(props: HelpDeskModalsContainerProps) {
           onClose={() => setAdminScreenType(null)}
           adminModalHeight={adminModalHeight}
           currentEnterpriseName={currentEnterpriseName}
+          activeEnterpriseBlindId={activeEnterpriseBlindId}
           allowNameEntry={allowNameEntry}
           onToggleAllowNameEntry={onToggleAllowNameEntry}
           loginIssueEnabled={loginIssueEnabled}

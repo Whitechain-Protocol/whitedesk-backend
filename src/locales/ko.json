@@ -1154,7 +1154,11 @@
       "field_required": "필수 항목",
       "field_optional": "선택 항목",
       "custom_field_placeholder": "예: 기기 일련번호, 부서...",
-      "add_custom_field_btn": "사용자 정의 필드 추가"
+      "add_custom_field_btn": "사용자 정의 필드 추가",
+      "button_theme_title": "버튼 테마",
+      "button_theme_sub": "기본 화면의 티켓, 토론 및 무전 버튼 색상 팔레트",
+      "button_theme_select_btn": "테마 선택",
+      "button_theme_selected_btn": "선택됨 ✓"
     }
   },
   "ticket": {

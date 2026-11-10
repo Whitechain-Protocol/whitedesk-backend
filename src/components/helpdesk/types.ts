@@ -77,6 +77,7 @@ export interface AdvancedFeaturesConfig {
     maskIban: boolean;                // IBAN Numaraları
     maskSecrets: boolean;             // API Anahtarı, JWT ve Gizli Tokenlar
   };
+  buttonThemeId?: number;             // Kurumsal ana ekran buton teması ID'si (1 - 15)
 }
 
 export const DEFAULT_ADVANCED_FEATURES_CONFIG: AdvancedFeaturesConfig = {
@@ -117,6 +118,7 @@ export const DEFAULT_ADVANCED_FEATURES_CONFIG: AdvancedFeaturesConfig = {
     maskIban: true,
     maskSecrets: true,
   },
+  buttonThemeId: 1,
 };
 
 export interface UserAdvancedPreferences {

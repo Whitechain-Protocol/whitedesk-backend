@@ -1154,7 +1154,11 @@
       "field_required": "Obvezno polje",
       "field_optional": "Izbirno",
       "custom_field_placeholder": "npr. Serijska št. naprave, Oddelek...",
-      "add_custom_field_btn": "Dodaj polje po meri"
+      "add_custom_field_btn": "Dodaj polje po meri",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

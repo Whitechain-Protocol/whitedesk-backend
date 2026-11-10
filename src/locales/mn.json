@@ -1154,7 +1154,11 @@
       "field_required": "Заавал бөглөх талбар",
       "field_optional": "Заавал биш",
       "custom_field_placeholder": "жнь: Төхөөрөмжийн серийн дугаар, Хэлтэс...",
-      "add_custom_field_btn": "Тусгай талбар нэмэх"
+      "add_custom_field_btn": "Тусгай талбар нэмэх",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

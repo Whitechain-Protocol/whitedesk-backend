@@ -1154,7 +1154,11 @@
       "field_required": "Fushë e detyrueshme",
       "field_optional": "Opsionale",
       "custom_field_placeholder": "p.sh. Nr. serial i pajisjes, Departamenti...",
-      "add_custom_field_btn": "Shto fushë të personalizuar"
+      "add_custom_field_btn": "Shto fushë të personalizuar",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

@@ -1154,7 +1154,11 @@
       "field_required": "ဖြည့်စွက်ရန် လိုအပ်သောအကွက်",
       "field_optional": "ချန်လှပ်ထားနိုင်သည်",
       "custom_field_placeholder": "ဥပမာ - စက်ပစ္စည်း စီရီယယ်နံပါတ်၊ ဌာန...",
-      "add_custom_field_btn": "စိတ်ကြိုက်အကွက် ထည့်ရန်"
+      "add_custom_field_btn": "စိတ်ကြိုက်အကွက် ထည့်ရန်",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

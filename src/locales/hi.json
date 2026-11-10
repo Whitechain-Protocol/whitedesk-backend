@@ -1154,7 +1154,11 @@
       "field_required": "आवश्यक फ़ील्ड",
       "field_optional": "वैकल्पिक",
       "custom_field_placeholder": "उदा., डिवाइस सीरियल नं., विभाग...",
-      "add_custom_field_btn": "कस्टम फ़ील्ड जोड़ें"
+      "add_custom_field_btn": "कस्टम फ़ील्ड जोड़ें",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

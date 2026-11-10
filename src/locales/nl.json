@@ -1154,7 +1154,11 @@
       "field_required": "Verplicht veld",
       "field_optional": "Optioneel",
       "custom_field_placeholder": "bijv. Serienr. apparaat, Afdeling...",
-      "add_custom_field_btn": "Aangepast veld toevoegen"
+      "add_custom_field_btn": "Aangepast veld toevoegen",
+      "button_theme_title": "Knoppen-thema",
+      "button_theme_sub": "Kleurenpalet voor ticket-, discussie- en radioknoppen op het hoofdscherm",
+      "button_theme_select_btn": "Thema selecteren",
+      "button_theme_selected_btn": "Geselecteerd ✓"
     }
   },
   "ticket": {

@@ -1154,7 +1154,11 @@
       "field_required": "Povinné pole",
       "field_optional": "Voliteľné",
       "custom_field_placeholder": "napr. Sériové č. zariadenia, Oddelenie...",
-      "add_custom_field_btn": "Pridať vlastné pole"
+      "add_custom_field_btn": "Pridať vlastné pole",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

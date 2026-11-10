@@ -1154,7 +1154,11 @@
       "field_required": "Kolom Wajib",
       "field_optional": "Opsional",
       "custom_field_placeholder": "mis., No. Seri Perangkat, Departemen...",
-      "add_custom_field_btn": "Tambah Kolom Kustom"
+      "add_custom_field_btn": "Tambah Kolom Kustom",
+      "button_theme_title": "Button Theme",
+      "button_theme_sub": "Color palette for ticket, discussion and radio buttons on the main screen",
+      "button_theme_select_btn": "Select Theme",
+      "button_theme_selected_btn": "Selected ✓"
     }
   },
   "ticket": {

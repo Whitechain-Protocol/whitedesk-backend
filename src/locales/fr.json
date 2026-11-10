@@ -1154,7 +1154,11 @@
       "field_required": "Champ obligatoire",
       "field_optional": "Facultatif",
       "custom_field_placeholder": "ex. N° de série de l'appareil, Département...",
-      "add_custom_field_btn": "Ajouter un champ personnalisé"
+      "add_custom_field_btn": "Ajouter un champ personnalisé",
+      "button_theme_title": "Thème des boutons",
+      "button_theme_sub": "Palette de couleurs pour les boutons de ticket, de discussion et de radio sur l'écran principal",
+      "button_theme_select_btn": "Sélectionner le thème",
+      "button_theme_selected_btn": "Sélectionné ✓"
     }
   },
   "ticket": {

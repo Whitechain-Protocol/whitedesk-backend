@@ -1154,7 +1154,11 @@
       "field_required": "Pflichtfeld",
       "field_optional": "Optional",
       "custom_field_placeholder": "z. B. Geräteseriennr., Abteilung...",
-      "add_custom_field_btn": "Benutzerdefiniertes Feld hinzufügen"
+      "add_custom_field_btn": "Benutzerdefiniertes Feld hinzufügen",
+      "button_theme_title": "Schaltflächen-Design",
+      "button_theme_sub": "Farbpalette für Ticket-, Diskussions- und Funk-Schaltflächen auf dem Startbildschirm",
+      "button_theme_select_btn": "Design auswählen",
+      "button_theme_selected_btn": "Ausgewählt ✓"
     }
   },
   "ticket": {
