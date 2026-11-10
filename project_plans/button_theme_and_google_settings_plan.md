@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > Bu plan, kullanıcının `/grill-me` mülakatında onayladığı iki kritik mimari karara göre güncellenmiştir:
-> 1. **Doğrudan Çerçeve İçi (Inline Kart):** Ekstra bir pop-up/modal açılmayacak; 15 paletlik tema seçici, buton önizlemeleri ve ok kontrolleri doğrudan Kuruluş Ayarları ekranının en altındaki 5. Google kartının içerisine gömülecektir.
+> 1. **Doğrudan Çerçeve İçi (Inline Kart):** Ekstra bir pop-up/modal açılmayacak; 19 paletlik tema seçici, buton önizlemeleri ve ok kontrolleri doğrudan Kuruluş Ayarları ekranının en altındaki 5. Google kartının içerisine gömülecektir.
 > 2. **Kurumsal Düzeyde Senkronizasyon (Cloudflare D1 & SafeSecureStore):** Seçilen tema yalnızca bu cihaza özgü kalmayacak; Cloudflare D1 (`whitedesk_enterprises.advanced_features_config.buttonThemeId`) üzerinden kuruluşun tüm personeli ve yöneticileri için kurumsal olarak geçerli olacaktır.
 
 ---
@@ -18,7 +18,7 @@ flowchart TD
     A --> F["5. Kart: Buton Teması (Doğrudan Çerçeve İçi / Inline)"]
     
     subgraph "5. Kart İçeriği (Inline)"
-        F1["Üst Bar: BUTON TEMASI & Sayaç (01 / 15)"]
+        F1["Üst Bar: BUTON TEMASI & Sayaç (01 / 19)"]
         F2["Aktif Tema Başlığı: örn. Parlament / İndigo (Katı)"]
         F3["3 Buton Canlı Önizleme Yığını (Stack)"]
         F4["Hex Değerleri Göstergesi (#2563EB · #EA580C · #16A34A)"]
@@ -68,7 +68,7 @@ Mevcut düzensiz ve karmaşık liste yapısı yerine Google Settings / Material 
 Kuruluş ayarlarının en altında yer alacak 5. kartın doğrudan içinde:
 * **Kart Başlık Çubuğu:**
   - Sol: `BUTON TEMASI` (13px, bold, kurumsal gri `#334155`, letterSpacing: 0.5)
-  - Sağ: `01 / 15` Sayaç rozeti (Monospace, `#64748B`)
+  - Sağ: `01 / 19` Sayaç rozeti (Monospace, `#64748B`)
 * **Aktif Tema Adı:**
   - Ortalanmış, 14px bold metin (Örn: `Parlament / İndigo (Katı)`).
 * **3 Buton Canlı Önizleme Yığını (Stack):**
@@ -84,7 +84,7 @@ Kuruluş ayarlarının en altında yer alacak 5. kartın doğrudan içinde:
 
 ---
 
-## 3. 15 Paletlik Tema Kataloğu (`buttonThemeService.ts`)
+## 3. 19 paletlik Tema Kataloğu (`buttonThemeService.ts`)
 
 Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 
@@ -97,14 +97,18 @@ Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 | **05** | Klasik Dengeli Mavi | `#4A90E2` | **`#F38240`** | `#38A169` |
 | **06** | Kobalt Pastel | `#4C82E6` | **`#E88452`** | `#3FA87E` |
 | **07** | Gök / Azure Mavi | `#3A8FC4` | **`#DC7B62`** | `#559E84` |
-| **08** | Buz Mavisi & Amber | `#5188A6` | **`#E07A5F`** | `#4D9078` |
-| **09** | Dumanlı Slate Mavisi | `#5D7A88` | **`#DE8F6E`** | `#6BA292` |
-| **10** | Vintage Mat Mavi | `#557A95` | **`#D9834F`** | `#608871` |
-| **11** | Pastel Şeker Mavisi | `#639FAB` | **`#E28456`** | `#5BA88E` |
-| **12** | Puslu Mineral Mavi | `#6C8299` | **`#D38260`** | `#5B9279` |
-| **13** | Çerçeveli Saf Mavi (Ghost) | `#FFFFFF` (`#2B6CB0`) | **`#FFFFFF` (`#DD6B20`)** | `#FFFFFF` (`#2F855A`) |
-| **14** | Açık Göl Mavisi Dolgu | `#DCEAF4` | **`#FEE8D8`** | `#DBEFE2` |
-| **15** | Buzul Tint (En Açık Zemin) | `#EBF3FC` | **`#FEF0E7`** | `#EAF7EF` |
+| **08** | Duru Gök Pasteli | `#4293C3` | **`#DD8066`** | `#54A086` |
+| **09** | Uçuk Buzul Mavisi | `#4D96BD` | **`#DE866D`** | `#5AA389` |
+| **10** | Sisli Göl Pasteli | `#5394B1` | **`#DD8972`** | `#5C9E86` |
+| **11** | Durgun Kıyı Pasteli | `#4F8DA6` | **`#DE8369`** | `#53977F` |
+| **12** | Buz Mavisi & Amber | `#5188A6` | **`#E07A5F`** | `#4D9078` |
+| **13** | Dumanlı Slate Mavisi | `#5D7A88` | **`#DE8F6E`** | `#6BA292` |
+| **14** | Vintage Mat Mavi | `#557A95` | **`#D9834F`** | `#608871` |
+| **15** | Pastel Şeker Mavisi | `#639FAB` | **`#E28456`** | `#5BA88E` |
+| **16** | Puslu Mineral Mavi | `#6C8299` | **`#D38260`** | `#5B9279` |
+| **17** | Çerçeveli Saf Mavi (Ghost) | `#FFFFFF` (`#2B6CB0`) | **`#FFFFFF` (`#DD6B20`)** | `#FFFFFF` (`#2F855A`) |
+| **18** | Açık Göl Mavisi Dolgu | `#DCEAF4` | **`#FEE8D8`** | `#DBEFE2` |
+| **19** | Buzul Tint (En Açık Zemin) | `#EBF3FC` | **`#FEF0E7`** | `#EAF7EF` |
 
 ---
 
@@ -121,7 +125,7 @@ Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 
 ## 5. Değiştirilecek Dosyalar
 
-1. **`src/services/helpdesk/buttonThemeService.ts`** *(15 palet tanımı, D1 senkronizasyonu ve SafeSecureStore önbelleği)*
+1. **`src/services/helpdesk/buttonThemeService.ts`** *(19 palet tanımı, D1 senkronizasyonu ve SafeSecureStore önbelleği)*
 2. **`src/components/helpdesk/types.ts`** *(AdvancedFeaturesConfig içine `buttonThemeId?: number` eklenmesi)*
 3. **`src/components/helpdesk/station/SettingsStationModal.tsx`** *(Google kart teması dönüşümü + 5. Inline Buton Teması kartı)*
 4. **`src/components/helpdesk/views/TicketListView.tsx`** *(3 butonun seçili temaya ve turuncu tartışma butonuna bağlanması)*

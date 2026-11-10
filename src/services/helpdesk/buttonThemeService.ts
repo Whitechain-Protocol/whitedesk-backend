@@ -66,55 +66,83 @@ export const BUTTON_THEME_PALETTES: ButtonTheme[] = [
   },
   {
     id: 8,
+    name: 'Duru Gök Pasteli',
+    ticket: { bg: '#4293C3', text: '#FFFFFF', border: 'transparent' },
+    disc:   { bg: '#DD8066', text: '#FFFFFF', border: 'transparent' },
+    radio:  { bg: '#54A086', text: '#FFFFFF', border: 'transparent' }
+  },
+  {
+    id: 9,
+    name: 'Uçuk Buzul Mavisi',
+    ticket: { bg: '#4D96BD', text: '#FFFFFF', border: 'transparent' },
+    disc:   { bg: '#DE866D', text: '#FFFFFF', border: 'transparent' },
+    radio:  { bg: '#5AA389', text: '#FFFFFF', border: 'transparent' }
+  },
+  {
+    id: 10,
+    name: 'Sisli Göl Pasteli',
+    ticket: { bg: '#5394B1', text: '#FFFFFF', border: 'transparent' },
+    disc:   { bg: '#DD8972', text: '#FFFFFF', border: 'transparent' },
+    radio:  { bg: '#5C9E86', text: '#FFFFFF', border: 'transparent' }
+  },
+  {
+    id: 11,
+    name: 'Durgun Kıyı Pasteli',
+    ticket: { bg: '#4F8DA6', text: '#FFFFFF', border: 'transparent' },
+    disc:   { bg: '#DE8369', text: '#FFFFFF', border: 'transparent' },
+    radio:  { bg: '#53977F', text: '#FFFFFF', border: 'transparent' }
+  },
+  {
+    id: 12,
     name: 'Buz Mavisi & Amber',
     ticket: { bg: '#5188A6', text: '#FFFFFF', border: 'transparent' },
     disc:   { bg: '#E07A5F', text: '#FFFFFF', border: 'transparent' },
     radio:  { bg: '#4D9078', text: '#FFFFFF', border: 'transparent' }
   },
   {
-    id: 9,
+    id: 13,
     name: 'Dumanlı Slate Mavisi',
     ticket: { bg: '#5D7A88', text: '#FFFFFF', border: 'transparent' },
     disc:   { bg: '#DE8F6E', text: '#FFFFFF', border: 'transparent' },
     radio:  { bg: '#6BA292', text: '#FFFFFF', border: 'transparent' }
   },
   {
-    id: 10,
+    id: 14,
     name: 'Vintage Mat Mavi',
     ticket: { bg: '#557A95', text: '#FFFFFF', border: 'transparent' },
     disc:   { bg: '#D9834F', text: '#FFFFFF', border: 'transparent' },
     radio:  { bg: '#608871', text: '#FFFFFF', border: 'transparent' }
   },
   {
-    id: 11,
+    id: 15,
     name: 'Pastel Şeker Mavisi',
     ticket: { bg: '#639FAB', text: '#FFFFFF', border: 'transparent' },
     disc:   { bg: '#E28456', text: '#FFFFFF', border: 'transparent' },
     radio:  { bg: '#5BA88E', text: '#FFFFFF', border: 'transparent' }
   },
   {
-    id: 12,
+    id: 16,
     name: 'Puslu Mineral Mavi',
     ticket: { bg: '#6C8299', text: '#FFFFFF', border: 'transparent' },
     disc:   { bg: '#D38260', text: '#FFFFFF', border: 'transparent' },
     radio:  { bg: '#5B9279', text: '#FFFFFF', border: 'transparent' }
   },
   {
-    id: 13,
+    id: 17,
     name: 'Çerçeveli Saf Mavi (Ghost)',
     ticket: { bg: '#FFFFFF', text: '#2B6CB0', border: '#2B6CB0' },
     disc:   { bg: '#FFFFFF', text: '#DD6B20', border: '#DD6B20' },
     radio:  { bg: '#FFFFFF', text: '#2F855A', border: '#2F855A' }
   },
   {
-    id: 14,
+    id: 18,
     name: 'Açık Göl Mavisi Dolgu',
     ticket: { bg: '#DCEAF4', text: '#2C5282', border: 'transparent' },
     disc:   { bg: '#FEE8D8', text: '#9C4221', border: 'transparent' },
     radio:  { bg: '#DBEFE2', text: '#22543D', border: 'transparent' }
   },
   {
-    id: 15,
+    id: 19,
     name: 'Buzul Tint (En Açık Zemin)',
     ticket: { bg: '#EBF3FC', text: '#1D54B2', border: '#BDD8F8' },
     disc:   { bg: '#FEF0E7', text: '#A84315', border: '#FCD2BC' },
