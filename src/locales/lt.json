@@ -800,19 +800,19 @@
       "title": "Organizacijos logotipas ir pasirinktiniai laukai",
       "subtitle": "Logotipą ir pasirinktinius užklausų laukus galite pridėti dabar arba praleisti. Juos bet kada galėsite pakeisti nustatymuose.",
       "skip_header_link": "Atlikti vėliau ➔",
-      "skip_button": "Praleisti šį veiksmą (sukonfigūruoti vėliau nustatymuose)",
+      "skip_button": "Praleisti šį veiksmą",
       "save_button": "Išsaugoti ir tęsti",
-      "defer_notice": "Pastaba: logotipą ir pasirinktinius laukus bet kada galite pridėti arba atnaujinti nustatymų skiltyje.",
+      "defer_notice": "logotipą ir pasirinktinius laukus bet kada galite pridėti arba atnaujinti nustatymų skiltyje.",
       "logo_section": {
         "title": "Organizacijos logotipas (neprivaloma)",
-        "format_hint": "SVG, PNG arba WEBP (maks. 2 MB)",
+        "format_hint": "SVG, PNG arba WEBP · 512×512",
         "dropzone_text": "Nuvilkite logotipą čia arba pasirinkite failą",
         "remove_logo": "Pašalinti logotipą",
         "selected_success": "Logotipas sėkmingai pasirinktas",
         "tap_to_change": "Palieskite, kad pakeistumėte"
       },
       "fields_section": {
-        "title": "Pasirinktiniai užklausos laukai (neprivaloma)",
+        "title": "Pasirinktiniai užklausos laukai",
         "description": "Papildoma informacija, kurią norite, kad klientai pateiktų kurdami užklausas.",
         "placeholder_example": "pvz., Įrenginio modelis, serijos numeris",
         "empty_state": "Pasirinktinių laukų dar nepridėta. Šį veiksmą galite praleisti."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Saugos rakto sąranka",
-      "subtitle": "Jūsų duomenys šifruojami tik šiame įrenginyje. Žemiau esanti 12 žodžių atkūrimo frazė yra vienintelis jūsų organizacijos raktas. Ji niekada nesaugoma serveriuose.",
+      "subtitle": "Jūsų duomenys šifruojami tik šiame įrenginyje. Žemiau esanti 12 žodžių atkūrimo frazė yra vienintelis jūsų organizacijos raktas.",
       "warning": "Šie 12 žodžių niekada nesaugomi serveriuose. Praradus, jų atkurti neįmanoma. Saugokite juos saugioje vietoje.",
       "copy": "Kopijuoti į iškarpinę",
       "copied": "Nukopijuota",

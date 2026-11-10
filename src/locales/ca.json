@@ -800,19 +800,19 @@
       "title": "Logotip de l'organització i camps personalitzats",
       "subtitle": "Podeu afegir el logotip i els camps personalitzats dels tiquets ara o ometre aquest pas. Ho podreu modificar en qualsevol moment a Configuració.",
       "skip_header_link": "Fes-ho més tard ➔",
-      "skip_button": "Omet aquest pas (Configura-ho més tard a Configuració)",
+      "skip_button": "Omet aquest pas",
       "save_button": "Desa i continua",
       "defer_notice": "Avís: Podeu afegir o actualitzar el logotip i els camps personalitzats en qualsevol moment a la secció de Configuració.",
       "logo_section": {
         "title": "Logotip de l'organització (opcional)",
-        "format_hint": "SVG, PNG o WEBP (màx. 2 MB)",
+        "format_hint": "SVG, PNG o WEBP · 512×512",
         "dropzone_text": "Arrossegueu el logotip aquí o seleccioneu un fitxer",
         "remove_logo": "Elimina el logotip",
         "selected_success": "Logotip seleccionat correctament",
         "tap_to_change": "Toqueu per canviar"
       },
       "fields_section": {
-        "title": "Camps personalitzats del tiquet (opcional)",
+        "title": "Camps personalitzats del tiquet",
         "description": "Informació addicional que voleu que els clients proporcionin en crear tiquets.",
         "placeholder_example": "p. ex., Model del dispositiu, Número de sèrie",
         "empty_state": "Encara no s'ha afegit cap camp personalitzat. Podeu ometre aquest pas."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configuració de la clau de seguretat",
-      "subtitle": "Les vostres dades només es xifren en aquest dispositiu. La frase de recuperació de 12 paraules següent és l'única clau de la vostra organització. Mai no s'emmagatzema als servidors.",
+      "subtitle": "Les vostres dades només es xifren en aquest dispositiu. La frase de recuperació de 12 paraules següent és l'única clau de la vostra organització.",
       "warning": "Aquestes 12 paraules mai no s'emmagatzemen als servidors. Si es perden, no es poden recuperar. Deseu-les en un lloc segur.",
       "copy": "Copia al porta-retalls",
       "copied": "Copiat",

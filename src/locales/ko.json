@@ -800,19 +800,19 @@
       "title": "조직 로고 및 맞춤 필드",
       "subtitle": "지금 로고와 맞춤 티켓 필드를 추가하거나 건너뛸 수 있습니다. 설정에서 언제든지 변경할 수 있습니다.",
       "skip_header_link": "나중에 하기 ➔",
-      "skip_button": "이 단계 건너뛰기 (나중에 설정에서 구성)",
+      "skip_button": "이 단계 건너뛰기",
       "save_button": "저장 및 계속",
       "defer_notice": "안내: 설정 섹션에서 언제든지 로고와 맞춤 필드를 추가하거나 업데이트할 수 있습니다.",
       "logo_section": {
         "title": "조직 로고 (선택 사항)",
-        "format_hint": "SVG, PNG 또는 WEBP (최대 2MB)",
+        "format_hint": "SVG, PNG 또는 WEBP · 512×512",
         "dropzone_text": "여기로 로고를 드래그하거나 파일 선택",
         "remove_logo": "로고 제거",
         "selected_success": "로고가 성공적으로 선택되었습니다",
         "tap_to_change": "탭하여 변경"
       },
       "fields_section": {
-        "title": "티켓 맞춤 필드 (선택 사항)",
+        "title": "티켓 맞춤 필드",
         "description": "고객이 티켓을 생성할 때 추가로 입력하도록 요청할 정보입니다.",
         "placeholder_example": "예: 기기 모델, 일련번호",
         "empty_state": "아직 추가된 맞춤 필드가 없습니다. 이 단계를 건너뛰어도 됩니다."

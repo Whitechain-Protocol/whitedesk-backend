@@ -800,19 +800,19 @@
       "title": "組織ロゴとカスタムフィールド",
       "subtitle": "今すぐロゴやチケットのカスタムフィールドを追加するか、スキップできます。これらは後から設定でいつでも変更可能です。",
       "skip_header_link": "後で設定する ➔",
-      "skip_button": "このステップをスキップ (後で設定画面から構成)",
+      "skip_button": "このステップをスキップ",
       "save_button": "保存して続行",
       "defer_notice": "案内: ロゴやカスタムフィールドは「設定」からいつでも追加・更新できます。",
       "logo_section": {
         "title": "組織ロゴ (任意)",
-        "format_hint": "SVG、PNG、またはWEBP (最大2MB)",
+        "format_hint": "SVG、PNG、またはWEBP · 512×512",
         "dropzone_text": "ここにロゴをドラッグするかファイルを選択",
         "remove_logo": "ロゴを削除",
         "selected_success": "ロゴが正常に選択されました",
         "tap_to_change": "タップして変更"
       },
       "fields_section": {
-        "title": "チケットカスタムフィールド (任意)",
+        "title": "チケットカスタムフィールド",
         "description": "チケット作成時に顧客へ入力を求める追加情報です。",
         "placeholder_example": "例: 機器モデル、シリアル番号",
         "empty_state": "カスタムフィールドはまだ追加されていません。このステップはスキップできます。"

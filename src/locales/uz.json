@@ -800,19 +800,19 @@
       "title": "Tashkilot logotipi va maxsus maydonlar",
       "subtitle": "Logotip va maxsus murojaat maydonlarini hozir qo'shishingiz yoki o'tkazib yuborishingiz mumkin. Ularni istalgan vaqtda Sozlamalarda o'zgartira olasiz.",
       "skip_header_link": "Keyinroq bajarish ➔",
-      "skip_button": "Ushbu qadamni o'tkazib yuborish (Sozlamalarda keyinroq sozlash)",
+      "skip_button": "Ushbu qadamni o'tkazib yuborish",
       "save_button": "Saqlash va davom etish",
-      "defer_notice": "Eslatma: Logotip va maxsus maydonlarni istalgan vaqtda Sozlamalar bo'limida qo'shishingiz yoki yangilashingiz mumkin.",
+      "defer_notice": "Logotip va maxsus maydonlarni istalgan vaqtda Sozlamalar bo'limida qo'shishingiz yoki yangilashingiz mumkin.",
       "logo_section": {
         "title": "Tashkilot logotipi (Ixtiyoriy)",
-        "format_hint": "SVG, PNG yoki WEBP (Maks. 2 MB)",
+        "format_hint": "SVG, PNG yoki WEBP · 512×512",
         "dropzone_text": "Logotipni shu yerga tashlang yoki faylni tanlang",
         "remove_logo": "Logotipni olib tashlash",
         "selected_success": "Logotip muvaffaqiyatli tanlandi",
         "tap_to_change": "O'zgartirish uchun bosing"
       },
       "fields_section": {
-        "title": "Maxsus murojaat maydonlari (Ixtiyoriy)",
+        "title": "Maxsus murojaat maydonlari",
         "description": "Mijozlar murojaat yaratishda kiritishini xohlagan qo'shimcha ma'lumotlaringiz.",
         "placeholder_example": "masalan, Qurilma modeli, Seriya raqami",
         "empty_state": "Hali maxsus maydonlar qo'shilmagan. Ushbu qadamni o'tkazib yuborishingiz mumkin."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Xavfsizlik kalitini sozlash",
-      "subtitle": "Ma'lumotlaringiz faqat ushbu qurilmada shifrlanadi. Quyidagi 12 so'zli tiklash iborasi tashkilotingizning yagona kalitidir. U hech qachon serverlarda saqlanmaydi.",
+      "subtitle": "Ma'lumotlaringiz faqat ushbu qurilmada shifrlanadi. Quyidagi 12 so'zli tiklash iborasi tashkilotingizning yagona kalitidir.",
       "warning": "Ushbu 12 ta so'z hech qachon serverlarda saqlanmaydi. Yo'qolsa, ularni qayta tiklab bo'lmaydi. Iltimos, ularni xavfsiz joyda saqlang.",
       "copy": "Almashish buferiga nusxalash",
       "copied": "Nusxalandi",

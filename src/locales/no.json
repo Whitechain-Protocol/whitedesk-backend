@@ -800,19 +800,19 @@
       "title": "Organisasjonslogo & egendefinerte felt",
       "subtitle": "Du kan legge til logo og egendefinerte saksfelt nå eller hoppe over. Du kan endre disse når som helst i Innstillinger.",
       "skip_header_link": "Gjør det senere ➔",
-      "skip_button": "Hopp over dette trinnet (Konfigurer senere i Innstillinger)",
+      "skip_button": "Hopp over dette trinnet",
       "save_button": "Lagre & fortsett",
-      "defer_notice": "Merk: Du kan legge til eller oppdatere logoen og egendefinerte felt når som helst under Innstillinger.",
+      "defer_notice": "Du kan legge til eller oppdatere logoen og egendefinerte felt når som helst under Innstillinger.",
       "logo_section": {
         "title": "Organisasjonslogo (Valgfritt)",
-        "format_hint": "SVG, PNG eller WEBP (Maks 2 MB)",
+        "format_hint": "SVG, PNG eller WEBP · 512×512",
         "dropzone_text": "Dra logoen hit eller velg fil",
         "remove_logo": "Fjern logo",
         "selected_success": "Logo er valgt",
         "tap_to_change": "Trykk for å endre"
       },
       "fields_section": {
-        "title": "Egendefinerte saksfelt (Valgfritt)",
+        "title": "Egendefinerte saksfelt",
         "description": "Tilleggsinformasjon du ønsker at kundene skal oppgi når de oppretter saker.",
         "placeholder_example": "f.eks. Enhetsmodell, Serienummer",
         "empty_state": "Ingen egendefinerte felt er lagt til ennå. Du kan hoppe over dette trinnet."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Oppsett av sikkerhetsnøkkel",
-      "subtitle": "Dataene dine krypteres kun på denne enheten. Gjenopprettingsfrasen på 12 ord nedenfor er organisasjonens eneste nøkkel. Den lagres aldri på servere.",
+      "subtitle": "Dataene dine krypteres kun på denne enheten. Gjenopprettingsfrasen på 12 ord nedenfor er organisasjonens eneste nøkkel.",
       "warning": "Disse 12 ordene lagres aldri på servere. Hvis de går tapt, kan de ikke gjenopprettes. Oppbevar dem på et trygt sted.",
       "copy": "Kopier til utklippstavlen",
       "copied": "Kopiert",

@@ -800,19 +800,19 @@
       "title": "Logoja & fushat e personalizuara të organizatës",
       "subtitle": "Mund të shtoni logon dhe fushat e personalizuara të biletës tani ose t'i anashkaloni. Mund t'i ndryshoni këto në çdo kohë te Cilësimet.",
       "skip_header_link": "Bëje më vonë ➔",
-      "skip_button": "Anashkalo këtë hap (Konfiguroje më vonë te Cilësimet)",
+      "skip_button": "Anashkalo këtë hap",
       "save_button": "Ruaj & vazhdo",
-      "defer_notice": "Njoftim: Mund të shtoni ose përditësoni logon dhe fushat e personalizuara në çdo kohë në seksionin Cilësimet.",
+      "defer_notice": "Mund të shtoni ose përditësoni logon dhe fushat e personalizuara në çdo kohë në seksionin Cilësimet.",
       "logo_section": {
         "title": "Logoja e organizatës (Opsionale)",
-        "format_hint": "PNG, JPG ose SVG (Rekomandohet: 512x512)",
+        "format_hint": "PNG, JPG ose SVG · 512×512",
         "dropzone_text": "Tërhiqni logon këtu ose zgjidhni skedarin",
         "remove_logo": "Hiq logon",
         "selected_success": "Logoja u zgjodh me sukses",
         "tap_to_change": "Prekni për ta ndryshuar"
       },
       "fields_section": {
-        "title": "Fushat e personalizuara të biletës (Opsionale)",
+        "title": "Fushat e personalizuara të biletës",
         "description": "Informacion shtesë që dëshironi të japin klientët gjatë krijimit të biletave.",
         "placeholder_example": "p.sh. Modeli i pajisjes, Numri serial",
         "empty_state": "Nuk është shtuar ende asnjë fushë e personalizuar. Mund ta anashkaloni këtë hap."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Konfigurimi i çelësit të sigurisë",
-      "subtitle": "Të dhënat tuaja kodohen vetëm në këtë pajisje. Fraza e rikthimit me 12 fjalë më poshtë është çelësi i vetëm i organizatës suaj. Ajo nuk ruhet kurrë në serverë.",
+      "subtitle": "Të dhënat tuaja kodohen vetëm në këtë pajisje. Fraza e rikthimit me 12 fjalë më poshtë është çelësi i vetëm i organizatës suaj.",
       "warning": "Këto 12 fjalë nuk ruhen kurrë në serverë. Nëse humbasin, nuk mund të rikthehen. Ju lutemi ruajini në mënyrë të sigurt.",
       "copy": "Kopjo në kujtesën e fragmenteve",
       "copied": "U kopjua",

@@ -800,19 +800,19 @@
       "title": "Logotip organizacije i prilagođena polja",
       "subtitle": "Logotip i prilagođena polja zahtjeva možete dodati sada ili preskočiti. Možete ih promijeniti u bilo kojem trenutku u Postavkama.",
       "skip_header_link": "Učini to kasnije ➔",
-      "skip_button": "Preskoči ovaj korak (Konfiguriraj kasnije u Postavkama)",
+      "skip_button": "Preskoči ovaj korak",
       "save_button": "Spremi i nastavi",
-      "defer_notice": "Napomena: Svoj logotip i prilagođena polja možete dodati ili ažurirati u bilo kojem trenutku u odjeljku Postavke.",
+      "defer_notice": "Svoj logotip i prilagođena polja možete dodati ili ažurirati u bilo kojem trenutku u odjeljku Postavke.",
       "logo_section": {
         "title": "Logotip organizacije (Neobavezno)",
-        "format_hint": "SVG, PNG ili WEBP (maks. 2 MB)",
+        "format_hint": "SVG, PNG ili WEBP · 512×512",
         "dropzone_text": "Povucite logotip ovdje ili odaberite datoteku",
         "remove_logo": "Ukloni logotip",
         "selected_success": "Logotip uspješno odabran",
         "tap_to_change": "Dodirnite za promjenu"
       },
       "fields_section": {
-        "title": "Prilagođena polja zahtjeva (Neobavezno)",
+        "title": "Prilagođena polja zahtjeva",
         "description": "Dodatne informacije koje želite da korisnici navedu prilikom izrade zahtjeva.",
         "placeholder_example": "npr. Model uređaja, Serijski broj",
         "empty_state": "Još nisu dodana prilagođena polja. Možete preskočiti ovaj korak."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Postavljanje sigurnosnog ključa",
-      "subtitle": "Vaši se podaci šifriraju isključivo na ovom uređaju. Fraza za oporavak od 12 riječi u nastavku jedini je ključ vaše organizacije. Nikada se ne pohranjuje na poslužiteljima.",
+      "subtitle": "Vaši se podaci šifriraju isključivo na ovom uređaju. Fraza za oporavak od 12 riječi u nastavku jedini je ključ vaše organizacije.",
       "warning": "Ovih 12 riječi nikada se ne pohranjuje na poslužiteljima. Ako se izgube, ne mogu se vratiti. Pohranite ih na sigurno mjesto.",
       "copy": "Kopiraj u međuspremnik",
       "copied": "Kopirano",

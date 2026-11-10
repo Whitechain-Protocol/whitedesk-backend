@@ -800,19 +800,19 @@
       "title": "Logo Organisasi & Medan Tersuai",
       "subtitle": "Anda boleh menambah logo dan medan tiket tersuai sekarang atau langkau. Anda boleh menukarnya pada bila-bila masa dalam Tetapan.",
       "skip_header_link": "Buat Kemudian ➔",
-      "skip_button": "Langkau Langkah Ini (Konfigurasi Kemudian dalam Tetapan)",
+      "skip_button": "Langkau Langkah Ini",
       "save_button": "Simpan & Teruskan",
-      "defer_notice": "Notis: Anda boleh menambah atau mengemas kini logo dan medan tersuai anda pada bila-bila masa di bahagian Tetapan.",
+      "defer_notice": "Anda boleh menambah atau mengemas kini logo dan medan tersuai anda pada bila-bila masa di bahagian Tetapan.",
       "logo_section": {
         "title": "Logo Organisasi (Pilihan)",
-        "format_hint": "SVG, PNG atau WEBP (Maks 2MB)",
+        "format_hint": "SVG, PNG atau WEBP · 512×512",
         "dropzone_text": "Seret logo ke sini atau pilih fail",
         "remove_logo": "Alih Keluar Logo",
         "selected_success": "Logo Berjaya Dipilih",
         "tap_to_change": "Ketik untuk menukar"
       },
       "fields_section": {
-        "title": "Medan Tersuai Tiket (Pilihan)",
+        "title": "Medan Tersuai Tiket",
         "description": "Maklumat tambahan yang anda mahu pelanggan berikan apabila mencipta tiket.",
         "placeholder_example": "cth., Model Peranti, Nombor Siri",
         "empty_state": "Tiada medan tersuai ditambah lagi. Anda boleh melangkau langkah ini."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Persediaan Kunci Keselamatan",
-      "subtitle": "Data anda hanya disulitkan pada peranti ini. Frasa pemulihan 12 perkataan di bawah ialah satu-satunya kunci organisasi anda. Ia tidak pernah disimpan pada pelayan.",
+      "subtitle": "Data anda hanya disulitkan pada peranti ini. Frasa pemulihan 12 perkataan di bawah ialah satu-satunya kunci organisasi anda.",
       "warning": "Ke-12 perkataan ini tidak pernah disimpan pada pelayan. Jika hilang, ia tidak boleh dipulihkan. Sila simpan dengan selamat.",
       "copy": "Salin ke Papan Keratan",
       "copied": "Disalin",

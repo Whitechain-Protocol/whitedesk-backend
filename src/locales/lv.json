@@ -800,19 +800,19 @@
       "title": "Organizācijas logotips un pielāgotie lauki",
       "subtitle": "Varat pievienot logotipu un pielāgotos pieteikuma laukus tagad vai izlaist. Tos varat jebkurā laikā mainīt Iestatījumos.",
       "skip_header_link": "Darīt vēlāk ➔",
-      "skip_button": "Izlaist šo soli (Konfigurēt vēlāk Iestatījumos)",
+      "skip_button": "Izlaist šo soli",
       "save_button": "Saglabāt un turpināt",
       "defer_notice": "Piezīme: Logotipu un pielāgotos laukus varat pievienot vai atjaunināt jebkurā laikā sadaļā Iestatījumi.",
       "logo_section": {
         "title": "Organizācijas logotips (Neobligāti)",
-        "format_hint": "SVG, PNG vai WEBP (maks. 2 MB)",
+        "format_hint": "SVG, PNG vai WEBP · 512×512",
         "dropzone_text": "Velciet logotipu šeit vai izvēlieties failu",
         "remove_logo": "Noņemt logotipu",
         "selected_success": "Logotips veiksmīgi izvēlēts",
         "tap_to_change": "Pieskarieties, lai mainītu"
       },
       "fields_section": {
-        "title": "Pieteikuma pielāgotie lauki (Neobligāti)",
+        "title": "Pieteikuma pielāgotie lauki",
         "description": "Papildu informācija, ko vēlaties saņemt no klientiem, veidojot pieteikumus.",
         "placeholder_example": "piem., Ierīces modelis, Sērijas numurs",
         "empty_state": "Pielāgotie lauki vēl nav pievienoti. Varat šo soli izlaist."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Drošības atslēgas iestatīšana",
-      "subtitle": "Jūsu dati tiek šifrēti tikai šajā ierīcē. Tālāk norādītā 12 vārdu atkopšanas frāze ir jūsu organizācijas vienīgā atslēga. Tā nekad netiek glabāta serveros.",
+      "subtitle": "Jūsu dati tiek šifrēti tikai šajā ierīcē. Tālāk norādītā 12 vārdu atkopšanas frāze ir jūsu organizācijas vienīgā atslēga.",
       "warning": "Šie 12 vārdi nekad netiek glabāti serveros. Ja tie tiks pazaudēti, tos nevarēs atgūt. Lūdzu, glabājiet tos droši.",
       "copy": "Kopēt starpliktuvē",
       "copied": "Nokopēts",

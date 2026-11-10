@@ -800,19 +800,19 @@
       "title": "Organisationslogo og brugerdefinerede felter",
       "subtitle": "Du kan tilføje logo og brugerdefinerede sagsfelter nu eller springe over. Du kan altid ændre dem senere under Indstillinger.",
       "skip_header_link": "Gør det senere ➔",
-      "skip_button": "Spring dette trin over (Konfigurer senere i Indstillinger)",
+      "skip_button": "Spring dette trin over",
       "save_button": "Gem og fortsæt",
       "defer_notice": "Bemærk: Du kan til enhver tid tilføje eller opdatere dit logo og brugerdefinerede felter under Indstillinger.",
       "logo_section": {
         "title": "Organisationslogo (Valgfrit)",
-        "format_hint": "SVG, PNG eller WEBP (Maks. 2 MB)",
+        "format_hint": "SVG, PNG eller WEBP · 512×512",
         "dropzone_text": "Træk logo hertil, eller vælg fil",
         "remove_logo": "Fjern logo",
         "selected_success": "Logo valgt",
         "tap_to_change": "Tryk for at ændre"
       },
       "fields_section": {
-        "title": "Brugerdefinerede sagsfelter (Valgfrit)",
+        "title": "Brugerdefinerede sagsfelter",
         "description": "Yderligere oplysninger, som kunderne skal angive ved oprettelse af sager.",
         "placeholder_example": "f.eks. Enhedsmodel, serienummer",
         "empty_state": "Ingen brugerdefinerede felter tilføjet endnu. Du kan springe dette trin over."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Opsætning af sikkerhedsnøgle",
-      "subtitle": "Dine data krypteres kun på denne enhed. Gendannelsessætningen på 12 ord nedenfor er din organisations eneste nøgle. Den gemmes aldrig på servere.",
+      "subtitle": "Dine data krypteres kun på denne enhed. Gendannelsessætningen på 12 ord nedenfor er din organisations eneste nøgle.",
       "warning": "Disse 12 ord gemmes aldrig på servere. Hvis de mistes, kan de ikke gendannes. Opbevar dem venligst et sikkert sted.",
       "copy": "Kopier til udklipsholder",
       "copied": "Kopieret",

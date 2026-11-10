@@ -800,19 +800,19 @@
       "title": "Logo de l'organisation et champs personnalisés",
       "subtitle": "Vous pouvez ajouter dès maintenant un logo et des champs de ticket personnalisés ou ignorer cette étape. Vous pourrez les modifier à tout moment dans les Paramètres.",
       "skip_header_link": "Configurer plus tard ➔",
-      "skip_button": "Ignorer cette étape (Configurer plus tard dans les Paramètres)",
+      "skip_button": "Ignorer cette étape",
       "save_button": "Enregistrer et continuer",
-      "defer_notice": "Remarque: Vous pouvez ajouter ou mettre à jour votre logo et vos champs personnalisés à tout moment dans la section Paramètres.",
+      "defer_notice": "Vous pouvez ajouter ou mettre à jour votre logo et vos champs personnalisés à tout moment dans la section Paramètres.",
       "logo_section": {
         "title": "Logo de l'organisation (Facultatif)",
-        "format_hint": "SVG, PNG ou WEBP (Max 2 Mo)",
+        "format_hint": "SVG, PNG ou WEBP · 512×512",
         "dropzone_text": "Glissez le logo ici ou sélectionnez un fichier",
         "remove_logo": "Supprimer le logo",
         "selected_success": "Logo sélectionné avec succès",
         "tap_to_change": "Appuyer pour modifier"
       },
       "fields_section": {
-        "title": "Champs personnalisés des tickets (Facultatif)",
+        "title": "Champs personnalisés des tickets",
         "description": "Informations supplémentaires que vous souhaitez demander aux clients lors de la création de tickets.",
         "placeholder_example": "ex. Modèle d'appareil, Numéro de série",
         "empty_state": "Aucun champ personnalisé ajouté pour le moment. Vous pouvez ignorer cette étape."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configuration de la clé de sécurité",
-      "subtitle": "Vos données sont uniquement chiffrées sur cet appareil. La phrase de récupération de 12 mots ci-dessous constitue l'unique clé de votre organisation. Elle n'est jamais stockée sur des serveurs.",
+      "subtitle": "Vos données sont uniquement chiffrées sur cet appareil. La phrase de récupération de 12 mots ci-dessous constitue l'unique clé de votre organisation.",
       "warning": "Ces 12 mots ne sont jamais stockés sur des serveurs. En cas de perte, ils ne peuvent pas être récupérés. Veuillez les conserver en lieu sûr.",
       "copy": "Copier dans le presse-papiers",
       "copied": "Copié",

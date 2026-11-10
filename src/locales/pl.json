@@ -800,19 +800,19 @@
       "title": "Logo organizacji i pola niestandardowe",
       "subtitle": "Możesz teraz dodać logo i niestandardowe pola zgłoszeń lub pominąć ten krok. Zmienisz je w dowolnym momencie w Ustawieniach.",
       "skip_header_link": "Zrób to później ➔",
-      "skip_button": "Pomiń ten krok (Skonfiguruj później w Ustawieniach)",
+      "skip_button": "Pomiń ten krok",
       "save_button": "Zapisz i kontynuuj",
-      "defer_notice": "Uwaga: Logo i pola niestandardowe możesz dodać lub zaktualizować w dowolnym momencie w sekcji Ustawienia.",
+      "defer_notice": "Logo i pola niestandardowe możesz dodać lub zaktualizować w dowolnym momencie w sekcji Ustawienia.",
       "logo_section": {
         "title": "Logo organizacji (opcjonalnie)",
-        "format_hint": "SVG, PNG lub WEBP (maks. 2 MB)",
+        "format_hint": "SVG, PNG lub WEBP · 512×512",
         "dropzone_text": "Przeciągnij logo tutaj lub wybierz plik",
         "remove_logo": "Usuń logo",
         "selected_success": "Logo zostało pomyślnie wybrane",
         "tap_to_change": "Dotknij, aby zmienić"
       },
       "fields_section": {
-        "title": "Niestandardowe pola zgłoszeń (opcjonalnie)",
+        "title": "Niestandardowe pola zgłoszeń",
         "description": "Dodatkowe informacje, które klienci mają podawać podczas tworzenia zgłoszeń.",
         "placeholder_example": "np. Model urządzenia, Numer seryjny",
         "empty_state": "Nie dodano jeszcze żadnych pól niestandardowych. Możesz pominąć ten krok."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Konfiguracja klucza bezpieczeństwa",
-      "subtitle": "Twoje dane są szyfrowane wyłącznie na tym urządzeniu. Poniższa 12-słowna fraza odzyskiwania jest jedynym kluczem Twojej organizacji. Nigdy nie jest przechowywana na serwerach.",
+      "subtitle": "Twoje dane są szyfrowane wyłącznie na tym urządzeniu. Poniższa 12-słowna fraza odzyskiwania jest jedynym kluczem Twojej organizacji.",
       "warning": "Te 12 słów nigdy nie jest przechowywanych na serwerach. W razie utraty nie można ich odzyskać. Przechowuj je w bezpiecznym miejscu.",
       "copy": "Kopiuj do schowka",
       "copied": "Skopiowano",

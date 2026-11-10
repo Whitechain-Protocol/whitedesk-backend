@@ -800,19 +800,19 @@
       "title": "Organisatsiooni logo ja kohandatud väljad",
       "subtitle": "Saate logo ja piletite kohandatud väljad lisada kohe või jätta vahele. Saate neid igal ajal seadetes muuta.",
       "skip_header_link": "Tee hiljem ➔",
-      "skip_button": "Jäta see samm vahele (seadista hiljem seadetes)",
+      "skip_button": "Jäta see samm vahele",
       "save_button": "Salvesta ja jätka",
       "defer_notice": "Märkus: saate oma logo ja kohandatud välju igal ajal seadete jaotises lisada või uuendada.",
       "logo_section": {
         "title": "Organisatsiooni logo (valikuline)",
-        "format_hint": "SVG, PNG või WEBP (maks 2 MB)",
+        "format_hint": "SVG, PNG või WEBP · 512×512",
         "dropzone_text": "Lohistage logo siia või valige fail",
         "remove_logo": "Eemalda logo",
         "selected_success": "Logo on edukalt valitud",
         "tap_to_change": "Puudutage muutmiseks"
       },
       "fields_section": {
-        "title": "Pileti kohandatud väljad (valikuline)",
+        "title": "Pileti kohandatud väljad",
         "description": "Lisateave, mida soovite, et kliendid piletite loomisel esitaksid.",
         "placeholder_example": "nt Seadme mudel, seerianumber",
         "empty_state": "Kohandatud välju pole veel lisatud. Võite selle sammu vahele jätta."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Turvavõtme seadistamine",
-      "subtitle": "Teie andmed krüpteeritakse ainult selles seadmes. Allolev 12-sõnaline taastefraas on teie organisatsiooni ainus võti. Seda ei salvestata kunagi serveritesse.",
+      "subtitle": "Teie andmed krüpteeritakse ainult selles seadmes. Allolev 12-sõnaline taastefraas on teie organisatsiooni ainus võti.",
       "warning": "Neid 12 sõna ei salvestata kunagi serveritesse. Kaotamise korral ei saa neid taastada. Hoidke neid turvaliselt.",
       "copy": "Kopeeri lõikelauale",
       "copied": "Kopeeritud",

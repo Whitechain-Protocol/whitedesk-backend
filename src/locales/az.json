@@ -800,19 +800,19 @@
       "title": "Təşkilat Loqosu və Xüsusi Xanalar",
       "subtitle": "Loqonu və xüsusi sorğu xanalarını indi əlavə edə və ya keçə bilərsiniz. Bunları istənilən vaxt Tənzimləmələr bölməsindən dəyişdirə bilərsiniz.",
       "skip_header_link": "Daha Sonra Et ➔",
-      "skip_button": "Bu Addımı Keç (Daha Sonra Tənzimləmələrdən Et)",
+      "skip_button": "Bu Addımı Keç",
       "save_button": "Yadda Saxla və Davam Et",
       "defer_notice": "Məlumat: Loqo və xüsusi xana təyinatlarını istənilən vaxt Tənzimləmələr bölməsindən əlavə edə və ya yeniləyə bilərsiniz.",
       "logo_section": {
         "title": "Təşkilat Loqosu (İstəyə bağlı)",
-        "format_hint": "SVG, PNG və ya WEBP (Maks. 2MB)",
+        "format_hint": "SVG, PNG və ya WEBP · 512×512",
         "dropzone_text": "Loqonu bura sürükləyin və ya fayl seçin",
         "remove_logo": "Loqonu Sil",
         "selected_success": "Loqo Uğurla Seçildi",
         "tap_to_change": "Dəyişdirmək üçün toxunun"
       },
       "fields_section": {
-        "title": "Sorğu Xüsusi Xanaları (İstəyə bağlı)",
+        "title": "Sorğu Xüsusi Xanaları",
         "description": "Müştərilərinizin sorğu açarkən təqdim etməsini istədiyiniz əlavə məlumatlar.",
         "placeholder_example": "Məs: Cihaz Modeli, Seriya Nömrəsi",
         "empty_state": "Hələ xüsusi xana əlavə edilməyib. Bu addımı keçə bilərsiniz."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Təhlükəsizlik Açarının Quraşdırılması",
-      "subtitle": "Məlumatlarınız yalnız bu cihazda şifrələnir. Aşağıdakı 12 sözlük bərpa ifadəsi təşkilatınızın yeganə açarıdır. Bu açar heç vaxt serverlərdə saxlanılmır.",
+      "subtitle": "Məlumatlarınız yalnız bu cihazda şifrələnir. Aşağıdakı 12 sözlük bərpa ifadəsi təşkilatınızın yeganə açarıdır.",
       "warning": "Bu 12 söz heç vaxt serverlərdə saxlanılmır. İtirilərsə, bərpa edilə bilməz. Zəhmət olmasa, təhlükəsiz yerdə saxlayın.",
       "copy": "Mübadilə Buferinə Kopyala",
       "copied": "Kopyalandı",

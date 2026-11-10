@@ -800,19 +800,19 @@
       "title": "Logotip organizacije i prilagođena polja",
       "subtitle": "Logotip i prilagođena polja tiketa možete dodati sada ili preskočiti. Možete ih promeniti u bilo kom trenutku u Podešavanjima.",
       "skip_header_link": "Uradi to kasnije ➔",
-      "skip_button": "Preskoči ovaj korak (Konfiguriši kasnije u Podešavanjima)",
+      "skip_button": "Preskoči ovaj korak",
       "save_button": "Sačuvaj i nastavi",
-      "defer_notice": "Napomena: Svoj logotip i prilagođena polja možete dodati ili ažurirati u bilo kom trenutku u odeljku Podešavanja.",
+      "defer_notice": "Svoj logotip i prilagođena polja možete dodati ili ažurirati u bilo kom trenutku u odeljku Podešavanja.",
       "logo_section": {
         "title": "Logotip organizacije (opciono)",
-        "format_hint": "SVG, PNG ili WEBP (maks. 2 MB)",
+        "format_hint": "SVG, PNG ili WEBP · 512×512",
         "dropzone_text": "Prevucite logotip ovde ili izaberite datoteku",
         "remove_logo": "Ukloni logotip",
         "selected_success": "Logotip uspešno izabran",
         "tap_to_change": "Dodirnite za promenu"
       },
       "fields_section": {
-        "title": "Prilagođena polja tiketa (opciono)",
+        "title": "Prilagođena polja tiketa",
         "description": "Dodatne informacije koje želite da korisnici navedu prilikom kreiranja tiketa.",
         "placeholder_example": "npr. Model uređaja, Serijski broj",
         "empty_state": "Još nisu dodata prilagođena polja. Možete preskočiti ovaj korak."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Postavljanje bezbednosnog ključa",
-      "subtitle": "Vaši podaci se šifruju isključivo na ovom uređaju. Fraza za oporavak od 12 reči u nastavku jedini je ključ vaše organizacije. Nikada se ne čuva na serverima.",
+      "subtitle": "Vaši podaci se šifruju isključivo na ovom uređaju. Fraza za oporavak od 12 reči u nastavku jedini je ključ vaše organizacije.",
       "warning": "Ovih 12 reči nikada se ne čuva na serverima. Ako se izgube, ne mogu se povratiti. Sačuvajte ih na bezbednom mestu.",
       "copy": "Kopiraj u ostavu",
       "copied": "Kopirano",

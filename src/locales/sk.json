@@ -800,19 +800,19 @@
       "title": "Logo organizácie a vlastné polia",
       "subtitle": "Logo a vlastné polia tiketov môžete pridať teraz alebo tento krok preskočiť. Zmeniť ich môžete kedykoľvek v Nastaveniach.",
       "skip_header_link": "Urobiť neskôr ➔",
-      "skip_button": "Preskočiť tento krok (Nastaviť neskôr v Nastaveniach)",
+      "skip_button": "Preskočiť tento krok",
       "save_button": "Uložiť a pokračovať",
       "defer_notice": "Poznámka: Logo a vlastné polia môžete kedykoľvek pridať alebo aktualizovať v časti Nastavenia.",
       "logo_section": {
         "title": "Logo organizácie (voliteľné)",
-        "format_hint": "SVG, PNG alebo WEBP (max. 2 MB)",
+        "format_hint": "SVG, PNG alebo WEBP · 512×512",
         "dropzone_text": "Presuňte logo sem alebo vyberte súbor",
         "remove_logo": "Odstrániť logo",
         "selected_success": "Logo bolo úspešne vybrané",
         "tap_to_change": "Ťuknutím zmeníte"
       },
       "fields_section": {
-        "title": "Vlastné polia tiketu (voliteľné)",
+        "title": "Vlastné polia tiketu",
         "description": "Ďalšie informácie, ktoré chcete, aby zákazníci uvádzali pri vytváraní tiketov.",
         "placeholder_example": "napr. Model zariadenia, Sériové číslo",
         "empty_state": "Zatiaľ neboli pridané žiadne vlastné polia. Tento krok môžete preskočiť."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Nastavenie bezpečnostného kľúča",
-      "subtitle": "Vaše údaje sú šifrované iba v tomto zariadení. Nižšie uvedená 12-slovná obnovovacia fráza je jediným kľúčom vašej organizácie. Nikdy sa neukladá na serveroch.",
+      "subtitle": "Vaše údaje sú šifrované iba v tomto zariadení. Nižšie uvedená 12-slovná obnovovacia fráza je jediným kľúčom vašej organizácie.",
       "warning": "Týchto 12 slov sa nikdy neukladá na serveroch. Pri ich strate ich nie je možné obnoviť. Uschovajte ich prosím na bezpečnom mieste.",
       "copy": "Kopírovať do schránky",
       "copied": "Skopírované",

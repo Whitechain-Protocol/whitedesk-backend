@@ -800,19 +800,19 @@
       "title": "Erakundearen logotipoa eta eremu pertsonalizatuak",
       "subtitle": "Logotipoa eta tiket-eremu pertsonalizatuak orain gehi ditzakezu edo saltatu. Edozein unetan alda ditzakezu Ezarpenak atalean.",
       "skip_header_link": "Egin geroago ➔",
-      "skip_button": "Saltatu urrats hau (Konfiguratu geroago Ezarpenetan)",
+      "skip_button": "Saltatu urrats hau",
       "save_button": "Gorde eta jarraitu",
-      "defer_notice": "Oharra: Zure logotipoa eta eremu pertsonalizatuak edozein unetan gehitu edo egunera ditzakezu Ezarpenak atalean.",
+      "defer_notice": "Zure logotipoa eta eremu pertsonalizatuak edozein unetan gehitu edo egunera ditzakezu Ezarpenak atalean.",
       "logo_section": {
         "title": "Erakundearen logotipoa (Aukerakoa)",
-        "format_hint": "SVG, PNG edo WEBP (Geh. 2MB)",
+        "format_hint": "SVG, PNG edo WEBP · 512×512",
         "dropzone_text": "Arrastatu logotipoa hona edo hautatu fitxategia",
         "remove_logo": "Kendu logotipoa",
         "selected_success": "Logotipoa behar bezala hautatu da",
         "tap_to_change": "Sakatu aldatzeko"
       },
       "fields_section": {
-        "title": "Tiketaren eremu pertsonalizatuak (Aukerakoa)",
+        "title": "Tiketaren eremu pertsonalizatuak",
         "description": "Bezeroek tiketak sortzean ematea nahi duzun informazio gehigarria.",
         "placeholder_example": "adib., Gailuaren modeloa, Serie-zenbakia",
         "empty_state": "Oraindik ez da eremu pertsonalizaturik gehitu. Urrats hau salta dezakezu."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Segurtasun-gakoaren konfigurazioa",
-      "subtitle": "Zure datuak gailu honetan soilik zifratzen dira. Beheko 12 hitzeko berreskuratze-esaldia zure erakundearen gako bakarra da. Ez da inoiz zerbitzarietan gordetzen.",
+      "subtitle": "Zure datuak gailu honetan soilik zifratzen dira. Beheko 12 hitzeko berreskuratze-esaldia zure erakundearen gako bakarra da.",
       "warning": "12 hitz hauek ez dira inoiz zerbitzarietan gordetzen. Galduz gero, ezin dira berreskuratu. Gorde itzazu modu seguruan.",
       "copy": "Kopiatu arbelean",
       "copied": "Kopiatuta",

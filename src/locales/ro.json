@@ -800,19 +800,19 @@
       "title": "Sigla organizației și câmpuri personalizate",
       "subtitle": "Puteți adăuga acum sigla și câmpurile personalizate pentru tichete sau puteți omite acest pas. Le puteți modifica oricând în Setări.",
       "skip_header_link": "Mai târziu ➔",
-      "skip_button": "Omite acest pas (Configurează mai târziu în Setări)",
+      "skip_button": "Omite acest pas",
       "save_button": "Salvează și continuă",
       "defer_notice": "Notă: Puteți adăuga sau actualiza oricând sigla și câmpurile personalizate în secțiunea Setări.",
       "logo_section": {
         "title": "Sigla organizației (Opțional)",
-        "format_hint": "SVG, PNG sau WEBP (Max. 2 MB)",
+        "format_hint": "SVG, PNG sau WEBP · 512×512",
         "dropzone_text": "Trageți sigla aici sau selectați fișierul",
         "remove_logo": "Elimină sigla",
         "selected_success": "Siglă selectată cu succes",
         "tap_to_change": "Atingeți pentru a schimba"
       },
       "fields_section": {
-        "title": "Câmpuri personalizate pentru tichete (Opțional)",
+        "title": "Câmpuri personalizate pentru tichete",
         "description": "Informații suplimentare pe care doriți ca clienții să le furnizeze la crearea tichetelor.",
         "placeholder_example": "ex.: Model dispozitiv, Număr de serie",
         "empty_state": "Nu au fost adăugate încă câmpuri personalizate. Puteți omite acest pas."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configurarea cheii de securitate",
-      "subtitle": "Datele dvs. sunt criptate doar pe acest dispozitiv. Fraza de recuperare de 12 cuvinte de mai jos este singura cheie a organizației dvs. Nu este stocată niciodată pe servere.",
+      "subtitle": "Datele dvs. sunt criptate doar pe acest dispozitiv.",
       "warning": "Aceste 12 cuvinte nu sunt stocate niciodată pe servere. Dacă sunt pierdute, nu pot fi recuperate. Vă rugăm să le păstrați în siguranță.",
       "copy": "Copiază în clipboard",
       "copied": "Copiat",

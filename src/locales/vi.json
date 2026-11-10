@@ -800,19 +800,19 @@
       "title": "Biểu trưng Tổ chức & Trường tùy chỉnh",
       "subtitle": "Bạn có thể thêm biểu trưng và các trường phiếu tùy chỉnh ngay bây giờ hoặc bỏ qua. Bạn có thể thay đổi bất kỳ lúc nào trong Cài đặt.",
       "skip_header_link": "Thực hiện sau ➔",
-      "skip_button": "Bỏ qua bước này (Cấu hình sau trong Cài đặt)",
+      "skip_button": "Bỏ qua bước này",
       "save_button": "Lưu & Tiếp tục",
       "defer_notice": "Lưu ý: Bạn có thể thêm hoặc cập nhật biểu trưng và các trường tùy chỉnh bất kỳ lúc nào trong mục Cài đặt.",
       "logo_section": {
         "title": "Biểu trưng Tổ chức (Tùy chọn)",
-        "format_hint": "SVG, PNG hoặc WEBP (Tối đa 2MB)",
+        "format_hint": "SVG, PNG hoặc WEBP · 512×512",
         "dropzone_text": "Kéo biểu trưng vào đây hoặc chọn tệp",
         "remove_logo": "Xóa biểu trưng",
         "selected_success": "Đã chọn biểu trưng thành công",
         "tap_to_change": "Nhấn để thay đổi"
       },
       "fields_section": {
-        "title": "Trường tùy chỉnh của phiếu (Tùy chọn)",
+        "title": "Trường tùy chỉnh của phiếu",
         "description": "Thông tin bổ sung bạn muốn khách hàng cung cấp khi tạo phiếu hỗ trợ.",
         "placeholder_example": "vd: Kiểu thiết bị, Số sê-ri",
         "empty_state": "Chưa thêm trường tùy chỉnh nào. Bạn có thể bỏ qua bước này."

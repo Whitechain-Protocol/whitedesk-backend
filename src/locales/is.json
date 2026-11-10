@@ -800,19 +800,19 @@
       "title": "Merki stofnunar og sérsniðnir reitir",
       "subtitle": "Þú getur bætt við merki og sérsniðnum beiðnareitum núna eða sleppt því. Þú getur breytt þessu hvenær sem er í Stillingum.",
       "skip_header_link": "Gera það síðar ➔",
-      "skip_button": "Sleppa þessu skrefi (Stilla síðar í Stillingum)",
+      "skip_button": "Sleppa þessu skrefi",
       "save_button": "Vista og halda áfram",
       "defer_notice": "Athugaðu: Þú getur bætt við eða uppfært merkið þitt og sérsniðna reiti hvenær sem er í hlutanum Stillingar.",
       "logo_section": {
         "title": "Merki stofnunar (Valfrjálst)",
-        "format_hint": "SVG, PNG eða WEBP (Hám. 2MB)",
+        "format_hint": "SVG, PNG eða WEBP · 512×512",
         "dropzone_text": "Dragðu merki hingað eða veldu skrá",
         "remove_logo": "Fjarlægja merki",
         "selected_success": "Merki valið",
         "tap_to_change": "Ýttu til að breyta"
       },
       "fields_section": {
-        "title": "Sérsniðnir reitir beiðnar (Valfrjálst)",
+        "title": "Sérsniðnir reitir beiðnar",
         "description": "Viðbótarupplýsingar sem þú vilt að viðskiptavinir gefi upp þegar þeir stofna beiðnir.",
         "placeholder_example": "t.d. Tegund tækis, raðnúmer",
         "empty_state": "Engum sérsniðnum reitum bætt við enn. Þú getur sleppt þessu skrefi."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Uppsetning öryggislykils",
-      "subtitle": "Gögnin þín eru aðeins dulkóðuð á þessu tæki. 12 orða endurheimtarstrengurinn hér að neðan er eini lykill stofnunar þinnar. Hann er aldrei geymdur á netþjónum.",
+      "subtitle": "Gögnin þín eru aðeins dulkóðuð á þessu tæki. 12 orða endurheimtarstrengurinn hér að neðan er eini lykill stofnunar þinnar.",
       "warning": "Þessi 12 orð eru aldrei geymd á netþjónum. Ef þau glatast er ekki hægt að endurheimta þau. Vinsamlegast geymdu þau á öruggan hátt.",
       "copy": "Afrita á klippiborð",
       "copied": "Afritað",

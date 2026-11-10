@@ -800,19 +800,19 @@
       "title": "Organisationslogotyp & anpassade fält",
       "subtitle": "Du kan lägga till logotyp och anpassade ärendefält nu eller hoppa över detta steg. Du kan ändra dem när som helst i Inställningar.",
       "skip_header_link": "Gör det senare ➔",
-      "skip_button": "Hoppa över detta steg (Konfigurera senare i Inställningar)",
+      "skip_button": "Hoppa över detta steg",
       "save_button": "Spara & fortsätt",
-      "defer_notice": "Obs: Du kan lägga till eller uppdatera din logotyp och dina anpassade fält när som helst under Inställningar.",
+      "defer_notice": "Du kan lägga till eller uppdatera din logotyp och dina anpassade fält när som helst under Inställningar.",
       "logo_section": {
         "title": "Organisationslogotyp (Valfritt)",
-        "format_hint": "SVG, PNG eller WEBP (Max 2 MB)",
+        "format_hint": "SVG, PNG eller WEBP · 512×512",
         "dropzone_text": "Dra logotypen hit eller välj fil",
         "remove_logo": "Ta bort logotyp",
         "selected_success": "Logotypen har valts",
         "tap_to_change": "Tryck för att ändra"
       },
       "fields_section": {
-        "title": "Anpassade ärendefält (Valfritt)",
+        "title": "Anpassade ärendefält",
         "description": "Ytterligare uppgifter som du vill att kunder ska ange när de skapar ärenden.",
         "placeholder_example": "t.ex. Enhetsmodell, Serienummer",
         "empty_state": "Inga anpassade fält har lagts till ännu. Du kan hoppa över detta steg."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Konfiguration av säkerhetsnyckel",
-      "subtitle": "Dina data krypteras endast på denna enhet. Den 12-ordiga återställningsfrasen nedan är din organisations enda nyckel. Den lagras aldrig på några servrar.",
+      "subtitle": "Dina data krypteras endast på denna enhet. Den 12-ordiga återställningsfrasen nedan är din organisations enda nyckel.",
       "warning": "Dessa 12 ord lagras aldrig på servrar. Om de förloras kan de inte återskapas. Förvara dem på ett säkert ställe.",
       "copy": "Kopiera till urklipp",
       "copied": "Kopierat",

@@ -800,19 +800,19 @@
       "title": "Logotip organizacije in polja po meri",
       "subtitle": "Logotip in polja zahtevkov po meri lahko dodate zdaj ali pa ta korak preskočite. Spremenite jih lahko kadar koli v Nastavitvah.",
       "skip_header_link": "Naredi pozneje ➔",
-      "skip_button": "Preskoči ta korak (Nastavi pozneje v Nastavitvah)",
+      "skip_button": "Preskoči ta korak",
       "save_button": "Shrani in nadaljuj",
-      "defer_notice": "Opomba: Logotip in polja po meri lahko kadar koli dodate ali posodobite v razdelku Nastavitve.",
+      "defer_notice": "Logotip in polja po meri lahko kadar koli dodate ali posodobite v razdelku Nastavitve.",
       "logo_section": {
         "title": "Logotip organizacije (izbirno)",
-        "format_hint": "SVG, PNG ali WEBP (največ 2 MB)",
+        "format_hint": "SVG, PNG ali WEBP · 512×512",
         "dropzone_text": "Povlecite logotip sem ali izberite datoteko",
         "remove_logo": "Odstrani logotip",
         "selected_success": "Logotip uspešno izbran",
         "tap_to_change": "Dotaknite se za spremembo"
       },
       "fields_section": {
-        "title": "Polja zahtevkov po meri (izbirno)",
+        "title": "Polja zahtevkov po meri",
         "description": "Dodatni podatki, ki jih morajo stranke navesti ob ustvarjanju zahtevkov.",
         "placeholder_example": "npr. Model naprave, Serijska številka",
         "empty_state": "Dodano ni še nobeno polje po meri. Ta korak lahko preskočite."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Nastavitev varnostnega ključa",
-      "subtitle": "Vaši podatki so šifrirani izključno v tej napravi. Spodnja 12-besedna obnovitvena fraza je edini ključ vaše organizacije. Nikoli se ne shranjuje na strežnikih.",
+      "subtitle": "Vaši podatki so šifrirani izključno v tej napravi. Spodnja 12-besedna obnovitvena fraza je edini ključ vaše organizacije.",
       "warning": "Teh 12 besed se nikoli ne shranjuje na strežnikih. Če jih izgubite, jih ni mogoče obnoviti. Shranite jih na varno mesto.",
       "copy": "Kopiraj v odložišče",
       "copied": "Kopirano",

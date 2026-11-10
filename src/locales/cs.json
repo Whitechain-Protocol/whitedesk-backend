@@ -800,19 +800,19 @@
       "title": "Logo organizace a vlastní pole",
       "subtitle": "Logo a vlastní pole požadavků můžete přidat nyní nebo tento krok přeskočit. Kdykoli je můžete změnit v Nastavení.",
       "skip_header_link": "Udělat později ➔",
-      "skip_button": "Přeskočit tento krok (Nastavit později v Nastavení)",
+      "skip_button": "Přeskočit tento krok",
       "save_button": "Uložit a pokračovat",
       "defer_notice": "Upozornění: Logo a vlastní pole můžete kdykoli přidat nebo aktualizovat v sekci Nastavení.",
       "logo_section": {
         "title": "Logo organizace (volitelné)",
-        "format_hint": "SVG, PNG nebo WEBP (max. 2 MB)",
+        "format_hint": "SVG, PNG nebo WEBP · 512×512",
         "dropzone_text": "Přetáhněte logo sem nebo vyberte soubor",
         "remove_logo": "Odebrat logo",
         "selected_success": "Logo bylo úspěšně vybráno",
         "tap_to_change": "Klepnutím změníte"
       },
       "fields_section": {
-        "title": "Vlastní pole požadavků (volitelné)",
+        "title": "Vlastní pole požadavků",
         "description": "Další informace, které mají zákazníci uvést při vytváření požadavků.",
         "placeholder_example": "např. Model zařízení, Sériové číslo",
         "empty_state": "Zatím nebyla přidána žádná vlastní pole. Tento krok můžete přeskočit."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Nastavení bezpečnostního klíče",
-      "subtitle": "Vaše data jsou šifrována pouze v tomto zařízení. Níže uvedená 12slovná obnovovací fráze je jediným klíčem vaší organizace. Nikdy se neukládá na servery.",
+      "subtitle": "Vaše data jsou šifrována pouze v tomto zařízení. Níže uvedená 12slovná obnovovací fráze je jediným klíčem vaší organizace.",
       "warning": "Těchto 12 slov se nikdy neukládá na servery. Při ztrátě je nelze obnovit. Uchovejte je prosím na bezpečném místě.",
       "copy": "Zkopírovat do schránky",
       "copied": "Zkopírováno",

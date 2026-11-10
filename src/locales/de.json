@@ -800,19 +800,19 @@
       "title": "Organisationslogo & Benutzerdefinierte Felder",
       "subtitle": "Sie können das Logo und benutzerdefinierte Ticketfelder jetzt hinzufügen oder diesen Schritt überspringen. Sie können dies jederzeit in den Einstellungen ändern.",
       "skip_header_link": "Später einrichten ➔",
-      "skip_button": "Diesen Schritt überspringen (Später in den Einstellungen konfigurieren)",
+      "skip_button": "Diesen Schritt überspringen",
       "save_button": "Speichern & Weiter",
-      "defer_notice": "Hinweis: Sie können Ihr Logo und benutzerdefinierte Felder jederzeit im Bereich Einstellungen hinzufügen oder aktualisieren.",
+      "defer_notice": "Sie können Ihr Logo und benutzerdefinierte Felder jederzeit im Bereich Einstellungen hinzufügen oder aktualisieren.",
       "logo_section": {
         "title": "Organisationslogo (Optional)",
-        "format_hint": "SVG, PNG oder WEBP (Max. 2 MB)",
+        "format_hint": "SVG, PNG oder WEBP · 512×512",
         "dropzone_text": "Logo hierher ziehen oder Datei auswählen",
         "remove_logo": "Logo entfernen",
         "selected_success": "Logo erfolgreich ausgewählt",
         "tap_to_change": "Zum Ändern tippen"
       },
       "fields_section": {
-        "title": "Benutzerdefinierte Ticketfelder (Optional)",
+        "title": "Benutzerdefinierte Ticketfelder",
         "description": "Zusätzliche Angaben, die Kunden beim Erstellen von Tickets machen sollen.",
         "placeholder_example": "z. B. Gerätemodell, Seriennummer",
         "empty_state": "Noch keine benutzerdefinierten Felder hinzugefügt. Sie können diesen Schritt überspringen."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Einrichtung des Sicherheitsschlüssels",
-      "subtitle": "Ihre Daten werden ausschließlich auf diesem Gerät verschlüsselt. Die unten stehende 12-Wörter-Wiederherstellungsphrase ist der einzige Hauptschlüssel Ihrer Organisation. Sie wird niemals auf Servern gespeichert.",
+      "subtitle": "Ihre Daten werden ausschließlich auf diesem Gerät verschlüsselt. Die unten stehende 12-Wörter-Wiederherstellungsphrase ist der einzige Hauptschlüssel Ihrer Organisation.",
       "warning": "Diese 12 Wörter werden niemals auf Servern gespeichert. Bei Verlust können sie nicht wiederhergestellt werden. Bitte bewahren Sie sie sicher auf.",
       "copy": "In die Zwischenablage kopieren",
       "copied": "Kopiert",

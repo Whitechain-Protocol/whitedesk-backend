@@ -800,19 +800,19 @@
       "title": "Logo ng Organisasyon at mga Custom na Field",
       "subtitle": "Maaari kang magdagdag ng logo at mga custom na field ng tiket ngayon o laktawan muna ito. Maaari mo itong baguhin anumang oras sa Mga Setting.",
       "skip_header_link": "Gawin Mamaya ➔",
-      "skip_button": "Laktawan ang Hakbang na Ito (Isaayos Mamaya sa Mga Setting)",
+      "skip_button": "Laktawan ang Hakbang na Ito",
       "save_button": "I-save at Magpatuloy",
-      "defer_notice": "Paunawa: Maaari mong idagdag o i-update ang iyong logo at mga custom na field anumang oras sa seksyong Mga Setting.",
+      "defer_notice": "Maaari mong idagdag o i-update ang iyong logo at mga custom na field anumang oras sa seksyong Mga Setting.",
       "logo_section": {
         "title": "Logo ng Organisasyon (Opsyonal)",
-        "format_hint": "SVG, PNG o WEBP (Max 2MB)",
+        "format_hint": "SVG, PNG o WEBP · 512×512",
         "dropzone_text": "I-drag ang logo dito o pumili ng file",
         "remove_logo": "Alisin ang Logo",
         "selected_success": "Matagumpay na Napili ang Logo",
         "tap_to_change": "I-tap upang palitan"
       },
       "fields_section": {
-        "title": "Mga Custom na Field ng Tiket (Opsyonal)",
+        "title": "Mga Custom na Field ng Tiket",
         "description": "Karagdagang impormasyon na nais mong ibigay ng mga kliyente kapag gumagawa ng mga tiket.",
         "placeholder_example": "hal., Modelo ng Device, Serial Number",
         "empty_state": "Wala pang naidaragdag na custom na field. Maaari mong laktawan ang hakbang na ito."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Pag-setup ng Susi sa Seguridad",
-      "subtitle": "Ang iyong datos ay naka-encrypt lamang sa device na ito. Ang 12-salitang parirala sa pagbawi sa ibaba ay ang tanging susi ng iyong organisasyon. Hindi ito kailanman iniimbak sa mga server.",
+      "subtitle": "Ang iyong datos ay naka-encrypt lamang sa device na ito. Ang 12-salitang parirala sa pagbawi sa ibaba ay ang tanging susi ng iyong organisasyon.",
       "warning": "Ang 12 salitang ito ay hindi kailanman iniimbak sa mga server. Kapag nawala, hindi na ito mababawi. Pakitago ang mga ito nang ligtas.",
       "copy": "Kopyahin sa Clipboard",
       "copied": "Nakopya na",

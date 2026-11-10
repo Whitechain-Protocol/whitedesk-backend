@@ -800,19 +800,19 @@
       "title": "Logótipo da Organização e Campos Personalizados",
       "subtitle": "Pode adicionar o logótipo e os campos personalizados de tickets agora ou avançar. Poderá alterá-los a qualquer momento nas Definições.",
       "skip_header_link": "Fazer Mais Tarde ➔",
-      "skip_button": "Ignorar Este Passo (Configurar Mais Tarde nas Definições)",
+      "skip_button": "Ignorar Este Passo",
       "save_button": "Guardar e Continuar",
-      "defer_notice": "Nota: Pode adicionar ou atualizar o logótipo e os campos personalizados a qualquer momento na secção Definições.",
+      "defer_notice": "Pode adicionar ou atualizar o logótipo e os campos personalizados a qualquer momento na secção Definições.",
       "logo_section": {
         "title": "Logótipo da Organização (Opcional)",
-        "format_hint": "SVG, PNG ou WEBP (Máx. 2 MB)",
+        "format_hint": "SVG, PNG ou WEBP · 512×512",
         "dropzone_text": "Arraste o logótipo para aqui ou selecione um ficheiro",
         "remove_logo": "Remover Logótipo",
         "selected_success": "Logótipo Selecionado com Sucesso",
         "tap_to_change": "Toque para alterar"
       },
       "fields_section": {
-        "title": "Campos Personalizados do Ticket (Opcional)",
+        "title": "Campos Personalizados do Ticket",
         "description": "Informações adicionais que pretende solicitar aos clientes ao criarem tickets.",
         "placeholder_example": "ex., Modelo do Dispositivo, Número de Série",
         "empty_state": "Ainda não foram adicionados campos personalizados. Pode ignorar este passo."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configuração da Chave de Segurança",
-      "subtitle": "Os seus dados são encriptados apenas neste dispositivo. A frase de recuperação de 12 palavras abaixo é a única chave da sua organização. Nunca é guardada em servidores.",
+      "subtitle": "Os seus dados são encriptados apenas neste dispositivo. A frase de recuperação de 12 palavras abaixo é a única chave da sua organização.",
       "warning": "Estas 12 palavras nunca são armazenadas em servidores. Se forem perdidas, não poderão ser recuperadas. Guarde-as num local seguro.",
       "copy": "Copiar para a Área de Transferência",
       "copied": "Copiado",

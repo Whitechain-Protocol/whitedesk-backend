@@ -800,19 +800,19 @@
       "title": "Nembo ya Shirika na Sehemu Maalum",
       "subtitle": "Unaweza kuongeza nembo na sehemu maalum za tiketi sasa au uruke. Unaweza kubadilisha hizi wakati wowote katika Mipangilio.",
       "skip_header_link": "Fanya Baadaye ➔",
-      "skip_button": "Ruka Hatua Hii (Sanidi Baadaye katika Mipangilio)",
+      "skip_button": "Ruka Hatua Hii",
       "save_button": "Hifadhi na Uendelee",
-      "defer_notice": "Ilani: Unaweza kuongeza au kusasisha nembo yako na sehemu maalum wakati wowote katika sehemu ya Mipangilio.",
+      "defer_notice": "Unaweza kuongeza au kusasisha nembo yako na sehemu maalum wakati wowote katika sehemu ya Mipangilio.",
       "logo_section": {
         "title": "Nembo ya Shirika (Si lazima)",
-        "format_hint": "SVG, PNG au WEBP (Upeo 2MB)",
+        "format_hint": "SVG, PNG au WEBP · 512×512",
         "dropzone_text": "Buruta nembo hapa au chagua faili",
         "remove_logo": "Ondoa Nembo",
         "selected_success": "Nembo Imechaguliwa kwa Mafanikio",
         "tap_to_change": "Gusa ili kubadilisha"
       },
       "fields_section": {
-        "title": "Sehemu Maalum za Tiketi (Si lazima)",
+        "title": "Sehemu Maalum za Tiketi",
         "description": "Taarifa za ziada unazotaka wateja watoe wanapounda tiketi.",
         "placeholder_example": "k.m., Muundo wa Kifaa, Nambari ya Ufuatiliaji",
         "empty_state": "Hakuna sehemu maalum zilizoongezwa bado. Unaweza kuruka hatua hii."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Usanidi wa Ufunguo wa Usalama",
-      "subtitle": "Data yako imesimbwa kwenye kifaa hiki pekee. Maneno 12 ya urejeshaji hapa chini ndiyo ufunguo pekee wa shirika lako. Hayahifadhiwi kamwe kwenye seva.",
+      "subtitle": "Data yako imesimbwa kwenye kifaa hiki pekee. Maneno 12 ya urejeshaji hapa chini ndiyo ufunguo pekee wa shirika lako.",
       "warning": "Maneno haya 12 hayahifadhiwi kamwe kwenye seva. Yakipotea, hayawezi kurejeshwa. Tafadhali yahifadhi kwa usalama.",
       "copy": "Nakili kwenye Ubao wa Kunakili",
       "copied": "Imenakiliwa",

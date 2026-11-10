@@ -800,19 +800,19 @@
       "title": "Organisatielogo & aangepaste velden",
       "subtitle": "U kunt nu een logo en aangepaste ticketvelden toevoegen of deze stap overslaan. U kunt dit altijd wijzigen via Instellingen.",
       "skip_header_link": "Later doen ➔",
-      "skip_button": "Deze stap overslaan (Later configureren in Instellingen)",
+      "skip_button": "Deze stap overslaan",
       "save_button": "Opslaan & doorgaan",
-      "defer_notice": "Let op: U kunt uw logo en aangepaste velden op elk moment toevoegen of bijwerken onder Instellingen.",
+      "defer_notice": "U kunt uw logo en aangepaste velden op elk moment toevoegen of bijwerken onder Instellingen.",
       "logo_section": {
         "title": "Organisatielogo (Optioneel)",
-        "format_hint": "SVG, PNG of WEBP (Max. 2 MB)",
+        "format_hint": "SVG, PNG of WEBP · 512×512",
         "dropzone_text": "Sleep het logo hierheen of selecteer een bestand",
         "remove_logo": "Logo verwijderen",
         "selected_success": "Logo succesvol geselecteerd",
         "tap_to_change": "Tik om te wijzigen"
       },
       "fields_section": {
-        "title": "Aangepaste ticketvelden (Optioneel)",
+        "title": "Aangepaste ticketvelden",
         "description": "Aanvullende informatie die klanten moeten opgeven bij het aanmaken van een ticket.",
         "placeholder_example": "bijv. Apparaatmodel, Serienummer",
         "empty_state": "Nog geen aangepaste velden toegevoegd. U kunt deze stap overslaan."

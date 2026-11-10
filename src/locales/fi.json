@@ -800,19 +800,19 @@
       "title": "Organisaation logo ja lisäkentät",
       "subtitle": "Voit lisätä logon ja tukipyynnön lisäkentät nyt tai ohittaa vaiheen. Voit muuttaa näitä milloin tahansa Asetuksissa.",
       "skip_header_link": "Tee myöhemmin ➔",
-      "skip_button": "Ohita tämä vaihe (Määritä myöhemmin asetuksissa)",
+      "skip_button": "Ohita tämä vaihe",
       "save_button": "Tallenna ja jatka",
-      "defer_notice": "Huomautus: Voit lisätä tai päivittää logon ja lisäkentät milloin tahansa Asetukset-osiossa.",
+      "defer_notice": "Voit lisätä tai päivittää logon ja lisäkentät milloin tahansa Asetukset-osiossa.",
       "logo_section": {
         "title": "Organisaation logo (Valinnainen)",
-        "format_hint": "SVG, PNG tai WEBP (enintään 2 Mt)",
+        "format_hint": "SVG, PNG tai WEBP · 512×512",
         "dropzone_text": "Vedä logo tähän tai valitse tiedosto",
         "remove_logo": "Poista logo",
         "selected_success": "Logo valittu onnistuneesti",
         "tap_to_change": "Napauta vaihtaaksesi"
       },
       "fields_section": {
-        "title": "Tukipyynnön lisäkentät (Valinnainen)",
+        "title": "Tukipyynnön lisäkentät",
         "description": "Lisätiedot, jotka haluat asiakkaiden antavan tukipyyntöä luodessaan.",
         "placeholder_example": "esim. Laitemalli, Sarjanumero",
         "empty_state": "Lisäkenttiä ei ole vielä lisätty. Voit ohittaa tämän vaiheen."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Turva-avaimen käyttöönotto",
-      "subtitle": "Tietosi salataan vain tällä laitteella. Alla oleva 12 sanan palautuslause on organisaatiosi ainoa avain. Sitä ei koskaan tallenneta palvelimille.",
+      "subtitle": "Tietosi salataan vain tällä laitteella. Alla oleva 12 sanan palautuslause on organisaatiosi ainoa avain.",
       "warning": "Näitä 12 sanaa ei koskaan tallenneta palvelimille. Jos ne katoavat, niitä ei voi palauttaa. Säilytä ne turvallisessa paikassa.",
       "copy": "Kopioi leikepöydälle",
       "copied": "Kopioitu",

@@ -800,19 +800,19 @@
       "title": "Logo Organisasi & Kolom Kustom",
       "subtitle": "Anda dapat menambahkan logo dan kolom tiket kustom sekarang atau nanti. Anda dapat mengubahnya kapan saja di Pengaturan.",
       "skip_header_link": "Lakukan Nanti ➔",
-      "skip_button": "Lewati Langkah Ini (Konfigurasi Nanti di Pengaturan)",
+      "skip_button": "Lewati Langkah Ini",
       "save_button": "Simpan & Lanjutkan",
-      "defer_notice": "Pemberitahuan: Anda dapat menambahkan atau memperbarui logo dan kolom kustom kapan saja di bagian Pengaturan.",
+      "defer_notice": "Anda dapat menambahkan atau memperbarui logo dan kolom kustom kapan saja di bagian Pengaturan.",
       "logo_section": {
         "title": "Logo Organisasi (Opsional)",
-        "format_hint": "SVG, PNG atau WEBP (Maks 2MB)",
+        "format_hint": "SVG, PNG atau WEBP · 512×512",
         "dropzone_text": "Seret logo ke sini atau pilih berkas",
         "remove_logo": "Hapus Logo",
         "selected_success": "Logo Berhasil Dipilih",
         "tap_to_change": "Ketuk untuk mengubah"
       },
       "fields_section": {
-        "title": "Kolom Kustom Tiket (Opsional)",
+        "title": "Kolom Kustom Tiket",
         "description": "Informasi tambahan yang Anda ingin pelanggan berikan saat membuat tiket.",
         "placeholder_example": "mis., Model Perangkat, Nomor Seri",
         "empty_state": "Belum ada kolom kustom yang ditambahkan. Anda dapat melewati langkah ini."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Pengaturan Kunci Keamanan",
-      "subtitle": "Data Anda hanya dienkripsi di perangkat ini. Frasa pemulihan 12 kata di bawah ini adalah satu-satunya kunci organisasi Anda. Kunci ini tidak pernah disimpan di server.",
+      "subtitle": "Data Anda hanya dienkripsi di perangkat ini. Frasa pemulihan 12 kata di bawah ini adalah satu-satunya kunci organisasi Anda.",
       "warning": "Ke-12 kata ini tidak pernah disimpan di server. Jika hilang, tidak dapat dipulihkan. Harap simpan dengan aman.",
       "copy": "Salin ke Papan Klip",
       "copied": "Tersalin",

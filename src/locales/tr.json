@@ -798,21 +798,21 @@
     },
     "customization": {
       "title": "Kuruluş Logosu ve Özel Alanlar",
-      "subtitle": "Destek biletlerinizde yer alacak alanları ve logonuzu şimdi ekleyebilir veya doğrudan geçebilirsiniz. Bu tercihleri daha sonra 'Ayarlar' bölümünden dilediğiniz an değiştirebilirsiniz.",
+      "subtitle": "Destek biletlerinizde yer alacak alanları ve logonuzu tanımlayın. Bu alanları daha sonra Ayarlar bölümünden güncelleyebilirsiniz.",
       "skip_header_link": "Daha Sonra Yap ➔",
-      "skip_button": "Bu Adımı Atla (Daha Sonra Ayarlardan Yap)",
+      "skip_button": "Bu Adımı Atla",
       "save_button": "Kaydet ve Devam Et",
-      "defer_notice": "Bilgi: Logo ve özel alan tanımlarını dilediğiniz zaman Ayarlar bölümünden ekleyebilir veya güncelleyebilirsiniz.",
+      "defer_notice": "Logo ve özel alanları dilediğiniz zaman Ayarlar bölümünden güncelleyebilirsiniz.",
       "logo_section": {
         "title": "Kuruluş Logosu",
-        "format_hint": "PNG, JPG veya SVG (Önerilen: 512x512)",
+        "format_hint": "PNG, JPG veya SVG · 512×512",
         "dropzone_text": "Logoyu buraya sürükleyin veya dosya seçin",
         "remove_logo": "Logoyu Kaldır",
         "selected_success": "Logo Başarıyla Seçildi",
         "tap_to_change": "Değiştirmek için dokunun"
       },
       "fields_section": {
-        "title": "Bilet Takip Alanları (İsteğe Bağlı)",
+        "title": "Bilet Takip Alanları",
         "description": "Müşterilerinizin destek bileti açarken doldurmasını istediğiniz ek bilgiler.",
         "placeholder_example": "Örn: Cihaz Modeli, Seri Numarası",
         "empty_state": "Henüz özel alan eklenmedi. Bu adımı atlayabilirsiniz."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Güvenlik Anahtarı Kurulumu",
-      "subtitle": "Verileriniz yalnızca bu cihazda şifrelenir. Aşağıdaki 12 kelimelik kurtarma ifadesi kuruluşunuzun tek anahtarıdır. Bu anahtar sunucularda saklanmaz.",
+      "subtitle": "Aşağıdaki 12 kelimelik kurtarma ifadesi kuruluşunuzun tek anahtarıdır.",
       "warning": "Bu 12 kelime sunucularda saklanmaz. Kaybedilirse geri getirilemez. Lütfen güvenli bir yere not ediniz.",
       "copy": "Panoya Kopyala",
       "copied": "Kopyalandı",
@@ -840,7 +840,7 @@
     },
     "genesis_success": {
       "trial_badge": "14 Günlük Ücretsiz Deneme Paketi",
-      "trial_body": "Kuruluşunuz için 1 Yönetici Erişim Anahtarı ve 10 Kullanıcı Erişim Anahtarı üretilmiştir. Bu anahtarlar cihazınızda yerel olarak güvenle mühürlenmiş olup kullanıcılar doğrudan sisteme bağlanabilir.",
+      "trial_body": "Kuruluşunuz için 1 Yönetici ve 10 Kullanıcı erişim anahtarı yerel olarak üretildi.",
       "bundle_admin_key_item": "• 1 Yönetici Erişim Anahtarı: {keyPrefix}...",
       "bundle_user_keys_item": "• 10 Kullanıcı Erişim Anahtarı: Hazırlandı ve kaydedildi",
       "copy_all_keys_btn": "Tüm Erişim Anahtarlarını Kopyala",
@@ -856,8 +856,8 @@
       "back_btn": "Giriş Ekranına Dön",
       "camera_permission_desc": "QR kod okuyabilmek için lütfen kamera izni veriniz.",
       "char_count": "{count} karakter",
-      "code_input_placeholder": "Giriş Kodunuz...",
-      "code_login_subtitle": "Sistem yöneticisi tarafından verilen kodu girin",
+      "code_input_placeholder": "Erişim Kodu veya Hash...",
+      "code_login_subtitle": "Yöneticinizden aldığınız kodu veya Profil QR kodunu girin",
       "code_login_title": "Kod ile Oturum Açın",
       "error_invalid_key": "Lütfen en az 10 karakterlik geçerli bir erişim anahtarı giriniz.",
       "invalid_key_title": "Geçersiz Anahtar",

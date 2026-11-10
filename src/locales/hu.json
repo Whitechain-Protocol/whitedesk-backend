@@ -800,19 +800,19 @@
       "title": "Szervezeti logó és egyéni mezők",
       "subtitle": "Most is hozzáadhatja a logót és az egyéni hibajegymezőket, vagy kihagyhatja. Ezeket később bármikor módosíthatja a Beállításokban.",
       "skip_header_link": "Később állítom be ➔",
-      "skip_button": "Lépés kihagyása (Beállítás később a Beállításokban)",
+      "skip_button": "Lépés kihagyása",
       "save_button": "Mentés és tovább",
       "defer_notice": "Megjegyzés: Logóját és egyéni mezőit bármikor hozzáadhatja vagy frissítheti a Beállítások részben.",
       "logo_section": {
         "title": "Szervezeti logó (Opcionális)",
-        "format_hint": "SVG, PNG vagy WEBP (Max. 2 MB)",
+        "format_hint": "SVG, PNG vagy WEBP · 512×512",
         "dropzone_text": "Húzza ide a logót, vagy válasszon fájlt",
         "remove_logo": "Logó eltávolítása",
         "selected_success": "Logó sikeresen kiválasztva",
         "tap_to_change": "Érintse meg a módosításhoz"
       },
       "fields_section": {
-        "title": "Hibajegy egyéni mezők (Opcionális)",
+        "title": "Hibajegy egyéni mezők",
         "description": "További adatok, amelyeket a hibajegy létrehozásakor kérni szeretne az ügyfelektől.",
         "placeholder_example": "pl. Eszközmodell, Sorozatszám",
         "empty_state": "Még nincs hozzáadva egyéni mező. Kihagyhatja ezt a lépést."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Biztonsági kulcs beállítása",
-      "subtitle": "Adatai kizárólag ezen az eszközön kerülnek titkosításra. Az alábbi 12 szavas helyreállítási kifejezés szervezete egyetlen kulcsa. Soha nem tárolódik szervereken.",
+      "subtitle": "Adatai kizárólag ezen az eszközön kerülnek titkosításra. Az alábbi 12 szavas helyreállítási kifejezés szervezete egyetlen kulcsa.",
       "warning": "Ez a 12 szó soha nem tárolódik szervereken. Elvesztésük esetén nem állíthatók helyre. Kérjük, őrizze meg őket biztonságos helyen.",
       "copy": "Másolás a vágólapra",
       "copied": "Másolva",

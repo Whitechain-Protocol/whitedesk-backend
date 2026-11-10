@@ -800,19 +800,19 @@
       "title": "Tambarin Ƙungiya & Wuraren Musamman",
       "subtitle": "Kuna iya ƙara tambari da wuraren tikiti na musamman yanzu ko ku tsallake. Kuna iya canza waɗannan a kowane lokaci a Saituna.",
       "skip_header_link": "Yi Daga Baya ➔",
-      "skip_button": "Tsallake Wannan Mataki (Saita Daga Baya a Saituna)",
+      "skip_button": "Tsallake Wannan Mataki",
       "save_button": "Ajiye & Ci gaba",
-      "defer_notice": "Sanarwa: Kuna iya ƙarawa ko sabunta tambarinku da wuraren musamman a kowane lokaci a ɓangaren Saituna.",
+      "defer_notice": "Kuna iya ƙarawa ko sabunta tambarinku da wuraren musamman a kowane lokaci a ɓangaren Saituna.",
       "logo_section": {
         "title": "Tambarin Ƙungiya (Na Zaɓi)",
-        "format_hint": "PNG, JPG ko SVG (An Shawarta: 512x512)",
+        "format_hint": "PNG, JPG ko SVG · 512×512",
         "dropzone_text": "Jawo tambari zuwa nan ko zaɓi fayil",
         "remove_logo": "Cire Tambari",
         "selected_success": "An Yi Nasarar Zaɓar Tambari",
         "tap_to_change": "Taɓa domin canzawa"
       },
       "fields_section": {
-        "title": "Wuraren Musamman na Tikiti (Na Zaɓi)",
+        "title": "Wuraren Musamman na Tikiti",
         "description": "Ƙarin bayanin da kuke son abokan ciniki su bayar yayin ƙirƙirar tikiti.",
         "placeholder_example": "misali: Samfurin Na'ura, Lambar Serial",
         "empty_state": "Ba a ƙara wuraren musamman ba tukuna. Kuna iya tsallake wannan mataki."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Saita Maɓallan Tsaro",
-      "subtitle": "Ana rufe bayananku da sirri a wannan na'ura kawai. Kalmomin farfaɗowa guda 12 na ƙasa su ne kaɗai maɓallin ƙungiyarku. Ba a taɓa adana su a sabarori ba.",
+      "subtitle": "Ana rufe bayananku da sirri a wannan na'ura kawai. Kalmomin farfaɗowa guda 12 na ƙasa su ne kaɗai maɓallin ƙungiyarku.",
       "warning": "Ba a taɓa adana waɗannan kalmomi 12 a sabarori ba. Idan suka ɓace, ba za a iya dawo da su ba. Da fatan za a adana su cikin aminci.",
       "copy": "Kwafi zuwa Allon Kwafi",
       "copied": "An kwafa",

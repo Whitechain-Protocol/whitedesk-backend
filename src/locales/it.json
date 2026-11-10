@@ -800,19 +800,19 @@
       "title": "Logo organizzazione e campi personalizzati",
       "subtitle": "Puoi aggiungere ora il logo e i campi personalizzati dei ticket oppure saltare questo passaggio. Potrai modificarli in qualsiasi momento nelle Impostazioni.",
       "skip_header_link": "Fallo più tardi ➔",
-      "skip_button": "Salta questo passaggio (Configura più tardi nelle Impostazioni)",
+      "skip_button": "Salta questo passaggio",
       "save_button": "Salva e continua",
-      "defer_notice": "Nota: Puoi aggiungere o aggiornare il logo e i campi personalizzati in qualsiasi momento nella sezione Impostazioni.",
+      "defer_notice": "Puoi aggiungere o aggiornare il logo e i campi personalizzati in qualsiasi momento nella sezione Impostazioni.",
       "logo_section": {
         "title": "Logo organizzazione (Opzionale)",
-        "format_hint": "SVG, PNG o WEBP (Max 2 MB)",
+        "format_hint": "SVG, PNG o WEBP · 512×512",
         "dropzone_text": "Trascina qui il logo o seleziona un file",
         "remove_logo": "Rimuovi logo",
         "selected_success": "Logo selezionato con successo",
         "tap_to_change": "Tocca per modificare"
       },
       "fields_section": {
-        "title": "Campi personalizzati del ticket (Opzionale)",
+        "title": "Campi personalizzati del ticket",
         "description": "Informazioni aggiuntive che desideri richiedere ai clienti durante la creazione dei ticket.",
         "placeholder_example": "es. Modello dispositivo, Numero di serie",
         "empty_state": "Nessun campo personalizzato ancora aggiunto. Puoi saltare questo passaggio."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configurazione chiave di sicurezza",
-      "subtitle": "I tuoi dati vengono crittografati esclusivamente su questo dispositivo. La frase di recupero di 12 parole sottostante è l'unica chiave della tua organizzazione. Non viene mai salvata sui server.",
+      "subtitle": "I tuoi dati vengono crittografati esclusivamente su questo dispositivo. La frase di recupero di 12 parole sottostante è l'unica chiave della tua organizzazione.",
       "warning": "Queste 12 parole non vengono mai memorizzate sui server. In caso di smarrimento non potranno essere recuperate. Conservale in un luogo sicuro.",
       "copy": "Copia negli appunti",
       "copied": "Copiato",

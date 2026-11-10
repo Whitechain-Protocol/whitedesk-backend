@@ -798,21 +798,21 @@
     },
     "customization": {
       "title": "Organization Logo & Custom Fields",
-      "subtitle": "You can add logo and custom ticket fields now or skip. You can change these anytime in Settings.",
+      "subtitle": "Define custom ticket fields and your logo. You can update these anytime in Settings.",
       "skip_header_link": "Do It Later ➔",
-      "skip_button": "Skip This Step (Configure Later in Settings)",
+      "skip_button": "Skip This Step",
       "save_button": "Save & Continue",
-      "defer_notice": "Notice: You can add or update your logo and custom fields anytime in the Settings section.",
+      "defer_notice": "You can add or update your logo and custom fields anytime in Settings.",
       "logo_section": {
         "title": "Organization Logo (Optional)",
-        "format_hint": "PNG, JPG or SVG (Recommended: 512x512)",
+        "format_hint": "PNG, JPG or SVG · 512×512",
         "dropzone_text": "Drag logo here or select file",
         "remove_logo": "Remove Logo",
         "selected_success": "Logo Selected Successfully",
         "tap_to_change": "Tap to change"
       },
       "fields_section": {
-        "title": "Ticket Custom Fields (Optional)",
+        "title": "Ticket Custom Fields",
         "description": "Additional information you want customers to provide when creating tickets.",
         "placeholder_example": "e.g., Device Model, Serial Number",
         "empty_state": "No custom fields added yet. You may skip this step."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Security Key Setup",
-      "subtitle": "Your data is only encrypted on this device. The 12-word recovery phrase below is your organization's sole key. It is never stored on servers.",
+      "subtitle": "The 12-word recovery phrase below is your organization’s sole key.",
       "warning": "These 12 words are never stored on servers. If lost, they cannot be recovered. Please store them securely.",
       "copy": "Copy to Clipboard",
       "copied": "Copied",
@@ -840,7 +840,7 @@
     },
     "genesis_success": {
       "trial_badge": "14-Day Free Trial",
-      "trial_body": "1 Administrator Access Key and 10 User Access Keys have been generated locally on your device for the trial.",
+      "trial_body": "1 Administrator and 10 User access keys have been generated locally on your device.",
       "bundle_admin_key_item": "• 1 Administrator Access Key: {keyPrefix}...",
       "bundle_user_keys_item": "• 10 User Access Keys: Prepared and saved",
       "copy_all_keys_btn": "Copy All Access Keys",
@@ -856,8 +856,8 @@
       "back_btn": "Back to Login",
       "camera_permission_desc": "Please grant camera permission to scan QR codes.",
       "char_count": "{count} characters",
-      "code_input_placeholder": "Your Login Code...",
-      "code_login_subtitle": "Enter the code provided by your system administrator",
+      "code_input_placeholder": "Access Code or Hash...",
+      "code_login_subtitle": "Enter the code provided by your administrator or scan Profile QR",
       "code_login_title": "Sign In with Code",
       "error_invalid_key": "Please enter a valid access key of at least 10 characters.",
       "invalid_key_title": "Invalid Key",

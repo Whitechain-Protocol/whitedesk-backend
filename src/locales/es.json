@@ -800,19 +800,19 @@
       "title": "Logotipo de la organización y campos personalizados",
       "subtitle": "Puede añadir el logotipo y los campos personalizados de los tickets ahora u omitirlo. Puede cambiarlos en cualquier momento en Configuración.",
       "skip_header_link": "Hacerlo más tarde ➔",
-      "skip_button": "Omitir este paso (configurar más tarde en Configuración)",
+      "skip_button": "Omitir este paso",
       "save_button": "Guardar y continuar",
-      "defer_notice": "Aviso: puede añadir o actualizar su logotipo y campos personalizados en cualquier momento en la sección Configuración.",
+      "defer_notice": "puede añadir o actualizar su logotipo y campos personalizados en cualquier momento en la sección Configuración.",
       "logo_section": {
         "title": "Logotipo de la organización (opcional)",
-        "format_hint": "SVG, PNG o WEBP (máx. 2 MB)",
+        "format_hint": "SVG, PNG o WEBP · 512×512",
         "dropzone_text": "Arrastre el logotipo aquí o seleccione un archivo",
         "remove_logo": "Quitar logotipo",
         "selected_success": "Logotipo seleccionado correctamente",
         "tap_to_change": "Toque para cambiar"
       },
       "fields_section": {
-        "title": "Campos personalizados de tickets (opcional)",
+        "title": "Campos personalizados de tickets",
         "description": "Información adicional que desea que los clientes proporcionen al crear tickets.",
         "placeholder_example": "p. ej., modelo del dispositivo, número de serie",
         "empty_state": "Aún no se han añadido campos personalizados. Puede omitir este paso."
@@ -823,7 +823,7 @@
     },
     "ceremony": {
       "title": "Configuración de la clave de seguridad",
-      "subtitle": "Sus datos solo se cifran en este dispositivo. La frase de recuperación de 12 palabras que aparece abajo es la única clave de su organización. Nunca se almacena en los servidores.",
+      "subtitle": "Sus datos solo se cifran en este dispositivo. La frase de recuperación de 12 palabras que aparece abajo es la única clave de su organización.",
       "warning": "Estas 12 palabras nunca se almacenan en los servidores. Si se pierden, no se pueden recuperar. Guárdelas de forma segura.",
       "copy": "Copiar al portapapeles",
       "copied": "Copiado",
