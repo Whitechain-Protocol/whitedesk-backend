@@ -1041,15 +1041,8 @@ export default function HelpDeskScreen() {
           }}
           onNewTicketPress={() => {
             setIsCreatingDiscussion(false);
-            if (adminRole === 'global_admin') {
-              setEscalationTarget('thewhite');
-              setComposeCategory('internal_admin_ticket');
-            } else if (isAdmin) {
-              setEscalationTarget('global_admin');
-              setComposeCategory('internal_admin_ticket');
-            } else {
-              setEscalationTarget('none');
-            }
+            setEscalationTarget('none');
+            setComposeCategory(availableCategories[0]?.id || '');
             setCurrentView('compose');
           }}
           onNewDiscussionPress={() => {

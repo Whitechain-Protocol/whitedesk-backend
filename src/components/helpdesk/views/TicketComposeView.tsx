@@ -262,25 +262,12 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
               <Text style={styles.composeFieldLabel}>
                 {getLabel('helpdesk.category')}
               </Text>
-              {supportTicketTarget === 'thewhite' ? (
-                <View style={[styles.categoryPill, styles.categoryPillActive, { alignSelf: 'flex-start', backgroundColor: '#ECFDF5', borderColor: '#10B981' }]}>
-                  <Text style={[styles.categoryPillText, { color: '#047857', fontWeight: '700' }]}>
-                    {getLabel('helpdesk.thewhite_app_arch_support')}
-                  </Text>
-                </View>
-              ) : supportTicketTarget === 'global_admin' ? (
-                <View style={[styles.categoryPill, styles.categoryPillActive, { alignSelf: 'flex-start', backgroundColor: '#ECFDF5', borderColor: '#10B981' }]}>
-                  <Text style={[styles.categoryPillText, { color: '#047857', fontWeight: '700' }]}>
-                    {getLabel('helpdesk.global_admin_internal_support')}
-                  </Text>
-                </View>
-              ) : (
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.categoryScrollContainer}
-                >
-                  {availableCategories.map((cat) => {
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.categoryScrollContainer}
+              >
+                {availableCategories.map((cat) => {
                     const isSelected = composeCategory === cat.id;
                     const i18nCat = t(`helpdesk.cat_${cat.id}`);
                     const catLabel = i18nCat !== `helpdesk.cat_${cat.id}` ? i18nCat : (language === 'tr' ? cat.labelTr : (cat.labelEn || cat.labelTr));
@@ -306,7 +293,6 @@ export const TicketComposeView: React.FC<TicketComposeViewProps> = ({
                     );
                   })}
                 </ScrollView>
-              )}
             </View>
 
             {/* Subject Input */}

@@ -37,6 +37,8 @@ import { TenantLogo } from '../../TenantLogo';
 import { useTranslation } from '../../../services/i18nService';
 import {
   buttonThemeService,
+  BUTTON_THEME_PALETTES_G1,
+  BUTTON_THEME_PALETTES_G2,
   BUTTON_THEME_PALETTES,
   ButtonTheme,
 } from '../../../services/helpdesk/buttonThemeService';
@@ -109,35 +111,49 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const [selectedGroup, setSelectedGroup] = useState<1 | 2>(1);
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const [isThemeSaved, setIsThemeSaved] = useState(false);
 
   useEffect(() => {
     if (visible) {
       buttonThemeService.getSavedTheme().then(theme => {
-        const idx = BUTTON_THEME_PALETTES.findIndex(p => p.id === theme.id);
+        const g: 1 | 2 = (theme.id > 20 || theme.group === 2) ? 2 : 1;
+        setSelectedGroup(g);
+        const list = g === 2 ? BUTTON_THEME_PALETTES_G2 : BUTTON_THEME_PALETTES_G1;
+        const idx = list.findIndex(p => p.id === theme.id);
         if (idx !== -1) {
           setCurrentThemeIndex(idx);
           setIsThemeSaved(true);
+        } else {
+          setCurrentThemeIndex(0);
         }
       });
     }
   }, [visible]);
 
-  const activePalette = BUTTON_THEME_PALETTES[currentThemeIndex];
+  const activeGroupList = selectedGroup === 2 ? BUTTON_THEME_PALETTES_G2 : BUTTON_THEME_PALETTES_G1;
+  const activePalette = activeGroupList[currentThemeIndex] || activeGroupList[0];
+
+  const handleSelectGroup = (g: 1 | 2) => {
+    if (selectedGroup === g) return;
+    setSelectedGroup(g);
+    setCurrentThemeIndex(0);
+    setIsThemeSaved(false);
+  };
 
   const handlePrevTheme = () => {
-    setCurrentThemeIndex(prev => (prev - 1 + BUTTON_THEME_PALETTES.length) % BUTTON_THEME_PALETTES.length);
+    setCurrentThemeIndex(prev => (prev - 1 + activeGroupList.length) % activeGroupList.length);
     setIsThemeSaved(false);
   };
 
   const handleNextTheme = () => {
-    setCurrentThemeIndex(prev => (prev + 1) % BUTTON_THEME_PALETTES.length);
+    setCurrentThemeIndex(prev => (prev + 1) % activeGroupList.length);
     setIsThemeSaved(false);
   };
 
   const handleSelectTheme = async () => {
-    const selected = BUTTON_THEME_PALETTES[currentThemeIndex];
+    const selected = activePalette;
     await buttonThemeService.saveTheme(selected.id);
     setIsThemeSaved(true);
 
@@ -507,9 +523,34 @@ export const SettingsStationModal: React.FC<SettingsStationModalProps> = ({
                 </View>
                 <View style={styles.badgeCounterBox}>
                   <Text style={styles.badgeCounterText}>
-                    {String(currentThemeIndex + 1).padStart(2, '0')} / {BUTTON_THEME_PALETTES.length}
+                    {String(currentThemeIndex + 1).padStart(2, '0')} / {activeGroupList.length}
                   </Text>
                 </View>
+              </View>
+
+              {/* Grup 1 ve Grup 2 Segment Seçici */}
+              <View style={styles.groupSelectorRow}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => handleSelectGroup(1)}
+                  style={[styles.groupTabBtn, selectedGroup === 1 && styles.groupTabBtnActive]}
+                >
+                  <Text style={[styles.groupTabBadge, selectedGroup === 1 && styles.groupTabBadgeActive]}>1</Text>
+                  <Text style={[styles.groupTabText, selectedGroup === 1 && styles.groupTabTextActive]}>
+                    {t('settings.station.button_theme_group_1', '1. Grup')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => handleSelectGroup(2)}
+                  style={[styles.groupTabBtn, selectedGroup === 2 && styles.groupTabBtnActive]}
+                >
+                  <Text style={[styles.groupTabBadge, selectedGroup === 2 && styles.groupTabBadgeActive]}>2</Text>
+                  <Text style={[styles.groupTabText, selectedGroup === 2 && styles.groupTabTextActive]}>
+                    {t('settings.station.button_theme_group_2', '2. Grup')}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Aktif Palet Adı (60 Dile Lokalize) */}
@@ -960,6 +1001,55 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#64748B',
     fontFamily: 'monospace',
+  },
+  groupSelectorRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    padding: 3,
+    marginTop: 8,
+    marginBottom: 4,
+    gap: 4,
+  },
+  groupTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    gap: 6,
+  },
+  groupTabBtnActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  groupTabBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+  },
+  groupTabBadgeActive: {
+    color: '#FFFFFF',
+    backgroundColor: '#2563EB',
+  },
+  groupTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  groupTabTextActive: {
+    color: '#0F172A',
+    fontWeight: '700',
   },
   themeNameWrapper: {
     alignItems: 'center',

@@ -84,9 +84,11 @@ Kuruluş ayarlarının en altında yer alacak 5. kartın doğrudan içinde:
 
 ---
 
-## 3. 19 paletlik Tema Kataloğu (`buttonThemeService.ts`)
+## 3. 40 Paletlik Tema Kataloğu (Grup 1 ve Grup 2) (`buttonThemeService.ts`)
 
-Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
+Ekranın başında **`[ 1 ]`** ve **`[ 2 ]`** grup seçici yer alır. Her grupta 20'şer adet palet bulunmaktadır (`01 / 20`).
+
+### 1. Grup (20 Palet - Zengin Dinamik Spektrum)
 
 | No | Tema Adı | Bilet Butonu (Mavi) | Tartışma Butonu (Turuncu) | Telsiz Butonu (Yeşil) |
 | :---: | :--- | :---: | :---: | :---: |
@@ -110,6 +112,39 @@ Kullanıcının ilettiği 15 renk seti tam olarak korunmuştur:
 | **18** | Çerçeveli Saf Mavi (Ghost) | `#FFFFFF` (`#2B6CB0`) | **`#FFFFFF` (`#DD6B20`)** | `#FFFFFF` (`#2F855A`) |
 | **19** | Açık Göl Mavisi Dolgu | `#DCEAF4` | **`#FEE8D8`** | `#DBEFE2` |
 | **20** | Buzul Tint (En Açık Zemin) | `#EBF3FC` | **`#FEF0E7`** | `#EAF7EF` |
+
+### 2. Grup (20 Palet - WhiteDesk Öz Mavi & Tondaş Armoni)
+
+*Mavi renk uygulamanın `#2563EB` omurgasına sadık tondaştır; turuncu ve yeşil tonlar abes kontrast olmadan profesyonelce dengelenmiştir.*
+
+| No | Global ID | Tema Adı | Bilet Butonu (Mavi) | Tartışma (Kiremit/Bakır) | Telsiz (Yeşil/Orman) |
+| :---: | :---: | :--- | :---: | :---: | :---: |
+| **01** | 21 | Derin Kurumsal Mavi | `#1D4ED8` | `#C2410C` | `#15803D` |
+| **02** | 22 | WhiteDesk Öz Mavi | `#2563EB` | `#D97706` | `#059669` |
+| **03** | 23 | Asil Safir Mavi | `#215BD6` | `#CA521B` | `#1B8749` |
+| **04** | 24 | Prestij Mavi | `#2B66E2` | `#CF5A24` | `#228B52` |
+| **05** | 25 | Modern Kurumsal Mavi | `#326EE6` | `#C8632E` | `#25965C` |
+| **06** | 26 | Parlak İş Mavisi | `#3B7DF0` | `#D26D34` | `#2CA366` |
+| **07** | 27 | Canlı Tondaş Mavi | `#4185F5` | `#D7743E` | `#32AC70` |
+| **08** | 28 | Duru Kurumsal Mavi | `#4F8DF5` | `#DB7D4A` | `#39B57B` |
+| **09** | 29 | İpeksi Tondaş Mavi | `#5C96F7` | `#E08757` | `#43BD85` |
+| **10** | 30 | Yumuşak Gökyüzü Mavisi | `#6B9FF8` | `#E49064` | `#4DC590` |
+| **11** | 31 | Dumanlı Kurumsal Slate | `#3B5B8C` | `#B25732` | `#3A7359` |
+| **12** | 32 | Grafit Mavi Tondaş | `#38547C` | `#A8502D` | `#346850` |
+| **13** | 33 | Çelik Kurumsal Mavi | `#42618F` | `#B65F3A` | `#3E795E` |
+| **14** | 34 | Sisli Lacivert Slate | `#3F587A` | `#A45B3A` | `#386551` |
+| **15** | 35 | Mat Mineral Mavi | `#4B678E` | `#B36949` | `#467862` |
+| **16** | 36 | Puslu İş Mavisi | `#557199` | `#B87355` | `#4D826C` |
+| **17** | 37 | İnce Gri Kurumsal Tint | `#607B9E` | `#BC7E62` | `#558B75` |
+| **18** | 38 | Çerçeveli Kurumsal Slate (Ghost) | `#FFFFFF` (`#3B5B8C`) | `#FFFFFF` (`#B25732`) | `#FFFFFF` (`#3A7359`) |
+| **19** | 39 | Açık Slate Mavi Dolgu | `#E2E8F0` | `#FFEDD5` | `#DCFCE7` |
+| **20** | 40 | İnce Kurumsal Haze | `#EEF2F6` | `#FFF7ED` | `#F0FDF4` |
+
+---
+
+## 4. Bilet Açılışı Kategori Kilidinin Kaldırılması
+
+Admin bilet açılışında daha önce zorlanan sabit `"TheWhite Uygulama & Mimari Desteği"` (`thewhite` / `global_admin`) kategori kilidi kaldırılmış; hem yönetici hem kullanıcı bilet oluştururken firmanın dinamik kategorilerini (`availableCategories`) özgürce seçebilecek hale getirilmiştir.
 
 ---
 
