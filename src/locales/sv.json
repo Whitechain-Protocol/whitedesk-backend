@@ -888,7 +888,9 @@
     "default_external_app": "Extern applikation",
     "explanation_banner": "En unik SDK-bryggnyckel på 60 tecken skapas för varje applikation. När du återkallar en nyckel stoppas inkommande ärenden från den applikationen omedelbart.",
     "placeholder_bridge_key": "60_teckens_sdk_bryggnyckel",
-    "revoke_confirm_dynamic_desc": "SDK-bryggnyckeln för \"{appName}\" ({appId}) kommer att återkallas och inkommande ärenden från denna applikation kommer att avvisas."
+    "revoke_confirm_dynamic_desc": "SDK-bryggnyckeln för \"{appName}\" ({appId}) kommer att återkallas och inkommande ärenden från denna applikation kommer att avvisas.",
+    "subtitle": "Generera SDK-integrationsnyckel för applikationen",
+    "sdk_badge_title": "SDK-integrering"
   },
   "provisioning": {
     "action_delete": "Radera",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suveränt ägarskap och anslutningsuppgifter",
       "status_sealed": "Förseglad",
       "enterprise_name_label": "Företagsnamn",
-      "blind_id_label": "Blind-ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratörsbehörighet",
       "protocol_label": "Protokoll",
       "protocol_value": "Cloudflare D1 HTTPS • Noll personuppgifter • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Alla applikationer",
       "all_apps_general": "Alla applikationer (Allmänt)",
       "cat_name_label_upper": "KATEGORINAMN",
-      "cat_name_placeholder": "t.ex. Hårdvarufel, Fakturaförfrågan, Kontoåtkomst"
+      "cat_name_placeholder": "t.ex. Hårdvarufel, Fakturaförfrågan, Kontoåtkomst",
+      "users_section_title": "Användare ({count})",
+      "add_user_modal_title": "Lägg till ny användare",
+      "add_user_modal_sub": "Användarbehörigheter och åtkomstdefinition",
+      "sdk_integration_badge": "SDK-integrering",
+      "admin_categories_title": "Kategorier",
+      "admin_categories_sub": "Supportkategorier tilldelade specifikt till administratör",
+      "delete_user_title": "Ta bort användare"
     }
   },
   "settings": {

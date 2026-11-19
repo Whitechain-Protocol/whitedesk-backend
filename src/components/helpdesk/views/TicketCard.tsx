@@ -9,7 +9,7 @@ import {
 import { HelpDeskTicket, TicketStatus, OrgEntry, helpDeskService } from '../../../services/helpDeskService';
 import { piiSanitizer } from '../../../services/piiSanitizer';
 import { AdminBadge, tierFromCategory } from '../AdminBadge';
-import { MoreVertical, Leaf, Clock, Star, Paperclip, ImageIcon, FileText, ArrowRight, Cloud, Lock, User } from 'lucide-react-native';
+import { MoreVertical, Leaf, Clock, Paperclip, ImageIcon, FileText, ArrowRight, Cloud, Lock, User, ShieldCheck } from 'lucide-react-native';
 import { isImageFile } from '../utils/fileMimeUtils';
 import { formatDisplayBlindId } from '../utils/helpdeskFormatters';
 
@@ -182,9 +182,9 @@ export const TicketCard: React.FC<TicketCardProps> = ({
 
         return (
           <>
-            {/* Oluşturan Satırı: Pill olmadan yalın, en başta içi boş yıldız ikonlu + Oluşturma Tarihi */}
+            {/* Oluşturan Satırı: Pill olmadan yalın, en başta profil (User) ikonlu + Oluşturma Tarihi */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-              <Star size={11} color="#64748B" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
+              <User size={11} color="#64748B" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
               <Text style={[styles.ticketDateMutedText, { fontWeight: '600', color: '#475569' }]} numberOfLines={1}>
                 {creatorText}
               </Text>
@@ -194,11 +194,11 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               </Text>
             </View>
 
-            {/* Son Satır: Temsilci (Pill Yok, Mavi) + Atama/Havuz/Devir Tarihi · Sağ Ray: Bulut + Sayaç */}
+            {/* Son Satır: Temsilci (Pill Yok, Mavi) + İçi Boş Güvenlik Rozeti (ShieldCheck) İkonu + Atama/Havuz/Devir Tarihi · Sağ Ray: Bulut + Sayaç */}
             <View style={styles.cardMetaRow}>
               {/* Sol: Temsilci + Atama Tarihi */}
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, minWidth: 0, marginRight: 8, overflow: 'hidden' }}>
-                <User size={11} color="#2563EB" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
+                <ShieldCheck size={11} color="#2563EB" strokeWidth={2.2} style={{ marginRight: 4, flexShrink: 0 }} />
                 <Text style={[styles.ticketDateMutedText, { fontWeight: '600', color: '#2563EB' }]} numberOfLines={1}>
                   {representativeText}
                 </Text>

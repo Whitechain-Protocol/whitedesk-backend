@@ -131,7 +131,7 @@ export function SdkIntegrationModal({
     <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.sheetContainer}>
-          {/* Başlık Barı */}
+          {/* Başlık Barı: Yeni Uygulama Ekle -> Açıklama -> Firma Adı */}
           <View style={styles.headerBar}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <View style={styles.headerIconBox}>
@@ -139,7 +139,8 @@ export function SdkIntegrationModal({
               </View>
               <View style={{ marginLeft: 10, flex: 1 }}>
                 <Text style={styles.headerTitle}>{t('integration.title')}</Text>
-                <Text style={styles.headerSubtitle} numberOfLines={1}>{enterpriseName}</Text>
+                <Text style={styles.headerSubtitle}>{t('integration.subtitle')}</Text>
+                <Text style={styles.headerCompanySub} numberOfLines={1}>{enterpriseName}</Text>
               </View>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -148,9 +149,12 @@ export function SdkIntegrationModal({
           </View>
 
           <ScrollView style={styles.scrollBody} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
-            {/* Açıklama Bannerı */}
+            {/* Açıklama Bannerı: Başında Shadesiz ve Butonsuz "SDK Entegrasyonu" Küçük Başlığı */}
             <View style={styles.explanationBanner}>
-              <Code2 size={16} color="#2563EB" style={{ marginRight: 8, marginTop: 2 }} />
+              <View style={styles.sdkHeaderInsideBanner}>
+                <Code2 size={15} color="#2563EB" strokeWidth={2.4} style={{ marginRight: 6 }} />
+                <Text style={styles.sdkBadgeTitleText}>{t('integration.sdk_badge_title')}</Text>
+              </View>
               <Text style={styles.explanationBannerText}>
                 {t('integration.explanation_banner')}
               </Text>
@@ -359,14 +363,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 18.5,
     fontWeight: '800',
     color: '#0F172A',
+    letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '500',
     color: '#64748B',
-    marginTop: 1,
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  headerCompanySub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+    marginTop: 2,
   },
   closeBtn: {
     width: 32,
@@ -401,20 +414,28 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   explanationBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
     borderColor: '#BFDBFE',
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     marginBottom: 16,
+  },
+  sdkHeaderInsideBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  sdkBadgeTitleText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#2563EB',
+    letterSpacing: 0.2,
   },
   explanationBannerText: {
     fontSize: 12.5,
     color: '#1E40AF',
     lineHeight: 18,
-    flex: 1,
     fontWeight: '500',
   },
   readOnlyText: {

@@ -888,7 +888,9 @@
     "default_external_app": "Сыртқы қолданба",
     "explanation_banner": "Әрбір қолданба үшін бірегей 60 таңбалы SDK көпір кілті жасалады. Кілтті қайтарып алған кезде, сол қолданбадан өтінім жіберу бірден тоқтатылады.",
     "placeholder_bridge_key": "60_tanbaly_sdk_kopir_kilti",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) үшін SDK көпір кілті қайтарып алынады және осы қолданбадан келетін өтінімдер қабылданбайды."
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) үшін SDK көпір кілті қайтарып алынады және осы қолданбадан келетін өтінімдер қабылданбайды.",
+    "subtitle": "Қолданба үшін SDK интеграциялық кілтін жасау",
+    "sdk_badge_title": "SDK интеграциясы"
   },
   "provisioning": {
     "action_delete": "Жою",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Егеменді иелік және қосылу мәліметтері",
       "status_sealed": "Мөрленген",
       "enterprise_name_label": "Кәсіпорын атауы",
-      "blind_id_label": "Соқыр ID (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Әкімші өкілеттігі",
       "protocol_label": "Хаттама",
       "protocol_value": "Cloudflare D1 HTTPS • Нөлдік жеке деректер • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Барлық қолданбалар",
       "all_apps_general": "Барлық қолданбалар (Жалпы)",
       "cat_name_label_upper": "САНАТ АТАУЫ",
-      "cat_name_placeholder": "мысалы, Жабдық ақауы, Шот-фактура сұранысы, Аккаунтқа кіру"
+      "cat_name_placeholder": "мысалы, Жабдық ақауы, Шот-фактура сұранысы, Аккаунтқа кіру",
+      "users_section_title": "Пайдаланушылар ({count})",
+      "add_user_modal_title": "Жаңа пайдаланушы қосу",
+      "add_user_modal_sub": "Пайдаланушы рұқсаттары мен қолжетімділік анықтамасы",
+      "sdk_integration_badge": "SDK интеграциясы",
+      "admin_categories_title": "Санаттар",
+      "admin_categories_sub": "Әкімшіге арнайы тағайындалған қолдау санаттары",
+      "delete_user_title": "Пайдаланушыны жою"
     }
   },
   "settings": {

@@ -888,7 +888,9 @@
     "default_external_app": "Aplikacion i jashtëm",
     "explanation_banner": "Një çelës unik ure SDK prej 60 karakteresh gjenerohet për çdo aplikacion. Kur revokoni një çelës, dërgimi i biletave nga ai aplikacion ndalon menjëherë.",
     "placeholder_bridge_key": "çelës_ure_sdk_prej_60_karakteresh",
-    "revoke_confirm_dynamic_desc": "Çelësi i urës së SDK-së për \"{appName}\" ({appId}) do të revokohet dhe biletat hyrëse nga ky aplikacion do të refuzohen."
+    "revoke_confirm_dynamic_desc": "Çelësi i urës së SDK-së për \"{appName}\" ({appId}) do të revokohet dhe biletat hyrëse nga ky aplikacion do të refuzohen.",
+    "subtitle": "Gjeneroni çelësin e integrimit SDK për aplikacionin",
+    "sdk_badge_title": "Integrimi SDK"
   },
   "provisioning": {
     "action_delete": "Fshij",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Të gjitha aplikacionet",
       "all_apps_general": "Të gjitha aplikacionet (Të përgjithshme)",
       "cat_name_label_upper": "EMRI I KATEGORISË",
-      "cat_name_placeholder": "p.sh. Defekt në pajisje, Kërkesë për faturë, Qasje në llogari"
+      "cat_name_placeholder": "p.sh. Defekt në pajisje, Kërkesë për faturë, Qasje në llogari",
+      "users_section_title": "Përdoruesit ({count})",
+      "add_user_modal_title": "Shto Përdorues të Ri",
+      "add_user_modal_sub": "Përcaktimi i lejeve dhe qasjes së përdoruesit",
+      "sdk_integration_badge": "Integrimi SDK",
+      "admin_categories_title": "Kategoritë",
+      "admin_categories_sub": "Kategoritë e mbështetjes të caktuara posaçërisht për administratorin",
+      "delete_user_title": "Fshi Përdoruesin"
     }
   },
   "settings": {

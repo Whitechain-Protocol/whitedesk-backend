@@ -888,7 +888,9 @@
     "default_external_app": "Spoljna aplikacija",
     "explanation_banner": "Za svaku aplikaciju generiše se jedinstveni 60-znakovni ključ SDK mosta. Kada opozovete ključ, slanje tiketa iz te aplikacije odmah se zaustavlja.",
     "placeholder_bridge_key": "60_znakovni_kljuc_sdk_mosta",
-    "revoke_confirm_dynamic_desc": "Ključ SDK mosta za \"{appName}\" ({appId}) biće opozvan, a dolazni tiketi iz ove aplikacije biće odbijeni."
+    "revoke_confirm_dynamic_desc": "Ključ SDK mosta za \"{appName}\" ({appId}) biće opozvan, a dolazni tiketi iz ove aplikacije biće odbijeni.",
+    "subtitle": "Генериши кључ интеграције SDK-а за апликацију",
+    "sdk_badge_title": "SDK интеграција"
   },
   "provisioning": {
     "action_delete": "Obriši",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suvereno vlasništvo i detalji povezivanja",
       "status_sealed": "Zapečaćeno",
       "enterprise_name_label": "Naziv preduzeća",
-      "blind_id_label": "Slepi ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratorsko ovlašćenje",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Nula ličnih podataka • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Sve aplikacije",
       "all_apps_general": "Sve aplikacije (Opšte)",
       "cat_name_label_upper": "NAZIV KATEGORIJE",
-      "cat_name_placeholder": "npr. Kvar hardvera, Zahtev za fakturu, Pristup nalogu"
+      "cat_name_placeholder": "npr. Kvar hardvera, Zahtev za fakturu, Pristup nalogu",
+      "users_section_title": "Корисници ({count})",
+      "add_user_modal_title": "Додај новог корисника",
+      "add_user_modal_sub": "Дефинисање корисничких овлашћења и приступа",
+      "sdk_integration_badge": "SDK интеграција",
+      "admin_categories_title": "Категорије",
+      "admin_categories_sub": "Категорије подршке додељене администратору",
+      "delete_user_title": "Обриши корисника"
     }
   },
   "settings": {

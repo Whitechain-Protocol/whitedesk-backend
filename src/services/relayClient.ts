@@ -148,6 +148,11 @@ export const relayClient = {
     sender_blind_id: string;
     encrypted_payload: string;
     attachment_r2_key?: string | null;
+    ticket_type?: 'ticket' | 'discussion';
+    thread_id?: string | null;
+    key_envelopes?: Array<{ admin_blind_id: string; encrypted_room_key: string }> | string | null;
+    pending_admins?: string[] | string | null;
+    expires_at?: number;
   }): Promise<{ success: boolean; id?: string; error?: string }> {
     try {
       const res = await fetch(`${RELAY_BASE_URL.replace(/\/$/, '')}/api/relay/send`, {
@@ -199,12 +204,12 @@ export const relayClient = {
   /**
    * ACK Vaporization: Immediately deletes message from D1 and attachment from R2.
    */
-  async confirmRelayAck(id: string, r2_key?: string | null): Promise<boolean> {
+  async confirmRelayAck(id: string, r2_key?: string | null, admin_blind_id?: string | null): Promise<boolean> {
     try {
       const res = await fetch(`${RELAY_BASE_URL.replace(/\/$/, '')}/api/relay/ack`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, r2_key }),
+        body: JSON.stringify({ id, r2_key, admin_blind_id }),
       });
       return res.ok;
     } catch {

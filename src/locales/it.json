@@ -888,7 +888,9 @@
     "default_external_app": "Applicazione esterna",
     "explanation_banner": "Per ogni applicazione viene generata una chiave bridge SDK univoca di 60 caratteri. Quando revochi una chiave, l'invio di ticket da tale applicazione viene interrotto immediatamente.",
     "placeholder_bridge_key": "chiave_bridge_sdk_60_caratteri",
-    "revoke_confirm_dynamic_desc": "La chiave bridge SDK per \"{appName}\" ({appId}) verrà revocata e i ticket in arrivo da questa applicazione verranno rifiutati."
+    "revoke_confirm_dynamic_desc": "La chiave bridge SDK per \"{appName}\" ({appId}) verrà revocata e i ticket in arrivo da questa applicazione verranno rifiutati.",
+    "subtitle": "Genera chiave di integrazione SDK per l'applicazione",
+    "sdk_badge_title": "Integrazione SDK"
   },
   "provisioning": {
     "action_delete": "Elimina",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Tutte le applicazioni",
       "all_apps_general": "Tutte le applicazioni (Generale)",
       "cat_name_label_upper": "NOME CATEGORIA",
-      "cat_name_placeholder": "es. Guasto hardware, Richiesta fattura, Accesso account"
+      "cat_name_placeholder": "es. Guasto hardware, Richiesta fattura, Accesso account",
+      "users_section_title": "Utenti ({count})",
+      "add_user_modal_title": "Aggiungi nuovo utente",
+      "add_user_modal_sub": "Definizione dei permessi e dell'accesso utente",
+      "sdk_integration_badge": "Integrazione SDK",
+      "admin_categories_title": "Categorie",
+      "admin_categories_sub": "Categorie di supporto assegnate specificamente all'amministratore",
+      "delete_user_title": "Elimina utente"
     }
   },
   "settings": {

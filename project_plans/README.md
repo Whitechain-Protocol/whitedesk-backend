@@ -9,6 +9,9 @@ Bu klasör, WhiteDesk mimarisinin tüm çekirdek süreçlerini, sıfır-bilgi (Z
 - **[ticket_hierarchy_and_roles.md](./ticket_hierarchy_and_roles.md):**
   - **Master Bilet ve Rol Hiyerarşisi Şartnamesi.**
   - Kullanıcılar, Bölüm Adminleri, Global Adminler ve Kurucu (TheWhite) arasındaki bilet türleri (Mavi Standart, Mavi Discussion, Yeşil Destek/Eskalasyon), UI tetikleyicileri, fan-out dağıtım modelleri ve tam yönlendirme matrisi.
+- **[discussion_tickets_process.md](./discussion_tickets_process.md):**
+  - **Açık Tartışma (Discussion) Mimari ve Süreç Şartnamesi.**
+  - Tekil `transient_messages` tablosu üzerinde Shared Room Key (Paylaşımlı Oda Anahtarı) modeli, tek satır D1 yazma standardı, Self-Healing ve Burn-on-ACK akıllı buharlaşma yaşam döngüsü.
 - **[Ticket_alloc_revoke.md](./Ticket_alloc_revoke.md):** 
   - Master mimari şartname (v2.0). 
   - Sıfır-bilgi ikiz bilet mekanizması (Paket A / Paket B), D1 `admin_roster` tablosu, adil dağıtım sayacı (%20 dengeleme), mola/izin dönüşü tabana çekme ve eskalasyon zinciri.

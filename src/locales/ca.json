@@ -888,7 +888,9 @@
     "default_external_app": "Aplicació externa",
     "explanation_banner": "Es genera una clau de pont SDK única de 60 caràcters per a cada aplicació. Quan revoqueu una clau, l'enviament de tiquets des d'aquesta aplicació s'atura immediatament.",
     "placeholder_bridge_key": "clau_pont_sdk_de_60_caracters",
-    "revoke_confirm_dynamic_desc": "Es revocarà la clau de pont SDK per a \"{appName}\" ({appId}) i es rebutjaran els tiquets entrants d'aquesta aplicació."
+    "revoke_confirm_dynamic_desc": "Es revocarà la clau de pont SDK per a \"{appName}\" ({appId}) i es rebutjaran els tiquets entrants d'aquesta aplicació.",
+    "subtitle": "Generar clau d'integració SDK per a l'aplicació",
+    "sdk_badge_title": "Integració SDK"
   },
   "provisioning": {
     "action_delete": "Suprimeix",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Detalls de propietat sobirana i connexió",
       "status_sealed": "Segellat",
       "enterprise_name_label": "Nom de l'empresa",
-      "blind_id_label": "Identificador cec (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Autoritat d'administrador",
       "protocol_label": "Protocol de xarxa",
       "protocol_value": "Cloudflare D1 HTTPS • Zero dades personals • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Totes les aplicacions",
       "all_apps_general": "Totes les aplicacions (General)",
       "cat_name_label_upper": "NOM DE LA CATEGORIA",
-      "cat_name_placeholder": "p. ex., Avaria de maquinari, Sol·licitud de factura, Accés al compte"
+      "cat_name_placeholder": "p. ex., Avaria de maquinari, Sol·licitud de factura, Accés al compte",
+      "users_section_title": "Usuaris ({count})",
+      "add_user_modal_title": "Afegir nou usuari",
+      "add_user_modal_sub": "Definició de permisos i accés d'usuari",
+      "sdk_integration_badge": "Integració SDK",
+      "admin_categories_title": "Categories",
+      "admin_categories_sub": "Categories de suport assignades específicament a l'administrador",
+      "delete_user_title": "Eliminar usuari"
     }
   },
   "settings": {

@@ -123,7 +123,26 @@ export function useHelpDeskConsoleData({
         effectiveAdmins = [founderEntry, ...effectiveAdmins];
       }
 
-      const sortedAdmins = [...effectiveAdmins].sort((a, b) => {
+      // Tekil kurucu garantisi: Birden fazla founder veya 'TheWhite' kaydı varsa yalnızca birincisini sakla
+      const uniqueAdmins: AdminEntry[] = [];
+      const seenWhiteIds = new Set<string>();
+      let seenFounder = false;
+
+      for (const adm of effectiveAdmins) {
+        const cleanWhiteId = (adm.white_id || '').toLowerCase();
+        if (cleanWhiteId && seenWhiteIds.has(cleanWhiteId)) continue;
+        
+        const isFounderRole = adm.role === 'founder' || adm.role === 'master' || (adm.alias && adm.alias.toLowerCase().trim() === 'thewhite');
+        if (isFounderRole) {
+          if (seenFounder) continue; // Fazlalık/çift kurucuyu ele
+          seenFounder = true;
+        }
+
+        if (cleanWhiteId) seenWhiteIds.add(cleanWhiteId);
+        uniqueAdmins.push(adm);
+      }
+
+      const sortedAdmins = [...uniqueAdmins].sort((a, b) => {
         const getRank = (adm: AdminEntry) => {
           if (adm.role === 'founder' || adm.role === 'master' || (adm.alias && adm.alias.toLowerCase().trim() === 'thewhite')) return 0;
           if (adm.role === 'global_admin' || (adm.alias && (adm.alias.toLowerCase().includes('whitecosmos') || adm.alias.toLowerCase().includes('global admin')))) return 1;

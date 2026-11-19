@@ -75,15 +75,15 @@ Bilet kartında hem bileti açan kullanıcının/yöneticinin hem de bilete atan
 ```text
 TKT-SG9NW3 · Saha                                        [ Açık ]  ⋮
 Rd ticket
-☆ 1f8b4d...7365f · 04 Kas 2026 14:10
-👤 8294f4...52123 · 04 Kas 2026 15:47                    [☁️] [🍃 2g]
+👤 1f8b4d...7365f · 04 Kas 2026 14:10
+🛡️ 8294f4...52123 · 04 Kas 2026 15:47                    [☁️] [🍃 2g]
 ```
 
 * **1. Oluşturan Satırı (Atanan satırından bir önceki satır, en başta — Pill Yok, Gri):**
   - Kesinlikle pill (kutu/çerçeve) içerisine alınmaz; yalın metin olarak yazılır.
-  - Satırın en solunda **içi boş yıldız (`Star`)** ikonu, yanında oluşturanın adı-soyadı (veya Blind ID'si), ` · ` ayracı ve sabit **oluşturma tarihi-saati (`ticket.created_at`)** yer alır. Bu tarih biletin doğum anıdır ve asla değişmez.
+  - Satırın en solunda **profil (`User`)** ikonu, yanında oluşturanın adı-soyadı (veya Blind ID'si), ` · ` ayracı ve sabit **oluşturma tarihi-saati (`ticket.created_at`)** yer alır. Bu tarih biletin doğum anıdır ve asla değişmez.
 * **2. Temsilci / Havuz Satırı (Son satır / Google M3 Alt Barı — Pill Yok, Mavi `#2563EB`):**
-  - Sol tarafta **kesinlikle pill (kutu/çerçeve) olmadan** mavi (`#2563EB`) kullanıcı (`User`) ikonu ve mavi atanan temsilci (veya `Havuzda`) yer alır.
+  - Sol tarafta **kesinlikle pill (kutu/çerçeve) olmadan** mavi (`#2563EB`) içi boş güvenlik rozeti (`ShieldCheck`) ikonu ve mavi atanan temsilci (veya `Havuzda`) yer alır.
   - Hemen sağında ` · ` ayracı ve **sahiplik/atama tarihi-saati (`ticket.assigned_at`)** yer alır:
     1. **İlk Açılış (Havuz veya Doğrudan Atama):** Havuza giriş veya ilk atama tarihi-saati (`created_at` ile eşzamanlı başlar).
     2. **Havuzdan Devralma (`claimEscalatedTicket`):** Adminin bileti havuzdan çektiği tarih ve saat.

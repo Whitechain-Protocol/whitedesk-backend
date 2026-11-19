@@ -888,7 +888,9 @@
     "default_external_app": "Ekstern applikasjon",
     "explanation_banner": "En unik SDK-bronøkkel på 60 tegn genereres for hver applikasjon. Når du tilbakekaller en nøkkel, stoppes innsending av saker fra den applikasjonen umiddelbart.",
     "placeholder_bridge_key": "60_tegns_sdk_bronokkel",
-    "revoke_confirm_dynamic_desc": "SDK-bronøkkelen for \"{appName}\" ({appId}) vil bli tilbakekalt, og innkommende saker fra denne applikasjonen vil bli avvist."
+    "revoke_confirm_dynamic_desc": "SDK-bronøkkelen for \"{appName}\" ({appId}) vil bli tilbakekalt, og innkommende saker fra denne applikasjonen vil bli avvist.",
+    "subtitle": "Generer SDK-integrasjonsnøkkel for applikasjonen",
+    "sdk_badge_title": "SDK-integrasjon"
   },
   "provisioning": {
     "action_delete": "Slett",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suverent eierskap og tilkoblingsdetaljer",
       "status_sealed": "Forseglet",
       "enterprise_name_label": "Virksomhetsnavn",
-      "blind_id_label": "Blind-ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratormyndighet",
       "protocol_label": "Protokoll",
       "protocol_value": "Cloudflare D1 HTTPS • Null personopplysninger • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Alle applikasjoner",
       "all_apps_general": "Alle applikasjoner (Generelt)",
       "cat_name_label_upper": "KATEGORINAVN",
-      "cat_name_placeholder": "f.eks. Maskinvarefeil, Fakturaforespørsel, Kontotilgang"
+      "cat_name_placeholder": "f.eks. Maskinvarefeil, Fakturaforespørsel, Kontotilgang",
+      "users_section_title": "Brukere ({count})",
+      "add_user_modal_title": "Legg til ny bruker",
+      "add_user_modal_sub": "Brukertillatelser og tilgangsdefinisjon",
+      "sdk_integration_badge": "SDK-integrasjon",
+      "admin_categories_title": "Kategorier",
+      "admin_categories_sub": "Brukerstøttekategorier tildelt administratoren",
+      "delete_user_title": "Slett bruker"
     }
   },
   "settings": {

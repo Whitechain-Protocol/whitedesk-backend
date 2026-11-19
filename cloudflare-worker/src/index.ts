@@ -132,9 +132,13 @@ export interface ClientSessionInfo {
 export interface TransientMessageRecord {
   id: string;
   ticket_id: string;
+  ticket_type?: 'ticket' | 'discussion';
+  thread_id?: string | null;
   recipient_blind_id: string;
   sender_blind_id: string;
   encrypted_payload: string;
+  key_envelopes?: string | null;
+  pending_admins?: string | null;
   attachment_r2_key?: string | null;
   created_at: number;
   expires_at: number;
@@ -328,14 +332,24 @@ async function ensureD1Schema(db: D1Database): Promise<void> {
       CREATE TABLE IF NOT EXISTS transient_messages (
         id TEXT PRIMARY KEY,
         ticket_id TEXT NOT NULL,
+        ticket_type TEXT DEFAULT 'ticket',
+        thread_id TEXT,
         recipient_blind_id TEXT NOT NULL,
         sender_blind_id TEXT NOT NULL,
         encrypted_payload TEXT NOT NULL,
+        key_envelopes TEXT,
+        pending_admins TEXT,
         attachment_r2_key TEXT,
         created_at INTEGER NOT NULL,
         expires_at INTEGER NOT NULL
       )
     `).run();
+
+    // Kolon ekleme geçişi (var olan tablolara eklemek için güvenli ALTER TABLE)
+    try { await db.prepare(`ALTER TABLE transient_messages ADD COLUMN ticket_type TEXT DEFAULT 'ticket'`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE transient_messages ADD COLUMN thread_id TEXT`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE transient_messages ADD COLUMN key_envelopes TEXT`).run(); } catch {}
+    try { await db.prepare(`ALTER TABLE transient_messages ADD COLUMN pending_admins TEXT`).run(); } catch {}
 
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS ephemeral_signals (
@@ -1568,17 +1582,28 @@ export default {
         const id = body.id || 'msg_' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
         const now = Date.now();
         const ttlHours = 72;
-        const expiresAt = now + ttlHours * 3600 * 1000;
+        const expiresAt = body.expires_at || (now + ttlHours * 3600 * 1000);
+        const ticketType = body.ticket_type || 'ticket';
+        const threadId = body.thread_id || null;
+        const keyEnvelopes = typeof body.key_envelopes === 'object' ? JSON.stringify(body.key_envelopes) : (body.key_envelopes || null);
+        const pendingAdmins = typeof body.pending_admins === 'object' ? JSON.stringify(body.pending_admins) : (body.pending_admins || null);
 
         await env.DB.prepare(`
-          INSERT INTO transient_messages (id, ticket_id, recipient_blind_id, sender_blind_id, encrypted_payload, attachment_r2_key, created_at, expires_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO transient_messages (
+            id, ticket_id, ticket_type, thread_id, recipient_blind_id, sender_blind_id,
+            encrypted_payload, key_envelopes, pending_admins, attachment_r2_key, created_at, expires_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
           id,
           body.ticket_id,
+          ticketType,
+          threadId,
           body.recipient_blind_id,
           body.sender_blind_id,
           body.encrypted_payload,
+          keyEnvelopes,
+          pendingAdmins,
           body.attachment_r2_key || null,
           now,
           expiresAt
@@ -1648,12 +1673,17 @@ export default {
 
           const finalIds = Array.from(expandedIds).filter(Boolean);
           const placeholders = finalIds.map(() => '?').join(',');
+
+          // Tartışma araması için pending_admins veya recipient_blind_id kontrolü
+          const pendingConditions = finalIds.map(() => "pending_admins LIKE ?").join(' OR ');
+          const pendingPatterns = finalIds.map((id) => `%"${id}"%`);
+
           if (ticketId) {
-            query += ` WHERE recipient_blind_id IN (${placeholders}) AND ticket_id = ? ORDER BY created_at ASC LIMIT 100;`;
-            params.push(...finalIds, ticketId);
+            query += ` WHERE (recipient_blind_id IN (${placeholders}) OR (${pendingConditions})) AND ticket_id = ? ORDER BY created_at ASC LIMIT 100;`;
+            params.push(...finalIds, ...pendingPatterns, ticketId);
           } else {
-            query += ` WHERE recipient_blind_id IN (${placeholders}) ORDER BY created_at ASC LIMIT 100;`;
-            params.push(...finalIds);
+            query += ` WHERE (recipient_blind_id IN (${placeholders}) OR (${pendingConditions})) ORDER BY created_at ASC LIMIT 100;`;
+            params.push(...finalIds, ...pendingPatterns);
           }
         } else if (ticketId) {
           query += ' WHERE ticket_id = ? ORDER BY created_at ASC LIMIT 100;';
@@ -1675,9 +1705,48 @@ export default {
     if (request.method === 'POST' && url.pathname === '/api/relay/ack') {
       try {
         if (!env.DB) return new Response(JSON.stringify({ success: true }), { headers: corsHeaders });
-        const { id, r2_key } = (await request.json()) as { id?: string; r2_key?: string };
+        const { id, r2_key, admin_blind_id } = (await request.json()) as { id?: string; r2_key?: string; admin_blind_id?: string };
         if (id) {
-          await env.DB.prepare('DELETE FROM transient_messages WHERE id = ?').bind(id).run();
+          // Eğer admin_blind_id verilmişse ve satır bir tartışma (pending_admins içeren) ise Burn-on-ACK kontrolü yap
+          if (admin_blind_id) {
+            const { results } = await env.DB.prepare(
+              'SELECT pending_admins, attachment_r2_key FROM transient_messages WHERE id = ?'
+            ).bind(id).all<{ pending_admins: string | null; attachment_r2_key: string | null }>();
+
+            const row = results && results[0];
+            if (row && row.pending_admins) {
+              try {
+                let pendingList: string[] = JSON.parse(row.pending_admins);
+                pendingList = pendingList.filter((a) => a !== admin_blind_id);
+
+                if (pendingList.length === 0) {
+                  // Tüm adminler teslim aldı -> Satırı ve R2 ekini tamamen buharlaştır
+                  await env.DB.prepare('DELETE FROM transient_messages WHERE id = ?').bind(id).run();
+                  const targetR2Key = r2_key || row.attachment_r2_key;
+                  if (targetR2Key && env.BUCKET) {
+                    try { await env.BUCKET.delete(targetR2Key); } catch {}
+                  }
+                  return new Response(JSON.stringify({ success: true, vaporized: true, id }), {
+                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+                  });
+                } else {
+                  // Hala bekleyen adminler var -> pending_admins listesini güncelle
+                  await env.DB.prepare('UPDATE transient_messages SET pending_admins = ? WHERE id = ?')
+                    .bind(JSON.stringify(pendingList), id)
+                    .run();
+                  return new Response(JSON.stringify({ success: true, vaporized: false, id, remaining: pendingList.length }), {
+                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+                  });
+                }
+              } catch {
+                await env.DB.prepare('DELETE FROM transient_messages WHERE id = ?').bind(id).run();
+              }
+            } else {
+              await env.DB.prepare('DELETE FROM transient_messages WHERE id = ?').bind(id).run();
+            }
+          } else {
+            await env.DB.prepare('DELETE FROM transient_messages WHERE id = ?').bind(id).run();
+          }
         }
         if (r2_key && env.BUCKET) {
           try {
@@ -2084,8 +2153,32 @@ export default {
     if (env.DB) {
       try {
         const now = Date.now();
+
+        // 1. Süresi dolmuş ekli dosyaları önce R2'den temizle (Orphan R2 file engelleme)
+        if (env.BUCKET) {
+          try {
+            const { results: expiredItems } = await env.DB.prepare(
+              'SELECT attachment_r2_key FROM transient_messages WHERE expires_at < ? AND attachment_r2_key IS NOT NULL'
+            ).bind(now).all<{ attachment_r2_key: string }>();
+
+            for (const item of expiredItems || []) {
+              if (item.attachment_r2_key) {
+                try {
+                  await env.BUCKET.delete(item.attachment_r2_key);
+                } catch {}
+              }
+            }
+          } catch {}
+        }
+
+        // 2. Süresi dolan geçici mesaj ve tartışma satırlarını D1'den buharlaştır
         await env.DB.prepare('DELETE FROM transient_messages WHERE expires_at < ?').bind(now).run();
+
+        // 3. 2 dakikadan eski WebRTC ve RTC sinyal satırlarını buharlaştır
         await env.DB.prepare('DELETE FROM ephemeral_signals WHERE updated_at < ?').bind(now - 120_000).run();
+        try {
+          await env.DB.prepare('DELETE FROM transient_rtc_signals WHERE expires_at < ?').bind(now).run();
+        } catch {}
       } catch {}
     }
   },

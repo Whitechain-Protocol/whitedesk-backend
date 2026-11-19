@@ -69,6 +69,14 @@ CREATE TABLE IF NOT EXISTS admin_roster (
 CREATE INDEX IF NOT EXISTS idx_roster_allocation 
 ON admin_roster (enterprise_blind_id, org_id, app_id, is_active, counter);
 ```
+*** SORULAR ***
+a)	Proviston panelindeki kategoriler
+1.	Burada girdiğimiz kategoriler Whitedesk_categories tablosunda D1 de listeleniyor mu
+2.	Kuşşanıcılar bilet açarken kulşlanıcı ekranında seçmek üzere görğünüyor mu
+3.	Adminlere kategoriler atadığımızda d1 de Categories tablosuyla admins tablosu arasında keyleri ikişkilendirilip admine D1 de de atanıyor mu
+4.	Kulşlanıcılar bilet oluştururken admins tablosunda sayacı en düşük admin atanıyor mu
+5.	Kullanıcı bilet oluştururken kategori seçerse o kategoriye sahip adminlerden en az sayaca sahip olan atanıyor mu
+****
 
 ### B. Cloudflare D1: `whitedesk_tickets` Güncellemeleri
 ```sql

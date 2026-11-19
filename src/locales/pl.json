@@ -888,7 +888,9 @@
     "default_external_app": "Aplikacja zewnętrzna",
     "explanation_banner": "Dla każdej aplikacji generowany jest unikalny 60-znakowy klucz mostu SDK. Po unieważnieniu klucza przesyłanie zgłoszeń z tej aplikacji zostaje natychmiast zatrzymane.",
     "placeholder_bridge_key": "60_znakowy_klucz_mostu_sdk",
-    "revoke_confirm_dynamic_desc": "Klucz mostu SDK dla aplikacji \"{appName}\" ({appId}) zostanie unieważniony, a przychodzące z niej zgłoszenia będą odrzucane."
+    "revoke_confirm_dynamic_desc": "Klucz mostu SDK dla aplikacji \"{appName}\" ({appId}) zostanie unieważniony, a przychodzące z niej zgłoszenia będą odrzucane.",
+    "subtitle": "Wygeneruj klucz integracji SDK dla aplikacji",
+    "sdk_badge_title": "Integracja SDK"
   },
   "provisioning": {
     "action_delete": "Usuń",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Szczegóły suwerennej własności i połączenia",
       "status_sealed": "Zapieczętowany",
       "enterprise_name_label": "Nazwa przedsiębiorstwa",
-      "blind_id_label": "Ślepy identyfikator (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Uprawnienia administratora",
       "protocol_label": "Protokół",
       "protocol_value": "Cloudflare D1 HTTPS • Zero Danych Osobowych • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Wszystkie aplikacje",
       "all_apps_general": "Wszystkie aplikacje (Ogólne)",
       "cat_name_label_upper": "NAZWA KATEGORII",
-      "cat_name_placeholder": "np. Awaria sprzętu, Prośba o fakturę, Dostęp do konta"
+      "cat_name_placeholder": "np. Awaria sprzętu, Prośba o fakturę, Dostęp do konta",
+      "users_section_title": "Użytkownicy ({count})",
+      "add_user_modal_title": "Dodaj nowego użytkownika",
+      "add_user_modal_sub": "Definicja uprawnień i dostępu użytkownika",
+      "sdk_integration_badge": "Integracja SDK",
+      "admin_categories_title": "Kategorie",
+      "admin_categories_sub": "Kategorie wsparcia przypisane administratorowi",
+      "delete_user_title": "Usuń użytkownika"
     }
   },
   "settings": {

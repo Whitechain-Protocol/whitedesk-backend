@@ -632,7 +632,7 @@
     "registration_info_delimiter_legacy": "--- 📋 [Ro'yxatga olish ma'lumotlari] ---",
     "self_test_suffix_legacy": "(Avto-sinov)",
     "founder_enterprise_default": "TheWhite Enterprises",
-    "tenant_enterprise_default": "Whitechain",
+    "tenant_enterprise_default": "WhiteChain",
     "sovereign_node_default": "Mustaqil tugun",
     "receipt_relay_channel": "Cloudflare R2 + D1 Relay",
     "closure_hours_placeholder": "24",
@@ -888,7 +888,9 @@
     "default_external_app": "Tashqi ilova",
     "explanation_banner": "Har bir ilova uchun 60 belgidan iborat noyob SDK ko'prik kaliti yaratiladi. Kalitni bekor qilganingizda, ushbu ilovadan murojaatlar yuborilishi darhol to'xtaydi.",
     "placeholder_bridge_key": "60_belgili_sdk_koprik_kaliti",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) uchun SDK ko'prik kaliti bekor qilinadi va ushbu ilovadan keluvchi murojaatlar rad etiladi."
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) uchun SDK ko'prik kaliti bekor qilinadi va ushbu ilovadan keluvchi murojaatlar rad etiladi.",
+    "subtitle": "Ilova uchun SDK integratsiya kalitini yaratish",
+    "sdk_badge_title": "SDK integratsiyasi"
   },
   "provisioning": {
     "action_delete": "O'chirish",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Mustaqil egalik va ulanish tafsilotlari",
       "status_sealed": "Muhrlangan",
       "enterprise_name_label": "Korxona nomi",
-      "blind_id_label": "Ko'r ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administrator vakolati",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Shaxsiy ma'lumotlarsiz • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Barcha ilovalar",
       "all_apps_general": "Barcha ilovalar (Umumiy)",
       "cat_name_label_upper": "TOIFA NOMI",
-      "cat_name_placeholder": "masalan, Uskuna nosozligi, Hisob-faktura so'rovi, Hisobga kirish"
+      "cat_name_placeholder": "masalan, Uskuna nosozligi, Hisob-faktura so'rovi, Hisobga kirish",
+      "users_section_title": "Foydalanuvchilar ({count})",
+      "add_user_modal_title": "Yangi foydalanuvchi qo'shish",
+      "add_user_modal_sub": "Foydalanuvchi ruxsatlari va kirish ta'rifi",
+      "sdk_integration_badge": "SDK integratsiyasi",
+      "admin_categories_title": "Kategoriyalar",
+      "admin_categories_sub": "Administratorga maxsus biriktirilgan yordam kategoriyalari",
+      "delete_user_title": "Foydalanuvchini o'chirish"
     }
   },
   "settings": {
@@ -1572,7 +1581,7 @@
     "admin_verified_success": "Siz '{tenantName}' yordam amaliyotlari jamoasiga qo'shildingiz. Admin identifikatoringiz ({alias}) endi faol.",
     "feature_10_blind_access": "10 ta anonim kirish tokeni",
     "feature_1_admin_recovery": "1 ta admin tiklash tokeni",
-    "feature_sovereign_whitechain": "Mustaqil Whitechain infratuzilmasi",
+    "feature_sovereign_whitechain": "Mustaqil WhiteChain infratuzilmasi",
     "feature_trial_14_days": "14 kunlik baholash davri",
     "founder_verified_success": "Sizning TheWhite Asoschi (**) identifikatoringiz muvaffaqiyatli tasdiqlandi. Barcha asoschi imtiyozlari faol.",
     "global_admin_hash_failed": "Global admin tasdiqlash dayjestini yaratib bo'lmadi.",
@@ -1630,7 +1639,7 @@
     "default_user_alias": "Foydalanuvchi",
     "invalid_enterprise_token": "Yaroqsiz korxona tokeni.",
     "sdk_bridge_key_failed": "SDK ko'prik kalitini yaratib bo'lmadi.",
-    "default_foundation_name": "Whitechain jamg'armasi",
+    "default_foundation_name": "WhiteChain jamg'armasi",
     "master_device_alias_tr": "ushbu qurilma (asosiy)",
     "master_device_alias_en": "ushbu qurilma (asosiy)"
   },

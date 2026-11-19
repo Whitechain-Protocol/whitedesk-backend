@@ -11,9 +11,9 @@
     "wdrun": "node --env-file=.env.local scripts/wdrun-server.js",
     "bundle:android": "node scripts/compile-bundle.js",
     "build:android": "npm run bundle:android && cd android && .\\gradlew.bat assembleDebug",
-    "install:s24": "npm run build:android && adb -s R5CX62MRJPT install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
-    "install:tab": "npm run build:android && adb -s R92X103H1ZE install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
-    "install:all": "npm run build:android && adb -s R5CX62MRJPT install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk && adb -s R92X103H1ZE install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk"
+    "install:s24": "npm run build:android && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" connect 192.168.1.31:5555 && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.31:5555 install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.31:5555 shell monkey -p com.mceryilmaz.whitedesk -c android.intent.category.LAUNCHER 1",
+    "install:tab": "npm run build:android && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" connect 192.168.1.30:5555 && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.30:5555 install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.30:5555 shell monkey -p com.mceryilmaz.whitedesk -c android.intent.category.LAUNCHER 1",
+    "install:all": "npm run build:android && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" connect 192.168.1.31:5555 && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" connect 192.168.1.30:5555 && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.31:5555 install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.30:5555 install -r -d android\\app\\build\\outputs\\apk\\debug\\app-debug.apk && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.31:5555 shell monkey -p com.mceryilmaz.whitedesk -c android.intent.category.LAUNCHER 1 && \"%LOCALAPPDATA%\\Android\\Sdk\\platform-tools\\adb.exe\" -s 192.168.1.30:5555 shell monkey -p com.mceryilmaz.whitedesk -c android.intent.category.LAUNCHER 1"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",

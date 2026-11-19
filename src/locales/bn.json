@@ -888,7 +888,9 @@
     "default_external_app": "বাহ্যিক অ্যাপ্লিকেশন",
     "explanation_banner": "প্রতিটি অ্যাপ্লিকেশনের জন্য একটি অনন্য ৬০-অক্ষরের SDK ব্রিজ কী তৈরি করা হয়। আপনি কোনো কী প্রত্যাহার করলে সেই অ্যাপ্লিকেশন থেকে টিকিট জমা দেওয়া তাৎক্ষণিকভাবে বন্ধ হয়ে যায়।",
     "placeholder_bridge_key": "৬০_অক্ষরের_sdk_ব্রিজ_কী",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId})-এর SDK ব্রিজ কী প্রত্যাহার করা হবে এবং এই অ্যাপ্লিকেশন থেকে আসা টিকিটগুলো প্রত্যাখ্যান করা হবে।"
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId})-এর SDK ব্রিজ কী প্রত্যাহার করা হবে এবং এই অ্যাপ্লিকেশন থেকে আসা টিকিটগুলো প্রত্যাখ্যান করা হবে।",
+    "subtitle": "অ্যাপ্লিকেশনের জন্য SDK ইন্টিগ্রেশন কী তৈরি করুন",
+    "sdk_badge_title": "SDK ইন্টিগ্রেশন"
   },
   "provisioning": {
     "action_delete": "মুছুন",
@@ -930,7 +932,7 @@
       "profile_subtitle": "সার্বভৌম মালিকানা ও সংযোগের বিবরণ",
       "status_sealed": "সিলড",
       "enterprise_name_label": "এন্টারপ্রাইজের নাম",
-      "blind_id_label": "ব্লাইন্ড ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "অ্যাডমিনিস্ট্রেটর কর্তৃত্ব",
       "protocol_label": "প্রোটোকল",
       "protocol_value": "Cloudflare D1 HTTPS • জিরো পার্সোনাল ডেটা • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "সকল অ্যাপ্লিকেশন",
       "all_apps_general": "সকল অ্যাপ্লিকেশন (সাধারণ)",
       "cat_name_label_upper": "ক্যাটাগরির নাম",
-      "cat_name_placeholder": "যেমন, হার্ডওয়্যার ত্রুটি, ইনভয়েস অনুরোধ, অ্যাকাউন্ট অ্যাক্সেস"
+      "cat_name_placeholder": "যেমন, হার্ডওয়্যার ত্রুটি, ইনভয়েস অনুরোধ, অ্যাকাউন্ট অ্যাক্সেস",
+      "users_section_title": "ব্যবহারকারী ({count})",
+      "add_user_modal_title": "নতুন ব্যবহারকারী যোগ করুন",
+      "add_user_modal_sub": "ব্যবহারকারীর অনুমতি এবং অ্যাক্সেস নির্ধারণ",
+      "sdk_integration_badge": "SDK ইন্টিগ্রেশন",
+      "admin_categories_title": "বিভাগসমূহ",
+      "admin_categories_sub": "অ্যাডমিনের জন্য বিশেষভাবে নির্ধারিত সহায়তা বিভাগসমূহ",
+      "delete_user_title": "ব্যবহারকারী মুছুন"
     }
   },
   "settings": {

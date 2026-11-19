@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Layers,
   Users,
+  User,
   Crown,
 } from 'lucide-react-native';
 import { ProvisioningHashModal } from '../../ProvisioningHashModal';
@@ -124,6 +125,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
 
   // Hash & QR Yetki Yönetimi Modalı
   const [hashModalVisible, setHashModalVisible] = useState<boolean>(false);
+  const [hashModalInitialRole, setHashModalInitialRole] = useState<'admin' | 'user'>('admin');
 
   // Zengin Giriş Modalları (Organizasyon ve Kategori)
   const [addOrgModalOpen, setAddOrgModalOpen] = useState<boolean>(false);
@@ -339,125 +341,134 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   </Text>
                 </View>
 
-                {/* 10 taneye kadar yatay kaydırılır; 10'dan fazla ise çok satıra sarılır */}
-                {!isMoreThanTenAdmins ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalScrollContent}
-                  >
-                    {filteredAdmins.map((adm) => {
-                      const isSelected = (selectedAdminId || defaultSelectedAdmin) === adm.white_id;
-                      const isGlobal = adm.role === 'global_admin';
-                      const isFounderRole = adm.role === 'founder' || adm.role === 'master';
-                      const canDelete = onRemoveAdmin && !isGlobal && !isFounderRole && (!ownWhiteId || adm.white_id.toLowerCase() !== ownWhiteId.toLowerCase());
-                      return (
-                        <TouchableOpacity
-                          key={`admin_pill_${adm.white_id}`}
-                          style={[styles.chipItem, isSelected && styles.chipItemActive]}
-                          onPress={() => setSelectedAdminId(adm.white_id)}
-                          activeOpacity={0.75}
-                        >
-                          {isGlobal ? (
-                            <ShieldCheck size={13} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
-                          ) : isFounderRole ? (
-                            <Crown size={13} color={isSelected ? '#FFFFFF' : '#D97706'} style={{ marginRight: 5 }} />
-                          ) : (
-                            <Users size={13} color={isSelected ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
-                          )}
-                          <Text
-                            style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}
-                            numberOfLines={1}
-                          >
-                            {adm.alias ? adm.alias : formatWhiteId(adm.white_id)}
-                          </Text>
-                          {isSelected && !canDelete && (
-                            <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
-                          )}
-                          {canDelete && (
-                            <TouchableOpacity
-                              onPress={() => setDeleteConfirm({
-                                visible: true,
-                                type: 'admin',
-                                id: adm.white_id,
-                                name: adm.alias || formatWhiteId(adm.white_id),
-                              })}
-                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                              style={styles.chipDeleteBtn}
-                            >
-                              <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
-                            </TouchableOpacity>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
-
-                    {/* Son yöneticinin sağında yuvarlak + butonu (Yetki Yönetimi Modalı Açar) */}
-                    <TouchableOpacity
-                      style={styles.roundAddButton}
-                      onPress={() => setHashModalVisible(true)}
-                      activeOpacity={0.8}
+                {/* Shade Container */}
+                <View style={styles.sectionShadePanel}>
+                  {/* 10 taneye kadar yatay kaydırılır; 10'dan fazla ise çok satıra sarılır */}
+                  {!isMoreThanTenAdmins ? (
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.horizontalScrollContent}
                     >
-                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
-                    </TouchableOpacity>
-                  </ScrollView>
-                ) : (
-                  <View style={styles.wrapGridContainer}>
-                    {filteredAdmins.map((adm) => {
-                      const isSelected = (selectedAdminId || defaultSelectedAdmin) === adm.white_id;
-                      const isGlobal = adm.role === 'global_admin';
-                      const isFounderRole = adm.role === 'founder' || adm.role === 'master';
-                      const canDelete = onRemoveAdmin && !isGlobal && !isFounderRole && (!ownWhiteId || adm.white_id.toLowerCase() !== ownWhiteId.toLowerCase());
-                      return (
-                        <TouchableOpacity
-                          key={`admin_pill_${adm.white_id}`}
-                          style={[styles.chipItem, isSelected && styles.chipItemActive]}
-                          onPress={() => setSelectedAdminId(adm.white_id)}
-                          activeOpacity={0.75}
-                        >
-                          {isGlobal ? (
-                            <ShieldCheck size={13} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
-                          ) : isFounderRole ? (
-                            <Crown size={13} color={isSelected ? '#FFFFFF' : '#D97706'} style={{ marginRight: 5 }} />
-                          ) : (
-                            <Users size={13} color={isSelected ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
-                          )}
-                          <Text
-                            style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}
-                            numberOfLines={1}
+                      {filteredAdmins.map((adm) => {
+                        const isSelected = (selectedAdminId || defaultSelectedAdmin) === adm.white_id;
+                        const isGlobal = adm.role === 'global_admin';
+                        const isFounderRole = adm.role === 'founder' || adm.role === 'master';
+                        const canDelete = onRemoveAdmin && !isGlobal && !isFounderRole && (!ownWhiteId || adm.white_id.toLowerCase() !== ownWhiteId.toLowerCase());
+                        return (
+                          <TouchableOpacity
+                            key={`admin_pill_${adm.white_id}`}
+                            style={[styles.chipItem, isSelected && styles.chipItemActive]}
+                            onPress={() => setSelectedAdminId(adm.white_id)}
+                            activeOpacity={0.75}
                           >
-                            {adm.alias ? adm.alias : formatWhiteId(adm.white_id)}
-                          </Text>
-                          {isSelected && !canDelete && (
-                            <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
-                          )}
-                          {canDelete && (
-                            <TouchableOpacity
-                              onPress={() => setDeleteConfirm({
-                                visible: true,
-                                type: 'admin',
-                                id: adm.white_id,
-                                name: adm.alias || formatWhiteId(adm.white_id),
-                              })}
-                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                              style={styles.chipDeleteBtn}
+                            {isGlobal ? (
+                              <ShieldCheck size={13} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
+                            ) : isFounderRole ? (
+                              <Crown size={13} color={isSelected ? '#FFFFFF' : '#D97706'} style={{ marginRight: 5 }} />
+                            ) : (
+                              <Users size={13} color={isSelected ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
+                            )}
+                            <Text
+                              style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}
+                              numberOfLines={1}
                             >
-                              <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
-                            </TouchableOpacity>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
+                              {adm.alias ? adm.alias : formatWhiteId(adm.white_id)}
+                            </Text>
+                            {isSelected && !canDelete && (
+                              <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
+                            )}
+                            {canDelete && (
+                              <TouchableOpacity
+                                onPress={() => setDeleteConfirm({
+                                  visible: true,
+                                  type: 'admin',
+                                  id: adm.white_id,
+                                  name: adm.alias || formatWhiteId(adm.white_id),
+                                })}
+                                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                                style={styles.chipDeleteBtn}
+                              >
+                                <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
+                              </TouchableOpacity>
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
 
-                    <TouchableOpacity
-                      style={styles.roundAddButton}
-                      onPress={() => setHashModalVisible(true)}
-                      activeOpacity={0.8}
-                    >
-                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                      {/* Son yöneticinin sağında yuvarlak + butonu (Yeni Yönetici Ekle Modalı Açar) */}
+                      <TouchableOpacity
+                        style={styles.roundAddButton}
+                        onPress={() => {
+                          setHashModalInitialRole('admin');
+                          setHashModalVisible(true);
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                      </TouchableOpacity>
+                    </ScrollView>
+                  ) : (
+                    <View style={styles.wrapGridContainer}>
+                      {filteredAdmins.map((adm) => {
+                        const isSelected = (selectedAdminId || defaultSelectedAdmin) === adm.white_id;
+                        const isGlobal = adm.role === 'global_admin';
+                        const isFounderRole = adm.role === 'founder' || adm.role === 'master';
+                        const canDelete = onRemoveAdmin && !isGlobal && !isFounderRole && (!ownWhiteId || adm.white_id.toLowerCase() !== ownWhiteId.toLowerCase());
+                        return (
+                          <TouchableOpacity
+                            key={`admin_pill_${adm.white_id}`}
+                            style={[styles.chipItem, isSelected && styles.chipItemActive]}
+                            onPress={() => setSelectedAdminId(adm.white_id)}
+                            activeOpacity={0.75}
+                          >
+                            {isGlobal ? (
+                              <ShieldCheck size={13} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
+                            ) : isFounderRole ? (
+                              <Crown size={13} color={isSelected ? '#FFFFFF' : '#D97706'} style={{ marginRight: 5 }} />
+                            ) : (
+                              <Users size={13} color={isSelected ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
+                            )}
+                            <Text
+                              style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}
+                              numberOfLines={1}
+                            >
+                              {adm.alias ? adm.alias : formatWhiteId(adm.white_id)}
+                            </Text>
+                            {isSelected && !canDelete && (
+                              <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
+                            )}
+                            {canDelete && (
+                              <TouchableOpacity
+                                onPress={() => setDeleteConfirm({
+                                  visible: true,
+                                  type: 'admin',
+                                  id: adm.white_id,
+                                  name: adm.alias || formatWhiteId(adm.white_id),
+                                })}
+                                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                                style={styles.chipDeleteBtn}
+                              >
+                                <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
+                              </TouchableOpacity>
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
+
+                      <TouchableOpacity
+                        style={styles.roundAddButton}
+                        onPress={() => {
+                          setHashModalInitialRole('admin');
+                          setHashModalVisible(true);
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
 
               {/* 3. ORGANİZASYONLAR */}
@@ -469,70 +480,73 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   </Text>
                 </View>
 
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalScrollContent}
-                >
-                  {/* Tümü Filtresi */}
-                  <TouchableOpacity
-                    style={[styles.chipItem, selectedStationOrg === 'all' && styles.chipItemActive]}
-                    onPress={() => setSelectedStationOrg('all')}
-                    activeOpacity={0.75}
+                {/* Shade Container */}
+                <View style={styles.sectionShadePanel}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
                   >
-                    <Layers size={12} color={selectedStationOrg === 'all' ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
-                    <Text style={[styles.chipItemText, selectedStationOrg === 'all' && styles.chipItemTextActive]}>
-                      {t('common.all')}
-                    </Text>
-                    {selectedStationOrg === 'all' && (
-                      <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
-                    )}
-                  </TouchableOpacity>
+                    {/* Tümü Filtresi */}
+                    <TouchableOpacity
+                      style={[styles.chipItem, selectedStationOrg === 'all' && styles.chipItemActive]}
+                      onPress={() => setSelectedStationOrg('all')}
+                      activeOpacity={0.75}
+                    >
+                      <Layers size={12} color={selectedStationOrg === 'all' ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
+                      <Text style={[styles.chipItemText, selectedStationOrg === 'all' && styles.chipItemTextActive]}>
+                        {t('common.all')}
+                      </Text>
+                      {selectedStationOrg === 'all' && (
+                        <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
+                      )}
+                    </TouchableOpacity>
 
-                  {filteredOrgs.map((org) => {
-                    const isSelected = selectedStationOrg === org.org_id;
-                    const isProtected = org.org_id === 'default' || org.org_id === 'thewhite' || org.org_id === '*';
-                    return (
-                      <TouchableOpacity
-                        key={`org_${org.org_id}`}
-                        style={[styles.chipItem, isSelected && styles.chipItemActive]}
-                        onPress={() => setSelectedStationOrg(isSelected ? 'all' : org.org_id)}
-                        activeOpacity={0.75}
-                      >
-                        <Layers size={12} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
-                        <Text style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}>
-                          {org.name || org.org_id}
-                        </Text>
-                        {isSelected && (
-                          <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
-                        )}
-                        {!isProtected && (
-                          <TouchableOpacity
-                            onPress={() => setDeleteConfirm({
-                              visible: true,
-                              type: 'org',
-                              id: org.org_id,
-                              name: org.name || org.org_id,
-                            })}
-                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                            style={styles.chipDeleteBtn}
-                          >
-                            <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
-                          </TouchableOpacity>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
+                    {filteredOrgs.map((org) => {
+                      const isSelected = selectedStationOrg === org.org_id;
+                      const isProtected = org.org_id === 'default' || org.org_id === 'thewhite' || org.org_id === '*';
+                      return (
+                        <TouchableOpacity
+                          key={`org_${org.org_id}`}
+                          style={[styles.chipItem, isSelected && styles.chipItemActive]}
+                          onPress={() => setSelectedStationOrg(isSelected ? 'all' : org.org_id)}
+                          activeOpacity={0.75}
+                        >
+                          <Layers size={12} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
+                          <Text style={[styles.chipItemText, isSelected && styles.chipItemTextActive]}>
+                            {org.name || org.org_id}
+                          </Text>
+                          {isSelected && (
+                            <Check size={13} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 5 }} />
+                          )}
+                          {!isProtected && (
+                            <TouchableOpacity
+                              onPress={() => setDeleteConfirm({
+                                visible: true,
+                                type: 'org',
+                                id: org.org_id,
+                                name: org.name || org.org_id,
+                              })}
+                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                              style={styles.chipDeleteBtn}
+                            >
+                              <X size={12} color={isSelected ? '#FFFFFF' : '#EF4444'} strokeWidth={2.5} />
+                            </TouchableOpacity>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
 
-                  {/* En sonuncunun sağında yuvarlak + butonu */}
-                  <TouchableOpacity
-                    style={styles.roundAddButton}
-                    onPress={() => setAddOrgModalOpen(true)}
-                    activeOpacity={0.8}
-                  >
-                    <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
-                  </TouchableOpacity>
-                </ScrollView>
+                    {/* En sonuncunun sağında yuvarlak + butonu */}
+                    <TouchableOpacity
+                      style={styles.roundAddButton}
+                      onPress={() => setAddOrgModalOpen(true)}
+                      activeOpacity={0.8}
+                    >
+                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                    </TouchableOpacity>
+                  </ScrollView>
+                </View>
               </View>
 
               {/* 4. UYGULAMALAR */}
@@ -544,49 +558,52 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   </Text>
                 </View>
 
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalScrollContent}
-                >
-                  {appsList.map((app) => {
-                    const isProtected = app.app_id === 'inwhite';
-                    return (
-                      <View key={`app_${app.app_id}`} style={styles.chipItem}>
-                        <LayoutGrid size={12} color="#3B82F6" style={{ marginRight: 4 }} />
-                        <Text style={styles.chipItemText}>{app.name || app.app_id}</Text>
-                        {!isProtected && (
-                          <TouchableOpacity
-                            onPress={() => setDeleteConfirm({
-                              visible: true,
-                              type: 'app',
-                              id: app.app_id,
-                              name: app.name || app.app_id,
-                            })}
-                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                            style={styles.chipDeleteBtn}
-                          >
-                            <X size={12} color="#EF4444" strokeWidth={2.5} />
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    );
-                  })}
+                {/* Shade Container */}
+                <View style={styles.sectionShadePanel}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
+                  >
+                    {appsList.map((app) => {
+                      const isProtected = app.app_id === 'inwhite';
+                      return (
+                        <View key={`app_${app.app_id}`} style={styles.chipItem}>
+                          <LayoutGrid size={12} color="#3B82F6" style={{ marginRight: 4 }} />
+                          <Text style={styles.chipItemText}>{app.name || app.app_id}</Text>
+                          {!isProtected && (
+                            <TouchableOpacity
+                              onPress={() => setDeleteConfirm({
+                                visible: true,
+                                type: 'app',
+                                id: app.app_id,
+                                name: app.name || app.app_id,
+                              })}
+                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                              style={styles.chipDeleteBtn}
+                            >
+                              <X size={12} color="#EF4444" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      );
+                    })}
 
-                  {/* En sonuncunun sağında yuvarlak + butonu */}
-                  {onOpenSdkIntegration && (
-                    <TouchableOpacity
-                      style={styles.roundAddButton}
-                      onPress={onOpenSdkIntegration}
-                      activeOpacity={0.8}
-                    >
-                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
-                    </TouchableOpacity>
-                  )}
-                </ScrollView>
+                    {/* En sonuncunun sağında yuvarlak + butonu */}
+                    {onOpenSdkIntegration && (
+                      <TouchableOpacity
+                        style={styles.roundAddButton}
+                        onPress={onOpenSdkIntegration}
+                        activeOpacity={0.8}
+                      >
+                        <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                      </TouchableOpacity>
+                    )}
+                  </ScrollView>
+                </View>
               </View>
 
-              {/* 5. KATEGORİLER (Katı Hiyerarşi) */}
+              {/* 5. KATEGORİLER (Birim Bazlı veya Genel Destek Kategorileri) */}
               <View style={styles.sectionBlock}>
                 <View style={styles.sectionTitleRow}>
                   <Tag size={16} color="#3B82F6" strokeWidth={2.2} style={{ marginRight: 6 }} />
@@ -595,47 +612,86 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   </Text>
                 </View>
 
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalScrollContent}
-                >
-                  {filteredCategories.map((cat) => {
-                    const isProtected = cat.id === 'all';
-                    return (
-                      <View key={`cat_${cat.id}`} style={styles.chipItem}>
-                        <Tag size={12} color="#3B82F6" style={{ marginRight: 4 }} />
-                        <Text style={styles.chipItemText}>{cat.labelTr || cat.id}</Text>
-                        {!isProtected && (
-                          <TouchableOpacity
-                            onPress={() => setDeleteConfirm({
-                              visible: true,
-                              type: 'category',
-                              id: cat.id,
-                              name: cat.labelTr || cat.id,
-                            })}
-                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                            style={styles.chipDeleteBtn}
-                          >
-                            <X size={12} color="#EF4444" strokeWidth={2.5} />
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    );
-                  })}
-
-                  {/* En sonuncunun sağında yuvarlak + butonu */}
-                  <TouchableOpacity
-                    style={styles.roundAddButton}
-                    onPress={() => {
-                      setSelectedCatOrg(selectedStationOrg !== 'all' ? selectedStationOrg : '');
-                      setAddCatModalOpen(true);
-                    }}
-                    activeOpacity={0.8}
+                {/* Shade Container */}
+                <View style={styles.sectionShadePanel}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
                   >
-                    <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
-                  </TouchableOpacity>
-                </ScrollView>
+                    {filteredCategories.map((cat) => {
+                      const isProtected = cat.id === 'all';
+                      return (
+                        <View key={`cat_${cat.id}`} style={styles.chipItem}>
+                          <Tag size={12} color="#3B82F6" style={{ marginRight: 4 }} />
+                          <Text style={styles.chipItemText}>{cat.labelTr || cat.id}</Text>
+                          {!isProtected && (
+                            <TouchableOpacity
+                              onPress={() => setDeleteConfirm({
+                                visible: true,
+                                type: 'category',
+                                id: cat.id,
+                                name: cat.labelTr || cat.id,
+                              })}
+                              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                              style={styles.chipDeleteBtn}
+                            >
+                              <X size={12} color="#EF4444" strokeWidth={2.5} />
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      );
+                    })}
+
+                    {/* En sonuncunun sağında yuvarlak + butonu */}
+                    <TouchableOpacity
+                      style={styles.roundAddButton}
+                      onPress={() => {
+                        setSelectedCatOrg(selectedStationOrg !== 'all' ? selectedStationOrg : '');
+                        setAddCatModalOpen(true);
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                    </TouchableOpacity>
+                  </ScrollView>
+                </View>
+              </View>
+
+              {/* 6. KULLANICILAR (Ayrılmış Bağımsız Satır) */}
+              <View style={styles.sectionBlock}>
+                <View style={styles.sectionTitleRow}>
+                  <User size={16} color="#7C3AED" strokeWidth={2.2} style={{ marginRight: 6 }} />
+                  <Text style={styles.sectionTitleText}>
+                    {t('provisioning.station.users_section_title', { count: 0 })}
+                  </Text>
+                </View>
+
+                {/* Shade Container */}
+                <View style={styles.sectionShadePanel}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
+                  >
+                    <View style={styles.chipItem}>
+                      <User size={12} color="#7C3AED" style={{ marginRight: 4 }} />
+                      <Text style={styles.chipItemText}>{t('provisioning.all_units')}</Text>
+                    </View>
+
+                    {/* Yeni Kullanıcı Yetki Üretim Butonu */}
+                    <TouchableOpacity
+                      style={[styles.roundAddButton, { backgroundColor: '#7C3AED' }]}
+                      onPress={() => {
+                        setHashModalInitialRole('user');
+                        setHashModalVisible(true);
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Plus size={16} color="#FFFFFF" strokeWidth={2.8} />
+                    </TouchableOpacity>
+                  </ScrollView>
+                </View>
               </View>
             </ScrollView>
 
@@ -704,9 +760,11 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
           enterpriseBlindId={activeEnterpriseBlindId || 'default'}
           enterpriseName={displayTenantName}
           ownWhiteId={ownWhiteId || ''}
+          initialRole={hashModalInitialRole}
           tenants={tenantsList.map((t) => ({ enterprise_blind_id: t.enterprise_blind_id, name: t.name || t.enterprise_blind_id }))}
           orgs={orgsList.map((o) => ({ org_id: o.org_id, name: o.name || o.org_id }))}
           apps={appsList.map((a) => ({ app_id: a.app_id, name: a.name || a.app_id }))}
+          availableCategories={availableCategories.map((c) => ({ id: c.id, labelTr: c.labelTr, labelEn: c.labelEn, org_id: c.org_id }))}
         />
       )}
 
@@ -714,24 +772,31 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
       <Modal
         visible={addOrgModalOpen}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
+        statusBarTranslucent={true}
         onRequestClose={() => setAddOrgModalOpen(false)}
       >
-        <View style={styles.entryModalOverlay}>
+        <View style={styles.fullScreenOverlay}>
           <TouchableOpacity
             style={StyleSheet.absoluteFill}
             activeOpacity={1}
             onPress={() => setAddOrgModalOpen(false)}
           />
-          <View style={styles.entryModalCard}>
+          <View style={[styles.bottomSheetContainer, { maxHeight: adminModalHeight }]}>
+            {/* Tutamak (Drag Handle) */}
+            <View style={styles.sheetDragHandleBox}>
+              <View style={styles.sheetDragHandle} />
+            </View>
+
             <View style={styles.entryModalHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <View style={[styles.entryIconBox, { backgroundColor: '#EFF6FF' }]}>
                   <Layers size={18} color="#3B82F6" strokeWidth={2.2} />
                 </View>
-                <View style={{ marginLeft: 10 }}>
+                <View style={{ marginLeft: 10, flex: 1 }}>
                   <Text style={styles.entryModalTitle}>{t('provisioning.station.add_org_modal_title')}</Text>
                   <Text style={styles.entryModalSubtitle}>{t('provisioning.station.add_org_modal_sub')}</Text>
+                  <Text style={styles.entryModalCompanySub}>{displayTenantName}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -743,72 +808,74 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
               </TouchableOpacity>
             </View>
 
-            {/* 1. Firma (Bağlanacak Kuruluş) */}
-            <View style={styles.entryFieldGroup}>
-              <Text style={styles.entryFieldLabel}>{t('provisioning.station.company_label_upper')}</Text>
-              {isFounder && tenantsList && tenantsList.length > 0 ? (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.entryHorizontalChips}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+              {/* 1. Firma (Bağlanacak Kuruluş) */}
+              <View style={styles.entryFieldGroup}>
+                <Text style={styles.entryFieldLabel}>{t('provisioning.station.company_label_upper')}</Text>
+                {isFounder && tenantsList && tenantsList.length > 0 ? (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.entryHorizontalChips}
+                  >
+                    {tenantsList.map((t) => {
+                      const isSelected = selectedOrgTenant === t.enterprise_blind_id;
+                      return (
+                        <TouchableOpacity
+                          key={`org_tenant_${t.enterprise_blind_id}`}
+                          style={[styles.entryChip, isSelected && styles.entryChipActive]}
+                          onPress={() => setSelectedOrgTenant(t.enterprise_blind_id)}
+                          activeOpacity={0.75}
+                        >
+                          <Building2 size={12} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
+                          <Text style={[styles.entryChipText, isSelected && styles.entryChipTextActive]}>
+                            {t.name || t.enterprise_blind_id}
+                          </Text>
+                          {isSelected && <Check size={12} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 4 }} />}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                ) : (
+                  <View style={styles.lockedPill}>
+                    <Building2 size={13} color="#3B82F6" style={{ marginRight: 6 }} />
+                    <Text style={styles.lockedPillText}>{displayTenantName}</Text>
+                  </View>
+                )}
+              </View>
+
+              {/* 2. Organizasyon Adı */}
+              <View style={styles.entryFieldGroup}>
+                <Text style={styles.entryFieldLabel}>{t('provisioning.station.org_name_label_upper')}</Text>
+                <TextInput
+                  style={styles.entryInput}
+                  placeholder={t('provisioning.station.org_name_placeholder')}
+                  placeholderTextColor="#94A3B8"
+                  value={newOrgInput}
+                  onChangeText={onChangeNewOrgInput}
+                  autoFocus={true}
+                />
+              </View>
+
+              {/* Aksiyon Butonları */}
+              <View style={styles.entryActionRow}>
+                <TouchableOpacity
+                  style={styles.entryCancelBtn}
+                  onPress={() => setAddOrgModalOpen(false)}
+                  activeOpacity={0.7}
                 >
-                  {tenantsList.map((t) => {
-                    const isSelected = selectedOrgTenant === t.enterprise_blind_id;
-                    return (
-                      <TouchableOpacity
-                        key={`org_tenant_${t.enterprise_blind_id}`}
-                        style={[styles.entryChip, isSelected && styles.entryChipActive]}
-                        onPress={() => setSelectedOrgTenant(t.enterprise_blind_id)}
-                        activeOpacity={0.75}
-                      >
-                        <Building2 size={12} color={isSelected ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 5 }} />
-                        <Text style={[styles.entryChipText, isSelected && styles.entryChipTextActive]}>
-                          {t.name || t.enterprise_blind_id}
-                        </Text>
-                        {isSelected && <Check size={12} color="#FFFFFF" strokeWidth={3} style={{ marginLeft: 4 }} />}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              ) : (
-                <View style={styles.lockedPill}>
-                  <Building2 size={13} color="#3B82F6" style={{ marginRight: 6 }} />
-                  <Text style={styles.lockedPillText}>{displayTenantName}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* 2. Organizasyon Adı */}
-            <View style={styles.entryFieldGroup}>
-              <Text style={styles.entryFieldLabel}>{t('provisioning.station.org_name_label_upper')}</Text>
-              <TextInput
-                style={styles.entryInput}
-                placeholder={t('provisioning.station.org_name_placeholder')}
-                placeholderTextColor="#94A3B8"
-                value={newOrgInput}
-                onChangeText={onChangeNewOrgInput}
-                autoFocus={true}
-              />
-            </View>
-
-            {/* Aksiyon Butonları */}
-            <View style={styles.entryActionRow}>
-              <TouchableOpacity
-                style={styles.entryCancelBtn}
-                onPress={() => setAddOrgModalOpen(false)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.entrySubmitBtn, !newOrgInput.trim() && styles.entrySubmitBtnDisabled]}
-                onPress={handleConfirmAddOrg}
-                disabled={!newOrgInput.trim()}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
-              </TouchableOpacity>
-            </View>
+                  <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.entrySubmitBtn, !newOrgInput.trim() && styles.entrySubmitBtnDisabled]}
+                  onPress={handleConfirmAddOrg}
+                  disabled={!newOrgInput.trim()}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -817,24 +884,31 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
       <Modal
         visible={addCatModalOpen}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
+        statusBarTranslucent={true}
         onRequestClose={() => setAddCatModalOpen(false)}
       >
-        <View style={styles.entryModalOverlay}>
+        <View style={styles.fullScreenOverlay}>
           <TouchableOpacity
             style={StyleSheet.absoluteFill}
             activeOpacity={1}
             onPress={() => setAddCatModalOpen(false)}
           />
-          <View style={styles.entryModalCard}>
+          <View style={[styles.bottomSheetContainer, { maxHeight: adminModalHeight }]}>
+            {/* Tutamak (Drag Handle) */}
+            <View style={styles.sheetDragHandleBox}>
+              <View style={styles.sheetDragHandle} />
+            </View>
+
             <View style={styles.entryModalHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <View style={[styles.entryIconBox, { backgroundColor: '#EFF6FF' }]}>
                   <Tag size={18} color="#3B82F6" strokeWidth={2.2} />
                 </View>
-                <View style={{ marginLeft: 10 }}>
+                <View style={{ marginLeft: 10, flex: 1 }}>
                   <Text style={styles.entryModalTitle}>{t('provisioning.station.add_cat_modal_title')}</Text>
                   <Text style={styles.entryModalSubtitle}>{t('provisioning.station.add_cat_modal_sub')}</Text>
+                  <Text style={styles.entryModalCompanySub}>{displayTenantName}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -846,7 +920,7 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
               {/* 1. Firma Seçimi */}
               <View style={styles.entryFieldGroup}>
                 <Text style={styles.entryFieldLabel}>{t('provisioning.station.company_label_upper')}</Text>
@@ -985,26 +1059,26 @@ export const ProvisioningStationModal: React.FC<ProvisioningStationModalProps> =
                   autoFocus={true}
                 />
               </View>
-            </ScrollView>
 
-            {/* Aksiyon Butonları */}
-            <View style={styles.entryActionRow}>
-              <TouchableOpacity
-                style={styles.entryCancelBtn}
-                onPress={() => setAddCatModalOpen(false)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.entrySubmitBtn, !newCatNameInput.trim() && styles.entrySubmitBtnDisabled]}
-                onPress={handleConfirmAddCat}
-                disabled={!newCatNameInput.trim()}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
-              </TouchableOpacity>
-            </View>
+              {/* Aksiyon Butonları */}
+              <View style={styles.entryActionRow}>
+                <TouchableOpacity
+                  style={styles.entryCancelBtn}
+                  onPress={() => setAddCatModalOpen(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.entryCancelText}>{t('provisioning.cancel_btn')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.entrySubmitBtn, !newCatNameInput.trim() && styles.entrySubmitBtnDisabled]}
+                  onPress={handleConfirmAddCat}
+                  disabled={!newCatNameInput.trim()}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.entrySubmitText}>{t('provisioning.add_btn')}</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -1046,10 +1120,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   consoleTitleText: {
-    fontSize: 16,
+    fontSize: 18.5,
     fontWeight: '800',
     color: '#0F172A',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   consoleSubtitleText: {
     fontSize: 12,
@@ -1077,6 +1151,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#1E293B',
+  },
+  // Kart arkası shade paneli (ana ekrandaki bilet kartı tonunda #F4F7FA)
+  sectionShadePanel: {
+    backgroundColor: '#F4F7FA',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    position: 'relative',
   },
   horizontalScrollContent: {
     flexDirection: 'row',
@@ -1138,6 +1222,31 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginLeft: 2,
   },
+  // Bottom sheet container for add modals (Kenarlara sıfır, en alttan başlayan Samsung OneUI formatı)
+  bottomSheetContainer: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 24,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    elevation: 25,
+  },
+  sheetDragHandleBox: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  sheetDragHandle: {
+    width: 38,
+    height: 4.5,
+    borderRadius: 999,
+    backgroundColor: '#CBD5E1',
+  },
   // Modal Overlay & Container
   entryModalOverlay: {
     flex: 1,
@@ -1175,16 +1284,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   entryModalTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '800',
     color: '#0F172A',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   entryModalSubtitle: {
-    fontSize: 11.5,
+    fontSize: 13,
     fontWeight: '500',
     color: '#64748B',
-    marginTop: 1,
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  entryModalCompanySub: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#94A3B8',
+    marginTop: 2,
   },
   entryCloseBtn: {
     width: 28,

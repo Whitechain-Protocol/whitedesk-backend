@@ -23,6 +23,7 @@ import {
   Copy,
   Share2,
   ShieldCheck,
+  Tag,
 } from 'lucide-react-native';
 import { helpDeskService } from '../services/helpDeskService';
 import { useTranslation } from '../services/i18nService';
@@ -38,9 +39,11 @@ export interface ProvisioningHashModalProps {
   enterpriseName: string;
   ownWhiteId?: string;
   currentAdminAlias?: string;
+  initialRole?: ProvisionRoleType;
   tenants?: Array<{ enterprise_blind_id: string; name: string }>;
   orgs?: Array<{ org_id: string; name: string }>;
   apps?: Array<{ app_id: string; name: string; org_id?: string }>;
+  availableCategories?: Array<{ id: string; labelTr?: string; labelEn?: string; org_id?: string }>;
   onHashCreated?: (role: ProvisionRoleType, hash: string) => void;
 }
 
@@ -52,20 +55,24 @@ export function ProvisioningHashModal({
   enterpriseName,
   ownWhiteId = '',
   currentAdminAlias = '',
+  initialRole = 'admin',
   tenants = [],
   orgs = [],
   apps = [],
+  availableCategories = [],
   onHashCreated,
 }: ProvisioningHashModalProps) {
   const { t, language } = useTranslation();
-  const [selectedRole, setSelectedRole] = useState<ProvisionRoleType>('admin');
+  const [selectedRole, setSelectedRole] = useState<ProvisionRoleType>(initialRole);
   const [selectedTenantBlindId, setSelectedTenantBlindId] = useState<string>(enterpriseBlindId);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('default');
   const [selectedAppId, setSelectedAppId] = useState<string>('inwhite');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
   const [availableTenants, setAvailableTenants] = useState<Array<{ enterprise_blind_id: string; name: string }>>(tenants);
   const [availableOrgs, setAvailableOrgs] = useState<Array<{ org_id: string; name: string }>>(orgs);
   const [availableApps, setAvailableApps] = useState<Array<{ app_id: string; name: string }>>(apps);
+  const [catList, setCatList] = useState<Array<{ id: string; labelTr?: string; labelEn?: string; org_id?: string }>>(availableCategories);
 
   const [generatedHash, setGeneratedHash] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -74,16 +81,17 @@ export function ProvisioningHashModal({
   // Sync inputs on open
   useEffect(() => {
     if (visible) {
-      setSelectedRole('admin');
+      setSelectedRole(initialRole);
       setSelectedTenantBlindId(enterpriseBlindId);
       setSelectedOrgId('default');
       setSelectedAppId('inwhite');
+      setSelectedCategoryIds([]);
       setGeneratedHash('');
       setCopied(false);
 
       void loadContextData();
     }
-  }, [visible, enterpriseBlindId]);
+  }, [visible, enterpriseBlindId, initialRole]);
 
   const loadContextData = async () => {
     try {
@@ -116,6 +124,15 @@ export function ProvisioningHashModal({
           setAvailableApps(fetchedApps.map((a: any) => ({ app_id: a.app_id, name: a.name || a.app_id })));
         }
       }
+
+      if (availableCategories && availableCategories.length > 0) {
+        setCatList(availableCategories);
+      } else if (enterpriseBlindId) {
+        const fetchedCats = await helpDeskService.getCategories({ enterpriseBlindId });
+        if (fetchedCats) {
+          setCatList(fetchedCats.map((c: any) => ({ id: c.id, labelTr: c.labelTr, labelEn: c.labelEn, org_id: c.org_id })));
+        }
+      }
     } catch (e) {
       console.warn('[ProvisioningHashModal] loadContextData error:', e);
     }
@@ -126,6 +143,12 @@ export function ProvisioningHashModal({
     if (!visible) return;
     void handleGenerateHashForRole(selectedRole);
   }, [selectedRole, selectedTenantBlindId, selectedOrgId, selectedAppId, visible]);
+
+  const handleToggleCategory = (catId: string) => {
+    setSelectedCategoryIds(prev => 
+      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+    );
+  };
 
   const handleGenerateHashForRole = async (role: ProvisionRoleType) => {
     setLoading(true);
@@ -173,6 +196,14 @@ export function ProvisioningHashModal({
     const tenantItem = availableTenants.find(item => item.enterprise_blind_id === selectedTenantBlindId);
     return tenantItem?.name || enterpriseName || t('provisioning.default_company');
   };
+
+  const modalTitle = selectedRole === 'user'
+    ? t('provisioning.station.add_user_modal_title')
+    : t('provisioning.modal_title');
+
+  const modalSubtitle = selectedRole === 'user'
+    ? t('provisioning.station.add_user_modal_sub')
+    : t('provisioning.modal_subtitle');
 
   const handleCopy = async () => {
     if (!generatedHash) return;
@@ -250,13 +281,12 @@ export function ProvisioningHashModal({
             <View style={styles.dragHandle} />
           </View>
 
-          {/* Modal Başlık Çubuğu: Yetki Yönetimi */}
+          {/* Modal Başlık Çubuğu: Standart Yeni [Başlık] Ekle -> Açıklama -> Firma Adı */}
           <View style={styles.headerRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.titleText}>{t('provisioning.modal_title')}</Text>
-              <Text style={styles.subtitleText}>
-                {t('provisioning.modal_subtitle')}
-              </Text>
+              <Text style={styles.titleText}>{modalTitle}</Text>
+              <Text style={styles.subtitleText}>{modalSubtitle}</Text>
+              <Text style={styles.companySubText}>{getTargetTenantName()}</Text>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
               <X size={18} color="#475569" strokeWidth={2.4} />
@@ -296,15 +326,14 @@ export function ProvisioningHashModal({
               </View>
             )}
 
-            {/* 2. ROL SEÇENEKLERİ */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeaderRow}>
-                <ShieldCheck size={15} color="#3B82F6" style={{ marginRight: 6 }} />
-                <Text style={styles.sectionLabel}>{t('provisioning.section_roles')}</Text>
-              </View>
-              <View style={styles.roleToggleContainer}>
-                {/* Küresel Yönetici (TheWhite / Founder ise) */}
-                {isFounder && (
+            {/* 2. ROL SEÇENEKLERİ (Yalnızca Yönetici Modunda Kurucu ise Genel Yönetici opsiyonu) */}
+            {initialRole === 'admin' && isFounder && (
+              <View style={styles.sectionContainer}>
+                <View style={styles.sectionHeaderRow}>
+                  <ShieldCheck size={15} color="#3B82F6" style={{ marginRight: 6 }} />
+                  <Text style={styles.sectionLabel}>{t('provisioning.section_roles')}</Text>
+                </View>
+                <View style={styles.roleToggleContainer}>
                   <TouchableOpacity
                     style={[styles.roleToggleTab, selectedRole === 'global_admin' && styles.roleToggleTabActive]}
                     onPress={() => setSelectedRole('global_admin')}
@@ -315,33 +344,20 @@ export function ProvisioningHashModal({
                       {t('provisioning.role_global_admin')}
                     </Text>
                   </TouchableOpacity>
-                )}
 
-                {/* Yönetici */}
-                <TouchableOpacity
-                  style={[styles.roleToggleTab, selectedRole === 'admin' && styles.roleToggleTabActive]}
-                  onPress={() => setSelectedRole('admin')}
-                  activeOpacity={0.8}
-                >
-                  <Users size={14} color={selectedRole === 'admin' ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
-                  <Text style={[styles.roleToggleTabText, selectedRole === 'admin' && styles.roleToggleTabTextActive]}>
-                    {t('provisioning.role_admin')}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Kullanıcı */}
-                <TouchableOpacity
-                  style={[styles.roleToggleTab, selectedRole === 'user' && styles.roleToggleTabActive]}
-                  onPress={() => setSelectedRole('user')}
-                  activeOpacity={0.8}
-                >
-                  <User size={14} color={selectedRole === 'user' ? '#FFFFFF' : '#7C3AED'} style={{ marginRight: 5 }} />
-                  <Text style={[styles.roleToggleTabText, selectedRole === 'user' && styles.roleToggleTabTextActive]}>
-                    {t('provisioning.role_user')}
-                  </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.roleToggleTab, selectedRole === 'admin' && styles.roleToggleTabActive]}
+                    onPress={() => setSelectedRole('admin')}
+                    activeOpacity={0.8}
+                  >
+                    <Users size={14} color={selectedRole === 'admin' ? '#FFFFFF' : '#16A34A'} style={{ marginRight: 5 }} />
+                    <Text style={[styles.roleToggleTabText, selectedRole === 'admin' && styles.roleToggleTabTextActive]}>
+                      {t('provisioning.role_admin')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            )}
 
             {/* 3. ORGANİZASYON & UYGULAMA SEÇİMİ */}
             {(selectedRole === 'admin' || selectedRole === 'user') && (
@@ -413,6 +429,47 @@ export function ProvisioningHashModal({
                     })}
                   </ScrollView>
                 </View>
+
+                {/* Kategori Seçimi (Yalnızca Yönetici İçin Sıfır-Dropdown Doğrudan Hap Listesi) */}
+                {selectedRole === 'admin' && catList.length > 0 && (
+                  <View style={{ marginTop: 14 }}>
+                    <View style={styles.subOptionHeaderRow}>
+                      <Tag size={14} color="#64748B" style={{ marginRight: 6 }} />
+                      <Text style={styles.subOptionLabel}>{t('provisioning.station.admin_categories_title')}</Text>
+                    </View>
+                    <ScrollView 
+                      style={styles.categoryScrollArea} 
+                      nestedScrollEnabled={true}
+                      showsVerticalScrollIndicator={true}
+                    >
+                      <View style={styles.categoryChipsWrap}>
+                        {catList
+                          .filter(c => !selectedOrgId || selectedOrgId === 'default' || !c.org_id || c.org_id === 'all' || c.org_id === selectedOrgId)
+                          .map(cat => {
+                            const isCatSel = selectedCategoryIds.includes(cat.id);
+                            return (
+                              <TouchableOpacity
+                                key={`cat_toggle_${cat.id}`}
+                                style={[styles.catChipItem, isCatSel && styles.catChipItemActive]}
+                                onPress={() => handleToggleCategory(cat.id)}
+                                activeOpacity={0.75}
+                              >
+                                <Tag size={12} color={isCatSel ? '#FFFFFF' : '#3B82F6'} style={{ marginRight: 4 }} />
+                                <Text style={[styles.catChipItemText, isCatSel && styles.catChipItemTextActive]}>
+                                  {cat.labelTr || cat.id}
+                                </Text>
+                                {isCatSel ? (
+                                  <View style={styles.catChipCheckCircle}>
+                                    <X size={10} color="#FFFFFF" strokeWidth={2.5} />
+                                  </View>
+                                ) : null}
+                              </TouchableOpacity>
+                            );
+                          })}
+                      </View>
+                    </ScrollView>
+                  </View>
+                )}
               </View>
             )}
 
@@ -516,14 +573,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   titleText: {
-    fontSize: 18,
+    fontSize: 18.5,
     fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
   },
   subtitleText: {
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '500',
     color: '#64748B',
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  companySubText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#94A3B8',
     marginTop: 2,
   },
   closeBtn: {
@@ -633,6 +698,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#334155',
+  },
+  subOptionHint: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginLeft: 8,
+  },
+  categoryScrollArea: {
+    maxHeight: 120,
+    marginTop: 4,
+  },
+  categoryChipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+    paddingVertical: 2,
+  },
+  catChipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5.5,
+  },
+  catChipItemActive: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#2563EB',
+  },
+  catChipItemText: {
+    fontSize: 12,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  catChipItemTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  catChipCheckCircle: {
+    marginLeft: 5,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   subChipPill: {
     backgroundColor: '#F8FAFC',

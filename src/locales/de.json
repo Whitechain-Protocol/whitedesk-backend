@@ -888,7 +888,9 @@
     "default_external_app": "Externe Anwendung",
     "explanation_banner": "Für jede Anwendung wird ein eindeutiger 60-stelliger SDK-Brückenschlüssel generiert. Wenn Sie einen Schlüssel widerrufen, werden Ticketeinreichungen aus dieser Anwendung sofort gestoppt.",
     "placeholder_bridge_key": "60_stelliger_sdk_brueckenschluessel",
-    "revoke_confirm_dynamic_desc": "Der SDK-Brückenschlüssel für \"{appName}\" ({appId}) wird widerrufen und eingehende Tickets aus dieser Anwendung werden abgewiesen."
+    "revoke_confirm_dynamic_desc": "Der SDK-Brückenschlüssel für \"{appName}\" ({appId}) wird widerrufen und eingehende Tickets aus dieser Anwendung werden abgewiesen.",
+    "subtitle": "SDK-Integrationsschlüssel für die Anwendung generieren",
+    "sdk_badge_title": "SDK-Integration"
   },
   "provisioning": {
     "action_delete": "Löschen",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Alle Anwendungen",
       "all_apps_general": "Alle Anwendungen (Allgemein)",
       "cat_name_label_upper": "KATEGORIENAME",
-      "cat_name_placeholder": "z. B. Hardwaredefekt, Rechnungsanfrage, Kontozugriff"
+      "cat_name_placeholder": "z. B. Hardwaredefekt, Rechnungsanfrage, Kontozugriff",
+      "users_section_title": "Benutzer ({count})",
+      "add_user_modal_title": "Neuen Benutzer hinzufügen",
+      "add_user_modal_sub": "Benutzerberechtigungen und Zugriffsdefinition",
+      "sdk_integration_badge": "SDK-Integration",
+      "admin_categories_title": "Kategorien",
+      "admin_categories_sub": "Dem Administrator speziell zugewiesene Support-Kategorien",
+      "delete_user_title": "Benutzer löschen"
     }
   },
   "settings": {

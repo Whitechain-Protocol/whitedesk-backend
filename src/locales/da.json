@@ -888,7 +888,9 @@
     "default_external_app": "Ekstern applikation",
     "explanation_banner": "Der genereres en unik SDK-bronøgle på 60 tegn for hver applikation. Når du tilbagekalder en nøgle, stopper sagsindsendelser fra den pågældende applikation øjeblikkeligt.",
     "placeholder_bridge_key": "60_tegns_sdk_bronøgle",
-    "revoke_confirm_dynamic_desc": "SDK-bronøglen for \"{appName}\" ({appId}) tilbagekaldes, og indgående sager fra denne applikation afvises."
+    "revoke_confirm_dynamic_desc": "SDK-bronøglen for \"{appName}\" ({appId}) tilbagekaldes, og indgående sager fra denne applikation afvises.",
+    "subtitle": "Generer SDK-integrationsnøgle til applikationen",
+    "sdk_badge_title": "SDK-integration"
   },
   "provisioning": {
     "action_delete": "Slet",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suverænt ejerskab og forbindelsesoplysninger",
       "status_sealed": "Forseglet",
       "enterprise_name_label": "Virksomhedsnavn",
-      "blind_id_label": "Blindt ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratorrettigheder",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Nul persondata • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Alle applikationer",
       "all_apps_general": "Alle applikationer (Generelt)",
       "cat_name_label_upper": "KATEGORINAVN",
-      "cat_name_placeholder": "f.eks. Hardwarefejl, Fakturaanmodning, Kontoadgang"
+      "cat_name_placeholder": "f.eks. Hardwarefejl, Fakturaanmodning, Kontoadgang",
+      "users_section_title": "Brugere ({count})",
+      "add_user_modal_title": "Tilføj ny bruger",
+      "add_user_modal_sub": "Brugertilladelser og adgangsdefinition",
+      "sdk_integration_badge": "SDK-integration",
+      "admin_categories_title": "Kategorier",
+      "admin_categories_sub": "Supportkategorier tildelt specifikt til administrator",
+      "delete_user_title": "Slet bruger"
     }
   },
   "settings": {

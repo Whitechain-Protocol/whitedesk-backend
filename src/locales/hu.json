@@ -888,7 +888,9 @@
     "default_external_app": "Külső alkalmazás",
     "explanation_banner": "Minden alkalmazáshoz egyedi, 60 karakteres SDK-hídkulcs jön létre. Ha visszavon egy kulcsot, az adott alkalmazásból érkező hibajegy-beküldések azonnal leállnak.",
     "placeholder_bridge_key": "60_karakteres_sdk_hidkulcs",
-    "revoke_confirm_dynamic_desc": "A(z) „{appName}” ({appId}) alkalmazás SDK-hídkulcsa visszavonásra kerül, és az ebből az alkalmazásból érkező hibajegyek elutasításra kerülnek."
+    "revoke_confirm_dynamic_desc": "A(z) „{appName}” ({appId}) alkalmazás SDK-hídkulcsa visszavonásra kerül, és az ebből az alkalmazásból érkező hibajegyek elutasításra kerülnek.",
+    "subtitle": "SDK integrációs kulcs generálása az alkalmazáshoz",
+    "sdk_badge_title": "SDK integráció"
   },
   "provisioning": {
     "action_delete": "Törlés",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Szuverén tulajdonosi és kapcsolati részletek",
       "status_sealed": "Hitelesítve",
       "enterprise_name_label": "Vállalat neve",
-      "blind_id_label": "Vakazonosító (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Adminisztrátori jogosultság",
       "protocol_label": "Protokoll",
       "protocol_value": "Cloudflare D1 HTTPS • Nulla személyes adat • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Összes alkalmazás",
       "all_apps_general": "Összes alkalmazás (Általános)",
       "cat_name_label_upper": "KATEGÓRIA NEVE",
-      "cat_name_placeholder": "pl. Hardverhiba, Számlakérés, Fiókhozzáférés"
+      "cat_name_placeholder": "pl. Hardverhiba, Számlakérés, Fiókhozzáférés",
+      "users_section_title": "Felhasználók ({count})",
+      "add_user_modal_title": "Új felhasználó hozzáadása",
+      "add_user_modal_sub": "Felhasználói jogosultságok és hozzáférés meghatározása",
+      "sdk_integration_badge": "SDK integráció",
+      "admin_categories_title": "Kategóriák",
+      "admin_categories_sub": "Kifejezetten az adminisztrátorhoz rendelt támogatási kategóriák",
+      "delete_user_title": "Felhasználó törlése"
     }
   },
   "settings": {

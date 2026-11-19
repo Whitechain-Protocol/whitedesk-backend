@@ -1231,7 +1231,8 @@ export const helpDeskStationService = {
     const cleanId = WhiteDeskCrypto.generateBlindId(adminWhiteId.trim());
     const cleanOrg = orgId.trim().toLowerCase() || 'all';
     const cleanApp = appId.trim().toLowerCase() || 'all';
-    let sql = `UPDATE whitedesk_admins SET org_id = ${escapeSqlString(cleanOrg)}, app_id = ${escapeSqlString(cleanApp)}`;
+    const cleanCats = Array.isArray(categories) && categories.length > 0 ? JSON.stringify(categories) : "[\"all\"]";
+    let sql = `UPDATE whitedesk_admins SET org_id = ${escapeSqlString(cleanOrg)}, app_id = ${escapeSqlString(cleanApp)}, categories = ${escapeSqlString(cleanCats)}`;
     if (enterpriseBlindId) {
       sql += `, enterprise_blind_id = ${escapeSqlString(enterpriseBlindId)}`;
     }

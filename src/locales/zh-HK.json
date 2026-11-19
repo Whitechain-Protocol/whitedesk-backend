@@ -888,7 +888,9 @@
     "default_external_app": "外部應用程式",
     "explanation_banner": "系統會為每個應用程式產生唯一的 60 字元 SDK 橋接密鑰。當您撤銷密鑰時，來自該應用程式的工單提交將立即停止。",
     "placeholder_bridge_key": "60_字元_sdk_橋接密鑰",
-    "revoke_confirm_dynamic_desc": "「{appName}」({appId}) 的 SDK 橋接密鑰將被撤銷，來自此應用程式的工單將一併遭到拒絕。"
+    "revoke_confirm_dynamic_desc": "「{appName}」({appId}) 的 SDK 橋接密鑰將被撤銷，來自此應用程式的工單將一併遭到拒絕。",
+    "subtitle": "為應用程式產生 SDK 整合密匙",
+    "sdk_badge_title": "SDK 整合"
   },
   "provisioning": {
     "action_delete": "刪除",
@@ -930,7 +932,7 @@
       "profile_subtitle": "主權所有權與連線詳細資訊",
       "status_sealed": "已封存",
       "enterprise_name_label": "企業名稱",
-      "blind_id_label": "盲化 ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "管理員權限",
       "protocol_label": "通訊協定",
       "protocol_value": "Cloudflare D1 HTTPS • 零個人資料 • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "所有應用程式",
       "all_apps_general": "所有應用程式（通用）",
       "cat_name_label_upper": "類別名稱",
-      "cat_name_placeholder": "例如：硬件故障、發票申請、帳號存取"
+      "cat_name_placeholder": "例如：硬件故障、發票申請、帳號存取",
+      "users_section_title": "用戶 ({count})",
+      "add_user_modal_title": "新增用戶",
+      "add_user_modal_sub": "用戶權限與訪問定義",
+      "sdk_integration_badge": "SDK 整合",
+      "admin_categories_title": "分類",
+      "admin_categories_sub": "專門分配給管理員的支援分類",
+      "delete_user_title": "刪除用戶"
     }
   },
   "settings": {

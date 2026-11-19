@@ -888,7 +888,9 @@
     "default_external_app": "Ārēja lietotne",
     "explanation_banner": "Katrai lietotnei tiek ģenerēta unikāla 60 rakstzīmju SDK tilta atslēga. Atsaucot atslēgu, pieteikumu iesniegšana no šīs lietotnes tiek nekavējoties apturēta.",
     "placeholder_bridge_key": "60_rakstzīmju_sdk_tilta_atslēga",
-    "revoke_confirm_dynamic_desc": "Lietotnes \"{appName}\" ({appId}) SDK tilta atslēga tiks atsaukta, un ienākošie pieteikumi no šīs lietotnes tiks noraidīti."
+    "revoke_confirm_dynamic_desc": "Lietotnes \"{appName}\" ({appId}) SDK tilta atslēga tiks atsaukta, un ienākošie pieteikumi no šīs lietotnes tiks noraidīti.",
+    "subtitle": "Ģenerēt lietotnes SDK integrācijas atslēgu",
+    "sdk_badge_title": "SDK integrācija"
   },
   "provisioning": {
     "action_delete": "Dzēst",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suverēnas īpašumtiesības un savienojuma detaļas",
       "status_sealed": "Aizzīmogots",
       "enterprise_name_label": "Uzņēmuma nosaukums",
-      "blind_id_label": "Aklais ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratora pilnvaras",
       "protocol_label": "Protokols",
       "protocol_value": "Cloudflare D1 HTTPS • Nulle personas datu • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Visām lietotnēm",
       "all_apps_general": "Visas lietotnes (Vispārīgi)",
       "cat_name_label_upper": "KATEGORIJAS NOSAUKUMS",
-      "cat_name_placeholder": "piem., Aparatūras kļūme, Rēķina pieprasījums, Piekļuve kontam"
+      "cat_name_placeholder": "piem., Aparatūras kļūme, Rēķina pieprasījums, Piekļuve kontam",
+      "users_section_title": "Lietotāji ({count})",
+      "add_user_modal_title": "Pievienot jaunu lietotāju",
+      "add_user_modal_sub": "Lietotāja atļauju un piekļuves definīcija",
+      "sdk_integration_badge": "SDK integrācija",
+      "admin_categories_title": "Kategorijas",
+      "admin_categories_sub": "Administratoram piešķirtās atbalsta kategorijas",
+      "delete_user_title": "Dzēst lietotāju"
     }
   },
   "settings": {

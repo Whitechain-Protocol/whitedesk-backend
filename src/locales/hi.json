@@ -888,7 +888,9 @@
     "default_external_app": "बाहरी एप्लिकेशन",
     "explanation_banner": "प्रत्येक एप्लिकेशन के लिए एक अद्वितीय 60-वर्ण की SDK ब्रिज कुंजी उत्पन्न होती है। जब आप किसी कुंजी को रद्द करते हैं, तो उस एप्लिकेशन से टिकट सबमिशन तुरंत रुक जाते हैं।",
     "placeholder_bridge_key": "60_वर्ण_की_sdk_ब्रिज_कुंजी",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) के लिए SDK ब्रिज कुंजी रद्द कर दी जाएगी और इस एप्लिकेशन से आने वाले टिकट अस्वीकार कर दिए जाएंगे।"
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) के लिए SDK ब्रिज कुंजी रद्द कर दी जाएगी और इस एप्लिकेशन से आने वाले टिकट अस्वीकार कर दिए जाएंगे।",
+    "subtitle": "एप्लिकेशन के लिए SDK इंटीग्रेशन की जनरेट करें",
+    "sdk_badge_title": "SDK इंटीग्रेशन"
   },
   "provisioning": {
     "action_delete": "हटाएं",
@@ -930,7 +932,7 @@
       "profile_subtitle": "संप्रभु स्वामित्व और कनेक्शन विवरण",
       "status_sealed": "सीलबंद",
       "enterprise_name_label": "एंटरप्राइज़ का नाम",
-      "blind_id_label": "ब्लाइंड ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "एडमिनिस्ट्रेटर अधिकार",
       "protocol_label": "प्रोटोकॉल",
       "protocol_value": "Cloudflare D1 HTTPS • शून्य व्यक्तिगत डेटा • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "सभी एप्लिकेशन",
       "all_apps_general": "सभी एप्लिकेशन (सामान्य)",
       "cat_name_label_upper": "श्रेणी का नाम",
-      "cat_name_placeholder": "उदा., हार्डवेयर विफलता, चालान अनुरोध, खाता एक्सेस"
+      "cat_name_placeholder": "उदा., हार्डवेयर विफलता, चालान अनुरोध, खाता एक्सेस",
+      "users_section_title": "उपयोगकर्ता ({count})",
+      "add_user_modal_title": "नया उपयोगकर्ता जोड़ें",
+      "add_user_modal_sub": "उपयोगकर्ता अनुमतियाँ और एक्सेस परिभाषा",
+      "sdk_integration_badge": "SDK इंटीग्रेशन",
+      "admin_categories_title": "श्रेणियां",
+      "admin_categories_sub": "व्यवस्थापक को विशेष रूप से सौंपी गई सहायता श्रेणियां",
+      "delete_user_title": "उपयोगकर्ता हटाएं"
     }
   },
   "settings": {

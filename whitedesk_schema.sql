@@ -256,13 +256,17 @@ CREATE TABLE IF NOT EXISTS whitedesk_desktop_sessions (
 -- 15. BUHARLAŞMA HAVUZU VE GERÇEK ZAMANLI SİNYAL TABLOLARI (D1 EPHEMERAL)
 -- =============================================================================
 
--- Geçici Asenkron Bilet / Mesaj Kuyruğu (ACK sonrası anında silinir)
+-- Geçici Asenkron Bilet / Tartışma Kuyruğu (ACK sonrası anında silinir)
 CREATE TABLE IF NOT EXISTS transient_messages (
   id TEXT PRIMARY KEY,
   ticket_id TEXT NOT NULL,
+  ticket_type TEXT DEFAULT 'ticket',                 -- 'ticket' | 'discussion'
+  thread_id TEXT,                                    -- Tartışma oturumunu birbirine bağlayan ortak ID
   recipient_blind_id TEXT NOT NULL,
   sender_blind_id TEXT NOT NULL,
   encrypted_payload TEXT NOT NULL,
+  key_envelopes TEXT,                                -- [{"admin_blind_id":"...","encrypted_room_key":"..."}]
+  pending_admins TEXT,                               -- Henüz ACK göndermemiş adminlerin JSON dizisi ["blind_1", "blind_2"]
   attachment_r2_key TEXT,
   created_at INTEGER NOT NULL,
   expires_at INTEGER NOT NULL

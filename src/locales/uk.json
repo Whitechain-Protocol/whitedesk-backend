@@ -888,7 +888,9 @@
     "default_external_app": "Зовнішній застосунок",
     "explanation_banner": "Для кожного застосунку генерується унікальний 60-символьний ключ мосту SDK. У разі відкликання ключа прийом заявок із цього застосунку негайно припиняється.",
     "placeholder_bridge_key": "60_символьний_ключ_мосту_sdk",
-    "revoke_confirm_dynamic_desc": "Ключ мосту SDK для «{appName}» ({appId}) буде відкликано, а вхідні заявки з цього застосунку відхилятимуться."
+    "revoke_confirm_dynamic_desc": "Ключ мосту SDK для «{appName}» ({appId}) буде відкликано, а вхідні заявки з цього застосунку відхилятимуться.",
+    "subtitle": "Згенерувати ключ інтеграції SDK для застосунку",
+    "sdk_badge_title": "Інтеграція SDK"
   },
   "provisioning": {
     "action_delete": "Видалити",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Суверенне володіння та параметри підключення",
       "status_sealed": "Зафіксовано",
       "enterprise_name_label": "Назва підприємства",
-      "blind_id_label": "Сліпий ID (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Повноваження адміністратора",
       "protocol_label": "Протокол",
       "protocol_value": "Cloudflare D1 HTTPS • Нуль персональних даних • E2EE",
@@ -975,7 +977,7 @@
       "enterprise_price": "$149/міс. · $1 490/рік",
       "enterprise_desc": "1 Глобальний адмін + 10 Адмінів + 500 Клієнтів",
       "starter_title": "🥉 Starter",
-      "pro_title": "🥈 Pro ⭐ (Професійний)",
+      "pro_title": "🥈 Pro ⭐",
       "enterprise_title": "🥇 Enterprise (Корпоративний)"
     },
     "station": {
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Усі застосунки",
       "all_apps_general": "Усі застосунки (загальна)",
       "cat_name_label_upper": "НАЗВА КАТЕГОРІЇ",
-      "cat_name_placeholder": "напр., Збій обладнання, Запит рахунку, Доступ до акаунту"
+      "cat_name_placeholder": "напр., Збій обладнання, Запит рахунку, Доступ до акаунту",
+      "users_section_title": "Користувачі ({count})",
+      "add_user_modal_title": "Додати нового користувача",
+      "add_user_modal_sub": "Визначення дозволів та доступу користувача",
+      "sdk_integration_badge": "Інтеграція SDK",
+      "admin_categories_title": "Категорії",
+      "admin_categories_sub": "Категорії підтримки, призначені адміністратору",
+      "delete_user_title": "Видалити користувача"
     }
   },
   "settings": {

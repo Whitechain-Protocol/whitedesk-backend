@@ -888,7 +888,9 @@
     "default_external_app": "Външно приложение",
     "explanation_banner": "За всяко приложение се генерира уникален 60-знаков SDK мостов ключ. Когато отнемете ключ, подаването на заявки от това приложение спира незабавно.",
     "placeholder_bridge_key": "60_знаков_sdk_мостов_ключ",
-    "revoke_confirm_dynamic_desc": "SDK мостовият ключ за „{appName}“ ({appId}) ще бъде отнет и входящите заявки от това приложение ще бъдат отхвърляни."
+    "revoke_confirm_dynamic_desc": "SDK мостовият ключ за „{appName}“ ({appId}) ще бъде отнет и входящите заявки от това приложение ще бъдат отхвърляни.",
+    "subtitle": "Генериране на ключ за интеграция на SDK за приложението",
+    "sdk_badge_title": "SDK интеграция"
   },
   "provisioning": {
     "action_delete": "Изтриване",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Суверенна собственост и детайли за връзката",
       "status_sealed": "Фиксиран",
       "enterprise_name_label": "Име на корпорацията",
-      "blind_id_label": "Сляп идентификатор (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Администраторски правомощия",
       "protocol_label": "Протокол",
       "protocol_value": "Cloudflare D1 HTTPS • Нулеви лични данни • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Всички приложения",
       "all_apps_general": "Всички приложения (Общо)",
       "cat_name_label_upper": "ИМЕ НА КАТЕГОРИЯТА",
-      "cat_name_placeholder": "напр. Хардуерна повреда, Заявка за фактура, Достъп до акаунт"
+      "cat_name_placeholder": "напр. Хардуерна повреда, Заявка за фактура, Достъп до акаунт",
+      "users_section_title": "Потребители ({count})",
+      "add_user_modal_title": "Добавяне на нов потребител",
+      "add_user_modal_sub": "Определяне на потребителски права и достъп",
+      "sdk_integration_badge": "SDK интеграция",
+      "admin_categories_title": "Категории",
+      "admin_categories_sub": "Категории за поддръжка, зададени на администратора",
+      "delete_user_title": "Изтриване на потребител"
     }
   },
   "settings": {

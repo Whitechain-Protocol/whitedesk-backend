@@ -888,7 +888,9 @@
     "default_external_app": "Išorinė programa",
     "explanation_banner": "Kiekvienai programai generuojamas unikalus 60 simbolių SDK tilto raktas. Atšaukus raktą, užklausų priėmimas iš tos programos iš karto sustabdomas.",
     "placeholder_bridge_key": "60_simboliu_sdk_tilto_raktas",
-    "revoke_confirm_dynamic_desc": "Programos „{appName}“ ({appId}) SDK tilto raktas bus atšauktas, o gaunamos užklausos iš šios programos bus atmestos."
+    "revoke_confirm_dynamic_desc": "Programos „{appName}“ ({appId}) SDK tilto raktas bus atšauktas, o gaunamos užklausos iš šios programos bus atmestos.",
+    "subtitle": "Generuoti programos SDK integravimo raktą",
+    "sdk_badge_title": "SDK integravimas"
   },
   "provisioning": {
     "action_delete": "Ištrinti",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suvereni nuosavybė ir ryšio duomenys",
       "status_sealed": "Užantspauduota",
       "enterprise_name_label": "Įmonės pavadinimas",
-      "blind_id_label": "Aklasis ID (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratoriaus įgaliojimas",
       "protocol_label": "Protokolas",
       "protocol_value": "Cloudflare D1 HTTPS • Nulis asmens duomenų • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Visos programos",
       "all_apps_general": "Visos programos (bendras)",
       "cat_name_label_upper": "KATEGORIJOS PAVADINIMAS",
-      "cat_name_placeholder": "pvz., Aparatinės įrangos gedimas, Sąskaitos užklausa, Paskyros prieiga"
+      "cat_name_placeholder": "pvz., Aparatinės įrangos gedimas, Sąskaitos užklausa, Paskyros prieiga",
+      "users_section_title": "Vartotojai ({count})",
+      "add_user_modal_title": "Pridėti naują vartotoją",
+      "add_user_modal_sub": "Vartotojo teisių ir prieigos nustatymas",
+      "sdk_integration_badge": "SDK integravimas",
+      "admin_categories_title": "Kategorijos",
+      "admin_categories_sub": "Pagalbos kategorijos, priskirtos administratoriui",
+      "delete_user_title": "Ištrinti vartotoją"
     }
   },
   "settings": {

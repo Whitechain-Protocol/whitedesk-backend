@@ -888,7 +888,9 @@
     "default_external_app": "برنامه خارجی",
     "explanation_banner": "برای هر برنامه یک کلید پل SDK منحصربه‌فرد ۶۰ کاراکتری تولید می‌شود. با لغو کلید، ارسال تیکت از آن برنامه فوراً متوقف می‌گردد.",
     "placeholder_bridge_key": "کلید_پل_SDK_شصت_کاراکتری",
-    "revoke_confirm_dynamic_desc": "کلید پل SDK برای «{appName}» ({appId}) لغو شده و تیکت‌های ورودی از این برنامه رد خواهند شد."
+    "revoke_confirm_dynamic_desc": "کلید پل SDK برای «{appName}» ({appId}) لغو شده و تیکت‌های ورودی از این برنامه رد خواهند شد.",
+    "subtitle": "ایجاد کلید ادغام SDK برای برنامه",
+    "sdk_badge_title": "ادغام SDK"
   },
   "provisioning": {
     "action_delete": "حذف",
@@ -930,7 +932,7 @@
       "profile_subtitle": "مالکیت حاکمیتی و جزئیات اتصال",
       "status_sealed": "مهروموم‌شده",
       "enterprise_name_label": "نام سازمان",
-      "blind_id_label": "شناسه کور (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "اختیار مدیر",
       "protocol_label": "پروتکل",
       "protocol_value": "Cloudflare D1 HTTPS • بدون داده شخصی • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "تمامی برنامه‌ها",
       "all_apps_general": "تمامی برنامه‌ها (عمومی)",
       "cat_name_label_upper": "نام دسته‌بندی",
-      "cat_name_placeholder": "مثال: خرابی سخت‌افزار، درخواست فاکتور، دسترسی حساب"
+      "cat_name_placeholder": "مثال: خرابی سخت‌افزار، درخواست فاکتور، دسترسی حساب",
+      "users_section_title": "کاربران ({count})",
+      "add_user_modal_title": "افزودن کاربر جدید",
+      "add_user_modal_sub": "تعریف دسترسی‌ها و مجوزهای کاربر",
+      "sdk_integration_badge": "ادغام SDK",
+      "admin_categories_title": "دسته‌بندی‌ها",
+      "admin_categories_sub": "دسته‌بندی‌های پشتیبانی اختصاص‌یافته به مدیر",
+      "delete_user_title": "حذف کاربر"
     }
   },
   "settings": {

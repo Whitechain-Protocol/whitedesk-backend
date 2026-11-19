@@ -632,7 +632,7 @@
     "registration_info_delimiter_legacy": "--- 📋 [Informação de Registo] ---",
     "self_test_suffix_legacy": "(Autoteste)",
     "founder_enterprise_default": "TheWhite Enterprises",
-    "tenant_enterprise_default": "Whitechain",
+    "tenant_enterprise_default": "WhiteChain",
     "sovereign_node_default": "Nó Soberano",
     "receipt_relay_channel": "Cloudflare R2 + D1 Relay",
     "closure_hours_placeholder": "24",
@@ -720,7 +720,7 @@
       "status_top_tier": "Plano de Escalão Superior",
       "status_active_plan": "Plano Ativo",
       "trial_days_remaining": "Restam {days} Dias",
-      "trial_valid_desc": "A licença de avaliação com privilégios totais está ativa na rede soberana Whitechain.",
+      "trial_valid_desc": "A licença de avaliação com privilégios totais está ativa na rede soberana WhiteChain.",
       "per_month": "/ mês",
       "annual_commitment": "Compromisso Anual",
       "period_end_prefix": "Fim do Período:",
@@ -888,7 +888,9 @@
     "default_external_app": "Aplicação Externa",
     "explanation_banner": "É gerada uma Chave de Ponte SDK única de 60 caracteres para cada aplicação. Quando revoga uma chave, o envio de tickets a partir dessa aplicação é imediatamente interrompido.",
     "placeholder_bridge_key": "chave_ponte_sdk_de_60_caracteres",
-    "revoke_confirm_dynamic_desc": "A chave de ponte SDK para \"{appName}\" ({appId}) será revogada e os tickets recebidos desta aplicação serão rejeitados."
+    "revoke_confirm_dynamic_desc": "A chave de ponte SDK para \"{appName}\" ({appId}) será revogada e os tickets recebidos desta aplicação serão rejeitados.",
+    "subtitle": "Gerar chave de integração SDK para a aplicação",
+    "sdk_badge_title": "Integração SDK"
   },
   "provisioning": {
     "action_delete": "Eliminar",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Todas as Aplicações",
       "all_apps_general": "Todas as Aplicações (Geral)",
       "cat_name_label_upper": "NOME DA CATEGORIA",
-      "cat_name_placeholder": "ex., Avaria de Hardware, Pedido de Fatura, Acesso à Conta"
+      "cat_name_placeholder": "ex., Avaria de Hardware, Pedido de Fatura, Acesso à Conta",
+      "users_section_title": "Utilizadores ({count})",
+      "add_user_modal_title": "Adicionar Novo Utilizador",
+      "add_user_modal_sub": "Definição de permissões e acessos de utilizador",
+      "sdk_integration_badge": "Integração SDK",
+      "admin_categories_title": "Categorias",
+      "admin_categories_sub": "Categorias de suporte atribuídas especificamente ao administrador",
+      "delete_user_title": "Eliminar Utilizador"
     }
   },
   "settings": {

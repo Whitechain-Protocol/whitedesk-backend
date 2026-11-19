@@ -888,7 +888,9 @@
     "default_external_app": "יישום חיצוני",
     "explanation_banner": "מפתח גשר SDK ייחודי בן 60 תווים מיוצר עבור כל יישום. בעת ביטול מפתח, שליחת פניות מאותו יישום נעצרת באופן מיידי.",
     "placeholder_bridge_key": "מפתח_גשר_SDK_בן_60_תווים",
-    "revoke_confirm_dynamic_desc": "מפתח גשר ה-SDK עבור \"{appName}\" ({appId}) יבוטל ופניות נכנסות מיישום זה יידחו."
+    "revoke_confirm_dynamic_desc": "מפתח גשר ה-SDK עבור \"{appName}\" ({appId}) יבוטל ופניות נכנסות מיישום זה יידחו.",
+    "subtitle": "הפקת מפתח שילוב SDK עבור האפליקציה",
+    "sdk_badge_title": "שילוב SDK"
   },
   "provisioning": {
     "action_delete": "מחיקה",
@@ -930,7 +932,7 @@
       "profile_subtitle": "בעלות ריבונית ופרטי חיבור",
       "status_sealed": "חתום",
       "enterprise_name_label": "שם הארגון",
-      "blind_id_label": "מזהה עיוור (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "סמכות מנהל",
       "protocol_label": "פרוטוקול",
       "protocol_value": "Cloudflare D1 HTTPS • אפס מידע אישי • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "כל היישומים",
       "all_apps_general": "כל היישומים (כללי)",
       "cat_name_label_upper": "שם קטגוריה",
-      "cat_name_placeholder": "למשל: תקלת חומרה, בקשת חשבונית, גישה לחשבון"
+      "cat_name_placeholder": "למשל: תקלת חומרה, בקשת חשבונית, גישה לחשבון",
+      "users_section_title": "משתמשים ({count})",
+      "add_user_modal_title": "הוסף משתמש חדש",
+      "add_user_modal_sub": "הגדרת הרשאות וגישת משתמש",
+      "sdk_integration_badge": "שילוב SDK",
+      "admin_categories_title": "קטגוריות",
+      "admin_categories_sub": "קטגוריות תמיכה שהוקצו ספציפית למנהל",
+      "delete_user_title": "מחק משתמש"
     }
   },
   "settings": {

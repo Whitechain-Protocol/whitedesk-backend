@@ -888,7 +888,9 @@
     "default_external_app": "Aplikasi Luaran",
     "explanation_banner": "Kunci Jambatan SDK 60 aksara yang unik dijana untuk setiap aplikasi. Apabila anda membatalkan kunci, penghantaran tiket daripada aplikasi tersebut berhenti serta-merta.",
     "placeholder_bridge_key": "kunci_jambatan_sdk_60_aksara",
-    "revoke_confirm_dynamic_desc": "Kunci jambatan SDK untuk \"{appName}\" ({appId}) akan dibatalkan dan tiket masuk daripada aplikasi ini akan ditolak."
+    "revoke_confirm_dynamic_desc": "Kunci jambatan SDK untuk \"{appName}\" ({appId}) akan dibatalkan dan tiket masuk daripada aplikasi ini akan ditolak.",
+    "subtitle": "Hasilkan kunci integrasi SDK untuk aplikasi",
+    "sdk_badge_title": "Integrasi SDK"
   },
   "provisioning": {
     "action_delete": "Padam",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Butiran pemilikan berdaulat dan sambungan",
       "status_sealed": "Dimeterai",
       "enterprise_name_label": "Nama Perusahaan",
-      "blind_id_label": "ID Buta",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Kuasa Pentadbir",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Sifar Data Peribadi • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Semua Aplikasi",
       "all_apps_general": "Semua Aplikasi (Umum)",
       "cat_name_label_upper": "NAMA KATEGORI",
-      "cat_name_placeholder": "cth., Kegagalan Perkakasan, Permintaan Invois, Akses Akaun"
+      "cat_name_placeholder": "cth., Kegagalan Perkakasan, Permintaan Invois, Akses Akaun",
+      "users_section_title": "Pengguna ({count})",
+      "add_user_modal_title": "Tambah Pengguna Baharu",
+      "add_user_modal_sub": "Definisi kebenaran dan akses pengguna",
+      "sdk_integration_badge": "Integrasi SDK",
+      "admin_categories_title": "Kategori",
+      "admin_categories_sub": "Kategori sokongan yang diberikan khusus kepada pentadbir",
+      "delete_user_title": "Padam Pengguna"
     }
   },
   "settings": {

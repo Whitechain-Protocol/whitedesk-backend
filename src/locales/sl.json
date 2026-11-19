@@ -888,7 +888,9 @@
     "default_external_app": "Zunanja aplikacija",
     "explanation_banner": "Za vsako aplikacijo se ustvari edinstven 60-mestni ključ mostu SDK. Ko ključ prekličete, se oddajanje zahtevkov iz te aplikacije takoj ustavi.",
     "placeholder_bridge_key": "60_znakovni_kljuc_mostu_sdk",
-    "revoke_confirm_dynamic_desc": "Ključ mostu SDK za aplikacijo »{appName}« ({appId}) bo preklican, dohodni zahtevki iz te aplikacije pa bodo zavrnjeni."
+    "revoke_confirm_dynamic_desc": "Ključ mostu SDK za aplikacijo »{appName}« ({appId}) bo preklican, dohodni zahtevki iz te aplikacije pa bodo zavrnjeni.",
+    "subtitle": "Ustvari integracijski ključ SDK za aplikacijo",
+    "sdk_badge_title": "Integracija SDK"
   },
   "provisioning": {
     "action_delete": "Izbriši",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suvereno lastništvo in podrobnosti povezave",
       "status_sealed": "Zapečateno",
       "enterprise_name_label": "Ime podjetja",
-      "blind_id_label": "Slepi ID (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Pooblastilo skrbnika",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Ničelni osebni podatki • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Vse aplikacije",
       "all_apps_general": "Vse aplikacije (splošno)",
       "cat_name_label_upper": "IME KATEGORIJE",
-      "cat_name_placeholder": "npr. Okvara strojne opreme, Zahteva za račun, Dostop do računa"
+      "cat_name_placeholder": "npr. Okvara strojne opreme, Zahteva za račun, Dostop do računa",
+      "users_section_title": "Uporabniki ({count})",
+      "add_user_modal_title": "Dodaj novega uporabnika",
+      "add_user_modal_sub": "Opredelitev uporabniških dovoljenj in dostopa",
+      "sdk_integration_badge": "Integracija SDK",
+      "admin_categories_title": "Kategorije",
+      "admin_categories_sub": "Kategorije podpore, dodeljene skrbniku",
+      "delete_user_title": "Izbriši uporabnika"
     }
   },
   "settings": {

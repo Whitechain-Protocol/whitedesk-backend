@@ -888,7 +888,9 @@
     "default_external_app": "Ứng dụng bên ngoài",
     "explanation_banner": "Một Khóa cầu nối SDK duy nhất gồm 60 ký tự được tạo cho mỗi ứng dụng. Khi bạn thu hồi khóa, việc gửi phiếu từ ứng dụng đó sẽ dừng ngay lập tức.",
     "placeholder_bridge_key": "khoa_cau_noi_sdk_60_ky_tu",
-    "revoke_confirm_dynamic_desc": "Khóa cầu nối SDK cho \"{appName}\" ({appId}) sẽ bị thu hồi và các phiếu gửi đến từ ứng dụng này sẽ bị từ chối."
+    "revoke_confirm_dynamic_desc": "Khóa cầu nối SDK cho \"{appName}\" ({appId}) sẽ bị thu hồi và các phiếu gửi đến từ ứng dụng này sẽ bị từ chối.",
+    "subtitle": "Tạo khóa tích hợp SDK cho ứng dụng",
+    "sdk_badge_title": "Tích hợp SDK"
   },
   "provisioning": {
     "action_delete": "Xóa",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Chi tiết quyền sở hữu độc lập và kết nối",
       "status_sealed": "Đã niêm phong",
       "enterprise_name_label": "Tên doanh nghiệp",
-      "blind_id_label": "ID Ẩn danh (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Thẩm quyền Quản trị viên",
       "protocol_label": "Giao thức",
       "protocol_value": "Cloudflare D1 HTTPS • Không Dữ Liệu Cá Nhân • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Tất cả ứng dụng",
       "all_apps_general": "Tất cả ứng dụng (Chung)",
       "cat_name_label_upper": "TÊN DANH MỤC",
-      "cat_name_placeholder": "VD: Lỗi phần cứng, Yêu cầu hóa đơn, Truy cập tài khoản"
+      "cat_name_placeholder": "VD: Lỗi phần cứng, Yêu cầu hóa đơn, Truy cập tài khoản",
+      "users_section_title": "Người dùng ({count})",
+      "add_user_modal_title": "Thêm người dùng mới",
+      "add_user_modal_sub": "Xác định quyền hạn và truy cập của người dùng",
+      "sdk_integration_badge": "Tích hợp SDK",
+      "admin_categories_title": "Danh mục",
+      "admin_categories_sub": "Các danh mục hỗ trợ được gán riêng cho quản trị viên",
+      "delete_user_title": "Xóa người dùng"
     }
   },
   "settings": {

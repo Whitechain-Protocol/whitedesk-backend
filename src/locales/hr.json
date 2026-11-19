@@ -888,7 +888,9 @@
     "default_external_app": "Vanjska aplikacija",
     "explanation_banner": "Za svaku aplikaciju generira se jedinstveni 60-znakovni ključ SDK mosta. Kada opozovete ključ, slanje zahtjeva iz te aplikacije odmah se zaustavlja.",
     "placeholder_bridge_key": "60_znakovni_kljuc_sdk_mosta",
-    "revoke_confirm_dynamic_desc": "Ključ SDK mosta za \"{appName}\" ({appId}) bit će opozvan, a dolazni zahtjevi iz ove aplikacije bit će odbijeni."
+    "revoke_confirm_dynamic_desc": "Ključ SDK mosta za \"{appName}\" ({appId}) bit će opozvan, a dolazni zahtjevi iz ove aplikacije bit će odbijeni.",
+    "subtitle": "Generiraj ključ integracije SDK-a za aplikaciju",
+    "sdk_badge_title": "SDK integracija"
   },
   "provisioning": {
     "action_delete": "Izbriši",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suvereno vlasništvo i pojedinosti povezivanja",
       "status_sealed": "Zapečaćeno",
       "enterprise_name_label": "Naziv poduzeća",
-      "blind_id_label": "Slijepi ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Administratorska ovlast",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Nula osobnih podataka • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Sve aplikacije",
       "all_apps_general": "Sve aplikacije (Općenito)",
       "cat_name_label_upper": "NAZIV KATEGORIJE",
-      "cat_name_placeholder": "npr. Kvar hardvera, Zahtjev za račun, Pristup računu"
+      "cat_name_placeholder": "npr. Kvar hardvera, Zahtjev za račun, Pristup računu",
+      "users_section_title": "Korisnici ({count})",
+      "add_user_modal_title": "Dodaj novog korisnika",
+      "add_user_modal_sub": "Definiranje korisničkih ovlaštenja i pristupa",
+      "sdk_integration_badge": "SDK integracija",
+      "admin_categories_title": "Kategorije",
+      "admin_categories_sub": "Kategorije podrške dodijeljene administratoru",
+      "delete_user_title": "Obriši korisnika"
     }
   },
   "settings": {

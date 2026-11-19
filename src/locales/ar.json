@@ -888,7 +888,9 @@
     "default_external_app": "تطبيق خارجي",
     "explanation_banner": "يتم إنشاء مفتاح جسر SDK فريد مكوّن من 60 حرفًا لكل تطبيق. عند إلغاء المفتاح، تتوقف طلبات إرسال التذاكر من ذلك التطبيق فورًا.",
     "placeholder_bridge_key": "مفتاح_جسر_sdk_من_60_حرفا",
-    "revoke_confirm_dynamic_desc": "سيتم إلغاء مفتاح جسر SDK الخاص بـ \"{appName}\" ({appId}) ورفض التذاكر الواردة من هذا التطبيق."
+    "revoke_confirm_dynamic_desc": "سيتم إلغاء مفتاح جسر SDK الخاص بـ \"{appName}\" ({appId}) ورفض التذاكر الواردة من هذا التطبيق.",
+    "subtitle": "إنشاء مفتاح تكامل SDK للتطبيق",
+    "sdk_badge_title": "تكامل SDK"
   },
   "provisioning": {
     "action_delete": "حذف",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "جميع التطبيقات",
       "all_apps_general": "جميع التطبيقات (عام)",
       "cat_name_label_upper": "اسم الفئة",
-      "cat_name_placeholder": "مثال: عطل في الأجهزة، طلب فاتورة، الوصول إلى الحساب"
+      "cat_name_placeholder": "مثال: عطل في الأجهزة، طلب فاتورة، الوصول إلى الحساب",
+      "users_section_title": "المستخدمون ({count})",
+      "add_user_modal_title": "إضافة مستخدم جديد",
+      "add_user_modal_sub": "تحديد أذونات ووصول المستخدم",
+      "sdk_integration_badge": "تكامل SDK",
+      "admin_categories_title": "الفئات",
+      "admin_categories_sub": "فئات الدعم المعينة خصيصاً للمسؤول",
+      "delete_user_title": "حذف المستخدم"
     }
   },
   "settings": {

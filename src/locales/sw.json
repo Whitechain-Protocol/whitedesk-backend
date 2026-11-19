@@ -888,7 +888,9 @@
     "default_external_app": "Programu ya Nje",
     "explanation_banner": "Ufunguo wa kipekee wa herufi 60 wa Daraja la SDK huzalishwa kwa kila programu. Unapobatilisha ufunguo, uwasilishaji wa tiketi kutoka kwa programu hiyo husimama mara moja.",
     "placeholder_bridge_key": "ufunguo_wa_daraja_la_sdk_herufi_60",
-    "revoke_confirm_dynamic_desc": "Ufunguo wa daraja la SDK wa \"{appName}\" ({appId}) utabatilishwa na tiketi zinazoingia kutoka kwa programu hii zitakataliwa."
+    "revoke_confirm_dynamic_desc": "Ufunguo wa daraja la SDK wa \"{appName}\" ({appId}) utabatilishwa na tiketi zinazoingia kutoka kwa programu hii zitakataliwa.",
+    "subtitle": "Tengeneza ufunguo wa ujumuishaji wa SDK kwa programu",
+    "sdk_badge_title": "Ujumuishaji wa SDK"
   },
   "provisioning": {
     "action_delete": "Futa",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Umiliki huru na maelezo ya muunganisho",
       "status_sealed": "Imefungwa",
       "enterprise_name_label": "Jina la Shirika",
-      "blind_id_label": "ID Kipofu (Blind ID)",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Mamlaka ya Msimamizi",
       "protocol_label": "Itifaki",
       "protocol_value": "Cloudflare D1 HTTPS • Sifuri ya Data Binafsi • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Programu Zote",
       "all_apps_general": "Programu Zote (Jumla)",
       "cat_name_label_upper": "JINA LA KATEGORIA",
-      "cat_name_placeholder": "k.m., Hitilafu ya Maunzi, Ombi la Ankara, Ufikiaji wa Akaunti"
+      "cat_name_placeholder": "k.m., Hitilafu ya Maunzi, Ombi la Ankara, Ufikiaji wa Akaunti",
+      "users_section_title": "Watumiaji ({count})",
+      "add_user_modal_title": "Ongeza Mtumiaji Mpya",
+      "add_user_modal_sub": "Ufafanuzi wa ruhusa na ufikiaji wa mtumiaji",
+      "sdk_integration_badge": "Ujumuishaji wa SDK",
+      "admin_categories_title": "Vitengo",
+      "admin_categories_sub": "Vitengo vya usaidizi vilivyopewa msimamizi mahususi",
+      "delete_user_title": "Futa Mtumiaji"
     }
   },
   "settings": {

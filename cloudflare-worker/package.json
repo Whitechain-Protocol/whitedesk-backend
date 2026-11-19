@@ -4,8 +4,11 @@
   "description": "WhiteDesk Sovereign Unified Edge Gateway using Cloudflare Workers, Durable Objects, D1 SQLite & R2",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "dev": "node run-wrangler.cjs dev",
+    "deploy": "node run-wrangler.cjs deploy",
+    "whoami": "node run-wrangler.cjs whoami",
+    "d1": "node run-wrangler.cjs d1",
+    "tail": "node run-wrangler.cjs tail"
   },
   "dependencies": {},
   "devDependencies": {

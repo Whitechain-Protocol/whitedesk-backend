@@ -888,7 +888,9 @@
     "default_external_app": "Manhaja ta Waje",
     "explanation_banner": "Ana samar da Maɓallin Gadar SDK na musamman mai haruffa 60 domin kowace manhaja. Lokacin da kuka janye maɓalli, gabatar da tikiti daga wannan manhaja yana tsayawa nan take.",
     "placeholder_bridge_key": "60_character_sdk_bridge_key",
-    "revoke_confirm_dynamic_desc": "Za a janye maɓallin gadar SDK na \"{appName}\" ({appId}) kuma za a ƙi karɓar tikitin da ke shigowa daga wannan manhaja."
+    "revoke_confirm_dynamic_desc": "Za a janye maɓallin gadar SDK na \"{appName}\" ({appId}) kuma za a ƙi karɓar tikitin da ke shigowa daga wannan manhaja.",
+    "subtitle": "Ƙirƙiri maɓallin haɗin SDK don manhajar",
+    "sdk_badge_title": "Haɗin SDK"
   },
   "provisioning": {
     "action_delete": "Goge",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Dukkan Manhajoji",
       "all_apps_general": "Dukkan Manhajoji (Gabaɗaya)",
       "cat_name_label_upper": "SUNAN RUKUNI",
-      "cat_name_placeholder": "misali: Lalacewar Kayan Aiki, Buƙatar Rasiti, Shiga Asusu"
+      "cat_name_placeholder": "misali: Lalacewar Kayan Aiki, Buƙatar Rasiti, Shiga Asusu",
+      "users_section_title": "Masu amfani ({count})",
+      "add_user_modal_title": "Ƙara Sabon Mai Amfani",
+      "add_user_modal_sub": "Ma'anar izini da hanyar shiga ta mai amfani",
+      "sdk_integration_badge": "Haɗin SDK",
+      "admin_categories_title": "Rukuni",
+      "admin_categories_sub": "Rukunin tallafi da aka keɓance wa mai gudanarwa",
+      "delete_user_title": "Goge Mai Amfani"
     }
   },
   "settings": {

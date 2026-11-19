@@ -888,7 +888,9 @@
     "default_external_app": "Application externe",
     "explanation_banner": "Une clé de pont SDK unique de 60 caractères est générée pour chaque application. Lorsque vous révoquez une clé, l'envoi de tickets depuis cette application s'arrête immédiatement.",
     "placeholder_bridge_key": "cle_pont_sdk_60_caracteres",
-    "revoke_confirm_dynamic_desc": "La clé de pont SDK pour \"{appName}\" ({appId}) sera révoquée et les tickets entrants de cette application seront rejetés."
+    "revoke_confirm_dynamic_desc": "La clé de pont SDK pour \"{appName}\" ({appId}) sera révoquée et les tickets entrants de cette application seront rejetés.",
+    "subtitle": "Générer la clé d'intégration SDK pour l'application",
+    "sdk_badge_title": "Intégration SDK"
   },
   "provisioning": {
     "action_delete": "Supprimer",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Toutes les applications",
       "all_apps_general": "Toutes les applications (Général)",
       "cat_name_label_upper": "NOM DE LA CATÉGORIE",
-      "cat_name_placeholder": "ex. Panne matérielle, Demande de facture, Accès au compte"
+      "cat_name_placeholder": "ex. Panne matérielle, Demande de facture, Accès au compte",
+      "users_section_title": "Utilisateurs ({count})",
+      "add_user_modal_title": "Ajouter un nouvel utilisateur",
+      "add_user_modal_sub": "Définition des autorisations et des accès utilisateur",
+      "sdk_integration_badge": "Intégration SDK",
+      "admin_categories_title": "Catégories",
+      "admin_categories_sub": "Catégories d'assistance spécifiquement attribuées à l'administrateur",
+      "delete_user_title": "Supprimer l'utilisateur"
     }
   },
   "settings": {

@@ -888,7 +888,9 @@
     "default_external_app": "Panlabas na Aplikasyon",
     "explanation_banner": "Isang natatanging 60-karakter na SDK Bridge Key ang binubuo para sa bawat aplikasyon. Kapag binawi mo ang isang susi, agad na hihinto ang pagsusumite ng tiket mula sa aplikasyong iyon.",
     "placeholder_bridge_key": "60_karakter_na_sdk_bridge_key",
-    "revoke_confirm_dynamic_desc": "Babawiin ang SDK bridge key para sa \"{appName}\" ({appId}) at tatanggihan ang mga papasok na tiket mula sa aplikasyong ito."
+    "revoke_confirm_dynamic_desc": "Babawiin ang SDK bridge key para sa \"{appName}\" ({appId}) at tatanggihan ang mga papasok na tiket mula sa aplikasyong ito.",
+    "subtitle": "Bumuo ng SDK integration key para sa application",
+    "sdk_badge_title": "Pagsasama ng SDK"
   },
   "provisioning": {
     "action_delete": "Burahin",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Soberanong pagmamay-ari at mga detalye ng koneksyon",
       "status_sealed": "Natatakan",
       "enterprise_name_label": "Pangalan ng Negosyo",
-      "blind_id_label": "Bulag na ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "Awtoridad ng Tagapangasiwa",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Walang Personal na Datos • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Lahat ng Aplikasyon",
       "all_apps_general": "Lahat ng Aplikasyon (Pangkalahatan)",
       "cat_name_label_upper": "PANGALAN NG KATEGORYA",
-      "cat_name_placeholder": "hal., Pagkasira ng Hardware, Kahilingan sa Invoice, Pag-access sa Account"
+      "cat_name_placeholder": "hal., Pagkasira ng Hardware, Kahilingan sa Invoice, Pag-access sa Account",
+      "users_section_title": "Mga Gumagamit ({count})",
+      "add_user_modal_title": "Magdagdag ng Bagong Gumagamit",
+      "add_user_modal_sub": "Kahulugan ng mga pahintulot at pag-access ng gumagamit",
+      "sdk_integration_badge": "Pagsasama ng SDK",
+      "admin_categories_title": "Mga Kategorya",
+      "admin_categories_sub": "Mga kategorya ng suporta na partikular na itinalaga sa admin",
+      "delete_user_title": "Tanggalin ang Gumagamit"
     }
   },
   "settings": {

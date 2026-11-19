@@ -888,7 +888,9 @@
     "default_external_app": "بیرونی ایپلیکیشن",
     "explanation_banner": "ہر ایپلیکیشن کے لیے 60 حروف پر مشتمل ایک منفرد SDK برج کلید تیار کی جاتی ہے۔ جب آپ کسی کلید کو منسوخ کرتے ہیں، تو اس ایپلیکیشن سے ٹکٹ جمع کروانے کا عمل فورا رک جاتا ہے۔",
     "placeholder_bridge_key": "60_حروف_کی_sdk_برج_کلید",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) کے لیے SDK برج کلید منسوخ کر دی جائے گی اور اس ایپلیکیشن سے آنے والے ٹکٹس مسترد کر دیے جائیں گے۔"
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) کے لیے SDK برج کلید منسوخ کر دی جائے گی اور اس ایپلیکیشن سے آنے والے ٹکٹس مسترد کر دیے جائیں گے۔",
+    "subtitle": "ایپلی کیشن کے لیے SDK انٹیگریشن کی بنائیں",
+    "sdk_badge_title": "SDK انٹیگریشن"
   },
   "provisioning": {
     "action_delete": "حذف کریں",
@@ -930,7 +932,7 @@
       "profile_subtitle": "خودمختار ملکیت اور کنکشن کی تفصیلات",
       "status_sealed": "سیل شدہ",
       "enterprise_name_label": "انٹرپرائز کا نام",
-      "blind_id_label": "بلائنڈ ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "ایڈمنسٹریٹر کا اختیار",
       "protocol_label": "پروٹوکول",
       "protocol_value": "Cloudflare D1 HTTPS • زیرو ذاتی ڈیٹا • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "تمام ایپلیکیشنز",
       "all_apps_general": "تمام ایپلیکیشنز (عمومی)",
       "cat_name_label_upper": "زمرے کا نام",
-      "cat_name_placeholder": "مثلاً ہارڈویئر کی خرابی، انوائس کی درخواست، اکاؤنٹ تک رسائی"
+      "cat_name_placeholder": "مثلاً ہارڈویئر کی خرابی، انوائس کی درخواست، اکاؤنٹ تک رسائی",
+      "users_section_title": "صارفین ({count})",
+      "add_user_modal_title": "نیا صارف شامل کریں",
+      "add_user_modal_sub": "صارف کے اختیارات اور رسائی کی تعریف",
+      "sdk_integration_badge": "SDK انٹیگریشن",
+      "admin_categories_title": "اقسام",
+      "admin_categories_sub": "منتظم کو خصوصی طور پر تفویض کردہ سپورٹ اقسام",
+      "delete_user_title": "صارف کو حذف کریں"
     }
   },
   "settings": {

@@ -888,7 +888,9 @@
     "default_external_app": "Xarici Tətbiq",
     "explanation_banner": "Hər tətbiq üçün unikal 60 simvolluq SDK Körpü Açarı yaradılır. Açarı ləğv etdikdə həmin tətbiqdən sorğu göndərişi dərhal dayanır.",
     "placeholder_bridge_key": "60_simvolluq_sdk_korpu_acari",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) tətbiqinin SDK körpü açarı ləğv ediləcək və bu tətbiqdən gələn sorğular rədd ediləcək."
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) tətbiqinin SDK körpü açarı ləğv ediləcək və bu tətbiqdən gələn sorğular rədd ediləcək.",
+    "subtitle": "Tətbiq üçün SDK inteqrasiya açarı yaradın",
+    "sdk_badge_title": "SDK İnteqrasiyası"
   },
   "provisioning": {
     "action_delete": "Sil",
@@ -930,7 +932,7 @@
       "profile_subtitle": "Suveren mülkiyyət və bağlantı təfərrüatları",
       "status_sealed": "Möhürlənib",
       "enterprise_name_label": "Müəssisə Adı",
-      "blind_id_label": "Kor Kimlik",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "İnzibatçı Səlahiyyəti",
       "protocol_label": "Protokol",
       "protocol_value": "Cloudflare D1 HTTPS • Sıfır Şəxsi Məlumat • E2EE",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Bütün Tətbiqlər",
       "all_apps_general": "Bütün Tətbiqlər (Ümumi)",
       "cat_name_label_upper": "KATEQORİYA ADI",
-      "cat_name_placeholder": "Məs: Avadanlıq Nasazlığı, Faktura Sorğusu, Hesaba Giriş"
+      "cat_name_placeholder": "Məs: Avadanlıq Nasazlığı, Faktura Sorğusu, Hesaba Giriş",
+      "users_section_title": "İstifadəçilər ({count})",
+      "add_user_modal_title": "Yeni İstifadəçi Əlavə Et",
+      "add_user_modal_sub": "İstifadəçi səlahiyyətləri və giriş tərifi",
+      "sdk_integration_badge": "SDK İnteqrasiyası",
+      "admin_categories_title": "Kateqoriyalar",
+      "admin_categories_sub": "İnzibatçıya xüsusi təyin edilmiş dəstək kateqoriyaları",
+      "delete_user_title": "İstifadəçini Sil"
     }
   },
   "settings": {

@@ -62,12 +62,23 @@ Uygulama, HelpDesk için hazırlanmış olan 32 dili eksiksiz olarak destekleyec
 
 ## 🔐 SIFIR-BİLGİ (ZERO-KNOWLEDGE) VE VERİTABANI ALTYAPISI
 
-### 1. Kör Kimlik (Blind ID) ve Kriptografi
+### 1. 12-Sözcüklü (BIP-39 Mnemonic) Passkey Kayıt ve Oturum Açma Motoru (`UnifiedAuthScreen.tsx`)
+Uygulama açılışında kimlik doğrulama, kullanıcı adı/şifre veya e-posta yerine %100 kriptografik BIP-39 Passkey Mnemonic standardıyla çalışır:
+* **Yeni Kuruluş Töreni (`genesis_ceremony`):**
+  - Yeni bir kurum veya yönetici alanı açılırken `CryptoVaultService.generateRootVault()` ile kriptografik olarak güvenli 12 sözcüklü İngilizce BIP-39 mnemonic (`passkey`) üretilir.
+  - Kullanıcıya 12 kelime sıralı ve 3'erli gruplar halinde gösterilir, güvenli kopyalama imkanı sunulur.
+  - **Sınama / Meydan Okuma (Ceremony Challenge):** Kullanıcının kelimeleri yedeklediğini doğrulamak için rastgele 2 kelime (örn: 3. ve 8. kelime) kullanıcıdan istenir; doğru girilirse anahtarlar donanım kasasına mühürlenir.
+* **12-Sözcük ile Oturum Kurtarma (`mnemonic_login`):**
+  - Önceden oluşturulmuş 12 kelimelik passkey girildiğinde, sistem deterministik olarak kullanıcının `blind_id`'sini, P-256 / Ed25519 anahtar çiftlerini türetir ve oturumu yeni cihazda anında geri yükler.
+* **Kurtarma İmi (`wd_prof_...` / `claimUnifiedHash`):**
+  - 12 sözcüğe alternatif olarak tekil 64 karakterlik kurtarma hash'i veya QR kod ile oturum anında tek tıkla cihazlar arasında taşınabilir.
+
+### 2. Kör Kimlik (Blind ID) ve Kriptografi
 * **Sıfır Kişisel Veri:** E-posta, telefon numarası veya isim toplanmaz ve saklanmaz.
 * **Körleme:** Kullanıcıların açık Ed25519 anahtarları (WhiteID) veritabanına asla düz metin yazılmaz; tek yönlü `HMAC-SHA256(WhiteID, SystemSalt)` formülüyle `blind_id` olarak kaydedilir.
 * **İtimat Zinciri:** Merkezi şifre yoktur. Yetkilendirmeler `TheWhite` (Genesis Root) veya `global_admin` tarafından Ed25519 dijital imzasıyla (`ed25519_sig`) doğrulanır.
 
-### 2. Neon Serverless PostgreSQL (Port 443 HTTP SQL Gateway)
+### 3. Neon Serverless PostgreSQL (Port 443 HTTP SQL Gateway)
 Mobil cihazların kurumsal güvenlik duvarlarına (firewall/DPI) takılmaması için TCP 5432 yerine **HTTPS Port 443 üzerinden Neon SQL HTTP Gateway (`/sql`)** kullanılır.
 
 * **SQL HTTP Endpoint:**
@@ -351,7 +362,8 @@ whitedesk/
 │   │   ├── helpdeskLang.json           <-- 32 DİLİN TAMAMINI İÇEREN SÖZLÜK (~200KB)
 │   │   └── languageNames.ts            <-- Dil kodları ve orijinal isimleri
 │   ├── screens/
-│   │   ├── RegisterScreen.tsx          <-- İlk Açılış 12-Word Passkey / Kurtarma Ekranı
+│   │   ├── auth/
+│   │   │   └── UnifiedAuthScreen.tsx   <-- 12-Word BIP-39 Passkey Register/Ceremony & Mnemonic Login
 │   │   ├── HelpDeskScreen.tsx          <-- 1:1 Birebir HelpDesk Ekranı (#3B82F6 açık mavi butonlar)
 │   │   └── WhiteDeskScannerScreen.tsx  <-- QR Tarayıcı Ekranı
 │   ├── services/

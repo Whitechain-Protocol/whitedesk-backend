@@ -888,7 +888,9 @@
     "default_external_app": "Kanpoko aplikazioa",
     "explanation_banner": "60 karaktereko SDK zubi-gako bakar bat sortzen da aplikazio bakoitzerako. Gako bat ezeztatzen duzunean, aplikazio horretako tiket-bidalketak berehala gelditzen dira.",
     "placeholder_bridge_key": "60_karaktereko_sdk_zubi_gakoa",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) aplikazioaren SDK zubi-gakoa ezeztatuko da eta aplikazio honetatik datozen tiketak baztertuko dira."
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId}) aplikazioaren SDK zubi-gakoa ezeztatuko da eta aplikazio honetatik datozen tiketak baztertuko dira.",
+    "subtitle": "Sortu aplikaziorako SDK integrazio-gakoa",
+    "sdk_badge_title": "SDK integrazioa"
   },
   "provisioning": {
     "action_delete": "Ezabatu",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Aplikazio guztiak",
       "all_apps_general": "Aplikazio guztiak (Orokorra)",
       "cat_name_label_upper": "KATEGORIAREN IZENA",
-      "cat_name_placeholder": "adib., Hardware-matxura, Faktura-eskaera, Konturako sarbidea"
+      "cat_name_placeholder": "adib., Hardware-matxura, Faktura-eskaera, Konturako sarbidea",
+      "users_section_title": "Erabiltzaileak ({count})",
+      "add_user_modal_title": "Gehitu erabiltzaile berria",
+      "add_user_modal_sub": "Erabiltzailearen baimenak eta sarbide-definizioa",
+      "sdk_integration_badge": "SDK integrazioa",
+      "admin_categories_title": "Kategoriak",
+      "admin_categories_sub": "Administratzaileari berariaz esleitutako laguntza-kategoriak",
+      "delete_user_title": "Ezabatu erabiltzailea"
     }
   },
   "settings": {

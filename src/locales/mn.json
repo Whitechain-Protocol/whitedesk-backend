@@ -888,7 +888,9 @@
     "default_external_app": "Гадны аппликейшн",
     "explanation_banner": "Аппликейшн тус бүрт 60 тэмдэгт бүхий цор ганц SDK гүүрийн түлхүүр үүсгэгддэг. Түлхүүрийг цуцалснаар уг аппликейшнээс ирэх тасалбарын илгээлт шууд зогсоно.",
     "placeholder_bridge_key": "60_character_sdk_bridge_key",
-    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId})-ийн SDK гүүрийн түлхүүр цуцлагдаж, энэ аппликейшнээс ирэх тасалбарууд татгалзагдах болно."
+    "revoke_confirm_dynamic_desc": "\"{appName}\" ({appId})-ийн SDK гүүрийн түлхүүр цуцлагдаж, энэ аппликейшнээс ирэх тасалбарууд татгалзагдах болно.",
+    "subtitle": "Аппликейшнд зориулсан SDK интеграцийн түлхүүр үүсгэх",
+    "sdk_badge_title": "SDK интеграци"
   },
   "provisioning": {
     "action_delete": "Устгах",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "Бүх аппликейшн",
       "all_apps_general": "Бүх аппликейшн (Ерөнхий)",
       "cat_name_label_upper": "АНГИЛЛЫН НЭР",
-      "cat_name_placeholder": "жнь: Техник хангамжийн гэмтэл, Нэхэмжлэхийн хүсэлт, Бүртгэлд хандах"
+      "cat_name_placeholder": "жнь: Техник хангамжийн гэмтэл, Нэхэмжлэхийн хүсэлт, Бүртгэлд хандах",
+      "users_section_title": "Хэрэглэгчид ({count})",
+      "add_user_modal_title": "Шинэ хэрэглэгч нэмэх",
+      "add_user_modal_sub": "Хэрэглэгчийн эрх ба хандалтын тодорхойлолт",
+      "sdk_integration_badge": "SDK интеграци",
+      "admin_categories_title": "Ангилалууд",
+      "admin_categories_sub": "Админд тусгайлан хуваарилсан дэмжлэгийн ангилалууд",
+      "delete_user_title": "Хэрэглэгчийг устгах"
     }
   },
   "settings": {

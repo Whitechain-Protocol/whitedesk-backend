@@ -888,7 +888,9 @@
     "default_external_app": "የውጭ መተግበሪያ",
     "explanation_banner": "ለእያንዳንዱ መተግበሪያ ልዩ ባለ 60-ቁምፊ የSDK Bridge ቁልፍ ይፈጠራል። ቁልፍን ሲሰርዙ፣ ከዚያ መተግበሪያ የሚመጡ የትኬት ማስረከቦች ወዲያውኑ ይቆማሉ።",
     "placeholder_bridge_key": "60_character_sdk_bridge_key",
-    "revoke_confirm_dynamic_desc": "የ\"{appName}\" ({appId}) የSDK bridge ቁልፍ ይሰረዛል እና ከዚህ መተግበሪያ የሚመጡ ገቢ ትኬቶች ውድቅ ይደረጋሉ።"
+    "revoke_confirm_dynamic_desc": "የ\"{appName}\" ({appId}) የSDK bridge ቁልፍ ይሰረዛል እና ከዚህ መተግበሪያ የሚመጡ ገቢ ትኬቶች ውድቅ ይደረጋሉ።",
+    "subtitle": "ለመተግበሪያው የ SDK ማዋሃጃ ቁልፍ ያመንጩ",
+    "sdk_badge_title": "የ SDK ውህደት"
   },
   "provisioning": {
     "action_delete": "አጥፋ",
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "ሁሉም መተግበሪያዎች",
       "all_apps_general": "ሁሉም መተግበሪያዎች (አጠቃላይ)",
       "cat_name_label_upper": "የምድብ ስም",
-      "cat_name_placeholder": "ምሳሌ፦ የሃርድዌር ብልሽት፣ የደረሰኝ ጥያቄ፣ የመለያ መዳረሻ"
+      "cat_name_placeholder": "ምሳሌ፦ የሃርድዌር ብልሽት፣ የደረሰኝ ጥያቄ፣ የመለያ መዳረሻ",
+      "users_section_title": "ተጠቃሚዎች ({count})",
+      "add_user_modal_title": "አዲስ ተጠቃሚ ያክሉ",
+      "add_user_modal_sub": "የተጠቃሚ ፈቃዶች እና የመዳረሻ ትርጉም",
+      "sdk_integration_badge": "የ SDK ውህደት",
+      "admin_categories_title": "ምድቦች",
+      "admin_categories_sub": "ለአስተዳዳሪው በተለይ የተመደቡ የድጋፍ ምድቦች",
+      "delete_user_title": "ተጠቃሚን ሰርዝ"
     }
   },
   "settings": {

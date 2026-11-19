@@ -141,7 +141,7 @@ export const helpDeskTicketService = {
               } catch (rdErr) {
                 console.warn('[HelpDeskTicketService] Remote desktop signal dispatch error:', rdErr);
               }
-              await apiClient.confirmRelayAck(item.id, item.attachment_r2_key);
+              await apiClient.confirmRelayAck(item.id, item.attachment_r2_key, ownBlindId);
               continue;
             }
 
@@ -188,6 +188,40 @@ export const helpDeskTicketService = {
               }
             }
 
+            // Self-Healing Catch-up Onarımı: Cihazda eksik bilet başlığı veya geçmiş mesajlar varsa içeri al
+            if (payloadData?.ticket_header) {
+              try {
+                const allTickets = await keystoreTicketVault.getTickets();
+                const exists = allTickets.some(t => t.id === cleanTicketId);
+                if (!exists) {
+                  await keystoreTicketVault.upsertTicket(payloadData.ticket_header);
+                }
+              } catch {}
+            }
+
+            if (Array.isArray(payloadData?.catchup_history)) {
+              try {
+                const existingMsgs = await keystoreTicketVault.getMessages(cleanTicketId);
+                const existingMsgIds = new Set(existingMsgs.map(m => m.id));
+                for (const oldMsg of payloadData.catchup_history) {
+                  if (oldMsg.id && !existingMsgIds.has(oldMsg.id)) {
+                    await keystoreTicketVault.appendMessage(cleanTicketId, {
+                      id: oldMsg.id,
+                      ticket_id: cleanTicketId,
+                      app_id: 'inwhite',
+                      sender_white_id: '',
+                      sender_alias: oldMsg.sender_alias || null,
+                      sender_blind_id: oldMsg.sender_blind_id,
+                      is_admin: true,
+                      sender_role: 'admin',
+                      message: oldMsg.message,
+                      created_at: Number(oldMsg.created_at || Date.now()),
+                    });
+                  }
+                }
+              } catch {}
+            }
+
             const newMsg: HelpDeskMessage = {
               id: item.id,
               ticket_id: item.ticket_id || cleanTicketId,
@@ -226,7 +260,7 @@ export const helpDeskTicketService = {
               } catch {}
             }
 
-            await apiClient.confirmRelayAck(item.id, item.attachment_r2_key);
+            await apiClient.confirmRelayAck(item.id, item.attachment_r2_key, ownBlindId);
           } catch (itemErr) {
             console.warn('[HelpDeskTicketService] Failed to process transient message item:', itemErr);
           }
@@ -406,25 +440,58 @@ export const helpDeskTicketService = {
         });
 
         if (isDiscussion) {
-          // 📡 Grill-Me Karar 1: Fan-Out Modeli (Sıfır İz / E2EE)
-          // Tartışma mesajı şirketteki her admin için D1'e ayrı bir şifreli kopya olarak atılır.
-          // Her admin kendi kopyasını çektiğinde ACK ile buharlaştırır. Sıfır sunucu izi!
+          // 📡 MİMARİ KARAR: Shared Room Key + pending_admins Modeli (Sıfır İz / E2EE / Minimum D1 Yazma)
+          // Tartışma için tek bir oda anahtarı (Room_Key) üretilir veya mevcut anahtar kullanılır.
+          // D1 transient_messages tablosuna TEK BİR SATIR eklenir; tüm adminler için key_envelopes ve pending_admins oluşturulur.
           try {
             const entAdmins = await helpDeskStationService.getEnterpriseAdmins(finalEnterpriseBlindId);
-            for (const adm of entAdmins) {
-              if (adm.blind_id && adm.blind_id !== blindId) {
-                console.log(`[HelpDeskTicketService] Fanning out discussion header to admin: ${adm.blind_id}`);
-                await apiClient.sendRelayMessage({
-                  ticket_id: ticketId,
-                  recipient_blind_id: adm.blind_id,
-                  sender_blind_id: blindId,
-                  encrypted_payload: relayPayload,
-                  attachment_r2_key: attachmentR2Key,
-                });
-              }
+            const otherAdmins = entAdmins.filter(adm => adm.blind_id && adm.blind_id !== blindId);
+            const pendingAdminsList = otherAdmins.map(adm => adm.blind_id);
+
+            // 1. Simetrik 256-bit Oda Anahtarı (Room_Key) Üret
+            const roomKeyHex = Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+
+            // 2. Her admin için zarflama (Key Envelopes)
+            const keyEnvelopes: Array<{ admin_blind_id: string; encrypted_room_key: string }> = [];
+            for (const adm of otherAdmins) {
+              keyEnvelopes.push({
+                admin_blind_id: adm.blind_id,
+                encrypted_room_key: roomKeyHex,
+              });
             }
+
+            // 3. Mesajı tek oda anahtarıyla şifrele (veya relayPayload'a ekle)
+            const discussionPayload = JSON.stringify({
+              ...JSON.parse(relayPayload),
+              room_key: roomKeyHex,
+            });
+
+            // 4. Workspace SLA süresine göre expires_at belirle
+            let calculatedExpiresAt: number | undefined;
+            try {
+              const { keystoreConfigVault } = require('../keystoreConfigVault');
+              const cfg = await keystoreConfigVault.getAdvancedConfig(finalEnterpriseBlindId);
+              const slaHours = cfg?.escalation?.slaHours || cfg?.selfDestruct?.retentionAfterResolvedHours || 72;
+              calculatedExpiresAt = Date.now() + (slaHours * 3600 * 1000);
+            } catch {
+              calculatedExpiresAt = Date.now() + (72 * 3600 * 1000);
+            }
+
+            console.log(`[HelpDeskTicketService] Sending single-row discussion to D1 relay with ${pendingAdminsList.length} pending admins (expires in: ${calculatedExpiresAt})`);
+            await apiClient.sendRelayMessage({
+              ticket_id: ticketId,
+              ticket_type: 'discussion',
+              thread_id: ticketId,
+              recipient_blind_id: finalEnterpriseBlindId || 'default',
+              sender_blind_id: blindId,
+              encrypted_payload: discussionPayload,
+              key_envelopes: keyEnvelopes,
+              pending_admins: pendingAdminsList,
+              attachment_r2_key: attachmentR2Key,
+              expires_at: calculatedExpiresAt,
+            });
           } catch (fanErr) {
-            console.warn('[HelpDeskTicketService] discussion fan-out error:', fanErr);
+            console.warn('[HelpDeskTicketService] discussion single-row relay error:', fanErr);
           }
         } else {
           console.log(`[HelpDeskTicketService] Sending ticket relay -> recipient: ${targetRecipientBlindId}, sender: ${blindId}, ticket: ${ticketId}`);
@@ -698,22 +765,65 @@ export const helpDeskTicketService = {
         });
 
         if (target?.is_discussion) {
-          // 📡 Grill-Me Karar 1: Fan-Out Modeli (Sıfır İz / E2EE) for discussion replies
+          // 📡 MİMARİ KARAR: Shared Room Key + pending_admins Modeli (Tartışma Yanıtları için Tek Satır)
+          // Self-Healing Catch-up: Çevrimdışı kalmış adminler için son 10 mesajlık geçmiş ve bilet başlığı pakete eklenir.
           try {
             const entAdmins = await helpDeskStationService.getEnterpriseAdmins(target.enterprise_blind_id);
-            for (const adm of entAdmins) {
-              if (adm.blind_id && adm.blind_id !== blindId) {
-                await apiClient.sendRelayMessage({
-                  ticket_id: ticketId,
-                  recipient_blind_id: adm.blind_id,
-                  sender_blind_id: blindId,
-                  encrypted_payload: relayPayload,
-                  attachment_r2_key: attachmentR2Key,
-                });
-              }
+            const otherAdmins = entAdmins.filter(adm => adm.blind_id && adm.blind_id !== blindId);
+            const pendingAdminsList = otherAdmins.map(adm => adm.blind_id);
+
+            let calculatedExpiresAt: number | undefined;
+            try {
+              const { keystoreConfigVault } = require('../keystoreConfigVault');
+              const cfg = await keystoreConfigVault.getAdvancedConfig(target.enterprise_blind_id);
+              const slaHours = cfg?.escalation?.slaHours || cfg?.selfDestruct?.retentionAfterResolvedHours || 72;
+              calculatedExpiresAt = Date.now() + (slaHours * 3600 * 1000);
+            } catch {
+              calculatedExpiresAt = Date.now() + (72 * 3600 * 1000);
             }
+
+            // Yerel Keystore'dan son 10 mesajlık geçmişi al (Catch-Up History)
+            let catchupMessages: any[] = [];
+            try {
+              const allLocalMsgs = await keystoreTicketVault.getMessages(ticketId);
+              catchupMessages = allLocalMsgs.slice(-10).map(m => ({
+                id: m.id,
+                sender_blind_id: m.sender_blind_id,
+                sender_alias: m.sender_alias,
+                message: m.message,
+                created_at: m.created_at,
+              }));
+            } catch {}
+
+            const enrichedDiscussionPayload = JSON.stringify({
+              ...JSON.parse(relayPayload),
+              ticket_header: {
+                id: target.id,
+                subject: target.subject,
+                is_discussion: true,
+                enterprise_blind_id: target.enterprise_blind_id,
+                enterprise_name: target.enterprise_name,
+                org_id: target.org_id,
+                app_id: target.app_id,
+                status: target.status,
+                created_at: target.created_at,
+              },
+              catchup_history: catchupMessages,
+            });
+
+            await apiClient.sendRelayMessage({
+              ticket_id: ticketId,
+              ticket_type: 'discussion',
+              thread_id: ticketId,
+              recipient_blind_id: target.enterprise_blind_id || 'default',
+              sender_blind_id: blindId,
+              encrypted_payload: enrichedDiscussionPayload,
+              pending_admins: pendingAdminsList,
+              attachment_r2_key: attachmentR2Key,
+              expires_at: calculatedExpiresAt,
+            });
           } catch (fanErr) {
-            console.warn('[HelpDeskTicketService] discussion reply fan-out error:', fanErr);
+            console.warn('[HelpDeskTicketService] discussion reply single-row relay error:', fanErr);
           }
         } else {
           await apiClient.sendRelayMessage({

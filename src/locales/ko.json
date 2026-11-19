@@ -888,7 +888,9 @@
     "default_external_app": "외부 애플리케이션",
     "explanation_banner": "각 애플리케이션마다 고유한 60자리의 SDK 브리지 키가 생성됩니다. 키를 폐기하면 해당 애플리케이션에서의 티켓 접수가 즉시 중단됩니다.",
     "placeholder_bridge_key": "60자리_SDK_브리지_키",
-    "revoke_confirm_dynamic_desc": "\"{appName}\"({appId})의 SDK 브리지 키가 폐기되며 이 애플리케이션에서 수신되는 티켓은 거부됩니다."
+    "revoke_confirm_dynamic_desc": "\"{appName}\"({appId})의 SDK 브리지 키가 폐기되며 이 애플리케이션에서 수신되는 티켓은 거부됩니다.",
+    "subtitle": "애플리케이션용 SDK 연동 키 생성",
+    "sdk_badge_title": "SDK 연동"
   },
   "provisioning": {
     "action_delete": "삭제",
@@ -930,7 +932,7 @@
       "profile_subtitle": "주권 소유권 및 연결 세부 정보",
       "status_sealed": "봉인됨",
       "enterprise_name_label": "기업명",
-      "blind_id_label": "블라인드 ID",
+      "blind_id_label": "Blind ID",
       "admin_authority_label": "관리자 권한",
       "protocol_label": "프로토콜",
       "protocol_value": "Cloudflare D1 HTTPS • 개인정보 제로 • E2EE",
@@ -975,7 +977,7 @@
       "enterprise_price": "$149/월 · $1,490/년",
       "enterprise_desc": "글로벌 관리자 1명 + 관리자 10명 + 고객 500명",
       "starter_title": "🥉 Starter (스타터)",
-      "pro_title": "🥈 Pro (프로) ⭐",
+      "pro_title": "🥈 Pro ⭐",
       "enterprise_title": "🥇 Enterprise (엔터프라이즈)"
     },
     "station": {
@@ -1006,7 +1008,14 @@
       "all_apps_hint": "모든 애플리케이션",
       "all_apps_general": "모든 애플리케이션 (공통)",
       "cat_name_label_upper": "카테고리명",
-      "cat_name_placeholder": "예: 하드웨어 고장, 청구서 요청, 계정 접근"
+      "cat_name_placeholder": "예: 하드웨어 고장, 청구서 요청, 계정 접근",
+      "users_section_title": "사용자 ({count})",
+      "add_user_modal_title": "새 사용자 추가",
+      "add_user_modal_sub": "사용자 권한 및 접근 정의",
+      "sdk_integration_badge": "SDK 연동",
+      "admin_categories_title": "카테고리",
+      "admin_categories_sub": "관리자에게 지정된 지원 카테고리",
+      "delete_user_title": "사용자 삭제"
     }
   },
   "settings": {
